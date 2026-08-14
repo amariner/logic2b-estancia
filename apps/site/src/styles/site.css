@@ -1,9 +1,24 @@
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/poppins-600-latin.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/poppins-800-logo.woff2') format('woff2');
+  font-weight: 800;
+  font-display: swap;
+  unicode-range: U+30-32, U+42;
+}
+
 .skip { position: fixed; z-index: 100; top: 8px; left: 8px; transform: translateY(-140%); border-radius: 999px; padding: 10px 16px; background: var(--ink); color: white; }
 .skip:focus { transform: none; }
-.topbar { display: flex; min-height: 82px; align-items: center; gap: 34px; }
-.wordmark { display: inline-grid; text-decoration: none; line-height: 1; }
-.wordmark span { font-family: var(--serif); font-size: 1.18rem; }
-.wordmark small { margin-top: 3px; color: var(--ash); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; }
+.site-header { position: sticky; z-index: 40; top: 0; border-bottom: 1px solid rgb(23 25 28 / .08); background: rgb(255 255 255 / .88); backdrop-filter: blur(14px); }
+.topbar { display: flex; min-height: 72px; align-items: center; gap: 34px; }
+.wordmark { display: inline-flex; align-items: baseline; gap: .28em; color: var(--ink); font-family: 'Poppins', var(--sans); font-size: 1.08rem; font-weight: 600; letter-spacing: .015em; line-height: 1; text-decoration: none; white-space: nowrap; }
+.wordmark-core strong { color: #2a2c30; font-weight: 800; }
+.wordmark-product { color: var(--slate); }
 .topbar nav { display: flex; margin-inline: auto; gap: 28px; }
 .topbar nav a, .locale { font-size: .78rem; text-decoration: none; }
 .top-actions { display: flex; align-items: center; gap: 14px; }
@@ -69,6 +84,7 @@
 .footer { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 40px; border-top: 1px solid var(--line); padding-block: 45px; }
 .footer div { display: flex; gap: 20px; }
 .footer a, .footer p { font-size: .72rem; text-decoration: none; }
+.footer .wordmark { font-size: 1.02rem; }
 .whatsapp { position: fixed; z-index: 20; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); display: flex; min-height: 48px; align-items: center; gap: 10px; border: 1px solid var(--ink); border-radius: 999px; padding: 0 18px; background: var(--paper); box-shadow: var(--shadow-artifact); font-size: .76rem; text-decoration: none; }
 .whatsapp[hidden], .consent[hidden] { display: none; }
 .consent { position: fixed; z-index: 30; right: 18px; bottom: 18px; left: 18px; display: flex; max-width: 760px; align-items: center; justify-content: space-between; gap: 24px; margin-inline: auto; border: 1px solid var(--line); border-radius: 20px; padding: 16px; background: white; box-shadow: var(--shadow-artifact); }
@@ -81,12 +97,13 @@
 .prose h2 { margin-top: 56px; font-size: 2rem; }
 .prose p, .prose li { color: var(--slate); line-height: 1.7; }
 .prose a { text-underline-offset: 3px; }
+[id] { scroll-margin-top: 88px; }
 
 @media (max-width: 900px) {
   .topbar nav, .top-actions .pill { display: none; }
   .top-actions { margin-left: auto; }
   .menu { display: block; border: 0; background: transparent; }
-  .mobile-nav { position: absolute; z-index: 10; right: 14px; left: 14px; display: grid; gap: 14px; border-radius: 20px; padding: 22px; background: var(--ink); color: white; }
+  .mobile-nav { position: absolute; z-index: 10; top: 64px; right: 14px; left: 14px; display: grid; gap: 14px; border-radius: 20px; padding: 22px; background: var(--ink); color: white; box-shadow: var(--shadow-artifact); }
   .mobile-nav[hidden] { display: none; }
   .mobile-nav a { text-decoration: none; }
   .hero { min-height: 720px; padding-top: 88px; }
