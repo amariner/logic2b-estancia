@@ -1,0 +1,80 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/source-serif-4';
+import '@logic-estancia/ui/theme.css';
+import '../styles/site.css';
+import { PRODUCT, type Locale } from '@logic-estancia/config';
+import { logic2bContact } from '@logic-estancia/config/contact';
+import { content } from '../content';
+
+interface Props { locale: Locale; title?: string; description?: string; route?: string; }
+const { locale, title = 'Logic Estancia', description = 'Web, reserva directa y operación para alojamientos.', route = '' } = Astro.props;
+const c = content[locale];
+const prefix = locale === 'en' ? '/en' : '';
+const canonical = `${PRODUCT.url}${prefix}${route ? `/${route.replace(/^\//, '')}` : '/'}${route && !route.endsWith('/') ? '/' : ''}`;
+const wa = logic2bContact(locale, route.startsWith('docs') ? 'docs' : 'commercial');
+---
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip" href="#contenido">{locale === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
+    <header class="topbar shell">
+      <a class="wordmark" href={`${prefix}/`} aria-label="Logic Estancia">
+        <span>Logic Estancia</span><small>by Logic2B</small>
+      </a>
+      <nav aria-label={locale === 'es' ? 'Principal' : 'Main'}>
+        <a href={`${prefix}/#producto`}>{c.nav.product}</a>
+        <a href={`${prefix}/#demos`}>{c.nav.demos}</a>
+        <a href={`${prefix}/#niveles`}>{c.nav.levels}</a>
+        <a href={`${prefix}/docs/`}>{c.nav.docs}</a>
+      </nav>
+      <div class="top-actions">
+        <a class="locale" href={locale === 'es' ? '/en/' : '/'}>{locale === 'es' ? 'EN' : 'ES'}</a>
+        <a class="pill" href={`${prefix}/#contacto`}>{c.nav.contact}</a>
+      </div>
+      <button class="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </header>
+    <div id="mobile-nav" class="mobile-nav" hidden>
+      <a href={`${prefix}/#producto`}>{c.nav.product}</a><a href={`${prefix}/#demos`}>{c.nav.demos}</a><a href={`${prefix}/#niveles`}>{c.nav.levels}</a><a href={`${prefix}/docs/`}>{c.nav.docs}</a>
+    </div>
+    <main id="contenido"><slot /></main>
+    <footer class="footer shell">
+      <a class="wordmark" href={`${prefix}/`}><span>Logic Estancia</span><small>by Logic2B</small></a>
+      <div><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
+      <p>© 2026 Logic2B · Castelló</p>
+    </footer>
+    <a class="whatsapp" href={wa.href} target="_blank" rel="noopener noreferrer" aria-label={`${wa.label} · WhatsApp`} data-whatsapp hidden>{wa.label}<span aria-hidden="true">↗</span></a>
+    <section class="consent" data-consent role="dialog" aria-label={locale === 'es' ? 'Preferencias de analítica' : 'Analytics preferences'}>
+      <p>{locale === 'es' ? 'Usamos analítica solo si la aceptas. Las demos no cargan seguimiento.' : 'We use analytics only if you accept it. Demos do not load tracking.'}</p>
+      <div><button class="pill ghost" data-reject>{locale === 'es' ? 'Solo esencial' : 'Essential only'}</button><button class="pill" data-accept>{locale === 'es' ? 'Aceptar analítica' : 'Accept analytics'}</button></div>
+    </section>
+    <script is:inline>
+      const menu = document.querySelector('.menu');
+      const mobile = document.querySelector('#mobile-nav');
+      menu?.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') === 'true'; menu.setAttribute('aria-expanded', String(!open)); if (mobile) mobile.hidden = open; });
+      const consent = document.querySelector('[data-consent]');
+      const stored = localStorage.getItem('logic-estancia-consent-v1');
+      if (stored) consent?.setAttribute('hidden', '');
+      function loadGtm() {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+        const script = document.createElement('script'); script.async = true; script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-TVDWZ9LC'; document.head.append(script);
+      }
+      if (stored === 'analytics') loadGtm();
+      document.querySelector('[data-accept]')?.addEventListener('click', () => { localStorage.setItem('logic-estancia-consent-v1', 'analytics'); consent?.setAttribute('hidden', ''); loadGtm(); });
+      document.querySelector('[data-reject]')?.addEventListener('click', () => { localStorage.setItem('logic-estancia-consent-v1', 'essential'); consent?.setAttribute('hidden', ''); });
+      const wa = document.querySelector('[data-whatsapp]');
+      const toggleWa = () => { if (wa) wa.hidden = window.scrollY < 280 || !consent?.hasAttribute('hidden'); };
+      addEventListener('scroll', toggleWa, { passive: true }); toggleWa();
+    </script>
+  </body>
+</html>

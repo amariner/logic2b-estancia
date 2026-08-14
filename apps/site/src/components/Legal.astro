@@ -1,0 +1,16 @@
+---
+import type { Locale } from '@logic-estancia/config';
+const { locale, kind } = Astro.props as { locale: Locale; kind: 'legal' | 'privacy' | 'cookies' };
+const es = {
+  legal: ['Aviso legal', 'Este sitio presenta Logic Estancia, un producto de Logic2B. Las marcas Nivora One, Terrava Collection y Aurem Hotel son demostraciones ficticias. Contacto: hola@logic2b.com.'],
+  privacy: ['Privacidad', 'El formulario recoge nombre, empresa o alojamiento, email, teléfono opcional, dimensión del negocio, plan y mensaje para responder a una solicitud comercial. La base jurídica es tu consentimiento. No vendemos los datos. Cloudflare aloja el servicio y Resend entrega el correo. Puedes ejercer tus derechos escribiendo a hola@logic2b.com.'],
+  cookies: ['Cookies', 'El almacenamiento esencial conserva tu decisión de consentimiento y el estado local de las demos. Google Tag Manager solo se carga en páginas comerciales después de aceptar analítica. Las demos no cargan seguimiento.'],
+};
+const en = {
+  legal: ['Legal notice', 'This site presents Logic Estancia, a Logic2B product. Nivora One, Terrava Collection and Aurem Hotel are fictitious demonstrations. Contact: hola@logic2b.com.'],
+  privacy: ['Privacy', 'The form collects name, business or stay, email, optional phone, business size, plan and message to answer a commercial request. The legal basis is your consent. We do not sell data. Cloudflare hosts the service and Resend delivers the email. Contact hola@logic2b.com to exercise your rights.'],
+  cookies: ['Cookies', 'Essential storage keeps your consent choice and local demo state. Google Tag Manager loads on commercial pages only after analytics consent. Demos do not load tracking.'],
+};
+const [title, body] = (locale === 'es' ? es : en)[kind];
+---
+<div class="prose shell"><p class="eyebrow">Logic Estancia · by Logic2B</p><h1>{title}</h1><p>{body}</p><h2>{locale === 'es' ? 'Última revisión' : 'Last reviewed'}</h2><p>14·08·2026</p></div>

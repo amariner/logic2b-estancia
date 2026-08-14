@@ -1,0 +1,16 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/source-serif-4';
+import '@logic-estancia/ui/theme.css';
+import '../styles/demos.css';
+import type { DemoLocale, DemoSlug } from '../data';
+import { demos } from '../data';
+const { slug, locale, dashboard = false } = Astro.props as { slug: DemoSlug; locale: DemoLocale; dashboard?: boolean };
+const demo = demos[slug]; const prefix = locale === 'en' ? '/en' : '';
+const other = locale === 'es' ? `/en/demos/${slug}/${dashboard ? 'gestion/' : ''}` : `/demos/${slug}/${dashboard ? 'gestion/' : ''}`;
+---
+<!doctype html><html lang={locale}><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width"/><meta name="robots" content="noindex,nofollow"/><meta name="theme-color" content={slug === 'aurem' ? '#131719' : slug === 'terrava' ? '#f1efe6' : '#f5f0e8'}/><link rel="icon" href="/favicon.svg"/><title>{demo.brand} · {dashboard ? 'Demo gestor' : 'Demo web'}</title></head><body class={`demo-body ${demo.theme} ${dashboard ? 'dashboard-page' : ''}`}>
+  {!dashboard && <div class="fiction"><span>{locale === 'es' ? 'Demostración ficticia de Logic Estancia' : 'Fictitious Logic Estancia demonstration'}</span><a href={`${prefix}/`}>{locale === 'es' ? 'Volver al producto' : 'Back to product'} ↗</a></div>}
+  <slot />
+  {!dashboard && <footer class="demo-footer"><span>{demo.brand}</span><small>{locale === 'es' ? 'Marca ficticia · Sin reservas ni cobros reales' : 'Fictitious brand · No live bookings or charges'}</small><div><a href={other}>{locale === 'es' ? 'EN' : 'ES'}</a><a href={`${prefix}/legal/`}>Legal</a><a href="https://wa.me/34626432316" target="_blank" rel="noopener noreferrer">Logic2B ↗</a></div></footer>}
+</body></html>

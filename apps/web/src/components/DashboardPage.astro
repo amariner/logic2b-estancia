@@ -1,0 +1,7 @@
+---
+import { DashboardDemo } from '@logic-estancia/dashboard';
+import '@logic-estancia/dashboard/styles.css';
+import type { DemoLocale } from '../data';
+const { scenario, locale } = Astro.props as { scenario: 'terrava' | 'aurem'; locale: DemoLocale };
+---
+<DashboardDemo scenario={scenario} locale={locale} client:only="react" />
