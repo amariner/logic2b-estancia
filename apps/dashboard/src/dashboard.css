@@ -23,7 +23,11 @@
 .page-head { display: flex; align-items: end; justify-content: space-between; margin-bottom: 28px; }
 .page-head p { margin: 0 0 5px; color: var(--ash); font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; }
 .page-head h1 { margin: 0; font-family: var(--serif); font-size: clamp(2.2rem, 4vw, 3.8rem); font-weight: 400; letter-spacing: -.025em; }
-.page-meta { display: flex; gap: 18px; color: var(--slate); }
+.page-meta { display: flex; gap: 7px; color: var(--slate); }
+.page-meta button { position: relative; display: flex; min-width: 40px; height: 40px; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); border-radius: 999px; padding: 0 11px; color: var(--slate); background: var(--paper); cursor: pointer; }
+.page-meta button:hover, .page-meta button[aria-expanded="true"] { color: var(--ink); border-color: var(--ink); }
+.shortcut { color: var(--ash); font-size: .62rem; }
+.notification-count { display: grid; min-width: 17px; height: 17px; place-items: center; border-radius: 999px; color: var(--paper); background: var(--ink); font-size: .55rem; }
 .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .metric-grid button { position: relative; display: grid; min-height: 145px; border: 0; border-radius: 20px; padding: 20px; background: var(--paper); text-align: left; cursor: pointer; }
 .metric-grid button > span { color: var(--slate); font-size: .72rem; }
@@ -47,6 +51,9 @@
 .panel-head p { margin: 0; color: var(--slate); font-size: .74rem; }
 .tag { display: inline-flex; border-radius: 999px; padding: 5px 9px; color: var(--slate); background: var(--mist); font-size: .63rem; }
 .tag.new, .tag.pending { color: var(--sienna); background: var(--peach); }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag.source { border: 1px solid var(--line); background: var(--paper); }
+.journey-note { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; border: 1px solid #ead4c9; border-radius: 16px; padding: 13px 16px; color: var(--sienna); background: var(--peach); font-size: .7rem; }
 .alert { margin-top: 24px; border-radius: 16px; padding: 16px; color: var(--sienna); background: var(--peach); font-size: .74rem; line-height: 1.5; }
 .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 .comparison div { display: grid; gap: 7px; border-radius: 16px; padding: 18px; background: var(--fog); }
@@ -124,6 +131,29 @@ blockquote { margin: 20px 0; border-left: 2px solid var(--ink); padding: 4px 0 4
 .tour-pop div { display: flex; justify-content: space-between; margin-top: 18px; }
 .tour-pop button { display: flex; min-height: 38px; align-items: center; gap: 6px; border: 1px solid #555; border-radius: 999px; padding: 0 14px; color: white; background: transparent; }
 .tour-pop button.primary { color: var(--ink); background: white; }
+.utility-backdrop { position: fixed; z-index: 30; inset: 0; border: 0; background: rgb(23 25 28 / .28); backdrop-filter: blur(2px); }
+.utility-panel { position: fixed; z-index: 35; top: 12px; right: 12px; bottom: 12px; display: flex; width: min(460px, calc(100% - 24px)); flex-direction: column; overflow: hidden; border-radius: 24px; background: var(--paper); box-shadow: var(--shadow-artifact); }
+.utility-panel > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--line); padding: 24px; }
+.utility-panel > header span { color: var(--ash); font-size: .62rem; letter-spacing: .09em; text-transform: uppercase; }
+.utility-panel > header h2 { margin: 6px 0 0; font-family: var(--serif); font-size: 2rem; font-weight: 400; }
+.utility-panel > header button { display: grid; flex: 0 0 38px; height: 38px; place-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); cursor: pointer; }
+.utility-search { display: flex; min-height: 0; flex: 1; flex-direction: column; padding: 18px; }
+.utility-search > label { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 16px; padding: 0 14px; color: var(--ash); background: var(--fog); }
+.utility-search input { width: 100%; min-height: 50px; border: 0; outline: 0; color: var(--ink); background: transparent; }
+.utility-results { display: grid; align-content: start; overflow-y: auto; margin-top: 12px; }
+.utility-results button, .notice-list button { display: grid; width: 100%; align-items: center; border: 0; border-bottom: 1px solid var(--line); padding: 15px 8px; color: var(--ink); background: transparent; text-align: left; cursor: pointer; }
+.utility-results button { grid-template-columns: 28px 1fr auto; }
+.utility-results button:hover, .notice-list button:hover { background: var(--fog); }
+.utility-results button span { font-size: .78rem; }
+.utility-results p { margin: 24px 8px; color: var(--slate); font-size: .76rem; }
+.utility-search > small { margin-top: auto; padding: 14px 8px 2px; color: var(--ash); font-size: .62rem; }
+.notice-list { overflow-y: auto; padding: 10px 18px 18px; }
+.notice-list button { grid-template-columns: 10px 1fr auto; gap: 12px; padding-block: 18px; }
+.notice-list button > i { width: 8px; height: 8px; border-radius: 999px; background: var(--ash); }
+.notice-list button > i.urgent { background: var(--sienna); }
+.notice-list button > span { display: grid; gap: 5px; }
+.notice-list strong { font-size: .76rem; font-weight: 500; }
+.notice-list small { color: var(--slate); font-size: .67rem; line-height: 1.4; }
 
 @media (max-width: 900px) {
   .sidebar { transform: translateX(-102%); transition: transform .2s ease; }
@@ -155,4 +185,10 @@ blockquote { margin: 20px 0; border-left: 2px solid var(--ink); padding: 4px 0 4
   .bar-chart { height: 220px; gap: 4px; }
   .bar-chart span { display: none; }
   .tour-pop { right: 12px; bottom: 12px; width: calc(100% - 24px); }
+  .page-meta { gap: 5px; }
+  .page-meta button { min-width: 38px; height: 38px; padding: 0 9px; }
+  .shortcut { display: none; }
+  .utility-panel { inset: 8px; width: auto; border-radius: 20px; }
+  .utility-panel > header { padding: 20px; }
+  .utility-panel > header h2 { font-size: 1.7rem; }
 }

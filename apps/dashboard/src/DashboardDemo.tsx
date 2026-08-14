@@ -9,6 +9,8 @@ import { canOperate, initialState, parseStored, type DemoState, type Scenario } 
 
 type Locale = 'es' | 'en';
 type View = 'home' | 'enquiries' | 'planning' | 'bookings' | 'guests' | 'cleaning' | 'channels' | 'automation' | 'control' | 'reports' | 'settings';
+type Utility = 'search' | 'notifications' | null;
+type Notice = { title: string; detail: string; view: View; urgent?: boolean };
 
 const properties = {
   terrava: ['Casa Aira', 'Casa Bruma', 'Casa Cauce', 'Casa Duna', 'Casa Era', 'Casa Faya', 'Casa Linde', 'Casa Umbral'],
@@ -26,6 +28,31 @@ const viewsFor = (scenario: Scenario): View[] => scenario === 'terrava'
   ? ['home', 'enquiries', 'planning', 'bookings', 'guests', 'cleaning', 'reports', 'settings']
   : ['home', 'planning', 'bookings', 'guests', 'cleaning', 'channels', 'automation', 'control', 'reports', 'settings'];
 
+const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name;
+const stayRange = (state: DemoState, locale: Locale) => {
+  const format = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  return `${format.format(new Date(`${state.stay.from}T00:00:00Z`))}–${format.format(new Date(`${state.stay.to}T00:00:00Z`))}`;
+};
+
+const noticesFor = (scenario: Scenario, state: DemoState, locale: Locale): Notice[] => {
+  if (scenario === 'terrava') return [
+    state.enquiry === 'new'
+      ? { title: locale === 'es' ? `Revisar solicitud de ${state.stay.name}` : `Review ${state.stay.name}’s enquiry`, detail: locale === 'es' ? 'Casa Aira no cubre la primera noche.' : 'Casa Aira does not cover the first night.', view: 'enquiries', urgent: true }
+      : state.enquiry === 'alternative'
+        ? { title: locale === 'es' ? 'Alternativa lista para convertir' : 'Alternative ready to convert', detail: `Casa Bruma · € ${state.stay.amount}`, view: 'enquiries' }
+        : { title: locale === 'es' ? 'Reserva TER-104 creada' : 'Booking TER-104 created', detail: `${state.stay.name} · Casa Bruma`, view: 'bookings' },
+    { title: locale === 'es' ? 'Casa Linde pendiente' : 'Casa Linde pending', detail: locale === 'es' ? 'Salida prevista a las 11:00.' : 'Departure expected at 11:00.', view: 'cleaning' },
+  ];
+  const cleaningNotice: Notice = state.cleaning === 'ready'
+    ? { title: locale === 'es' ? 'Habitación 408 validada' : 'Room 408 validated', detail: locale === 'es' ? 'Disponible para la entrada.' : 'Available for arrival.', view: 'cleaning' }
+    : { title: locale === 'es' ? 'Habitación 408 requiere atención' : 'Room 408 needs attention', detail: locale === 'es' ? 'Entrada prevista a las 15:00.' : 'Arrival expected at 15:00.', view: 'cleaning', urgent: true };
+  return [
+    cleaningNotice,
+    { title: locale === 'es' ? `Llegada de ${state.stay.name}` : `${state.stay.name} arrival`, detail: `${stayRange(state, locale)} · Terrace 408`, view: 'bookings' },
+    { title: locale === 'es' ? 'Expedia por validar' : 'Expedia to validate', detail: locale === 'es' ? 'Canal de muestra sin inventario enviado.' : 'Sample channel with no inventory sent.', view: 'channels' },
+  ];
+};
+
 function useDemoState(scenario: Scenario) {
   const key = `logic-estancia-demo-${scenario}-v1`;
   const [state, setState] = useState<DemoState>(() => typeof localStorage === 'undefined' ? initialState(scenario) : parseStored(localStorage.getItem(key), scenario));
@@ -40,12 +67,29 @@ export function DashboardDemo({ scenario, locale = 'es' }: { scenario: Scenario;
   const [view, setView] = useState<View>('home');
   const [mobile, setMobile] = useState(false);
   const [tour, setTour] = useState<number | null>(null);
+  const [utility, setUtility] = useState<Utility>(null);
+  const [query, setQuery] = useState('');
   const brand = scenario === 'aurem' ? 'Aurem Hotel' : 'Terrava Collection';
   const level = scenario === 'aurem' ? (locale === 'es' ? 'Visión' : 'Vision') : (locale === 'es' ? 'Gestión' : 'Manage');
   const availableViews = viewsFor(scenario);
 
-  const go = (next: View) => { setView(next); setMobile(false); const url = new URL(location.href); url.searchParams.set('vista', next); history.replaceState(null, '', url); };
+  const go = (next: View) => { setView(next); setMobile(false); setUtility(null); const url = new URL(location.href); url.searchParams.set('vista', next); history.replaceState(null, '', url); };
   useEffect(() => { const candidate = new URLSearchParams(location.search).get('vista') as View | null; if (candidate && availableViews.includes(candidate)) setView(candidate); }, []);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setUtility(null);
+      const target = event.target as HTMLElement | null;
+      if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '')) {
+        event.preventDefault(); setTour(null); setUtility('search');
+      }
+    };
+    addEventListener('keydown', onKey);
+    return () => removeEventListener('keydown', onKey);
+  }, []);
+  const openUtility = (next: Exclude<Utility, null>) => { setTour(null); setQuery(''); setUtility(next); };
+  const notices = noticesFor(scenario, state, locale);
+  const normalizedQuery = query.trim().toLocaleLowerCase(locale === 'es' ? 'es-ES' : 'en-GB');
+  const searchResults = availableViews.filter((item) => labels[locale][item].toLocaleLowerCase(locale === 'es' ? 'es-ES' : 'en-GB').includes(normalizedQuery));
 
   const tourSteps: [string, View][] = scenario === 'terrava' ? [
     [locale === 'es' ? 'Una solicitud sin encaje' : 'An enquiry without a fit', 'enquiries' as View],
@@ -65,7 +109,7 @@ export function DashboardDemo({ scenario, locale = 'es' }: { scenario: Scenario;
       <div className="dash-brand"><span>{brand}</span><small>Logic Estancia · {level}</small></div>
       <button className="sidebar-close" onClick={() => setMobile(false)} aria-label="Cerrar"><X size={20}/></button>
       <nav aria-label={locale === 'es' ? 'Gestor' : 'Workspace'}>{availableViews.map((item) => { const Icon = icons[item]; return <button key={item} className={item === view ? 'active' : ''} onClick={() => go(item)}><Icon size={17}/><span>{labels[locale][item]}</span></button>; })}</nav>
-      <div className="sidebar-foot"><a href="https://wa.me/34626432316" target="_blank" rel="noreferrer">{locale === 'es' ? 'Ayuda Logic2B' : 'Logic2B help'} ↗</a><span>{locale === 'es' ? 'Datos ficticios · sin integraciones' : 'Fictitious data · no integrations'}</span></div>
+      <div className="sidebar-foot"><a href={`${locale === 'en' ? '/en' : ''}/demos/${scenario}/`}>{locale === 'es' ? 'Volver a la web demo' : 'Back to demo website'} ←</a><a href="https://wa.me/34626432316" target="_blank" rel="noreferrer">{locale === 'es' ? 'Ayuda Logic2B' : 'Logic2B help'} ↗</a><span>{locale === 'es' ? 'Datos ficticios · sin integraciones' : 'Fictitious data · no integrations'}</span></div>
     </aside>
     {mobile && <button className="backdrop" onClick={() => setMobile(false)} aria-label="Cerrar menú"/>}
     <main className="dash-main">
@@ -78,11 +122,12 @@ export function DashboardDemo({ scenario, locale = 'es' }: { scenario: Scenario;
       </header>
       <div className="demo-banner"><strong>{locale === 'es' ? 'Demo funcional' : 'Functional demo'}</strong><span>{locale === 'es' ? 'Los cambios solo viven en este navegador. Pagos, canales, IA y envíos externos no están conectados.' : 'Changes only live in this browser. Payments, channels, AI and external delivery are not connected.'}</span></div>
       <section className="dash-content">
-        <div className="page-head"><div><p>{level} · {brand}</p><h1>{labels[locale][view]}</h1></div><div className="page-meta"><Search size={17}/><BellRing size={17}/></div></div>
+        <div className="page-head"><div><p>{level} · {brand}</p><h1>{labels[locale][view]}</h1></div><div className="page-meta"><button type="button" onClick={() => openUtility('search')} aria-label={locale === 'es' ? 'Buscar en el gestor' : 'Search workspace'} aria-expanded={utility === 'search'}><Search size={17}/><span className="shortcut" aria-hidden="true">/</span></button><button type="button" onClick={() => openUtility('notifications')} aria-label={locale === 'es' ? 'Abrir avisos' : 'Open notifications'} aria-expanded={utility === 'notifications'}><BellRing size={17}/><span className="notification-count">{notices.length}</span></button></div></div>
         <ViewContent scenario={scenario} locale={locale} view={view} state={state} patch={patch} go={go}/>
       </section>
     </main>
     {tour !== null && <div className="tour-pop" role="dialog" aria-modal="true" aria-label={locale === 'es' ? 'Recorrido guiado' : 'Guided tour'}><span>{tour + 1}/{tourSteps.length}</span><h2>{tourSteps[tour]![0]}</h2><p>{locale === 'es' ? 'La demo conserva este paso si cambias de pantalla. Puedes cerrarla y explorar libremente.' : 'The demo keeps this step as you change screens. Close it at any time and explore freely.'}</p><div><button onClick={() => setTour(null)}>{locale === 'es' ? 'Cerrar' : 'Close'}</button><button className="primary" onClick={advanceTour}>{tour === tourSteps.length - 1 ? (locale === 'es' ? 'Terminar' : 'Finish') : (locale === 'es' ? 'Siguiente' : 'Next')}<ChevronRight size={16}/></button></div></div>}
+    {utility && <><button className="utility-backdrop" type="button" onClick={() => setUtility(null)} aria-label={locale === 'es' ? 'Cerrar panel' : 'Close panel'}/><aside className="utility-panel" role="dialog" aria-modal="true" aria-label={utility === 'search' ? (locale === 'es' ? 'Búsqueda rápida' : 'Quick search') : (locale === 'es' ? 'Avisos operativos' : 'Operational notifications')}><header><div><span>{utility === 'search' ? (locale === 'es' ? 'Navegación' : 'Navigation') : (locale === 'es' ? 'Ahora' : 'Now')}</span><h2>{utility === 'search' ? (locale === 'es' ? 'Buscar en el gestor' : 'Search workspace') : (locale === 'es' ? 'Avisos operativos' : 'Operational notifications')}</h2></div><button type="button" onClick={() => setUtility(null)} aria-label={locale === 'es' ? 'Cerrar' : 'Close'}><X size={18}/></button></header>{utility === 'search' ? <div className="utility-search"><label><Search size={17}/><span className="sr-only">{locale === 'es' ? 'Buscar una sección' : 'Search a section'}</span><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={locale === 'es' ? 'Reservas, limpieza, informes…' : 'Bookings, cleaning, reports…'}/></label><div className="utility-results">{searchResults.map((item) => { const Icon = icons[item]; return <button type="button" key={item} onClick={() => go(item)}><Icon size={18}/><span>{labels[locale][item]}</span><ChevronRight size={16}/></button>; })}{searchResults.length === 0 && <p>{locale === 'es' ? 'No hay secciones que coincidan.' : 'No matching sections.'}</p>}</div><small>{locale === 'es' ? 'Pulsa / para abrir · Esc para cerrar' : 'Press / to open · Esc to close'}</small></div> : <div className="notice-list">{notices.map((notice) => <button type="button" key={`${notice.view}-${notice.title}`} onClick={() => go(notice.view)}><i className={notice.urgent ? 'urgent' : ''}></i><span><strong>{notice.title}</strong><small>{notice.detail}</small></span><ChevronRight size={16}/></button>)}</div>}</aside></>}
   </div>;
 }
 
@@ -91,10 +136,10 @@ function ViewContent({ scenario, locale, view, state, patch, go }: { scenario: S
   if (view === 'enquiries') return <Enquiries locale={locale} state={state} patch={patch} go={go}/>;
   if (view === 'planning') return <Planning scenario={scenario} locale={locale} state={state} patch={patch}/>;
   if (view === 'bookings') return <Bookings scenario={scenario} locale={locale} state={state}/>;
-  if (view === 'guests') return <TablePage locale={locale}/>;
+  if (view === 'guests') return <TablePage scenario={scenario} locale={locale} state={state}/>;
   if (view === 'cleaning') return <Cleaning scenario={scenario} locale={locale} state={state} patch={patch}/>;
   if (view === 'channels') return <Channels locale={locale}/>;
-  if (view === 'automation') return <Automation locale={locale}/>;
+  if (view === 'automation') return <Automation locale={locale} state={state}/>;
   if (view === 'control') return <Control locale={locale} state={state} go={go}/>;
   if (view === 'reports') return <Reports scenario={scenario} locale={locale}/>;
   return <SettingsPage locale={locale} scenario={scenario}/>;
@@ -112,12 +157,13 @@ function Home({ scenario, locale, state, go }: { scenario: Scenario; locale: Loc
     [locale === 'es' ? 'Entradas esta semana' : 'Arrivals this week', '5', 'bookings'],
     [locale === 'es' ? 'Pendientes de preparar' : 'Pending preparation', '2', 'cleaning'],
   ];
-  return <><div className="metric-grid">{cards.map(([name, value, target]) => <button key={name} onClick={() => go(target as View)}><span>{name}</span><strong>{value}</strong><ChevronRight size={17}/></button>)}</div><div className="dash-grid"><article className="panel wide"><h2>{locale === 'es' ? 'Lo que amenaza el día' : 'What threatens today'}</h2><Task tone="urgent" title={scenario === 'aurem' ? (locale === 'es' ? '408 · entrada a las 15:00' : '408 · arrival at 15:00') : (locale === 'es' ? 'Solicitud de Marina no cabe en Casa Aira' : 'Marina’s enquiry does not fit Casa Aira')} detail={scenario === 'aurem' ? (locale === 'es' ? 'Salida completada · limpieza pendiente' : 'Checkout complete · cleaning pending') : (locale === 'es' ? '4 huéspedes · 21–24 agosto' : '4 guests · 21–24 August')}/><Task title={locale === 'es' ? 'Cobro preparado, no enviado' : 'Payment prepared, not sent'} detail={locale === 'es' ? 'Requiere confirmación de Recepción' : 'Requires Reception confirmation'}/></article><article className="panel"><h2>{locale === 'es' ? 'Próximas decisiones' : 'Next decisions'}</h2><ol className="decision-list"><li><span>09:30</span>{locale === 'es' ? 'Validar dos salidas' : 'Validate two departures'}</li><li><span>11:00</span>{locale === 'es' ? 'Revisar disponibilidad' : 'Review availability'}</li><li><span>14:00</span>{locale === 'es' ? 'Preparar relevo' : 'Prepare handover'}</li></ol></article></div></>;
+  const stayDetail = `${state.stay.guests} ${locale === 'es' ? 'huéspedes' : 'guests'} · ${stayRange(state, locale)}`;
+  return <><div className="metric-grid">{cards.map(([name, value, target]) => <button key={name} onClick={() => go(target as View)}><span>{name}</span><strong>{value}</strong><ChevronRight size={17}/></button>)}</div><div className="dash-grid"><article className="panel wide"><h2>{locale === 'es' ? 'Lo que amenaza el día' : 'What threatens today'}</h2><Task tone="urgent" title={scenario === 'aurem' ? (locale === 'es' ? '408 · entrada a las 15:00' : '408 · arrival at 15:00') : (locale === 'es' ? `Solicitud de ${firstName(state.stay.name)} no cabe en Casa Aira` : `${firstName(state.stay.name)}’s enquiry does not fit Casa Aira`)} detail={scenario === 'aurem' ? (locale === 'es' ? `Entrada de ${state.stay.name} · limpieza pendiente` : `${state.stay.name} arrival · cleaning pending`) : stayDetail}/><Task title={locale === 'es' ? 'Cobro preparado, no enviado' : 'Payment prepared, not sent'} detail={locale === 'es' ? 'Requiere confirmación de Recepción' : 'Requires Reception confirmation'}/></article><article className="panel"><h2>{locale === 'es' ? 'Próximas decisiones' : 'Next decisions'}</h2><ol className="decision-list"><li><span>09:30</span>{locale === 'es' ? 'Validar dos salidas' : 'Validate two departures'}</li><li><span>11:00</span>{locale === 'es' ? 'Revisar disponibilidad' : 'Review availability'}</li><li><span>14:00</span>{locale === 'es' ? 'Preparar relevo' : 'Prepare handover'}</li></ol></article></div></>;
 }
 
 function Enquiries({ locale, state, patch, go }: { locale: Locale; state: DemoState; patch: (n: Partial<DemoState>) => void; go: (v: View) => void }) {
   const status = { new: locale === 'es' ? 'Nueva' : 'New', alternative: locale === 'es' ? 'Alternativa preparada' : 'Alternative prepared', booked: locale === 'es' ? 'Convertida' : 'Converted' }[state.enquiry];
-  return <div className="dash-grid"><article className="panel wide"><div className="panel-head"><div><span className={`tag ${state.enquiry}`}>{status}</span><h2>{locale === 'es' ? 'Marina Costa · 4 huéspedes' : 'Marina Costa · 4 guests'}</h2><p>21–24 · Casa Aira</p></div><strong>REQ-024</strong></div><div className="alert">{locale === 'es' ? 'Casa Aira no está disponible la primera noche. Casa Bruma encaja en fechas, capacidad y precio.' : 'Casa Aira is unavailable on the first night. Casa Bruma fits dates, capacity and price.'}</div><div className="comparison"><div><span>Casa Aira</span><b>{locale === 'es' ? 'Sin encaje' : 'No fit'}</b><small>{locale === 'es' ? 'Ocupada hasta el 22' : 'Occupied until 22'}</small></div><div className="recommended"><span>Casa Bruma</span><b>€ 612</b><small>{locale === 'es' ? 'Disponible · 3 noches' : 'Available · 3 nights'}</small></div></div><div className="actions">{state.enquiry === 'new' && <button className="primary" onClick={() => patch({ enquiry: 'alternative' })}>{locale === 'es' ? 'Preparar alternativa' : 'Prepare alternative'}</button>}{state.enquiry === 'alternative' && <button className="primary" onClick={() => { patch({ enquiry: 'booked' }); go('bookings'); }}>{locale === 'es' ? 'Convertir en reserva' : 'Convert to booking'}</button>}{state.enquiry === 'booked' && <span className="done"><Check size={16}/>{locale === 'es' ? 'Reserva TER-104 creada' : 'Booking TER-104 created'}</span>}</div></article><article className="panel"><h2>{locale === 'es' ? 'Contexto conservado' : 'Context preserved'}</h2><p className="body-copy">{locale === 'es' ? 'Fechas, huéspedes, preferencias y conversación viajan a la reserva. No hay que copiar datos entre pantallas.' : 'Dates, guests, preferences and conversation move into the booking. No copy and paste between screens.'}</p></article></div>;
+  return <div className="dash-grid"><article className="panel wide"><div className="panel-head"><div><div className="tag-row"><span className={`tag ${state.enquiry}`}>{status}</span>{state.stay.source === 'website' && <span className="tag source">{locale === 'es' ? 'Desde la web demo' : 'From demo website'}</span>}</div><h2>{state.stay.name} · {state.stay.guests} {locale === 'es' ? 'huéspedes' : 'guests'}</h2><p>{stayRange(state, locale)} · Casa Aira</p></div><strong>REQ-024</strong></div><div className="alert">{locale === 'es' ? 'Casa Aira no está disponible la primera noche. Casa Bruma encaja en fechas, capacidad y precio.' : 'Casa Aira is unavailable on the first night. Casa Bruma fits dates, capacity and price.'}</div><div className="comparison"><div><span>Casa Aira</span><b>{locale === 'es' ? 'Sin encaje' : 'No fit'}</b><small>{locale === 'es' ? 'Ocupada la primera noche' : 'Occupied on the first night'}</small></div><div className="recommended"><span>Casa Bruma</span><b>€ {state.stay.amount}</b><small>{locale === 'es' ? 'Disponible · estancia completa' : 'Available · full stay'}</small></div></div><div className="actions">{state.enquiry === 'new' && <button className="primary" onClick={() => patch({ enquiry: 'alternative' })}>{locale === 'es' ? 'Preparar alternativa' : 'Prepare alternative'}</button>}{state.enquiry === 'alternative' && <button className="primary" onClick={() => { patch({ enquiry: 'booked' }); go('bookings'); }}>{locale === 'es' ? 'Convertir en reserva' : 'Convert to booking'}</button>}{state.enquiry === 'booked' && <span className="done"><Check size={16}/>{locale === 'es' ? 'Reserva TER-104 creada' : 'Booking TER-104 created'}</span>}</div></article><article className="panel"><h2>{locale === 'es' ? 'Contexto conservado' : 'Context preserved'}</h2><p className="body-copy">{locale === 'es' ? 'Fechas, huéspedes, preferencias y conversación viajan a la reserva. No hay que copiar datos entre pantallas.' : 'Dates, guests, preferences and conversation move into the booking. No copy and paste between screens.'}</p></article></div>;
 }
 
 function Planning({ scenario, locale, state, patch }: { scenario: Scenario; locale: Locale; state: DemoState; patch: (n: Partial<DemoState>) => void }) {
@@ -126,13 +172,14 @@ function Planning({ scenario, locale, state, patch }: { scenario: Scenario; loca
 }
 
 function Bookings({ scenario, locale, state }: { scenario: Scenario; locale: Locale; state: DemoState }) {
-  const extra = scenario === 'terrava' && state.enquiry === 'booked' ? [['TER-104', 'Marina Costa', 'Casa Bruma', '21–24 Aug', locale === 'es' ? 'Confirmada' : 'Confirmed']] : [];
-  const rows = scenario === 'aurem' ? [['AUR-812', 'Elena Rossi', 'Terrace · 408', '14–17 Aug', locale === 'es' ? 'Entrada hoy' : 'Arrival today'],['AUR-809','M. Laurent','Classic · 403','14–16 Aug',locale === 'es' ? 'Confirmada' : 'Confirmed'],['AUR-798','Sofia Klein','Corner · 405','13–15 Aug',locale === 'es' ? 'En casa' : 'In house']] : [['TER-101','Irene Vidal','Casa Linde','18–22 Aug',locale === 'es' ? 'En casa' : 'In house'],['TER-102','Luis Martín','Casa Era','19–23 Aug',locale === 'es' ? 'Confirmada' : 'Confirmed'],['TER-103','Mina Olsen','Casa Faya','20–25 Aug',locale === 'es' ? 'Confirmada' : 'Confirmed'], ...extra];
-  return <Table rows={rows} headings={locale === 'es' ? ['Reserva','Titular','Unidad','Estancia','Estado'] : ['Booking','Lead guest','Unit','Stay','Status']}/>;
+  const extra = scenario === 'terrava' && state.enquiry === 'booked' ? [['TER-104', state.stay.name, 'Casa Bruma', stayRange(state, locale), locale === 'es' ? 'Confirmada' : 'Confirmed']] : [];
+  const rows = scenario === 'aurem' ? [['AUR-812', state.stay.name, 'Terrace · 408', stayRange(state, locale), locale === 'es' ? 'Entrada hoy' : 'Arrival today'],['AUR-809','M. Laurent','Classic · 403','14–16 Aug',locale === 'es' ? 'Confirmada' : 'Confirmed'],['AUR-798','Sofia Klein','Corner · 405','13–15 Aug',locale === 'es' ? 'En casa' : 'In house']] : [['TER-101','Irene Vidal','Casa Linde','18–22 Aug',locale === 'es' ? 'En casa' : 'In house'],['TER-102','Luis Martín','Casa Era','19–23 Aug',locale === 'es' ? 'Confirmada' : 'Confirmed'],['TER-103','Mina Olsen','Casa Faya','20–25 Aug',locale === 'es' ? 'Confirmada' : 'Confirmed'], ...extra];
+  return <>{state.stay.source === 'website' && <div className="journey-note"><Check size={16}/><span>{locale === 'es' ? `${state.stay.name} llega desde la reserva simulada de la web.` : `${state.stay.name} comes from the website’s simulated booking.`}</span></div>}<Table rows={rows} headings={locale === 'es' ? ['Reserva','Titular','Unidad','Estancia','Estado'] : ['Booking','Lead guest','Unit','Stay','Status']}/></>;
 }
 
-function TablePage({ locale }: { locale: Locale }) {
-  return <Table rows={[["Elena Rossi","elena@example.test","Italia",locale === 'es' ? 'Pre-check-in preparado' : 'Pre-check-in prepared'],["Marina Costa","marina@example.test","España",locale === 'es' ? 'Consentimiento demo' : 'Demo consent'],["M. Laurent","laurent@example.test","Francia",locale === 'es' ? 'En casa' : 'In house']]} headings={locale === 'es' ? ['Huésped','Email ficticio','País','Estado'] : ['Guest','Fictitious email','Country','Status']}/>;
+function TablePage({ scenario, locale, state }: { scenario: Scenario; locale: Locale; state: DemoState }) {
+  const rows = [[state.stay.name,state.stay.email,locale === 'es' ? 'Dato de la demo' : 'Demo data',scenario === 'aurem' ? (locale === 'es' ? 'Pre-check-in preparado' : 'Pre-check-in prepared') : (locale === 'es' ? 'Consulta recibida' : 'Enquiry received')],["M. Laurent","laurent@example.test","Francia",locale === 'es' ? 'En casa' : 'In house']];
+  return <Table rows={rows} headings={locale === 'es' ? ['Huésped','Email ficticio','Origen','Estado'] : ['Guest','Fictitious email','Source','Status']}/>;
 }
 
 function Cleaning({ scenario, locale, state, patch }: { scenario: Scenario; locale: Locale; state: DemoState; patch: (n: Partial<DemoState>) => void }) {
@@ -143,7 +190,7 @@ function Cleaning({ scenario, locale, state, patch }: { scenario: Scenario; loca
 
 function Channels({ locale }: { locale: Locale }) { return <><div className="integration-note"><strong>{locale === 'es' ? 'Demo · no conectado' : 'Demo · not connected'}</strong><span>{locale === 'es' ? 'Estos estados proceden de un fixture. Ningún canal ha recibido inventario.' : 'These states come from a fixture. No channel has received inventory.'}</span></div><div className="channel-grid">{[['Booking.com','Preparado','12:04'],['Airbnb','Preparado','11:58'],['Expedia','Por validar','—'],['iCal directo','Disponible','12:06']].map(([name,status,time]) => <article className="panel" key={name}><span>{status}</span><h2>{name}</h2><strong>{time}</strong><small>{locale === 'es' ? 'Última sincronización de muestra' : 'Sample last sync'}</small></article>)}</div></>; }
 
-function Automation({ locale }: { locale: Locale }) { return <div className="dash-grid"><article className="panel wide"><span className="tag">{locale === 'es' ? 'Copiloto supervisado · demo' : 'Supervised copilot · demo'}</span><h2>{locale === 'es' ? 'Respuesta preparada para Elena Rossi' : 'Reply prepared for Elena Rossi'}</h2><blockquote>{locale === 'es' ? 'Hola Elena, tu habitación Terrace estará lista a partir de las 15:00. Hemos preparado el pre-check-in, pero todavía necesitamos que confirmes…' : 'Hello Elena, your Terrace room will be ready from 15:00. We prepared the pre-check-in, but still need you to confirm…'}</blockquote><div className="sources"><span>{locale === 'es' ? 'Fuentes' : 'Sources'}</span><b>Reserva AUR-812</b><b>{locale === 'es' ? 'Política de entrada' : 'Arrival policy'}</b><b>{locale === 'es' ? 'Estado habitación 408' : 'Room 408 status'}</b></div><button disabled>{locale === 'es' ? 'Enviar · proveedor no conectado' : 'Send · provider not connected'}</button></article><article className="panel"><h2>{locale === 'es' ? 'Límite visible' : 'Visible boundary'}</h2><p className="body-copy">{locale === 'es' ? 'El copiloto prepara y explica. Precio, reserva, cobro y mensaje requieren una confirmación humana y un proveedor real.' : 'The copilot prepares and explains. Price, booking, payment and message require human confirmation and a real provider.'}</p></article></div>; }
+function Automation({ locale, state }: { locale: Locale; state: DemoState }) { return <div className="dash-grid"><article className="panel wide"><span className="tag">{locale === 'es' ? 'Copiloto supervisado · demo' : 'Supervised copilot · demo'}</span><h2>{locale === 'es' ? `Respuesta preparada para ${state.stay.name}` : `Reply prepared for ${state.stay.name}`}</h2><blockquote>{locale === 'es' ? `Hola ${firstName(state.stay.name)}, tu habitación Terrace estará lista a partir de las 15:00. Hemos preparado el pre-check-in, pero todavía necesitamos que confirmes…` : `Hello ${firstName(state.stay.name)}, your Terrace room will be ready from 15:00. We prepared the pre-check-in, but still need you to confirm…`}</blockquote><div className="sources"><span>{locale === 'es' ? 'Fuentes' : 'Sources'}</span><b>Reserva AUR-812</b><b>{locale === 'es' ? 'Política de entrada' : 'Arrival policy'}</b><b>{locale === 'es' ? 'Estado habitación 408' : 'Room 408 status'}</b></div><button disabled>{locale === 'es' ? 'Enviar · proveedor no conectado' : 'Send · provider not connected'}</button></article><article className="panel"><h2>{locale === 'es' ? 'Límite visible' : 'Visible boundary'}</h2><p className="body-copy">{locale === 'es' ? 'El copiloto prepara y explica. Precio, reserva, cobro y mensaje requieren una confirmación humana y un proveedor real.' : 'The copilot prepares and explains. Price, booking, payment and message require human confirmation and a real provider.'}</p></article></div>; }
 
 function Control({ locale, state, go }: { locale: Locale; state: DemoState; go: (v: View) => void }) {
   const families = locale === 'es' ? ['Centro','Limpieza','Mantenimiento','Equipo','Huésped','Reservas y grupos','Ingresos','Canales e inteligencia'] : ['Centre','Cleaning','Maintenance','Team','Guest','Bookings and groups','Revenue','Channels and intelligence'];

@@ -14,6 +14,7 @@
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/source-serif-4": "^5.2.8",
     "@logic-estancia/config": "workspace:*",
+    "@logic-estancia/domain": "workspace:*",
     "@logic-estancia/ui": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^5.12.0"

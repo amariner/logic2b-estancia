@@ -81,6 +81,9 @@ importers:
       '@logic-estancia/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@logic-estancia/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@logic-estancia/ui':
         specifier: workspace:*
         version: link:../../packages/ui

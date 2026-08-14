@@ -84,3 +84,20 @@ export const LEVELS: Record<PlanLevel, { rank: number; capabilities: string[] }>
 export function hasLevel(current: PlanLevel, required: PlanLevel): boolean {
   return LEVELS[current].rank >= LEVELS[required].rank;
 }
+
+export interface ScopeSignals {
+  propertyCount: number;
+  unitCount: number;
+  wantsBookings: boolean;
+  wantsAutomation: boolean;
+  wantsOperations: boolean;
+}
+
+export function recommendLevel(signals: ScopeSignals): PlanLevel {
+  const properties = Math.max(1, Math.trunc(signals.propertyCount));
+  const units = Math.max(1, Math.trunc(signals.unitCount));
+  if (signals.wantsOperations || units >= 40) return 'inteligente';
+  if (signals.wantsAutomation || units >= 12) return 'automatiza';
+  if (signals.wantsBookings || properties > 1 || units > 1) return 'gestion';
+  return 'inicio';
+}

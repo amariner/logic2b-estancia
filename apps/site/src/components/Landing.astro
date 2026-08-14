@@ -16,16 +16,25 @@ const demos = locale === 'es' ? [
   { slug: 'aurem', level: 'Vision · 96 rooms', name: 'Aurem Hotel', text: 'Direct booking, channels and a room that must be ready on time.', image: '/media/aurem/hero.webp' },
 ];
 const levels = locale === 'es' ? [
-  ['00', 'Inicio', 'Web, SEO y consultas. Sin un gestor que no necesitas todavía.'],
-  ['01', 'Gestión', 'Reservas, huéspedes, planning, cobro opcional, limpieza básica e iCal.'],
-  ['02', 'Automatiza', 'Mensajes, recordatorios, reseñas, canales y copiloto supervisado.'],
-  ['03', 'Inteligente', 'Centro operativo, equipo, mantenimiento, revenue y previsión.'],
+  ['00', 'Inicio', 'Web, SEO y consultas. Sin un gestor que no necesitas todavía.', 'inicio'],
+  ['01', 'Gestión', 'Reservas, huéspedes, planning, cobro opcional, limpieza básica e iCal.', 'gestion'],
+  ['02', 'Automatiza', 'Mensajes, recordatorios, reseñas, canales y copiloto supervisado.', 'automatiza'],
+  ['03', 'Inteligente', 'Centro operativo, equipo, mantenimiento, revenue y previsión.', 'inteligente'],
 ] : [
-  ['00', 'Start', 'Website, SEO and enquiries. No workspace you do not need yet.'],
-  ['01', 'Manage', 'Bookings, guests, planning, optional payment, basic cleaning and iCal.'],
-  ['02', 'Automate', 'Messages, reminders, reviews, channels and a supervised copilot.'],
-  ['03', 'Intelligent', 'Operations centre, teams, maintenance, revenue and forecasting.'],
+  ['00', 'Start', 'Website, SEO and enquiries. No workspace you do not need yet.', 'inicio'],
+  ['01', 'Manage', 'Bookings, guests, planning, optional payment, basic cleaning and iCal.', 'gestion'],
+  ['02', 'Automate', 'Messages, reminders, reviews, channels and a supervised copilot.', 'automatiza'],
+  ['03', 'Intelligent', 'Operations centre, teams, maintenance, revenue and forecasting.', 'inteligente'],
 ];
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: c.faq.items.map(([question, answer]) => ({
+    '@type': 'Question',
+    name: question,
+    acceptedAnswer: { '@type': 'Answer', text: answer },
+  })),
+};
 ---
 <section class="hero">
   <div class="hero-copy shell">
@@ -64,8 +73,50 @@ const levels = locale === 'es' ? [
 </section>
 
 <section id="niveles" class="section levels">
-  <div class="shell"><div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2></div><div class="level-grid">{levels.map(([n, name, text]) => <article><span>{n}</span><h3>{name}</h3><p>{text}</p></article>)}</div><p class="level-note">{c.levels.note}</p></div>
+  <div class="shell"><div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2></div><div class="level-grid">{levels.map(([n, name, text, value]) => <article><span>{n}</span><h3>{name}</h3><p>{text}</p><a href="#contacto" data-plan={value}>{locale === 'es' ? 'Me interesa' : 'I’m interested'} <span aria-hidden="true">→</span></a></article>)}</div><p class="level-note">{c.levels.note}</p></div>
 </section>
+
+<section id="alcance" class="section scope-section">
+  <div class="shell">
+    <div class="section-head"><p class="eyebrow">{c.scope.eyebrow}</p><h2 class="heading">{c.scope.title}</h2><p>{c.scope.body}</p></div>
+    <div class="scope-builder artifact" data-scope-estimator data-copy={JSON.stringify(c.scope)}>
+      <form class="scope-controls" data-scope-controls>
+        <div class="scope-counts">
+          <label>{c.scope.properties}<input name="scopeProperties" type="number" inputmode="numeric" min="1" max="10000" value="1" required /></label>
+          <label>{c.scope.units}<input name="scopeUnits" type="number" inputmode="numeric" min="1" max="100000" value="1" required /></label>
+        </div>
+        <fieldset><legend>{c.scope.needs}</legend>
+          <label><input name="scopeBookings" type="checkbox" /><span>{c.scope.booking}</span></label>
+          <label><input name="scopeAutomation" type="checkbox" /><span>{c.scope.automation}</span></label>
+          <label><input name="scopeOperations" type="checkbox" /><span>{c.scope.operations}</span></label>
+        </fieldset>
+      </form>
+      <article class="scope-result" data-scope-result>
+        <div aria-live="polite" aria-atomic="true">
+          <span>{c.scope.result}</span>
+          <p class="scope-plan-code" data-scope-code>00</p>
+          <h3 data-scope-name>{c.scope.plans.inicio[0]}</h3>
+          <p data-scope-description>{c.scope.plans.inicio[1]}</p>
+          <ul data-scope-reasons><li>{c.scope.reasons.single}</li></ul>
+        </div>
+        <a class="pill" href="#contacto" data-use-scope>{c.scope.use}<span aria-hidden="true">→</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section activation">
+  <div class="shell activation-wrap">
+    <div class="section-head"><p class="eyebrow">{c.activation.eyebrow}</p><h2 class="heading">{c.activation.title}</h2><p>{c.activation.body}</p><a class="pill ghost" href="#contacto">{c.activation.cta}</a></div>
+    <ol class="activation-steps">{c.activation.steps.map(([name, text], index) => <li><span>0{index + 1}</span><div><h3>{name}</h3><p>{text}</p></div></li>)}</ol>
+  </div>
+</section>
+
+<section class="section shell faq">
+  <div class="section-head"><p class="eyebrow">{c.faq.eyebrow}</p><h2 class="heading">{c.faq.title}</h2></div>
+  <div class="faq-list">{c.faq.items.map(([question, answer], index) => <details open={index === 0}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div>
+</section>
+<script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
 
 <section id="contacto" class="section shell">
   <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 class="heading">{c.contact.title}</h2><p>{c.contact.body}</p><p><a href={wa.href} target="_blank" rel="noopener noreferrer">WhatsApp · {wa.phone} →</a></p></div>
@@ -78,7 +129,7 @@ const levels = locale === 'es' ? [
     <label>{locale === 'es' ? 'Plan de interés' : 'Plan of interest'}<select name="plan"><option value="">—</option><option value="inicio">{locale === 'es' ? 'Inicio' : 'Start'}</option><option value="gestion">{locale === 'es' ? 'Gestión' : 'Manage'}</option><option value="automatiza">{locale === 'es' ? 'Automatiza' : 'Automate'}</option><option value="inteligente">{locale === 'es' ? 'Inteligente' : 'Intelligent'}</option></select></label>
     <label>{locale === 'es' ? 'Propiedades' : 'Properties'}<input name="propertyCount" type="number" min="1" max="10000" value="1" required /></label>
     <label>{locale === 'es' ? 'Unidades' : 'Units'}<input name="unitCount" type="number" min="1" max="100000" value="1" required /></label>
-    <label class="wide">{locale === 'es' ? 'Qué quieres poner en marcha' : 'What do you want to launch'}<textarea name="message" rows="5" maxlength="2000"></textarea></label>
+    <label class="wide">{locale === 'es' ? 'Qué quieres poner en marcha' : 'What do you want to launch'}<textarea name="message" rows="5" maxlength="2000" placeholder={locale === 'es' ? 'Cuéntanos qué gestionas hoy, qué te frena y qué te gustaría conectar.' : 'Tell us what you manage today, what gets in the way and what you would like to connect.'}></textarea></label>
     <label><span class="sr-only">Website</span><input name="website" tabindex="-1" autocomplete="off" /></label>
     <label class="check wide"><input name="accept" type="checkbox" required /><span>{locale === 'es' ? 'He leído la política de privacidad y acepto que Logic2B use estos datos para responder.' : 'I have read the privacy policy and accept that Logic2B uses these details to reply.'}</span></label>
     <div class="wide"><button class="pill" type="submit"><span>{c.contact.submit}</span><span aria-hidden="true">→</span></button></div>
@@ -89,6 +140,10 @@ const levels = locale === 'es' ? [
 <script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error }}>
   const form = document.querySelector('[data-lead]');
   const status = form?.querySelector('.form-status');
+  document.querySelectorAll('[data-plan]').forEach((link) => link.addEventListener('click', () => {
+    const plan = form?.querySelector('[name=plan]');
+    if (plan && link.dataset.plan) plan.value = link.dataset.plan;
+  }));
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
@@ -100,4 +155,8 @@ const levels = locale === 'es' ? [
     catch { if (status) status.textContent = error; }
     finally { if (button) button.disabled = false; if (label) label.textContent = locale === 'es' ? 'Enviar proyecto' : 'Send project'; }
   });
+</script>
+
+<script>
+  import '../scripts/scope-estimator';
 </script>

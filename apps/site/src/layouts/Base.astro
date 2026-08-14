@@ -11,8 +11,34 @@ interface Props { locale: Locale; title?: string; description?: string; route?: 
 const { locale, title = 'Logic Estancia', description = 'Web, reserva directa y operación para alojamientos.', route = '' } = Astro.props;
 const c = content[locale];
 const prefix = locale === 'en' ? '/en' : '';
-const canonical = `${PRODUCT.url}${prefix}${route ? `/${route.replace(/^\//, '')}` : '/'}${route && !route.endsWith('/') ? '/' : ''}`;
+const cleanRoute = route.replace(/^\//, '').replace(/\/$/, '');
+const routePath = cleanRoute ? `/${cleanRoute}/` : '/';
+const canonical = `${PRODUCT.url}${prefix}${routePath}`;
+const alternateEs = `${PRODUCT.url}${routePath}`;
+const alternateEn = `${PRODUCT.url}/en${routePath}`;
+const socialLocale = locale === 'es' ? 'es_ES' : 'en_GB';
+const alternateSocialLocale = locale === 'es' ? 'en_GB' : 'es_ES';
 const wa = logic2bContact(locale, route.startsWith('docs') ? 'docs' : 'commercial');
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${PRODUCT.url}/#organization`,
+    name: 'Logic2B',
+    url: 'https://logic2b.com',
+    email: PRODUCT.email,
+    telephone: wa.phone,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${PRODUCT.url}/#website`,
+    url: PRODUCT.url,
+    name: PRODUCT.name,
+    inLanguage: ['es', 'en'],
+    publisher: { '@id': `${PRODUCT.url}/#organization` },
+  },
+];
 ---
 <!doctype html>
 <html lang={locale}>
@@ -20,9 +46,24 @@ const wa = logic2bContact(locale, route.startsWith('docs') ? 'docs' : 'commercia
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
     <meta name="theme-color" content="#ffffff" />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="es" href={alternateEs} />
+    <link rel="alternate" hreflang="en" href={alternateEn} />
+    <link rel="alternate" hreflang="x-default" href={alternateEs} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={PRODUCT.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={socialLocale} />
+    <meta property="og:locale:alternate" content={alternateSocialLocale} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
     <title>{title}</title>
   </head>
   <body>
