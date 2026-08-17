@@ -6,7 +6,7 @@
 
 Rama: `main`
 
-Estado general: base comercial y demostrativa implementada; consentimiento y legales equiparados al patrón de Camp; producción continúa estable en el Worker anterior mientras `logic-estancia` queda preparado sin HubSpot para recibir el dominio. La migración y el smoke de Resend dependen únicamente de añadir la nueva clave como secreto al Worker nuevo.
+Estado general: base comercial y demostrativa implementada; consentimiento y legales equiparados al patrón de Camp; producción consolidada en el Worker `logic-estancia`, sin HubSpot, con dominio personalizado, HTTPS y Resend verificado mediante smoke idempotente. El Worker anterior `logic-estancia-demo` está retirado. Queda rotar la clave de Resend porque su primera carga en el Worker nuevo creó una versión borrador `plain_text`, aunque nunca recibió tráfico ni se imprimió durante la migración.
 
 El SHA actual de continuidad se obtiene siempre con `git rev-parse HEAD`; no se fija aquí para evitar que el propio commit de actualización deje el dato obsoleto.
 
@@ -41,7 +41,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Demos canónicas Nivora, Terrava y Aurem con límites explícitos y CTA contextual.
 - Dos recursos SEO iniciales y playbook comercial.
 - QA visual realizado; `pnpm check` con 28 tareas correctas y `pnpm e2e` con 24 pruebas correctas.
-- Worker `logic-estancia-demo` mantiene temporalmente `https://estancia.logic2b.com` durante la migración sin corte. El nuevo Worker `logic-estancia` está creado y verificado en su preview, sin variables ni token de HubSpot, con assets, `LeadCoordinator` y los secretos `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT` y `LEADS_REPLY_TO`; su versión activa es `ceda680c-9f41-4e85-a256-02040e7b770d`.
+- Worker `logic-estancia` publicado en `https://estancia.logic2b.com`, sin variables ni token de HubSpot, con assets, `LeadCoordinator`, cuatro secretos de correo cifrados y `workers.dev` desactivado. La versión activa es `e70fd292-1943-431b-a4ea-55d5fb7f0aef`; `logic-estancia-demo` fue eliminado después de verificar el corte.
 
 ## Siguiente cola priorizada
 
@@ -53,7 +53,7 @@ Siguiente punto exacto de desarrollo: añadir una herramienta de smoke test de i
 
 Bloqueos del siguiente punto: ninguno para implementar y probar localmente la herramienta. Su ejecución contra proveedores o producción depende de credenciales, valores definitivos y autorización humana.
 
-Siguiente punto exacto de activación: añadir directamente `LEADS_RESEND_API_KEY` como secreto del Worker `logic-estancia`; después desplegar la configuración versionada para trasladar `estancia.logic2b.com`, ejecutar el smoke marcado como prueba y comprobar la entrega en Resend antes de considerar operativo el formulario. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
+Siguiente punto exacto de activación: revocar la clave de Resend que pasó por el borrador `plain_text`, crear otra y sustituir el secreto existente `LEADS_RESEND_API_KEY` directamente como `secret_text`; después confirmar humanamente en Resend o en el buzón interno que los mensajes del smoke con referencia `64fd398c-cc9f-44d0-8edf-21723aac3e18` están visibles. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
 
 ### P1 · Accesibilidad, SEO técnico y rendimiento
 
@@ -79,7 +79,9 @@ Siguiente punto exacto de activación: añadir directamente `LEADS_RESEND_API_KE
 
 Estas actividades no se deben declarar completadas sin evidencia humana o acceso autorizado:
 
-- Configurar `LEADS_RESEND_API_KEY` en `logic-estancia`, trasladar el dominio y ejecutar el smoke de Resend. Una URL real `LEADS_MEETING_URL` permanece opcional.
+- Confirmar humanamente la recepción del smoke de Resend; la API respondió `202 delivered` en el Worker y en el dominio con la misma referencia idempotente.
+- Rotar la clave actual de Resend para invalidar el valor conservado en una versión borrador histórica como `plain_text`; actualizar el secreto existente, sin crear una variable de texto.
+- Configurar una URL real `LEADS_MEETING_URL` solo si se decide ofrecer agenda directa.
 - HubSpot está desactivado por decisión de producto; no configurar token, pipeline ni propiedades hasta que se autorice expresamente esa integración.
 - Configurar las etiquetas definitivas de GTM/GA4.
 - Revisar textos legales específicamente para España.
@@ -102,26 +104,28 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 - `pnpm e2e`: 24 pruebas Chromium correctas, incluidos consentimiento completo ES/EN, revocación, legales, agenda válida, fallback sin agenda y diagnóstico en 320, 375, 430 y 1366 px.
 - QA visual en navegador local: preferencias a 1280 × 720 y 375 × 812 correctas, sin overflow; toggle accesible por teclado y puntero, botones de 44 px y `prefers-reduced-motion` respetado.
 - `wrangler deploy --dry-run`: 118 assets, `LeadCoordinator` y variables versionadas reconocidos.
-- Producción permanece en `logic-estancia-demo`, versión limpia `53c7ae5b-cb13-4294-a077-3bb0c56bda40`, mientras se prepara el cambio de nombre sin corte.
-- Nuevo Worker `logic-estancia`: preview y portada responden `200`; versión activa `ceda680c-9f41-4e85-a256-02040e7b770d`; tres secretos de correo presentes y ninguna configuración de HubSpot. El dominio personalizado aún no se ha trasladado.
+- Producción consolidada en `logic-estancia`, versión `e70fd292-1943-431b-a4ea-55d5fb7f0aef`, con trigger exclusivo `estancia.logic2b.com (custom domain)`. El Worker `logic-estancia-demo` fue eliminado tras un dry-run y la verificación del corte.
+- `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT`, `LEADS_REPLY_TO` y `LEADS_RESEND_API_KEY` figuran como `secret_text`; `LEADS_TRANSPORT` es la única variable de canal. No existen bindings `HUBSPOT_*`.
 - DNS-over-HTTPS de Cloudflare: registros A `188.114.97.5` y `188.114.96.5` y registros AAAA publicados. El resolver local conservaba temporalmente un NXDOMAIN anterior, por lo que las comprobaciones de origen se fijaron contra la IP publicada.
 - Smoke HTTP posdespliegue: `/`, `/cookies/` y `/demos/terrava/` responden `200` por HTTPS; un `POST /api/leads` vacío responde `400` sin crear ningún contacto. El certificado, HTTP/2 y la respuesta desde Cloudflare quedan verificados.
 - QA visual en producción: portada y banner correctos; el panel de preferencias expone esencial siempre activo, toggle de analítica, rechazo total y guardado.
-- `wrangler secret list` en el nuevo Worker: presentes `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT` y `LEADS_REPLY_TO`. La clave de Resend no puede copiarse entre Workers porque Cloudflare no revela secretos existentes; no se ejecutó smoke contra el proveedor ni se declara operativo el formulario.
+- Smoke de Resend: `202 delivered` con referencia `64fd398c-cc9f-44d0-8edf-21723aac3e18`; la repetición por el dominio devolvió la misma referencia, demostrando idempotencia y que el hostname alcanzaba el Worker nuevo sin duplicar el envío.
+- La primera carga de la clave en `logic-estancia` se realizó desde el dashboard como `plain_text` en un borrador no desplegado. Se convirtió por tubería directa a `secret_text` sin imprimir el valor, pero la rotación sigue pendiente para invalidar el historial.
+- Verificación final: `/`, `/cookies/` y `/demos/terrava/` responden `200`; el hostname temporal `workers.dev` responde `404`.
 - `git diff --check`, búsqueda de secretos, remoto sin divergencia y ausencia de planes antiguos en superficies públicas: correctos.
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: correcto — el nombre del Worker deja de presentar el producto como demo y la migración no declara operativo el formulario antes de validar Resend.
+- Marketing estratégico: correcto — el Worker productivo deja de presentarse como demo y Resend queda validado sin activar HubSpot ni prometer agenda.
 - Diseño de producto: correcto — consentimiento, legales y demos comparten un contrato coherente sin alterar Básico, Gestión o Inteligente.
 - UX: corregido — aceptar, rechazar, configurar, volver y revocar funcionan en ES/EN; la categoría esencial explica el estado local de las demos.
 - UI/dirección visual: corregido — el patrón de Camp se adapta a serif editorial, neutros y terracota; escritorio y 375 px no presentan overflow.
 - SEO: corregido — las seis rutas legales conservan canonical/hreflang y ahora tienen descripciones específicas y contenido sustantivo.
 - Arquitectura frontend: corregido — clave y versión son fuente compartida, se migra la elección antigua y las demos leen el mismo contrato.
-- Full stack: corregido — `logic-estancia` está creado sin HubSpot y con tres secretos de correo; el dominio sigue en el Worker anterior hasta disponer de Resend en el nuevo.
-- QA/accesibilidad/rendimiento/confianza: correcto — 28 tareas, 20 unitarias y 24 E2E en verde; producción y preview responden `200`, sin corte durante la preparación. El smoke de Resend precederá al traslado final.
+- Full stack: corregido — `logic-estancia` sirve el dominio con cuatro secretos cifrados, Resend operativo y ausencia total de bindings HubSpot; el Worker anterior está retirado.
+- QA/accesibilidad/rendimiento/confianza: correcto — 28 tareas, 20 unitarias y 24 E2E en verde; rutas públicas `200`, smoke `202 delivered`, idempotencia verificada y superficie temporal cerrada.
 
-Deuda aceptada: los textos legales están adaptados desde Camp pero requieren revisión jurídica española; faltan la clave de Resend en el Worker nuevo, el traslado del dominio y el smoke del proveedor. La agenda real es opcional y HubSpot está deliberadamente fuera de alcance. La herramienta de smoke queda como siguiente P0; WCAG y Lighthouse completos permanecen en P1.
+Deuda aceptada: los textos legales están adaptados desde Camp pero requieren revisión jurídica española; faltan la rotación de la clave que pasó por el borrador `plain_text` y la confirmación humana de recepción del smoke. La agenda real es opcional y HubSpot está deliberadamente fuera de alcance. La herramienta reproducible de smoke queda como siguiente P0; WCAG y Lighthouse completos permanecen en P1.
 
 ## Registro de continuaciones
 
@@ -132,3 +136,4 @@ Deuda aceptada: los textos legales están adaptados desde Camp pero requieren re
 - 2026-08-17 — Se importó el patrón completo de consentimiento y legales de Camp, adaptado a Estancia, con 24 E2E y QA responsive. Commit `106a617`. Se creó el primer Worker Cloudflare, versión `92c45ea5-7f53-4702-b10b-d4b8f9446053`; DNS, secretos y smoke siguen bloqueando la publicación.
 - 2026-08-17 — Se sustituyó la ruta por un dominio personalizado gestionado por Cloudflare y se publicó `https://estancia.logic2b.com`. Commit `841391c`. DNS, HTTPS, rutas, banner y rechazo del payload inválido verificados; tres variables de correo compatibles copiadas desde Camp. La clave de Resend, agenda real y smoke contra proveedores siguen bloqueando la operatividad del formulario.
 - 2026-08-17 — Se preparó la migración de `logic-estancia-demo` a `logic-estancia`: nuevo Worker creado sin HubSpot, preview y producción simultáneamente sanos y tres secretos de correo trasladados. Pendiente añadir Resend al Worker nuevo, mover el dominio y ejecutar el smoke antes de retirar el Worker anterior.
+- 2026-08-17 — Se completó el corte a `logic-estancia`: clave convertida a secreto, cuatro bindings cifrados consolidados, Resend validado con `202 delivered` e idempotencia por dominio, `workers.dev` desactivado y `logic-estancia-demo` eliminado. HubSpot permanece fuera de alcance; queda rotar la clave para invalidar el borrador histórico `plain_text`.
