@@ -17,7 +17,9 @@
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["LeadCoordinator"] }
   ],
-  "routes": [{ "pattern": "estancia.logic2b.com/*", "zone_name": "logic2b.com" }],
+  "routes": [
+    { "pattern": "estancia.logic2b.com", "custom_domain": true }
+  ],
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist/assets",
