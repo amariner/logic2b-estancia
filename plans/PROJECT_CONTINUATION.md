@@ -17,8 +17,9 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 1. Leer `AGENTS.md` y este checkpoint completo.
 2. Ejecutar `git status --short --branch`, revisar los últimos commits y preservar cualquier cambio del usuario.
 3. Validar que el checkpoint sigue coincidiendo con el código.
-4. Seleccionar el primer elemento desbloqueado de la cola priorizada.
-5. Implementar, probar, documentar, actualizar este archivo y subir el incremento verificado según `AGENTS.md`.
+4. Realizar la revisión previa del consejo definido en `docs/MULTIDISCIPLINARY_REVIEW.md`.
+5. Seleccionar el primer elemento desbloqueado de la cola priorizada.
+6. Implementar, repetir la revisión multidisciplinar, probar, documentar, actualizar este archivo y subir el incremento verificado según `AGENTS.md`.
 
 ## Entregado
 
@@ -83,8 +84,20 @@ pnpm check
 pnpm e2e
 ```
 
-Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos en superficies públicas, demos con `noindex`, estado local no enviado al servidor y SHA remoto coincidente después del push.
+Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos en superficies públicas, demos con `noindex`, estado local no enviado al servidor, revisión multidisciplinar registrada y SHA remoto coincidente después del push.
+
+## Revisión multidisciplinar del checkpoint actual
+
+- Marketing estratégico: correcto — la siguiente prioridad protege el embudo y la respuesta al lead.
+- Diseño de producto: correcto — la cola mantiene la arquitectura de tres planes y las demos canónicas.
+- UX: pendiente no bloqueante — la próxima auditoría completa está registrada en P1.
+- UI/dirección visual: correcto — la QA visual base está completada; cada cambio público requerirá nueva revisión.
+- SEO: pendiente no bloqueante — auditoría técnica y siguientes contenidos registrados en P1 y P3.
+- Arquitectura frontend: correcto — fuente única de capacidades y contratos compartidos implantados.
+- Full stack: pendiente prioritario — persistencia del rate limit e idempotencia completa encabezan P0.
+- QA/accesibilidad/rendimiento/confianza: pendiente no bloqueante — pruebas actuales en verde; WCAG y Lighthouse completos siguen en P1.
 
 ## Registro de continuaciones
 
 - 2026-08-17 — Se implantó la experiencia comercial de tres planes y las cinco demostraciones. Commit `6f08b24`. Próximo punto: P0, resiliencia real del embudo.
+- 2026-08-17 — Se incorporó el consejo multidisciplinar obligatorio para revisar y encauzar cada continuación desde marketing, producto, UX, UI, SEO, arquitectura frontend y full stack.
