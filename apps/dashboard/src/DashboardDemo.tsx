@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   BedDouble,
@@ -289,6 +289,7 @@ export function DashboardDemo({
   const [tour, setTour] = useState<number | null>(state.tourStep);
   const [utility, setUtility] = useState<Utility>(null);
   const [query, setQuery] = useState("");
+  const utilityTrigger = useRef<HTMLElement | null>(null);
   const brand = scenario === "aurem" ? "Aurem Hotel" : "Terrava Collection";
   const level =
     scenario === "aurem"
@@ -317,27 +318,31 @@ export function DashboardDemo({
   useEffect(() => {
     track("demo_open", { locale, demo: scenario, source_section: "dashboard" });
   }, [locale, scenario]);
+  const closeUtility = () => {
+    setUtility(null);
+    requestAnimationFrame(() => utilityTrigger.current?.focus());
+  };
+  const openUtility = (next: Exclude<Utility, null>) => {
+    utilityTrigger.current = document.activeElement as HTMLElement | null;
+    setTour(null);
+    setQuery("");
+    setUtility(next);
+  };
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setUtility(null);
+      if (event.key === "Escape" && utility) closeUtility();
       const target = event.target as HTMLElement | null;
       if (
         event.key === "/" &&
         !["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName ?? "")
       ) {
         event.preventDefault();
-        setTour(null);
-        setUtility("search");
+        openUtility("search");
       }
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, []);
-  const openUtility = (next: Exclude<Utility, null>) => {
-    setTour(null);
-    setQuery("");
-    setUtility(next);
-  };
+  }, [utility]);
   const notices = noticesFor(scenario, state, locale);
   const normalizedQuery = query
     .trim()
@@ -631,7 +636,7 @@ export function DashboardDemo({
               : "The guided journey covers the main story. Free exploration keeps every area available."}
           </p>
           <div>
-            <button className="primary" onClick={startTour}>
+            <button className="primary" onClick={startTour} autoFocus>
               {locale === "es" ? "Visita guiada" : "Guided tour"}
             </button>
             <button
@@ -666,7 +671,7 @@ export function DashboardDemo({
               : "The demo keeps progress in this browser. Close it and resume from the header."}
           </p>
           <div>
-            <button onClick={closeTour}>
+            <button onClick={closeTour} autoFocus>
               {locale === "es" ? "Cerrar" : "Close"}
             </button>
             <button className="primary" onClick={advanceTour}>
@@ -702,7 +707,7 @@ export function DashboardDemo({
           <button
             className="utility-backdrop"
             type="button"
-            onClick={() => setUtility(null)}
+            onClick={closeUtility}
             aria-label={locale === "es" ? "Cerrar panel" : "Close panel"}
           />
           <aside
@@ -742,7 +747,7 @@ export function DashboardDemo({
               </div>
               <button
                 type="button"
-                onClick={() => setUtility(null)}
+                onClick={closeUtility}
                 aria-label={locale === "es" ? "Cerrar" : "Close"}
               >
                 <X size={18} />

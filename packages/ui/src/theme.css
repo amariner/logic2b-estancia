@@ -23,7 +23,7 @@ img { max-width: 100%; }
 
 .shell { width: min(1200px, calc(100% - 40px)); margin-inline: auto; }
 .eyebrow { margin: 0 0 14px; color: var(--ash); font-size: .75rem; letter-spacing: .09em; text-transform: uppercase; }
-.display, .heading { margin: 0; font-family: var(--serif); font-weight: 400; letter-spacing: -.025em; }
+.display, .heading { margin: 0; overflow-wrap: break-word; font-family: var(--serif); font-weight: 400; letter-spacing: -.025em; }
 .display { font-size: clamp(3.3rem, 7.5vw, 5.65rem); line-height: .96; }
 .heading { font-size: clamp(2.5rem, 5.6vw, 4rem); line-height: 1.02; }
 .heading em, .display em { font-weight: 400; }

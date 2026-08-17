@@ -62,6 +62,88 @@ test('every audited route exposes one main landmark and one page heading', async
   }
 });
 
+test('every audited route reflows without page-level horizontal scrolling at 320px', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  for (const path of auditedRoutes) {
+    await gotoStable(page, path);
+    const reflow = await page.evaluate(() => {
+      const pageScrollWidth = document.documentElement.scrollWidth;
+      return {
+        pageScrollWidth,
+        viewportWidth: innerWidth,
+        offenders: pageScrollWidth <= innerWidth ? [] : [...document.querySelectorAll<HTMLElement>('body *')].flatMap((element) => {
+          const bounds = element.getBoundingClientRect();
+          if (bounds.right <= innerWidth + 0.5) return [];
+          return [{
+            element: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${[...element.classList].map((name) => `.${name}`).join('')}`,
+            left: Math.round(bounds.left * 10) / 10,
+            right: Math.round(bounds.right * 10) / 10,
+          }];
+        }).slice(0, 12),
+      };
+    });
+    expect(reflow, path).toEqual({ pageScrollWidth: 320, viewportWidth: 320, offenders: [] });
+  }
+});
+
+test('representative families tolerate text resized to 200 percent', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const path of ['/', '/planes/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/']) {
+    await gotoStable(page, path);
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
+  }
+});
+
+test('diagnostic step and result changes move focus to the new context', async ({ page }) => {
+  await gotoStable(page, '/diagnostico/');
+  await page.getByRole('button', { name: 'Rechazar' }).click();
+  await page.getByText('Apartamentos', { exact: true }).click();
+  const next = page.locator('[data-next]');
+  await next.click();
+  await expect(page.locator('fieldset[data-step="2"] legend')).toBeFocused();
+  for (let index = 0; index < 5; index += 1) await next.click();
+  await expect(page.locator('[data-result-name]')).toBeFocused();
+  await page.locator('[data-edit]').click();
+  await expect(page.locator('fieldset[data-step="1"] legend')).toBeFocused();
+});
+
+test('cookie preferences expose and restore focus between their views', async ({ page }) => {
+  await gotoStable(page, '/');
+  const configure = page.getByRole('button', { name: 'Configurar preferencias' });
+  await configure.click();
+  await expect(page.getByRole('checkbox', { name: 'Cookies de analítica' })).toBeFocused();
+  await page.getByRole('button', { name: 'Volver' }).click();
+  await expect(configure).toBeFocused();
+});
+
+test('demo validation and checkout announce state while preserving focus', async ({ page }) => {
+  await gotoStable(page, '/demos/aurem/');
+  const form = page.locator('[data-demo-form]');
+  const departure = form.locator('[name="to"]');
+  await form.locator('[name="from"]').fill('2026-08-20');
+  await departure.fill('2026-08-19');
+  await form.getByRole('button', { name: 'Continuar a pago demo' }).click();
+  await expect(page.getByRole('status')).toHaveText('La salida debe ser posterior a la entrada.');
+  await expect(departure).toBeFocused();
+  await departure.fill('2026-08-22');
+  const submit = form.getByRole('button', { name: 'Continuar a pago demo' });
+  await submit.click();
+  await expect(page.getByRole('button', { name: 'Cerrar' })).toBeFocused();
+  await page.getByRole('button', { name: 'Cerrar' }).click();
+  await expect(submit).toBeFocused();
+});
+
+test('workspace utility panel restores focus to its opener on Escape', async ({ page }) => {
+  await gotoStable(page, '/demos/aurem/gestion/');
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
+  const search = page.getByRole('button', { name: 'Buscar en el gestor' });
+  await search.click();
+  await expect(page.getByPlaceholder('Reservas, limpieza, informes…')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(search).toBeFocused();
+});
+
 for (const path of ['/', '/demos/terrava/', '/demos/aurem/gestion/']) {
   test(`${path} exposes a visible keyboard focus indicator`, async ({ page }) => {
     await gotoStable(page, path);

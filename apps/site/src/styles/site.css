@@ -297,7 +297,10 @@
   .commercial-hero { padding-top: 80px; }
   .capability-grid, .choice-grid, .inline-fields { grid-template-columns: 1fr; }
   .capability-table { overflow-x: auto; }
-  .capability-row { min-width: 720px; }
+  .capability-row { grid-template-columns: 260px repeat(3, 95px) 110px; min-width: 655px; }
+  .resource header .display { font-size: clamp(2.75rem, 14vw, 4.3rem); }
+  .resource-body section { grid-template-columns: 1fr; gap: 12px; }
+  .resource-cta { padding: 28px; }
   .diagnostic-card { min-height: 580px; padding: 26px; }
   .result-links { align-items: stretch; flex-direction: column; }
   .lead-form .wide { grid-column: auto; }
