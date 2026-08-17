@@ -7,6 +7,7 @@ export interface LeadEnv {
   HUBSPOT_ACCESS_TOKEN?: string;
   HUBSPOT_PIPELINE?: string;
   HUBSPOT_DEAL_STAGE?: string;
+  LEAD_COORDINATOR?: DurableObjectNamespace;
 }
 
 const planInput = z.enum(['basico', 'gestion', 'inteligente', 'inicio', 'automatiza']);
@@ -32,27 +33,24 @@ export const leadSchema = z.object({
   lang: z.enum(['es', 'en']).optional(),
   accept: z.literal(true),
   website: z.string().trim().max(200).optional(),
-}).transform((lead) => ({ ...lead, plan: lead.plan ? normalizePlanLevel(lead.plan as PlanLevel | 'inicio' | 'automatiza') : undefined }));
+}).transform((lead) => ({ ...lead, email: lead.email.toLowerCase(), plan: lead.plan ? normalizePlanLevel(lead.plan as PlanLevel | 'inicio' | 'automatiza') : undefined }));
 
 export type Lead = z.output<typeof leadSchema>;
 
-const buckets = new Map<string, number[]>();
-const LIMIT = 5;
-const WINDOW = 60_000;
-
-function limited(ip: string, now = Date.now()): number | null {
-  const current = (buckets.get(ip) ?? []).filter((stamp) => now - stamp < WINDOW);
-  if (current.length >= LIMIT) {
-    buckets.set(ip, current);
-    return Math.ceil((WINDOW - (now - current[0]!)) / 1000);
-  }
-  current.push(now);
-  buckets.set(ip, current);
-  return null;
+export interface LeadCoordination {
+  rateLimit(ip: string): Promise<number | null>;
+  submit(fingerprint: string, lead: Lead): Promise<Response>;
 }
 
-export async function handleLead(request: Request, env: LeadEnv): Promise<Response> {
-  const retryAfter = limited(request.headers.get('cf-connecting-ip') ?? 'local');
+export async function handleLead(request: Request, env: LeadEnv, coordination = cloudflareCoordination(env)): Promise<Response> {
+  if (!coordination) return json({ ok: false, outcome: 'disabled', error: 'lead_coordination_unavailable' }, 503);
+  const ip = request.headers.get('cf-connecting-ip') ?? 'local';
+  let retryAfter: number | null;
+  try { retryAfter = await coordination.rateLimit(ip); }
+  catch {
+    console.error(JSON.stringify({ event: 'lead_rate_limit_failed' }));
+    return json({ ok: false, outcome: 'failed', error: 'lead_coordination_failed' }, 503);
+  }
   if (retryAfter) return json({ ok: false, outcome: 'limited', error: 'rate_limited', retryAfter }, 429, { 'retry-after': String(retryAfter) });
   const raw: unknown = await request.json().catch(() => null);
   const bot = z.object({ website: z.string().optional() }).passthrough().safeParse(raw);
@@ -66,7 +64,21 @@ export async function handleLead(request: Request, env: LeadEnv): Promise<Respon
   const canCrm = Boolean(env.HUBSPOT_ACCESS_TOKEN);
   if (!canEmail && !canCrm) return json({ ok: false, outcome: 'disabled', error: 'lead_delivery_disabled' }, 503);
 
-  const ref = crypto.randomUUID();
+  const fingerprint = await sha256(stableJson(lead));
+  try {
+    return await coordination.submit(fingerprint, lead);
+  } catch {
+    console.error(JSON.stringify({ event: 'lead_coordination_failed' }));
+    return json({ ok: false, outcome: 'failed', error: 'lead_coordination_failed' }, 503);
+  }
+}
+
+export async function deliverLead(lead: Lead, env: LeadEnv, ref: string): Promise<Response> {
+  const transport = env.LEADS_TRANSPORT ?? (env.LEADS_RESEND_API_KEY ? 'resend' : 'disabled');
+  const canEmail = transport === 'resend' && Boolean(env.LEADS_RESEND_API_KEY);
+  const canCrm = Boolean(env.HUBSPOT_ACCESS_TOKEN);
+  if (!canEmail && !canCrm) return json({ ok: false, outcome: 'disabled', error: 'lead_delivery_disabled' }, 503);
+
   const jobs: Promise<{ channel: string; ok: boolean }>[] = [];
   if (canEmail) {
     jobs.push(sendInternalEmail(lead, ref, env.LEADS_RESEND_API_KEY!).then((ok) => ({ channel: 'internal_email', ok })));
@@ -82,6 +94,42 @@ export async function handleLead(request: Request, env: LeadEnv): Promise<Respon
   const degraded = results.some(({ ok }) => !ok);
   if (degraded) console.error(JSON.stringify({ event: 'lead_delivery_degraded', ref, channels: results }));
   return json({ ok: true, outcome: degraded ? 'delivered_degraded' : 'delivered', ref }, 202);
+}
+
+function cloudflareCoordination(env: LeadEnv): LeadCoordination | null {
+  if (!env.LEAD_COORDINATOR) return null;
+  let namespace = env.LEAD_COORDINATOR;
+  try { namespace = namespace.jurisdiction('eu'); }
+  catch { /* workerd local does not implement jurisdiction restrictions. */ }
+  return {
+    async rateLimit(ip) {
+      const key = await sha256(ip);
+      const response = await namespace.getByName(`rate:${key}`).fetch('https://lead-coordinator/rate-limit', { method: 'POST' });
+      if (!response.ok) throw new Error('rate_limit_unavailable');
+      const body = await response.json() as { retryAfter?: number | null };
+      return body.retryAfter ?? null;
+    },
+    submit(fingerprint, lead) {
+      return namespace.getByName(`lead:${fingerprint}`).fetch('https://lead-coordinator/deliver', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(lead),
+      });
+    },
+  };
+}
+
+function stableJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
+  if (value && typeof value === 'object') {
+    return `{${Object.entries(value).sort(([left], [right]) => left.localeCompare(right)).map(([key, item]) => `${JSON.stringify(key)}:${stableJson(item)}`).join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'null';
+}
+
+async function sha256(value: string): Promise<string> {
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 function leadRows(lead: Lead): [string, string][] {
@@ -153,9 +201,23 @@ async function syncHubSpot(lead: Lead, ref: string, env: LeadEnv): Promise<boole
   if (!contact?.ok) return false;
   if (!contactId) contactId = ((await contact.json()) as { id?: string }).id;
   if (!contactId) return false;
+  const existingDeal = await hubspotRequest('/crm/v3/objects/deals/search', token, {
+    method: 'POST',
+    body: JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'logic_estancia_submission_id', operator: 'EQ', value: ref }] }], properties: ['logic_estancia_submission_id'], limit: 1 }),
+  });
+  if (!existingDeal?.ok) return false;
+  const existingDealBody = await existingDeal.json() as { results?: { id: string }[] };
+  if (existingDealBody.results?.[0]?.id) return true;
   const description = leadRows(lead).map(([key, value]) => `${key}: ${value}`).join('\n');
-  const deal = await hubspotRequest('/crm/v3/objects/deals', token, { method: 'POST', body: JSON.stringify({ properties: { dealname: `${lead.businessName} · ${lead.plan || 'diagnóstico'}`, pipeline: env.HUBSPOT_PIPELINE || 'default', dealstage: env.HUBSPOT_DEAL_STAGE || 'appointmentscheduled', description: `${description}\nReferencia: ${ref}` }, associations: [{ to: { id: contactId }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 3 }] }] }) });
-  return Boolean(deal?.ok);
+  const deal = await hubspotRequest('/crm/v3/objects/deals', token, { method: 'POST', body: JSON.stringify({ properties: { dealname: `${lead.businessName} · ${lead.plan || 'diagnóstico'}`, pipeline: env.HUBSPOT_PIPELINE || 'default', dealstage: env.HUBSPOT_DEAL_STAGE || 'appointmentscheduled', description: `${description}\nReferencia: ${ref}`, logic_estancia_submission_id: ref }, associations: [{ to: { id: contactId }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 3 }] }] }) });
+  if (deal?.ok) return true;
+  const retrySearch = await hubspotRequest('/crm/v3/objects/deals/search', token, {
+    method: 'POST',
+    body: JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'logic_estancia_submission_id', operator: 'EQ', value: ref }] }], properties: ['logic_estancia_submission_id'], limit: 1 }),
+  });
+  if (!retrySearch?.ok) return false;
+  const retryBody = await retrySearch.json() as { results?: { id: string }[] };
+  return Boolean(retryBody.results?.[0]?.id);
 }
 
 function escapeHtml(value: string): string {

@@ -79,7 +79,25 @@ Create these contact properties to receive structured assessment data. The Worke
 - `logic_estancia_source_path`
 - `logic_estancia_marketing_consent`
 
+Create one additional deal property before enabling HubSpot:
+
+- `logic_estancia_submission_id`: single-line text with unique values. The Worker searches this property before creating a deal and refuses an unsafe fallback when the property is unavailable.
+
 Before production, send one identified test lead and verify contact deduplication, deal association, internal email and visitor summary. Never paste the token into a tracked file.
+
+## Lead delivery resilience and recovery
+
+Cloudflare Durable Objects keep the five-submissions-per-minute IP limit outside individual Worker isolates. They also retain a submission reference and the completed response for 24 hours in the EU jurisdiction. Equivalent retries reuse that reference: Resend receives `estancia-lead/{ref}/internal` and `estancia-lead/{ref}/visitor` idempotency keys, while HubSpot searches `logic_estancia_submission_id` before attempting deal creation.
+
+Use the structured Worker log event and its `ref` when a provider is degraded:
+
+1. For `lead_delivery_degraded`, confirm which channel succeeded before doing anything manually.
+2. In HubSpot, search `logic_estancia_submission_id` for the reference. Create or repair a deal only when none exists, preserving the same reference.
+3. In Resend, inspect both idempotency keys for that reference before resending a message.
+4. For `lead_delivery_failed`, retry the unchanged payload within 24 hours; changing any lead field intentionally creates a different submission identity.
+5. If `lead_coordination_failed` appears, restore the Durable Object binding before retrying. The endpoint fails closed instead of bypassing rate limiting or idempotency.
+
+Do not treat a degraded response as loss of the lead when another channel succeeded, and do not create a second HubSpot deal merely to repair a missing email.
 
 ## GA4/GTM contract
 

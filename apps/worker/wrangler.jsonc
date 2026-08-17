@@ -9,6 +9,14 @@
     "HUBSPOT_PIPELINE": "default",
     "HUBSPOT_DEAL_STAGE": "appointmentscheduled"
   },
+  "durable_objects": {
+    "bindings": [
+      { "name": "LEAD_COORDINATOR", "class_name": "LeadCoordinator" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["LeadCoordinator"] }
+  ],
   "routes": [{ "pattern": "estancia.logic2b.com/*", "zone_name": "logic2b.com" }],
   "assets": {
     "binding": "ASSETS",

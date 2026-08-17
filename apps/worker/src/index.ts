@@ -1,5 +1,7 @@
 import { handleLead, type LeadEnv } from './leads';
 
+export { LeadCoordinator } from './lead-coordinator';
+
 interface Env extends LeadEnv { ASSETS: Fetcher; }
 
 const securityHeaders = {

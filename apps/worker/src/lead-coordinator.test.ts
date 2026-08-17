@@ -1,0 +1,98 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { LeadCoordinator } from './lead-coordinator';
+import type { LeadEnv } from './leads';
+
+const lead = { name: 'Ada', businessName: 'Casa Ada', email: 'ada@example.test', accommodationType: 'rural', propertyCount: 2, unitCount: 4, accept: true, website: '', lang: 'es' };
+
+class MemoryStorage {
+  readonly values = new Map<string, unknown>();
+  alarm: number | null = null;
+
+  async get<T>(key: string): Promise<T | undefined> { return this.values.get(key) as T | undefined; }
+  async put(key: string, value: unknown): Promise<void> { this.values.set(key, value); }
+  async delete(key: string): Promise<boolean> { return this.values.delete(key); }
+  async deleteAll(): Promise<void> { this.values.clear(); this.alarm = null; }
+  async setAlarm(time: number | Date): Promise<void> { this.alarm = Number(time); }
+}
+
+function state(storage = new MemoryStorage()): DurableObjectState {
+  return { storage } as unknown as DurableObjectState;
+}
+
+function deliver(coordinator: LeadCoordinator) {
+  return coordinator.fetch(new Request('https://coordinator/deliver', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(lead) }));
+}
+
+describe('LeadCoordinator', () => {
+  afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
+
+  it('persists the rate limit across object instances and clears it with its alarm', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-17T10:00:00Z'));
+    const storage = new MemoryStorage();
+    let coordinator = new LeadCoordinator(state(storage), {});
+    for (let count = 0; count < 5; count += 1) {
+      const response = await coordinator.fetch(new Request('https://coordinator/rate-limit', { method: 'POST' }));
+      expect(await response.json()).toEqual({ retryAfter: null });
+    }
+    coordinator = new LeadCoordinator(state(storage), {});
+    const limited = await coordinator.fetch(new Request('https://coordinator/rate-limit', { method: 'POST' }));
+    expect(await limited.json()).toEqual({ retryAfter: 60 });
+    await coordinator.alarm();
+    expect(storage.values.size).toBe(0);
+  });
+
+  it('replays a completed lead without calling providers again, even after a restart', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    const storage = new MemoryStorage();
+    const env: LeadEnv = { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret' };
+    const first = await deliver(new LeadCoordinator(state(storage), env));
+    const firstBody = await first.json() as { ref: string };
+    const second = await deliver(new LeadCoordinator(state(storage), env));
+    expect(await second.json()).toMatchObject({ ref: firstBody.ref, replayed: true });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it('coalesces simultaneous submissions into one provider delivery', async () => {
+    const pending: Array<(response: Response) => void> = [];
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockImplementation(() => new Promise<Response>((resolve) => pending.push(resolve)));
+    const coordinator = new LeadCoordinator(state(), { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret' });
+    const firstPromise = deliver(coordinator);
+    await vi.waitFor(() => expect(pending).toHaveLength(2));
+    const secondPromise = deliver(coordinator);
+    await Promise.resolve();
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    pending.forEach((resolve) => resolve(new Response('{}', { status: 200 })));
+    const [first, second] = await Promise.all([firstPromise, secondPromise]);
+    expect((await first.json() as { ref: string }).ref).toBe((await second.json() as { ref: string }).ref);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it('reuses its durable reference after a failed attempt and avoids a second deal creation', async () => {
+    let dealSearches = 0;
+    let dealCreates = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.endsWith('/contacts/search')) return new Response(JSON.stringify({ results: [{ id: 'contact-1' }] }), { status: 200 });
+      if (url.endsWith('/contacts/contact-1')) return new Response('{}', { status: 200 });
+      if (url.endsWith('/deals/search')) {
+        dealSearches += 1;
+        return new Response(JSON.stringify({ results: dealSearches >= 3 ? [{ id: 'deal-1' }] : [] }), { status: 200 });
+      }
+      if (url.endsWith('/deals')) {
+        dealCreates += 1;
+        return new Response('provider response lost', { status: 500 });
+      }
+      throw new Error(`Unexpected URL ${url}`);
+    });
+    const storage = new MemoryStorage();
+    const env: LeadEnv = { LEADS_TRANSPORT: 'disabled', HUBSPOT_ACCESS_TOKEN: 'crm' };
+    const first = await deliver(new LeadCoordinator(state(storage), env));
+    expect(first.status).toBe(502);
+    const firstBody = await first.json() as { ref: string };
+    const second = await deliver(new LeadCoordinator(state(storage), env));
+    expect(second.status).toBe(202);
+    expect(await second.json()).toMatchObject({ ref: firstBody.ref });
+    expect(dealCreates).toBe(1);
+  });
+});

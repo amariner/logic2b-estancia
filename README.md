@@ -14,7 +14,7 @@ El Worker local compone el sitio comercial, las tres webs ficticias y los gestor
 
 ## Producción
 
-La publicación es manual. Requiere `wrangler login` y el secreto `LEADS_RESEND_API_KEY` en el Worker `logic-estancia-demo`. Para sincronizar contactos y negocios con HubSpot, añade también `HUBSPOT_ACCESS_TOKEN`.
+La publicación es manual. Requiere `wrangler login` y el secreto `LEADS_RESEND_API_KEY` en el Worker `logic-estancia-demo`. Para sincronizar contactos y negocios con HubSpot, añade también `HUBSPOT_ACCESS_TOKEN` y la propiedad única de negocio `logic_estancia_submission_id` descrita en el playbook. La configuración versionada crea el Durable Object que mantiene el rate limit y la idempotencia durante el despliegue.
 
 ```bash
 pnpm deploy
