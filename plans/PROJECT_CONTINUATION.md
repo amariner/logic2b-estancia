@@ -2,11 +2,11 @@
 
 Última actualización: 2026-08-17
 
-Último incremento de producto verificado: `106a617`
+Último incremento de infraestructura verificado: `841391c`
 
 Rama: `main`
 
-Estado general: base comercial y demostrativa implementada; consentimiento y legales equiparados al patrón de Camp; primer candidato creado en Cloudflare; publicación por dominio, secretos reales y smoke contra proveedores pendientes.
+Estado general: base comercial y demostrativa implementada; consentimiento y legales equiparados al patrón de Camp; Worker publicado mediante dominio personalizado de Cloudflare con HTTPS y configuración de correo reutilizable; entrega real de leads y smoke contra proveedores pendientes de la clave de Resend.
 
 El SHA actual de continuidad se obtiene siempre con `git rev-parse HEAD`; no se fija aquí para evitar que el propio commit de actualización deje el dato obsoleto.
 
@@ -41,7 +41,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Demos canónicas Nivora, Terrava y Aurem con límites explícitos y CTA contextual.
 - Dos recursos SEO iniciales y playbook comercial.
 - QA visual realizado; `pnpm check` con 28 tareas correctas y `pnpm e2e` con 24 pruebas correctas.
-- Worker `logic-estancia-demo` creado en Cloudflare con assets, ruta declarada y `LeadCoordinator`; candidato `106a617` desplegado como versión `92c45ea5-7f53-4702-b10b-d4b8f9446053`, todavía inaccesible por ausencia de DNS.
+- Worker `logic-estancia-demo` publicado en `https://estancia.logic2b.com` como dominio personalizado de Cloudflare, con assets, `LeadCoordinator`, DNS gestionado, certificado HTTPS y las variables `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT` y `LEADS_REPLY_TO` copiadas de la configuración compatible de Camp. La versión activa tras los cambios de secretos es `28cc3d5c-4cb1-41d9-b799-35feb2c61f30`.
 
 ## Siguiente cola priorizada
 
@@ -53,7 +53,7 @@ Siguiente punto exacto de desarrollo: añadir una herramienta de smoke test de i
 
 Bloqueos del siguiente punto: ninguno para implementar y probar localmente la herramienta. Su ejecución contra proveedores o producción depende de credenciales, valores definitivos y autorización humana.
 
-Siguiente punto exacto de activación: crear o validar el DNS proxied de `estancia.logic2b.com`, configurar en el Worker `LEADS_RESEND_API_KEY`, `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT`, `LEADS_REPLY_TO`, `LEADS_MEETING_URL` y, cuando esté preparado, `HUBSPOT_ACCESS_TOKEN`; después ejecutar smoke y QA posdespliegue antes de considerar público el embudo.
+Siguiente punto exacto de activación: configurar directamente en el Worker `LEADS_RESEND_API_KEY` y una URL real `LEADS_MEETING_URL`; cuando HubSpot esté preparado, añadir `HUBSPOT_ACCESS_TOKEN`. Después ejecutar el smoke marcado como prueba y comprobar la entrega en Resend/HubSpot antes de considerar operativo el embudo. El sitio y sus demos ya son públicos, pero el formulario no se declara operativo sin esa evidencia.
 
 ### P1 · Accesibilidad, SEO técnico y rendimiento
 
@@ -80,9 +80,8 @@ Siguiente punto exacto de activación: crear o validar el DNS proxied de `estanc
 Estas actividades no se deben declarar completadas sin evidencia humana o acceso autorizado:
 
 - Configurar el pipeline, propiedades —incluida `logic_estancia_submission_id` como valor único— y token privado de HubSpot.
-- Configurar Resend y las etiquetas definitivas de GTM/GA4.
-- Configurar y verificar `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT`, `LEADS_REPLY_TO` y una URL real `LEADS_MEETING_URL` en Cloudflare.
-- Crear o validar el registro DNS proxied de `estancia.logic2b.com`; la ruta del Worker existe, pero el hostname no resuelve a 2026-08-17.
+- Configurar `LEADS_RESEND_API_KEY` y una URL real `LEADS_MEETING_URL` en Cloudflare; remitente, destinatario interno y reply-to ya están verificados por nombre, sin exponer sus valores.
+- Configurar las etiquetas definitivas de GTM/GA4.
 - Revisar textos legales específicamente para España.
 - Realizar 15 entrevistas cualificadas y presentar 5 propuestas reales antes de publicar precios.
 - Conseguir 3 proyectos firmados al mes 6 y 8 al mes 12.
@@ -103,22 +102,25 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 - `pnpm e2e`: 24 pruebas Chromium correctas, incluidos consentimiento completo ES/EN, revocación, legales, agenda válida, fallback sin agenda y diagnóstico en 320, 375, 430 y 1366 px.
 - QA visual en navegador local: preferencias a 1280 × 720 y 375 × 812 correctas, sin overflow; toggle accesible por teclado y puntero, botones de 44 px y `prefers-reduced-motion` respetado.
 - `wrangler deploy --dry-run`: 118 assets, `LeadCoordinator` y variables versionadas reconocidos.
-- Primer deploy: Worker `logic-estancia-demo`, ruta `estancia.logic2b.com/*`, versión `92c45ea5-7f53-4702-b10b-d4b8f9446053`; `wrangler deployments list` confirma 100 % en esa versión.
-- `wrangler secret list`: vacío. `dig` y `curl`: el hostname no resuelve; no se ejecutó smoke remoto ni se declara publicación completada.
+- Deploy de dominio personalizado: Worker `logic-estancia-demo`, trigger `estancia.logic2b.com (custom domain)`, versión de código `9b857b74-949e-4a6a-82a9-f9d54dda4684` y versión activa tras configurar los tres secretos compatibles `28cc3d5c-4cb1-41d9-b799-35feb2c61f30`.
+- DNS-over-HTTPS de Cloudflare: registros A `188.114.97.5` y `188.114.96.5` y registros AAAA publicados. El resolver local conservaba temporalmente un NXDOMAIN anterior, por lo que las comprobaciones de origen se fijaron contra la IP publicada.
+- Smoke HTTP posdespliegue: `/`, `/cookies/` y `/demos/terrava/` responden `200` por HTTPS; un `POST /api/leads` vacío responde `400` sin crear ningún contacto. El certificado, HTTP/2 y la respuesta desde Cloudflare quedan verificados.
+- QA visual en producción: portada y banner correctos; el panel de preferencias expone esencial siempre activo, toggle de analítica, rechazo total y guardado.
+- `wrangler secret list`: presentes `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT` y `LEADS_REPLY_TO`. La clave de Resend no puede recuperarse de Camp porque Cloudflare no revela secretos existentes; no se ejecutó smoke contra proveedores ni se declara operativo el formulario.
 - `git diff --check`, búsqueda de secretos, remoto sin divergencia y ausencia de planes antiguos en superficies públicas: correctos.
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: corregido — la elección de cookies ya no reduce confianza con un binario opaco; el candidato no se declara público mientras el embudo carece de entrega real.
+- Marketing estratégico: correcto — sitio, demos y propuesta ya son públicos; el formulario se mantiene expresamente fuera de la declaración de operatividad hasta validar la entrega real.
 - Diseño de producto: correcto — consentimiento, legales y demos comparten un contrato coherente sin alterar Básico, Gestión o Inteligente.
 - UX: corregido — aceptar, rechazar, configurar, volver y revocar funcionan en ES/EN; la categoría esencial explica el estado local de las demos.
 - UI/dirección visual: corregido — el patrón de Camp se adapta a serif editorial, neutros y terracota; escritorio y 375 px no presentan overflow.
 - SEO: corregido — las seis rutas legales conservan canonical/hreflang y ahora tienen descripciones específicas y contenido sustantivo.
 - Arquitectura frontend: corregido — clave y versión son fuente compartida, se migra la elección antigua y las demos leen el mismo contrato.
-- Full stack: corregido — GTM no existe antes de aceptar, la revocación elimina cookies accesibles y recarga; el Worker/DO y la ruta se desplegaron sin introducir secretos.
-- QA/accesibilidad/rendimiento/confianza: correcto — 28 tareas, 20 unitarias, 24 E2E, dry-run, deploy y QA visual en verde; el toggle funciona con teclado y los bloqueos DNS/credenciales son explícitos.
+- Full stack: corregido — GTM no existe antes de aceptar, la revocación elimina cookies accesibles y recarga; el Worker/DO, dominio personalizado, DNS, HTTPS y tres variables de correo compatibles están desplegados sin exponer valores.
+- QA/accesibilidad/rendimiento/confianza: correcto — 28 tareas, 20 unitarias, 24 E2E, dry-run, deploy, smoke HTTP y QA visual local/producción en verde; el bloqueo de entrega por credencial de Resend es explícito.
 
-Deuda aceptada: los textos legales están adaptados desde Camp pero requieren revisión jurídica española; DNS, secretos reales, propiedad única de HubSpot y smoke contra proveedores siguen pendientes. El Worker existe, pero el producto no se considera publicado hasta cerrar esas puertas. La herramienta de smoke queda como siguiente P0; WCAG y Lighthouse completos permanecen en P1.
+Deuda aceptada: los textos legales están adaptados desde Camp pero requieren revisión jurídica española; clave de Resend, agenda real, propiedad única de HubSpot y smoke contra proveedores siguen pendientes. El sitio está publicado, pero el formulario no se considera operativo hasta cerrar esas puertas. La herramienta de smoke queda como siguiente P0; WCAG y Lighthouse completos permanecen en P1.
 
 ## Registro de continuaciones
 
@@ -127,3 +129,4 @@ Deuda aceptada: los textos legales están adaptados desde Camp pero requieren re
 - 2026-08-17 — Se sustituyó el rate limit en memoria por Durable Objects y se hizo idempotente el lead completo, incluida la creación de negocios en HubSpot. Commit `025c543`. Próximo punto: configuración segura de remitentes, destinatarios y agenda.
 - 2026-08-17 — Se extrajo y validó la configuración completa de Resend y agenda, con fallo cerrado, degradación observable, fallback visible ES/EN y cobertura responsive. Commit `678aa59`. Próximo punto: herramienta segura de smoke test de integraciones.
 - 2026-08-17 — Se importó el patrón completo de consentimiento y legales de Camp, adaptado a Estancia, con 24 E2E y QA responsive. Commit `106a617`. Se creó el primer Worker Cloudflare, versión `92c45ea5-7f53-4702-b10b-d4b8f9446053`; DNS, secretos y smoke siguen bloqueando la publicación.
+- 2026-08-17 — Se sustituyó la ruta por un dominio personalizado gestionado por Cloudflare y se publicó `https://estancia.logic2b.com`. Commit `841391c`. DNS, HTTPS, rutas, banner y rechazo del payload inválido verificados; tres variables de correo compatibles copiadas desde Camp. La clave de Resend, agenda real y smoke contra proveedores siguen bloqueando la operatividad del formulario.
