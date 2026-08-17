@@ -44,9 +44,10 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Diagnóstico sin captación duplicada: conserva sus respuestas en el navegador y conduce al único formulario comercial de la landing.
 - Formularios, dashboards y acciones de las demos limitados a interacción visual/local; no envían correo, ni escriben en CRM, inventario, reservas, pagos, mensajes o proveedores externos.
 - Dos recursos SEO iniciales y playbook comercial.
-- QA visual realizado; `pnpm check` con 28 tareas correctas y `pnpm e2e` con 24 pruebas correctas.
+- QA visual responsive realizado; `pnpm check` con 28 tareas correctas y `pnpm e2e` con 32 pruebas correctas, incluidas 8 de accesibilidad.
 - Worker `logic-estancia` publicado en `https://estancia.logic2b.com`, sin variables ni token de HubSpot, con assets, `LeadCoordinator`, cuatro secretos de correo cifrados y `workers.dev` desactivado. La versión activa es `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`; `logic-estancia-demo` fue eliminado después de verificar el corte.
 - CLI `pnpm smoke:resend` con modo seco predeterminado, autorización explícita, origen validado, payload no comercial estable, comprobación opcional de referencia idempotente y salida allowlisted sin PII ni secretos.
+- Baseline automatizada WCAG 2.2 AA sobre las 30 rutas públicas, sin violaciones axe después de corregir contraste y objetivos táctiles; landmarks, foco visible y movimiento reducido cubiertos por E2E y limitaciones manuales documentadas.
 
 ## Siguiente cola priorizada
 
@@ -58,14 +59,14 @@ Siguiente punto exacto de activación: confirmar humanamente en el buzón intern
 
 ### P1 · Accesibilidad, SEO técnico y rendimiento
 
-- Ejecutar y documentar una auditoría WCAG 2.2 AA completa de las rutas principales.
-- Automatizar comprobaciones adicionales de foco, reduced motion, contraste y landmarks.
+- En progreso: baseline automatizada WCAG 2.2 AA completa sobre 30 rutas y QA visual documentados; quedan lectores de pantalla, zoom/reflow, alto contraste y estados dinámicos manuales.
+- Completado: comprobaciones automatizadas de axe, landmarks, foco visible, reduced motion, contraste y tamaño táctil.
 - Medir Lighthouse móvil y corregir regresiones hasta superar 90 en accesibilidad y SEO.
 - Revisar datos estructurados, canonical y `hreflang` con URLs finales de producción.
 
-Siguiente punto exacto de desarrollo: incorporar una auditoría E2E automatizada con axe sobre las rutas comerciales, legales, diagnóstico y demos canónicas en ES/EN; corregir primero cualquier violación crítica o seria y añadir comprobaciones específicas de landmarks, foco visible y `prefers-reduced-motion` que axe no cubra por sí solo.
+Siguiente punto exacto de desarrollo: medir Lighthouse móvil de portada, planes, diagnóstico y una demo canónica contra el build local, corregir las causas que impidan superar 90 en accesibilidad y SEO y registrar métricas reproducibles; después contrastar canonical, `hreflang` y JSON-LD con las URLs finales.
 
-Bloqueos del siguiente punto: ninguno para la auditoría local y sus correcciones. Lighthouse contra producción y la revisión jurídica siguen requiriendo condiciones externas independientes.
+Bloqueos del siguiente punto: ninguno para medición y correcciones locales. El contraste final contra producción, los recorridos completos con tecnologías asistivas y la revisión jurídica requieren condiciones externas o validación humana independientes.
 
 ### P2 · Profundidad comercial de las demos
 
@@ -105,10 +106,13 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 ## Evidencia del último incremento
 
 - `pnpm check`: 28 tareas correctas; Worker con 29 pruebas unitarias correctas.
-- `pnpm e2e`: 24 pruebas Chromium correctas, incluidos consentimiento completo ES/EN, revocación, legales, el único formulario comercial real y la ausencia de llamadas de lead desde diagnóstico y demos.
+- `pnpm e2e`: 32 pruebas Chromium correctas; las 24 funcionales siguen verdes y se añaden 8 de accesibilidad.
+- `tests/e2e/accessibility.spec.ts`: las 30 rutas públicas pasan axe con etiquetas WCAG 2.0/2.1/2.2 AA, un único `main`/`h1`, foco visible representativo y supresión de movimiento solicitada.
+- Primera auditoría corregida: contraste serio de texto secundario en web, demos y dashboards, acentos de Terrava/Aurem y dos enlaces de gestor por debajo de 24 px. Reejecución sin violaciones.
+- `pnpm peers check`: sin incidencias después de alinear `@cloudflare/workers-types` con Wrangler.
 - `pnpm smoke:resend -- --run-id release-20260817-a`: modo seco correcto, destino validado y `networkRequest: false`; no se ejecutó ningún envío externo.
 - CLI cubierta por 9 pruebas nuevas: bloqueo sin autorización, separador de pnpm, validación de origen/run-id, marcado no comercial, saneado de respuesta, referencia esperada y fallo ante entrega degradada. El Worker suma ahora 29 pruebas correctas.
-- QA visual en navegador local: el resultado del diagnóstico explica el alcance local y conduce correctamente al formulario comercial, sin regresiones visibles en escritorio.
+- QA visual en navegador local: portada a 1366 px y 375 px, Terrava y gestor Aurem sin overflow ni regresiones; la paleta conserva jerarquía e identidad con el contraste reforzado.
 - `wrangler deploy --dry-run`: 118 assets, `LeadCoordinator` y variables versionadas reconocidos.
 - Producción consolidada en `logic-estancia`, versión `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`, con trigger exclusivo `estancia.logic2b.com (custom domain)`. El Worker `logic-estancia-demo` fue eliminado tras un dry-run y la verificación del corte.
 - `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT`, `LEADS_REPLY_TO` y `LEADS_RESEND_API_KEY` figuran como `secret_text`; `LEADS_TRANSPORT` es la única variable de canal. No existen bindings `HUBSPOT_*`.
@@ -123,16 +127,16 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: correcto — el smoke se etiqueta repetidamente como prueba técnica, desactiva consentimiento comercial y prohíbe tratarlo como oportunidad; no abre otro formulario ni altera el recorrido de captación.
-- Diseño de producto: correcto — valida la resiliencia del único canal real mediante el mismo contrato `/api/leads`, con un `run-id` que diferencia una nueva comprobación de una repetición idempotente.
-- UX: corregido — ayuda, dry-run predeterminado, mensajes accionables y `--expect-ref` convierten la comprobación en un procedimiento recuperable; el correo no se acepta como argumento para que no quede en el historial.
-- UI/dirección visual: no aplica — no cambia ninguna superficie visual del producto; los 24 E2E existentes confirman que las rutas públicas no sufren regresiones.
-- SEO: no aplica — no cambia HTML, metadatos, indexación, sitemap ni URLs públicas.
-- Arquitectura frontend: correcto — la herramienta vive en el paquete Worker, fuera de los bundles y de las demos, y reutiliza el contrato público sin duplicar lógica en el cliente.
-- Full stack: corregido — ejecución bloqueada por frase explícita, base URL segura, payload estable, salida allowlisted, estado degradado como fallo y comparación de referencias; no lee secretos de Resend ni activa HubSpot.
-- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check` completa 28 tareas, el Worker pasa 29 pruebas y los 24 E2E siguen verdes; el dry-run observado confirma cero red. La auditoría visual no aplica y no existe impacto de bundle o runtime público.
+- Marketing estratégico: correcto — la legibilidad de argumentos, planes, legales y CTA mejora la confianza sin alterar promesas ni introducir reclamos nuevos.
+- Diseño de producto: correcto — el incremento refuerza todas las superficies existentes y sus límites demostrativos sin añadir alcance funcional o un canal externo.
+- UX: corregido — texto secundario alcanza contraste AA, los enlaces del gestor cumplen el mínimo táctil WCAG 2.2 y foco, landmarks y movimiento reducido quedan protegidos por regresión.
+- UI/dirección visual: corregido — los tokens compartidos y acentos de Terrava/Aurem se oscurecieron de forma sistémica; QA a 1366/375 px confirma que la jerarquía calmada y la diferenciación de marcas se conservan.
+- SEO: correcto — las 30 rutas mantienen semántica de página y ninguna violación automatizada; metadatos y URLs no cambian. Lighthouse y revisión final de canonical/`hreflang` siguen como siguiente trabajo medible.
+- Arquitectura frontend: corregido — contraste resuelto en tokens compartidos y estilos de familia, con una única suite parametrizada que cubre las 30 rutas sin lógica duplicada en producción.
+- Full stack: correcto — el cambio no altera API, datos ni integraciones; tipos de Cloudflare alineados con Wrangler y `pnpm peers check` limpio.
+- QA/accesibilidad/rendimiento/confianza: corregido — 28 tareas y 32 E2E en verde; axe, `main`/`h1`, foco y reduced motion automatizados; QA visual responsive sin regresiones. La documentación delimita expresamente lo que axe no certifica.
 
-Deuda aceptada: falta ejecutar la nueva CLI contra producción con autorización humana y un buzón controlado, además de confirmar el mensaje del smoke anterior. Los textos legales requieren revisión jurídica española; la agenda real es opcional y HubSpot continúa fuera de alcance. WCAG y Lighthouse completos permanecen en P1.
+Deuda aceptada: faltan lectores de pantalla, zoom/reflow, alto contraste y estados dinámicos manuales, además de Lighthouse móvil. También queda ejecutar la CLI de smoke con autorización humana y confirmar el smoke anterior. Los textos legales requieren revisión jurídica española; la agenda real es opcional y HubSpot continúa fuera de alcance.
 
 ## Registro de continuaciones
 
@@ -146,3 +150,4 @@ Deuda aceptada: falta ejecutar la nueva CLI contra producción con autorización
 - 2026-08-17 — Se completó el corte a `logic-estancia`: clave convertida a secreto, cuatro bindings cifrados consolidados, Resend validado con `202 delivered` e idempotencia por dominio, `workers.dev` desactivado y `logic-estancia-demo` eliminado. HubSpot permanece fuera de alcance; queda rotar la clave para invalidar el borrador histórico `plain_text`.
 - 2026-08-17 — Se fijó la landing como único formulario productivo, con entrega exclusiva a `marinerandreu+logic@gmail.com`; diagnóstico, demos y dashboards quedaron explícitamente locales. Se regeneró la clave de Resend, se eliminó HubSpot de los legales y se desplegó la versión `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`, validada con 24 E2E y smoke idempotente `202 delivered`.
 - 2026-08-17 — Se añadió la CLI segura y reproducible de smoke de Resend, offline por defecto, con autorización explícita, payload inequívocamente técnico, verificación idempotente y salida sin PII. Validada con 9 pruebas específicas, 28 tareas de `pnpm check`, 29 pruebas del Worker y 24 E2E. Próximo punto: auditoría WCAG 2.2 AA automatizada sobre rutas principales.
+- 2026-08-17 — Se automatizó la baseline WCAG 2.2 AA de las 30 rutas públicas y se corrigieron contraste sistémico y objetivos táctiles; se añadieron controles de landmarks, foco y movimiento reducido, documentación de límites y alineación de tipos Cloudflare. Verificado con 28 tareas, 32 E2E, axe limpio, peers limpios y QA visual responsive. Próximo punto: Lighthouse móvil y revisión técnica SEO final.

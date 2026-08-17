@@ -8,7 +8,7 @@
 .sidebar nav button:hover, .sidebar nav button.active { color: var(--ink); background: var(--mist); }
 .sidebar nav button.active { font-weight: 500; }
 .sidebar-foot { display: grid; gap: 9px; margin-top: auto; border-top: 1px solid var(--line); padding: 18px 10px 0; }
-.sidebar-foot a { font-size: .72rem; text-decoration: none; }
+.sidebar-foot a { display: flex; min-height: 24px; align-items: center; font-size: .72rem; text-decoration: none; }
 .sidebar-foot span { color: var(--ash); font-size: .62rem; line-height: 1.4; }
 .sidebar-close, .mobile-menu { display: none !important; }
 .dash-main { min-height: 100dvh; margin-left: 230px; }
