@@ -2,6 +2,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { deliverLead, handleLead, leadSchema, type LeadCoordination, type LeadEnv } from './leads';
 
 const lead = { name: 'Ada', businessName: 'Casa Ada', email: 'ada@example.test', accommodationType: 'rural', propertyCount: 2, unitCount: 4, accept: true, website: '', lang: 'es' };
+const emailEnv = {
+  LEADS_TRANSPORT: 'resend',
+  LEADS_RESEND_API_KEY: 'secret',
+  LEADS_FROM_EMAIL: 'delivery@example.test',
+  LEADS_INTERNAL_RECIPIENT: 'sales@example.test',
+  LEADS_REPLY_TO: 'reply@example.test',
+} as const;
 
 function directCoordination(env: LeadEnv): LeadCoordination {
   return {
@@ -25,13 +32,13 @@ describe('leads', () => {
       rateLimit: async () => null,
       submit: async (fingerprint) => { fingerprints.push(fingerprint); return new Response('{}', { status: 202 }); },
     };
-    const env = { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret' } as const;
+    const env = emailEnv;
     await submit(env, lead, 'case-one', coordination);
     await submit(env, { ...lead, email: 'ADA@EXAMPLE.TEST' }, 'case-two', coordination);
     expect(fingerprints[0]).toBe(fingerprints[1]);
   });
   it('fails closed when durable coordination is unavailable', async () => {
-    const response = await handleLead(new Request('https://test/api/leads', { method: 'POST', body: JSON.stringify(lead) }), { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret' });
+    const response = await handleLead(new Request('https://test/api/leads', { method: 'POST', body: JSON.stringify(lead) }), emailEnv);
     expect(response.status).toBe(503);
     expect(await response.json()).toMatchObject({ error: 'lead_coordination_unavailable' });
   });
@@ -44,13 +51,13 @@ describe('leads', () => {
           : new Response(JSON.stringify({ ok: true, outcome: 'delivered', ref: 'local-ref' }), { status: 202 }),
       }),
     } as unknown as DurableObjectNamespace;
-    const response = await handleLead(new Request('https://test/api/leads', { method: 'POST', body: JSON.stringify(lead) }), { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret', LEAD_COORDINATOR: namespace });
+    const response = await handleLead(new Request('https://test/api/leads', { method: 'POST', body: JSON.stringify(lead) }), { ...emailEnv, LEAD_COORDINATOR: namespace });
     expect(response.status).toBe(202);
     expect(await response.json()).toMatchObject({ ref: 'local-ref' });
   });
   it('fails closed when the persistent rate limiter is unavailable', async () => {
     const coordination: LeadCoordination = { rateLimit: async () => { throw new Error('unavailable'); }, submit: async () => new Response() };
-    const response = await submit({ LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret' }, lead, 'rate-error', coordination);
+    const response = await submit(emailEnv, lead, 'rate-error', coordination);
     expect(response.status).toBe(503);
     expect(await response.json()).toMatchObject({ error: 'lead_coordination_failed' });
   });
@@ -60,21 +67,31 @@ describe('leads', () => {
     expect(response.status).toBe(503);
     expect(await response.json()).toMatchObject({ outcome: 'disabled' });
   });
+  it('fails closed when email delivery is selected with incomplete configuration', async () => {
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const response = await submit({ LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'sensitive-test-value', LEADS_FROM_EMAIL: 'not-an-email' });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ error: 'lead_email_configuration_invalid' });
+    const log = logger.mock.calls.flat().join(' ');
+    expect(log).toContain('LEADS_FROM_EMAIL');
+    expect(log).toContain('LEADS_INTERNAL_RECIPIENT');
+    expect(log).not.toContain('sensitive-test-value');
+  });
   it('does not send a honeypot submission', async () => {
     const fetcher = vi.spyOn(globalThis, 'fetch');
-    const env = { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret' } as const;
+    const env = emailEnv;
     const response = await submit(env, { ...lead, website: 'spam.test' });
     expect(response.status).toBe(202); expect(fetcher).not.toHaveBeenCalled();
   });
   it('reports provider failure instead of claiming delivery', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('no', { status: 500 }));
-    const env = { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret' } as const;
+    const env = emailEnv;
     const response = await submit(env);
     expect(response.status).toBe(502); expect(await response.json()).toMatchObject({ outcome: 'failed' });
   });
   it('accepts the lead when email succeeds and HubSpot is degraded', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => String(input).includes('hubapi.com') ? new Response('no', { status: 500 }) : new Response('{}', { status: 200 }));
-    const env = { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret', HUBSPOT_ACCESS_TOKEN: 'crm' } as const;
+    const env = { ...emailEnv, HUBSPOT_ACCESS_TOKEN: 'crm' } as const;
     const response = await submit(env);
     expect(response.status).toBe(202); expect(await response.json()).toMatchObject({ outcome: 'delivered_degraded' });
   });
@@ -86,8 +103,34 @@ describe('leads', () => {
       if (url.endsWith('/contacts')) return new Response(JSON.stringify({ id: 'contact-1' }), { status: 201 });
       return new Response(JSON.stringify({ id: 'deal-1' }), { status: 201 });
     });
-    const env = { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret', HUBSPOT_ACCESS_TOKEN: 'crm' } as const;
+    const env = { ...emailEnv, HUBSPOT_ACCESS_TOKEN: 'crm' } as const;
     const response = await submit(env);
     expect(response.status).toBe(202); expect(await response.json()).toMatchObject({ outcome: 'delivered_degraded' });
+  });
+  it('marks delivery as degraded when CRM succeeds but selected email configuration is invalid', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.endsWith('/contacts/search')) return new Response(JSON.stringify({ results: [] }), { status: 200 });
+      if (url.endsWith('/contacts')) return new Response(JSON.stringify({ id: 'contact-1' }), { status: 201 });
+      return new Response(JSON.stringify({ id: 'deal-1' }), { status: 201 });
+    });
+    const response = await submit({ LEADS_TRANSPORT: 'resend', HUBSPOT_ACCESS_TOKEN: 'crm' });
+    expect(response.status).toBe(202);
+    expect(await response.json()).toMatchObject({ outcome: 'delivered_degraded' });
+  });
+  it('uses validated addresses and only returns a public HTTPS meeting URL', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    const response = await submit({ ...emailEnv, LEADS_MEETING_URL: 'https://meet.example.test/logic-estancia' });
+    expect(response.status).toBe(202);
+    expect(await response.json()).toMatchObject({ meetingUrl: 'https://meet.example.test/logic-estancia' });
+    const payloads = fetcher.mock.calls.map(([, init]) => JSON.parse(String(init?.body)) as Record<string, unknown>);
+    expect(payloads[0]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['sales@example.test'], reply_to: 'ada@example.test' });
+    expect(payloads[1]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['ada@example.test'], reply_to: 'reply@example.test' });
+  });
+  it('omits an unsafe meeting URL while preserving successful delivery', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    const response = await submit({ ...emailEnv, LEADS_MEETING_URL: 'javascript:alert(1)' });
+    expect(response.status).toBe(202);
+    expect(await response.json()).toMatchObject({ meetingUrl: null });
   });
 });

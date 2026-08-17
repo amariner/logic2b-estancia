@@ -85,6 +85,20 @@ Create one additional deal property before enabling HubSpot:
 
 Before production, send one identified test lead and verify contact deduplication, deal association, internal email and visitor summary. Never paste the token into a tracked file.
 
+## Lead environment configuration
+
+Configure these values in the Cloudflare Worker environment, never in tracked source:
+
+- `LEADS_RESEND_API_KEY`: Resend credential.
+- `LEADS_FROM_EMAIL`: verified sender address shown under the Logic Estancia name.
+- `LEADS_INTERNAL_RECIPIENT`: internal mailbox that receives the complete request.
+- `LEADS_REPLY_TO`: monitored address used when the visitor replies to their summary.
+- `LEADS_MEETING_URL`: public HTTPS scheduling URL, without embedded credentials.
+
+Email delivery is only eligible when the API key and all three addresses pass validation. If HubSpot is available while that selected email channel is incomplete, the lead can still be accepted as degraded and the log identifies only the invalid field names, never their values. If neither a complete email channel nor HubSpot is available, the endpoint fails closed. A missing or invalid meeting URL is never rendered as a link: the success state tells the visitor that the team will reply by email within one business day.
+
+Use `apps/worker/.dev.vars.example` only as a local shape reference. Definitive addresses and the scheduling URL require human validation before deployment.
+
 ## Lead delivery resilience and recovery
 
 Cloudflare Durable Objects keep the five-submissions-per-minute IP limit outside individual Worker isolates. They also retain a submission reference and the completed response for 24 hours in the EU jurisdiction. Equivalent retries reuse that reference: Resend receives `estancia-lead/{ref}/internal` and `estancia-lead/{ref}/visitor` idempotency keys, while HubSpot searches `logic_estancia_submission_id` before attempting deal creation.
@@ -96,6 +110,7 @@ Use the structured Worker log event and its `ref` when a provider is degraded:
 3. In Resend, inspect both idempotency keys for that reference before resending a message.
 4. For `lead_delivery_failed`, retry the unchanged payload within 24 hours; changing any lead field intentionally creates a different submission identity.
 5. If `lead_coordination_failed` appears, restore the Durable Object binding before retrying. The endpoint fails closed instead of bypassing rate limiting or idempotency.
+6. For `lead_email_configuration_invalid`, repair every named field before relying on Resend. For `lead_meeting_configuration_invalid`, verify the public HTTPS agenda value; no unsafe value is returned to the browser.
 
 Do not treat a degraded response as loss of the lead when another channel succeeded, and do not create a second HubSpot deal merely to repair a missing email.
 

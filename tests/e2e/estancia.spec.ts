@@ -37,7 +37,7 @@ test('public routes are complete and demos remain isolated', async ({ page }) =>
 for (const width of [320, 375, 430, 1366]) {
   test(`core experiences fit ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width < 500 ? 860 : 900 });
-    for (const path of ['/', '/demos/terrava/', '/demos/aurem/gestion/']) await expectCleanPage(page, path);
+    for (const path of ['/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/']) await expectCleanPage(page, path);
   });
 }
 
@@ -128,6 +128,34 @@ test('assessment reveals an operations recommendation before asking for contact 
   await expect(page.getByRole('heading', { name: 'Recibe el resumen y una respuesta personalizada.' })).toBeVisible();
   await expect(page.locator('[data-demo-link]')).toHaveAttribute('href', '/demos/aurem/');
 });
+
+for (const meeting of [
+  { name: 'configured agenda', url: 'https://meet.example.test/logic-estancia', copy: 'ya puedes elegir horario', linked: true },
+  { name: 'missing agenda', url: null, copy: 'tu solicitud ya está en curso', linked: false },
+]) {
+  test(`assessment shows a safe follow-up for a ${meeting.name}`, async ({ page }) => {
+    await page.route('**/api/leads', (route) => route.fulfill({
+      status: 202,
+      contentType: 'application/json',
+      body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'test-ref', meetingUrl: meeting.url }),
+    }));
+    await page.goto('/diagnostico/');
+    await page.getByText('Apartamentos', { exact: true }).click();
+    for (let step = 0; step < 5; step += 1) await page.getByRole('button', { name: /Siguiente|Ver recomendación/ }).click();
+    await page.getByRole('button', { name: /Ver recomendación/ }).click();
+    await page.getByLabel('Nombre').fill('Ada Demo');
+    await page.getByLabel('Empresa o alojamiento').fill('Casa Demo');
+    await page.getByRole('textbox', { name: 'Email', exact: true }).fill('ada@example.test');
+    await page.getByLabel(/Acepto la política/).check();
+    await page.getByRole('button', { name: /Enviarme el resumen/ }).click();
+
+    const followUp = page.locator('[data-meeting]');
+    await expect(followUp).toContainText(meeting.copy);
+    const link = followUp.locator('[data-meeting-link]');
+    if (meeting.linked) await expect(link).toHaveAttribute('href', meeting.url!);
+    else await expect(link).toBeHidden();
+  });
+}
 
 test('analytics remains consent-gated on commercial pages and demos', async ({ page }) => {
   await page.goto('/');

@@ -1,0 +1,10 @@
+# Local shape only. Copy to .dev.vars and replace values; never commit real credentials.
+LEADS_TRANSPORT=resend
+LEADS_RESEND_API_KEY=replace-with-local-resend-api-key
+LEADS_FROM_EMAIL=verified-sender@example.test
+LEADS_INTERNAL_RECIPIENT=sales@example.test
+LEADS_REPLY_TO=reply@example.test
+LEADS_MEETING_URL=https://calendar.example.test/logic-estancia
+
+# Optional CRM channel.
+# HUBSPOT_ACCESS_TOKEN=replace-with-local-private-app-token

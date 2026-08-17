@@ -3,6 +3,13 @@ import { LeadCoordinator } from './lead-coordinator';
 import type { LeadEnv } from './leads';
 
 const lead = { name: 'Ada', businessName: 'Casa Ada', email: 'ada@example.test', accommodationType: 'rural', propertyCount: 2, unitCount: 4, accept: true, website: '', lang: 'es' };
+const emailEnv = {
+  LEADS_TRANSPORT: 'resend',
+  LEADS_RESEND_API_KEY: 'secret',
+  LEADS_FROM_EMAIL: 'delivery@example.test',
+  LEADS_INTERNAL_RECIPIENT: 'sales@example.test',
+  LEADS_REPLY_TO: 'reply@example.test',
+} as const satisfies LeadEnv;
 
 class MemoryStorage {
   readonly values = new Map<string, unknown>();
@@ -45,7 +52,7 @@ describe('LeadCoordinator', () => {
   it('replays a completed lead without calling providers again, even after a restart', async () => {
     const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
     const storage = new MemoryStorage();
-    const env: LeadEnv = { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret' };
+    const env: LeadEnv = emailEnv;
     const first = await deliver(new LeadCoordinator(state(storage), env));
     const firstBody = await first.json() as { ref: string };
     const second = await deliver(new LeadCoordinator(state(storage), env));
@@ -56,7 +63,7 @@ describe('LeadCoordinator', () => {
   it('coalesces simultaneous submissions into one provider delivery', async () => {
     const pending: Array<(response: Response) => void> = [];
     const fetcher = vi.spyOn(globalThis, 'fetch').mockImplementation(() => new Promise<Response>((resolve) => pending.push(resolve)));
-    const coordinator = new LeadCoordinator(state(), { LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'secret' });
+    const coordinator = new LeadCoordinator(state(), emailEnv);
     const firstPromise = deliver(coordinator);
     await vi.waitFor(() => expect(pending).toHaveLength(2));
     const secondPromise = deliver(coordinator);

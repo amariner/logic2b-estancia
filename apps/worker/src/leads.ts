@@ -4,6 +4,10 @@ import { z } from 'zod';
 export interface LeadEnv {
   LEADS_TRANSPORT?: 'resend' | 'disabled' | 'demo';
   LEADS_RESEND_API_KEY?: string;
+  LEADS_FROM_EMAIL?: string;
+  LEADS_INTERNAL_RECIPIENT?: string;
+  LEADS_REPLY_TO?: string;
+  LEADS_MEETING_URL?: string;
   HUBSPOT_ACCESS_TOKEN?: string;
   HUBSPOT_PIPELINE?: string;
   HUBSPOT_DEAL_STAGE?: string;
@@ -11,6 +15,26 @@ export interface LeadEnv {
 }
 
 const planInput = z.enum(['basico', 'gestion', 'inteligente', 'inicio', 'automatiza']);
+
+const emailConfigurationSchema = z.object({
+  apiKey: z.string().trim().min(1),
+  fromEmail: z.string().trim().email().max(254),
+  internalRecipient: z.string().trim().email().max(254),
+  replyTo: z.string().trim().email().max(254),
+});
+
+const meetingUrlSchema = z.string().trim().max(500).url().refine((value) => {
+  const url = new URL(value);
+  return url.protocol === 'https:' && !url.username && !url.password;
+}, 'meeting_url_must_be_public_https');
+
+type EmailConfiguration = z.output<typeof emailConfigurationSchema>;
+const emailEnvironmentNames = {
+  apiKey: 'LEADS_RESEND_API_KEY',
+  fromEmail: 'LEADS_FROM_EMAIL',
+  internalRecipient: 'LEADS_INTERNAL_RECIPIENT',
+  replyTo: 'LEADS_REPLY_TO',
+} as const;
 
 export const leadSchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -59,10 +83,13 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
   if (!parsed.success) return json({ ok: false, outcome: 'invalid', error: 'invalid', issues: parsed.error.issues }, 400);
   const lead = parsed.data;
   const transport = env.LEADS_TRANSPORT ?? (env.LEADS_RESEND_API_KEY ? 'resend' : 'disabled');
-  if (transport === 'demo') return json({ ok: true, outcome: 'demo' }, 202);
-  const canEmail = transport === 'resend' && Boolean(env.LEADS_RESEND_API_KEY);
+  if (transport === 'demo') return json({ ok: true, outcome: 'demo', meetingUrl: parseMeetingUrl(env.LEADS_MEETING_URL) }, 202);
+  const expectedEmail = transport === 'resend';
+  const emailConfiguration = expectedEmail ? parseEmailConfiguration(env) : null;
+  const canEmail = Boolean(emailConfiguration);
   const canCrm = Boolean(env.HUBSPOT_ACCESS_TOKEN);
-  if (!canEmail && !canCrm) return json({ ok: false, outcome: 'disabled', error: 'lead_delivery_disabled' }, 503);
+  if (expectedEmail && !emailConfiguration) logInvalidEmailConfiguration(env);
+  if (!canEmail && !canCrm) return json({ ok: false, outcome: 'disabled', error: expectedEmail ? 'lead_email_configuration_invalid' : 'lead_delivery_disabled' }, 503);
 
   const fingerprint = await sha256(stableJson(lead));
   try {
@@ -75,14 +102,18 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
 
 export async function deliverLead(lead: Lead, env: LeadEnv, ref: string): Promise<Response> {
   const transport = env.LEADS_TRANSPORT ?? (env.LEADS_RESEND_API_KEY ? 'resend' : 'disabled');
-  const canEmail = transport === 'resend' && Boolean(env.LEADS_RESEND_API_KEY);
+  const expectedEmail = transport === 'resend';
+  const emailConfiguration = expectedEmail ? parseEmailConfiguration(env) : null;
+  const canEmail = Boolean(emailConfiguration);
   const canCrm = Boolean(env.HUBSPOT_ACCESS_TOKEN);
-  if (!canEmail && !canCrm) return json({ ok: false, outcome: 'disabled', error: 'lead_delivery_disabled' }, 503);
+  if (!canEmail && !canCrm) return json({ ok: false, outcome: 'disabled', error: expectedEmail ? 'lead_email_configuration_invalid' : 'lead_delivery_disabled' }, 503);
 
   const jobs: Promise<{ channel: string; ok: boolean }>[] = [];
-  if (canEmail) {
-    jobs.push(sendInternalEmail(lead, ref, env.LEADS_RESEND_API_KEY!).then((ok) => ({ channel: 'internal_email', ok })));
-    jobs.push(sendVisitorSummary(lead, ref, env.LEADS_RESEND_API_KEY!).then((ok) => ({ channel: 'visitor_email', ok })));
+  if (emailConfiguration) {
+    jobs.push(sendInternalEmail(lead, ref, emailConfiguration).then((ok) => ({ channel: 'internal_email', ok })));
+    jobs.push(sendVisitorSummary(lead, ref, emailConfiguration).then((ok) => ({ channel: 'visitor_email', ok })));
+  } else if (expectedEmail) {
+    jobs.push(Promise.resolve({ channel: 'email_configuration', ok: false }));
   }
   if (canCrm) jobs.push(syncHubSpot(lead, ref, env).then((ok) => ({ channel: 'hubspot', ok })));
   const results = await Promise.all(jobs);
@@ -93,7 +124,41 @@ export async function deliverLead(lead: Lead, env: LeadEnv, ref: string): Promis
   }
   const degraded = results.some(({ ok }) => !ok);
   if (degraded) console.error(JSON.stringify({ event: 'lead_delivery_degraded', ref, channels: results }));
-  return json({ ok: true, outcome: degraded ? 'delivered_degraded' : 'delivered', ref }, 202);
+  const meetingUrl = parseMeetingUrl(env.LEADS_MEETING_URL);
+  if (!meetingUrl) console.error(JSON.stringify({ event: 'lead_meeting_configuration_invalid', reason: env.LEADS_MEETING_URL ? 'invalid' : 'missing' }));
+  return json({ ok: true, outcome: degraded ? 'delivered_degraded' : 'delivered', ref, meetingUrl }, 202);
+}
+
+function parseEmailConfiguration(env: LeadEnv): EmailConfiguration | null {
+  const parsed = emailConfigurationSchema.safeParse({
+    apiKey: env.LEADS_RESEND_API_KEY,
+    fromEmail: env.LEADS_FROM_EMAIL,
+    internalRecipient: env.LEADS_INTERNAL_RECIPIENT,
+    replyTo: env.LEADS_REPLY_TO,
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+function logInvalidEmailConfiguration(env: LeadEnv): void {
+  const parsed = emailConfigurationSchema.safeParse({
+    apiKey: env.LEADS_RESEND_API_KEY,
+    fromEmail: env.LEADS_FROM_EMAIL,
+    internalRecipient: env.LEADS_INTERNAL_RECIPIENT,
+    replyTo: env.LEADS_REPLY_TO,
+  });
+  if (parsed.success) return;
+  const fields = [...new Set(parsed.error.issues.map((issue) => {
+    const field = issue.path[0];
+    return typeof field === 'string' && field in emailEnvironmentNames
+      ? emailEnvironmentNames[field as keyof typeof emailEnvironmentNames]
+      : 'unknown';
+  }))];
+  console.error(JSON.stringify({ event: 'lead_email_configuration_invalid', fields }));
+}
+
+function parseMeetingUrl(value: string | undefined): string | null {
+  const parsed = meetingUrlSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
 }
 
 function cloudflareCoordination(env: LeadEnv): LeadCoordination | null {
@@ -150,14 +215,14 @@ async function resend(apiKey: string, idempotencyKey: string, payload: Record<st
   } catch { return false; }
 }
 
-async function sendInternalEmail(lead: Lead, ref: string, apiKey: string): Promise<boolean> {
+async function sendInternalEmail(lead: Lead, ref: string, configuration: EmailConfiguration): Promise<boolean> {
   const rows = leadRows(lead); const subject = `${lead.plan ? `Plan ${lead.plan}` : 'Proyecto'} · ${lead.businessName}`;
   const text = `Nueva solicitud — Logic Estancia\n\n${rows.map(([key, value]) => `${key}: ${value}`).join('\n')}\n\nMensaje:\n${lead.message || '—'}\n\nReferencia: ${ref}`;
   const html = `<h2>Nueva solicitud — Logic Estancia</h2><table>${rows.map(([key, value]) => `<tr><td><strong>${escapeHtml(key)}</strong></td><td>${escapeHtml(value)}</td></tr>`).join('')}</table><p><strong>Mensaje</strong><br>${escapeHtml(lead.message || '—')}</p><p>Referencia: ${escapeHtml(ref)}</p>`;
-  return resend(apiKey, `estancia-lead/${ref}/internal`, { from: 'Logic Estancia <leads@logic2b.com>', to: ['marinerandreu@gmail.com'], reply_to: lead.email, subject, html, text });
+  return resend(configuration.apiKey, `estancia-lead/${ref}/internal`, { from: `Logic Estancia <${configuration.fromEmail}>`, to: [configuration.internalRecipient], reply_to: lead.email, subject, html, text });
 }
 
-async function sendVisitorSummary(lead: Lead, ref: string, apiKey: string): Promise<boolean> {
+async function sendVisitorSummary(lead: Lead, ref: string, configuration: EmailConfiguration): Promise<boolean> {
   const plan = lead.plan ?? 'basico';
   const names = lead.lang === 'en' ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' } : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
   const en = lead.lang === 'en'; const subject = en ? `Your Logic Estancia assessment · ${names[plan]}` : `Tu diagnóstico Logic Estancia · ${names[plan]}`;
@@ -165,7 +230,7 @@ async function sendVisitorSummary(lead: Lead, ref: string, apiKey: string): Prom
   const followup = en ? 'We will review your context and reply within one business day.' : 'Revisaremos tu contexto y responderemos en un día laborable.';
   const text = `${intro}\n\n${followup}\n\n${en ? 'Requested capabilities' : 'Capacidades solicitadas'}: ${lead.requestedCapabilities?.join(', ') || '—'}\n\n${en ? 'Reference' : 'Referencia'}: ${ref}`;
   const html = `<h2>${escapeHtml(intro)}</h2><p>${escapeHtml(followup)}</p><p><strong>${en ? 'Requested capabilities' : 'Capacidades solicitadas'}</strong><br>${escapeHtml(lead.requestedCapabilities?.join(', ') || '—')}</p><p>${en ? 'Reference' : 'Referencia'}: ${escapeHtml(ref)}</p>`;
-  return resend(apiKey, `estancia-lead/${ref}/visitor`, { from: 'Logic Estancia <leads@logic2b.com>', to: [lead.email], reply_to: 'marinerandreu@gmail.com', subject, html, text });
+  return resend(configuration.apiKey, `estancia-lead/${ref}/visitor`, { from: `Logic Estancia <${configuration.fromEmail}>`, to: [lead.email], reply_to: configuration.replyTo, subject, html, text });
 }
 
 async function hubspotRequest(path: string, token: string, init: RequestInit): Promise<Response | null> {
