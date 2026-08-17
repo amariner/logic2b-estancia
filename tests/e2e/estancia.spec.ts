@@ -321,6 +321,41 @@ test('Aurem revenue remains explainable and navigable in English', async ({ page
   await expect(page).toHaveURL(/vista=planning/);
 });
 
+test('Aurem channel review stays local, supervised and persistent', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method())) externalWrites.push(request.url());
+  });
+  await page.goto('/demos/aurem/gestion/?vista=channels');
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Canales' })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('0 canales conectados');
+  await expect(page.locator('.channel-matrix tbody tr')).toHaveCount(4);
+  await expect(page.getByText('Última sincronización de muestra')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Marcar revisión local' }).click();
+  await expect(page.getByRole('status')).toHaveText('Revisado en este navegador · sin publicación');
+  await expect(page.getByRole('button', { name: 'Publicar deshabilitado · sin conexión' })).toBeDisabled();
+  await expect(page.locator('.channel-metrics > div').filter({ hasText: 'Revisiones pendientes' }).locator('strong')).toHaveText('0');
+  expect(externalWrites).toEqual([]);
+
+  await page.reload();
+  await expect(page.getByRole('status')).toHaveText('Revisado en este navegador · sin publicación');
+});
+
+test('Aurem channel review enforces roles and explains live requirements in English', async ({ page }) => {
+  await page.goto('/en/demos/aurem/gestion/?vista=channels');
+  await page.getByRole('button', { name: 'Explore freely' }).click();
+  await page.getByLabel('Role').selectOption('cleaning');
+  await expect(page.getByRole('button', { name: 'Requires Direction or Reception' })).toBeDisabled();
+
+  await page.getByRole('button', { name: /Direct iCal/ }).click();
+  await expect(page.locator('.channel-review')).toContainText('timezone, deduplication and error handling');
+  await expect(page.getByRole('heading', { name: 'What a live connection would require' })).toBeVisible();
+  await expect(page.getByText('Agreement and credentials')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Publish disabled · no connection' })).toBeDisabled();
+});
+
 test('operational notifications expose context and open the related area', async ({ page }) => {
   await page.goto('/demos/aurem/gestion/');
   await page.getByRole('button', { name: 'Explorar libremente' }).click();

@@ -51,6 +51,7 @@ type View =
 type Utility = "search" | "notifications" | null;
 type Notice = { title: string; detail: string; view: View; urgent?: boolean };
 type RevenueMetric = "revenue" | "occupancy" | "adr" | "revpar";
+type ChannelId = "booking" | "airbnb" | "expedia" | "ical";
 
 const properties = {
   terrava: [
@@ -517,7 +518,7 @@ export function DashboardDemo({
           </label>
           {scenario === "aurem" && (
             <label className="role-select">
-              <span className="sr-only">Rol</span>
+              <span className="sr-only">{locale === "es" ? "Rol" : "Role"}</span>
               <select
                 value={state.role}
                 onChange={(e) => patch({ role: e.target.value as DemoRole })}
@@ -883,7 +884,8 @@ function ViewContent({
         patch={patch}
       />
     );
-  if (view === "channels") return <Channels locale={locale} />;
+  if (view === "channels")
+    return <Channels locale={locale} state={state} patch={patch} />;
   if (view === "automation")
     return <Automation locale={locale} state={state} />;
   if (view === "control")
@@ -1826,38 +1828,174 @@ function WebsiteEditor({
   );
 }
 
-function Channels({ locale }: { locale: Locale }) {
+function Channels({
+  locale,
+  state,
+  patch,
+}: {
+  locale: Locale;
+  state: DemoState;
+  patch: (next: Partial<DemoState>) => void;
+}) {
+  const [selected, setSelected] = useState<ChannelId>("expedia");
+  const allowedToReview = canOperate(state.role, "review");
+  const channels: Record<ChannelId, {
+    name: string;
+    status: string;
+    detail: string;
+    coverage: [string, string, string, string];
+  }> = locale === "es" ? {
+    booking: {
+      name: "Booking.com",
+      status: "Solo fixture",
+      detail: "Faltan credenciales, contrato, alojamiento, planes de tarifa y reconciliación de reservas.",
+      coverage: ["Escenario", "Escenario", "Sin entrada", "Fuera de demo"],
+    },
+    airbnb: {
+      name: "Airbnb",
+      status: "Solo fixture",
+      detail: "Faltan autorización OAuth, mapeo del anuncio, reglas de disponibilidad y webhooks.",
+      coverage: ["Escenario", "Escenario", "Sin entrada", "Fuera de demo"],
+    },
+    expedia: {
+      name: "Expedia",
+      status: state.channelReview === "reviewed" ? "Revisado localmente" : "Revisión pendiente",
+      detail: "El fixture marca una diferencia de tarifa. Debe revisarla una persona; no existe canal al que publicarla.",
+      coverage: ["Escenario", "Por revisar", "Sin entrada", "Fuera de demo"],
+    },
+    ical: {
+      name: "iCal directo",
+      status: "Lectura ficticia",
+      detail: "Un iCal real requeriría URL, frecuencia, zona horaria, deduplicación y gestión de errores.",
+      coverage: ["Lectura demo", "No compatible", "Sin entrada", "Fuera de demo"],
+    },
+  } : {
+    booking: {
+      name: "Booking.com",
+      status: "Fixture only",
+      detail: "Credentials, contract, property, rate-plan mapping and booking reconciliation are missing.",
+      coverage: ["Scenario", "Scenario", "No intake", "Out of demo"],
+    },
+    airbnb: {
+      name: "Airbnb",
+      status: "Fixture only",
+      detail: "OAuth authorisation, listing mapping, availability rules and webhooks are missing.",
+      coverage: ["Scenario", "Scenario", "No intake", "Out of demo"],
+    },
+    expedia: {
+      name: "Expedia",
+      status: state.channelReview === "reviewed" ? "Locally reviewed" : "Review pending",
+      detail: "The fixture flags a rate difference. A person must review it; there is no channel to publish to.",
+      coverage: ["Scenario", "Review", "No intake", "Out of demo"],
+    },
+    ical: {
+      name: "Direct iCal",
+      status: "Fictitious read",
+      detail: "A live iCal would require a URL, frequency, timezone, deduplication and error handling.",
+      coverage: ["Demo read", "Unsupported", "No intake", "Out of demo"],
+    },
+  };
+  const active = channels[selected];
+  const markReviewed = () => {
+    if (!allowedToReview) return;
+    patch({
+      channelReview: "reviewed",
+      completedFlows: [...new Set([...state.completedFlows, "channel-review"])],
+    });
+    track("demo_flow_complete", {
+      locale,
+      demo: "aurem",
+      flow: "channel-review",
+    });
+  };
+  const requirements = locale === "es"
+    ? [
+        ["01", "Acuerdo y credenciales", "Contrato con el canal y secretos guardados fuera del navegador."],
+        ["02", "Mapeo verificable", "Alojamiento, habitaciones, ocupaciones, tarifas, impuestos y restricciones."],
+        ["03", "Entorno de pruebas", "Sandbox o certificación con casos de alta, cambio, cancelación y error."],
+        ["04", "Reconciliación", "Colas, idempotencia, alertas, trazas y recuperación manual antes de producción."],
+      ]
+    : [
+        ["01", "Agreement and credentials", "Channel contract and secrets stored outside the browser."],
+        ["02", "Verifiable mapping", "Property, rooms, occupancies, rates, tax and restrictions."],
+        ["03", "Test environment", "Sandbox or certification for create, change, cancel and failure cases."],
+        ["04", "Reconciliation", "Queues, idempotency, alerts, traces and manual recovery before production."],
+      ];
   return (
     <>
-      <div className="integration-note">
+      <div className="integration-note channel-boundary" role="note">
         <strong>
-          {locale === "es" ? "Demo · no conectado" : "Demo · not connected"}
+          {locale === "es" ? "0 canales conectados" : "0 connected channels"}
         </strong>
         <span>
           {locale === "es"
-            ? "Estos estados proceden de un fixture. Ningún canal ha recibido inventario."
-            : "These states come from a fixture. No channel has received inventory."}
+            ? "La matriz es un escenario local. No lee ni publica inventario, tarifas, reservas o mensajes; tampoco contiene credenciales."
+            : "This matrix is a local scenario. It neither reads nor publishes inventory, rates, bookings or messages, and contains no credentials."}
         </span>
       </div>
-      <div className="channel-grid">
-        {[
-          ["Booking.com", "Preparado", "12:04"],
-          ["Airbnb", "Preparado", "11:58"],
-          ["Expedia", "Por validar", "—"],
-          ["iCal directo", "Disponible", "12:06"],
-        ].map(([name, status, time]) => (
-          <article className="panel" key={name}>
-            <span>{status}</span>
-            <h2>{name}</h2>
-            <strong>{time}</strong>
-            <small>
-              {locale === "es"
-                ? "Última sincronización de muestra"
-                : "Sample last sync"}
-            </small>
-          </article>
-        ))}
+      <div className="channel-metrics" aria-label={locale === "es" ? "Resumen de canales ficticios" : "Fictitious channel summary"}>
+        <div><span>{locale === "es" ? "Conectados" : "Connected"}</span><strong>0</strong></div>
+        <div><span>{locale === "es" ? "Fixtures" : "Fixtures"}</span><strong>4</strong></div>
+        <div><span>{locale === "es" ? "Revisiones pendientes" : "Pending reviews"}</span><strong>{state.channelReview === "reviewed" ? 0 : 1}</strong></div>
+        <div><span>{locale === "es" ? "Publicaciones" : "Publications"}</span><strong>0</strong></div>
       </div>
+      <div className="channel-workspace">
+        <article className="panel table-wrap channel-matrix">
+          <div className="channel-matrix-head">
+            <span className="tag">{locale === "es" ? "Cobertura demostrada" : "Demonstrated coverage"}</span>
+            <h2 id="channel-matrix-title">{locale === "es" ? "Matriz de alcance" : "Coverage matrix"}</h2>
+            <p>{locale === "es" ? "Selecciona una fila para entender su límite." : "Select a row to understand its boundary."}</p>
+          </div>
+          <table aria-labelledby="channel-matrix-title">
+            <thead><tr>
+              <th>{locale === "es" ? "Canal" : "Channel"}</th>
+              <th>{locale === "es" ? "Disponibilidad" : "Availability"}</th>
+              <th>{locale === "es" ? "Tarifas" : "Rates"}</th>
+              <th>{locale === "es" ? "Reservas" : "Bookings"}</th>
+              <th>{locale === "es" ? "Mensajes" : "Messages"}</th>
+              <th>{locale === "es" ? "Conexión" : "Connection"}</th>
+            </tr></thead>
+            <tbody>
+              {(Object.entries(channels) as [ChannelId, typeof active][]).map(([id, channel]) => (
+                <tr key={id} className={selected === id ? "selected" : ""}>
+                  <td><button type="button" aria-pressed={selected === id} onClick={() => setSelected(id)}><strong>{channel.name}</strong><small>{channel.status}</small></button></td>
+                  {channel.coverage.map((value) => <td key={value}><span className="channel-cell">{value}</span></td>)}
+                  <td><span className="channel-cell disconnected">{locale === "es" ? "No conectado" : "Not connected"}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </article>
+        <aside className="panel channel-review" aria-live="polite">
+          <span>{locale === "es" ? "Inspección local" : "Local inspection"}</span>
+          <h2>{active.name}</h2>
+          <strong>{active.status}</strong>
+          <p>{active.detail}</p>
+          {selected === "expedia" ? (
+            state.channelReview === "reviewed" ? (
+              <div className="channel-reviewed" role="status"><Check size={17} /><span>{locale === "es" ? "Revisado en este navegador · sin publicación" : "Reviewed in this browser · not published"}</span></div>
+            ) : (
+              <button type="button" className="primary" onClick={markReviewed} disabled={!allowedToReview}>
+                {allowedToReview
+                  ? locale === "es" ? "Marcar revisión local" : "Mark local review"
+                  : locale === "es" ? "Requiere Dirección o Recepción" : "Requires Direction or Reception"}
+              </button>
+            )
+          ) : <small>{locale === "es" ? "Este fixture no ofrece una acción local." : "This fixture has no local action."}</small>}
+          <button type="button" disabled className="channel-publish">
+            {locale === "es" ? "Publicar deshabilitado · sin conexión" : "Publish disabled · no connection"}
+          </button>
+        </aside>
+      </div>
+      <section className="panel channel-requirements" aria-labelledby="channel-requirements-title">
+        <div>
+          <span className="tag">{locale === "es" ? "Fuera de esta demo" : "Outside this demo"}</span>
+          <h2 id="channel-requirements-title">{locale === "es" ? "Qué exigiría conectar de verdad" : "What a live connection would require"}</h2>
+        </div>
+        <ol>
+          {requirements.map(([number, title, detail]) => <li key={number}><span>{number}</span><div><strong>{title}</strong><p>{detail}</p></div></li>)}
+        </ol>
+      </section>
     </>
   );
 }

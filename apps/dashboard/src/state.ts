@@ -6,6 +6,7 @@ export type CleaningState = "pending" | "in_progress" | "review" | "ready";
 export type StayOperationState = "original" | "reassigned" | "rate_updated";
 export type ArrivalRiskState = "detected" | "coordinating" | "resolved";
 export type MaintenanceState = "new" | "assigned" | "resolved";
+export type ChannelReviewState = "pending" | "reviewed";
 export type JourneySource = "fixture" | "website";
 export type TourMode = "unset" | "guided" | "free";
 
@@ -34,6 +35,7 @@ export interface DemoState {
   stayOperation: StayOperationState;
   arrivalRisk: ArrivalRiskState;
   maintenance: MaintenanceState;
+  channelReview: ChannelReviewState;
   tourMode: TourMode;
   tourStep: number | null;
   completedFlows: string[];
@@ -75,6 +77,7 @@ export const initialState = (scenario: Scenario): DemoState => {
     stayOperation: "original",
     arrivalRisk: "detected",
     maintenance: "new",
+    channelReview: "pending",
     tourMode: "unset",
     tourStep: null,
     completedFlows: [],
@@ -169,6 +172,11 @@ export function parseStored(raw: string | null, scenario: Scenario): DemoState {
     )
       ? (value.maintenance as MaintenanceState)
       : fallback.maintenance;
+    const channelReview = ["pending", "reviewed"].includes(
+      String(value.channelReview),
+    )
+      ? (value.channelReview as ChannelReviewState)
+      : fallback.channelReview;
     const tourMode = ["unset", "guided", "free"].includes(
       String(value.tourMode),
     )
@@ -196,6 +204,7 @@ export function parseStored(raw: string | null, scenario: Scenario): DemoState {
       stayOperation,
       arrivalRisk,
       maintenance,
+      channelReview,
       tourMode,
       tourStep: Number.isInteger(value.tourStep)
         ? Number(value.tourStep)

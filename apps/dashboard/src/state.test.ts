@@ -58,4 +58,16 @@ describe("demo state", () => {
     expect(canOperate("cleaning", "cleaning")).toBe(true);
     expect(canOperate("cleaning", "booking")).toBe(false);
   });
+  it("keeps a valid local channel review", () => {
+    const state = { ...initialState("aurem"), channelReview: "reviewed" as const };
+    expect(parseStored(JSON.stringify(state), "aurem").channelReview).toBe(
+      "reviewed",
+    );
+  });
+  it("rejects an unknown channel review state", () => {
+    const state = { ...initialState("aurem"), channelReview: "published" };
+    expect(parseStored(JSON.stringify(state), "aurem").channelReview).toBe(
+      "pending",
+    );
+  });
 });
