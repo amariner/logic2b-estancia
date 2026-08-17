@@ -125,37 +125,50 @@ test('assessment reveals an operations recommendation before asking for contact 
   await page.getByRole('button', { name: /Siguiente/ }).click();
   await page.getByRole('button', { name: /Ver recomendación/ }).click();
   await expect(page.locator('[data-result-name]')).toHaveText('Inteligente');
-  await expect(page.getByRole('heading', { name: 'Recibe el resumen y una respuesta personalizada.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Hablemos sobre esta recomendación.' })).toBeVisible();
   await expect(page.locator('[data-demo-link]')).toHaveAttribute('href', '/demos/aurem/');
 });
 
-for (const meeting of [
-  { name: 'configured agenda', url: 'https://meet.example.test/logic-estancia', copy: 'ya puedes elegir horario', linked: true },
-  { name: 'missing agenda', url: null, copy: 'tu solicitud ya está en curso', linked: false },
-]) {
-  test(`assessment shows a safe follow-up for a ${meeting.name}`, async ({ page }) => {
-    await page.route('**/api/leads', (route) => route.fulfill({
-      status: 202,
-      contentType: 'application/json',
-      body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'test-ref', meetingUrl: meeting.url }),
-    }));
-    await page.goto('/diagnostico/');
-    await page.getByText('Apartamentos', { exact: true }).click();
-    for (let step = 0; step < 5; step += 1) await page.getByRole('button', { name: /Siguiente|Ver recomendación/ }).click();
-    await page.getByRole('button', { name: /Ver recomendación/ }).click();
-    await page.getByLabel('Nombre').fill('Ada Demo');
-    await page.getByLabel('Empresa o alojamiento').fill('Casa Demo');
-    await page.getByRole('textbox', { name: 'Email', exact: true }).fill('ada@example.test');
-    await page.getByLabel(/Acepto la política/).check();
-    await page.getByRole('button', { name: /Enviarme el resumen/ }).click();
+test('assessment keeps answers local and routes contact to the single sales form', async ({ page }) => {
+  let leadRequests = 0;
+  page.on('request', (request) => { if (request.url().includes('/api/leads')) leadRequests += 1; });
+  await page.goto('/diagnostico/');
+  await page.getByText('Apartamentos', { exact: true }).click();
+  for (let step = 0; step < 5; step += 1) await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByRole('button', { name: /Ver recomendación/ }).click();
+  await expect(page.locator('[data-diagnostic-lead]')).toHaveCount(0);
+  await expect(page.getByText('Las respuestas del diagnóstico permanecen en este navegador.')).toBeVisible();
+  const salesLink = page.getByRole('link', { name: /Ir al formulario comercial/ });
+  await expect(salesLink).toHaveAttribute('href', '/#contacto');
+  expect(leadRequests).toBe(0);
+  await salesLink.click();
+  await expect(page).toHaveURL(/\/#contacto$/);
+  await expect(page.locator('[data-lead]')).toBeVisible();
+  expect(leadRequests).toBe(0);
+});
 
-    const followUp = page.locator('[data-meeting]');
-    await expect(followUp).toContainText(meeting.copy);
-    const link = followUp.locator('[data-meeting-link]');
-    if (meeting.linked) await expect(link).toHaveAttribute('href', meeting.url!);
-    else await expect(link).toBeHidden();
+test('the sales landing is the only form that calls the production lead endpoint', async ({ page }) => {
+  let leadRequests = 0;
+  await page.route('**/api/leads', (route) => {
+    leadRequests += 1;
+    return route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'test-ref', meetingUrl: null }) });
   });
-}
+  await page.goto('/');
+  const form = page.locator('[data-lead]');
+  await form.locator('[name="name"]').fill('Ada Demo');
+  await form.locator('[name="businessName"]').fill('Casa Demo');
+  await form.locator('[name="email"]').fill('ada@example.test');
+  await form.locator('[name="message"]').fill('Solicitud comercial de prueba.');
+  await form.locator('[name="accept"]').check();
+  await form.getByRole('button', { name: /Enviar proyecto/ }).click();
+  await expect(form.getByRole('status')).toHaveText('Solicitud entregada. Te responderemos pronto.');
+  expect(leadRequests).toBe(1);
+
+  await page.goto('/demos/terrava/');
+  await page.locator('[data-demo-form] button[type="submit"]').click();
+  await expect(page.locator('.demo-result')).toContainText('Solicitud demo creada');
+  expect(leadRequests).toBe(1);
+});
 
 test('cookie preferences remain consent-gated, revocable and shared with demos', async ({ page }) => {
   await page.goto('/');
@@ -204,7 +217,8 @@ test('the cookie choice and complete legal surfaces are localized in English', a
   await expect(page.getByRole('heading', { name: 'Demonstrations and scope' })).toBeVisible();
   await page.goto('/en/privacidad/');
   await expect(page.getByRole('heading', { name: 'Data, purpose and lawful basis' })).toBeVisible();
-  await expect(page.getByText(/HubSpot: management/)).toBeVisible();
+  await expect(page.getByText(/Resend: transport/)).toBeVisible();
+  await expect(page.getByText(/HubSpot:/)).toHaveCount(0);
   await page.goto('/en/cookies/');
   await expect(page.getByRole('columnheader', { name: 'Category' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Change my cookie choice' })).toBeVisible();

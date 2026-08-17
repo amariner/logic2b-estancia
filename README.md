@@ -14,7 +14,7 @@ El Worker local compone el sitio comercial, las tres webs ficticias y los gestor
 
 ## Producción
 
-La publicación es manual. Requiere `wrangler login` y configurar en el Worker `logic-estancia` `LEADS_RESEND_API_KEY`, `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT`, `LEADS_REPLY_TO` y `LEADS_MEETING_URL`. Las direcciones deben ser emails válidos y la agenda una URL HTTPS pública; el Worker no activa el canal de email con configuración parcial y la interfaz muestra una alternativa por email si la agenda falta o no es segura. HubSpot permanece desactivado mientras no exista `HUBSPOT_ACCESS_TOKEN`; su activación futura exige además la propiedad única de negocio `logic_estancia_submission_id` descrita en el playbook. La configuración versionada crea el Durable Object que mantiene el rate limit y la idempotencia durante el despliegue.
+La publicación es manual. Requiere `wrangler login` y configurar en el Worker `logic-estancia` `LEADS_RESEND_API_KEY`, `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT` y `LEADS_REPLY_TO`. El destinatario interno de producción es `marinerandreu+logic@gmail.com`. Solo el formulario comercial de la landing llama a `/api/leads`; el diagnóstico enlaza a ese formulario y las demos nunca lo invocan. El Worker no activa el canal de email con configuración parcial. HubSpot permanece intencionadamente fuera de alcance. La configuración versionada crea el Durable Object que mantiene el rate limit y la idempotencia durante el despliegue.
 
 Para desarrollo local, copia `apps/worker/.dev.vars.example` a `apps/worker/.dev.vars` y sustituye únicamente los valores locales. `.dev.vars` está excluido de Git; no guardes credenciales reales en archivos versionados.
 
@@ -22,9 +22,9 @@ Para desarrollo local, copia `apps/worker/.dev.vars.example` a `apps/worker/.dev
 pnpm deploy
 ```
 
-Las integraciones, pagos, canales, mensajería, SES.Hospedajes e IA visibles son demostraciones o estados preparados, nunca ejecuciones externas.
+Las integraciones, formularios, reservas, pagos, canales, mensajería, SES.Hospedajes e IA visibles en Nivora, Terrava, Aurem y sus dashboards son demostraciones locales, nunca ejecuciones externas.
 
-La cadencia comercial, el pipeline, la configuración de HubSpot, la taxonomía de GA4 y el guion de entrevistas están documentados en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md).
+La cadencia comercial, la taxonomía de GA4 y el guion de entrevistas están documentados en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md). La referencia histórica de HubSpot permanece diferida y no describe una integración activa.
 
 ## Continuidad del desarrollo
 

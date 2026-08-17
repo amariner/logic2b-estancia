@@ -37,6 +37,9 @@ Antes de implementar se identifica qué necesita cada perfil. Después se regist
 - Solo existen los planes Básico, Gestión e Inteligente. Los valores antiguos se aceptan únicamente en bordes de compatibilidad.
 - Nivora demuestra Básico sin dashboard; Terrava demuestra Gestión; Aurem demuestra Inteligente.
 - Las demos son locales, ficticias, transparentes y no ejecutan reservas, pagos, comunicaciones ni sincronizaciones reales.
+- El único formulario que envía solicitudes reales es el formulario comercial de la landing; su destinatario interno de producción es `marinerandreu+logic@gmail.com`.
+- Los formularios y controles de Nivora, Terrava, Aurem y sus dashboards solo modifican estado local ficticio. Nunca se conectan a email, CRM, inventario, reservas, pagos, mensajería ni proveedores externos.
+- HubSpot permanece fuera de alcance y no debe configurarse ni invocarse hasta una autorización futura explícita.
 - La recomendación se basa en capacidades; el tamaño solo añade contexto de implantación.
 - No se envía PII a GA4 y la analítica solo se activa tras consentimiento explícito.
 - No se publican precios hasta completar 15 entrevistas cualificadas y 5 propuestas reales.
