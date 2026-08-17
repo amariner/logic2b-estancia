@@ -70,4 +70,12 @@ describe("demo state", () => {
       "pending",
     );
   });
+  it("keeps a bounded supervised AI draft", () => {
+    const state = { ...initialState("aurem"), aiDraft: "Edited locally", aiReview: "reviewed" as const, aiRevision: 2 };
+    expect(parseStored(JSON.stringify(state), "aurem")).toMatchObject({ aiDraft: "Edited locally", aiReview: "reviewed", aiRevision: 2 });
+  });
+  it("rejects invalid AI workflow state", () => {
+    const state = { ...initialState("aurem"), aiDraft: "x".repeat(1001), aiReview: "sent", aiRevision: 99 };
+    expect(parseStored(JSON.stringify(state), "aurem")).toMatchObject({ aiDraft: null, aiReview: "draft", aiRevision: 1 });
+  });
 });

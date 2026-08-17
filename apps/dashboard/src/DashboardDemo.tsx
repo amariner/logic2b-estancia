@@ -887,7 +887,7 @@ function ViewContent({
   if (view === "channels")
     return <Channels locale={locale} state={state} patch={patch} />;
   if (view === "automation")
-    return <Automation locale={locale} state={state} />;
+    return <Automation locale={locale} state={state} patch={patch} />;
   if (view === "control")
     return <Control locale={locale} state={state} go={go} />;
   if (view === "reports")
@@ -2000,46 +2000,46 @@ function Channels({
   );
 }
 
-function Automation({ locale, state }: { locale: Locale; state: DemoState }) {
+function Automation({ locale, state, patch }: { locale: Locale; state: DemoState; patch: (next: Partial<DemoState>) => void }) {
+  const generated = locale === "es"
+    ? `Hola ${firstName(state.stay.name)}, tu habitación Terrace estará lista a partir de las 15:00. Hemos preparado el pre-check-in, pero todavía necesitamos que confirmes tu hora de llegada.`
+    : `Hello ${firstName(state.stay.name)}, your Terrace room will be ready from 15:00. We prepared pre-check-in, but still need you to confirm your arrival time.`;
+  const saved = state.aiDraft ?? generated;
+  const [draft, setDraft] = useState(saved);
+  useEffect(() => setDraft(saved), [saved]);
+  const dirty = draft !== saved;
+  const allowedToReview = canOperate(state.role, "review");
+  const saveDraft = () => patch({ aiDraft: draft.trim(), aiReview: "draft", aiRevision: Math.min(20, state.aiRevision + 1) });
+  const markReviewed = () => {
+    if (!allowedToReview || dirty) return;
+    patch({ aiReview: "reviewed", completedFlows: [...new Set([...state.completedFlows, "supervised-ai"])] });
+    track("demo_flow_complete", { locale, demo: "aurem", flow: "supervised-ai" });
+  };
   return (
-    <div className="dash-grid">
-      <article className="panel wide">
-        <span className="tag">
-          {locale === "es"
-            ? "Copiloto supervisado · demo"
-            : "Supervised copilot · demo"}
-        </span>
-        <h2>
-          {locale === "es"
-            ? `Respuesta preparada para ${state.stay.name}`
-            : `Reply prepared for ${state.stay.name}`}
-        </h2>
-        <blockquote>
-          {locale === "es"
-            ? `Hola ${firstName(state.stay.name)}, tu habitación Terrace estará lista a partir de las 15:00. Hemos preparado el pre-check-in, pero todavía necesitamos que confirmes…`
-            : `Hello ${firstName(state.stay.name)}, your Terrace room will be ready from 15:00. We prepared the pre-check-in, but still need you to confirm…`}
-        </blockquote>
-        <div className="sources">
-          <span>{locale === "es" ? "Fuentes" : "Sources"}</span>
-          <b>Reserva AUR-812</b>
-          <b>{locale === "es" ? "Política de entrada" : "Arrival policy"}</b>
-          <b>{locale === "es" ? "Estado habitación 408" : "Room 408 status"}</b>
-        </div>
-        <button disabled>
-          {locale === "es"
-            ? "Enviar · proveedor no conectado"
-            : "Send · provider not connected"}
-        </button>
-      </article>
-      <article className="panel">
-        <h2>{locale === "es" ? "Límite visible" : "Visible boundary"}</h2>
-        <p className="body-copy">
-          {locale === "es"
-            ? "El copiloto prepara y explica. Precio, reserva, cobro y mensaje requieren una confirmación humana y un proveedor real."
-            : "The copilot prepares and explains. Price, booking, payment and message require human confirmation and a real provider."}
-        </p>
-      </article>
-    </div>
+    <>
+      <div className="integration-note ai-boundary" role="note">
+        <strong>{locale === "es" ? "Copiloto local · sin modelo ni proveedor" : "Local copilot · no model or provider"}</strong>
+        <span>{locale === "es" ? "El texto parte de un fixture y solo cambia en este navegador. Revisar no envía el mensaje ni confirma precio, reserva o cobro." : "The text starts from a fixture and only changes in this browser. Review does not send it or confirm a price, booking or charge."}</span>
+      </div>
+      <div className="ai-workspace">
+        <article className="panel ai-editor">
+          <div className="panel-head"><div><span className={`tag ${state.aiReview}`}>{state.aiReview === "reviewed" ? locale === "es" ? "Revisado" : "Reviewed" : locale === "es" ? "Borrador" : "Draft"}</span><h2>{locale === "es" ? `Respuesta para ${state.stay.name}` : `Reply for ${state.stay.name}`}</h2><p>{locale === "es" ? `Versión ${state.aiRevision} · edición local` : `Version ${state.aiRevision} · local edit`}</p></div><Sparkles size={24} /></div>
+          <label>{locale === "es" ? "Mensaje preparado" : "Prepared message"}<textarea value={draft} maxLength={1000} rows={6} onChange={(event) => setDraft(event.target.value)} /></label>
+          <div className="sources" aria-label={locale === "es" ? "Fuentes del borrador" : "Draft sources"}><span>{locale === "es" ? "Fuentes fixture" : "Fixture sources"}</span><b>Reserva AUR-812</b><b>{locale === "es" ? "Política de entrada" : "Arrival policy"}</b><b>{locale === "es" ? `Habitación 408 · ${state.cleaning === "ready" ? "lista" : "pendiente"}` : `Room 408 · ${state.cleaning === "ready" ? "ready" : "pending"}`}</b></div>
+          <div className="actions">
+            <button type="button" onClick={() => setDraft(saved)} disabled={!dirty}>{locale === "es" ? "Descartar edición" : "Discard edit"}</button>
+            <button type="button" className="primary" onClick={saveDraft} disabled={!dirty || !draft.trim()}>{locale === "es" ? "Guardar borrador local" : "Save local draft"}</button>
+            <button type="button" className="primary" onClick={markReviewed} disabled={dirty || state.aiReview === "reviewed" || !allowedToReview}>{!allowedToReview ? locale === "es" ? "Requiere Dirección o Recepción" : "Requires Direction or Reception" : locale === "es" ? "Marcar como revisado" : "Mark as reviewed"}</button>
+          </div>
+          <button type="button" disabled className="ai-send">{locale === "es" ? "Enviar deshabilitado · proveedor no conectado" : "Send disabled · provider not connected"}</button>
+        </article>
+        <aside className="panel ai-trace" aria-live="polite">
+          <span>{locale === "es" ? "Trazabilidad" : "Trace"}</span>
+          <h2>{locale === "es" ? "Qué ha ocurrido" : "What happened"}</h2>
+          <ol><li className="done"><Check size={16} /><div><strong>{locale === "es" ? "Borrador de fixture" : "Fixture draft"}</strong><small>{locale === "es" ? "Sin llamada a un modelo externo" : "No external model call"}</small></div></li><li className={state.aiRevision > 1 ? "done" : ""}><Check size={16} /><div><strong>{locale === "es" ? "Edición humana" : "Human edit"}</strong><small>{state.aiRevision > 1 ? locale === "es" ? `Guardada como versión ${state.aiRevision}` : `Saved as version ${state.aiRevision}` : locale === "es" ? "Todavía sin cambios" : "No changes yet"}</small></div></li><li className={state.aiReview === "reviewed" ? "done" : ""}><Check size={16} /><div><strong>{locale === "es" ? "Revisión humana" : "Human review"}</strong><small>{state.aiReview === "reviewed" ? locale === "es" ? "Aprobada solo en local" : "Approved locally only" : locale === "es" ? "Pendiente" : "Pending"}</small></div></li><li><X size={16} /><div><strong>{locale === "es" ? "Envío externo" : "External delivery"}</strong><small>{locale === "es" ? "Bloqueado por diseño" : "Blocked by design"}</small></div></li></ol>
+        </aside>
+      </div>
+    </>
   );
 }
 

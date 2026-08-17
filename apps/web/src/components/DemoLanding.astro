@@ -44,7 +44,7 @@ const managerHref = `${prefix}/demos/${slug}/gestion/?vista=${managerView}`;
     const key = `logic-estancia-demo-${slug}-v2`; let current = {};
     try { const parsed = JSON.parse(localStorage.getItem(key)); if (parsed?.version === 2) current = parsed; } catch {}
     const title = slug === 'aurem' ? 'Todo dispuesto antes de llegar.' : 'El tiempo cambia cuando llegas.';
-    const defaults = { version: 2, selectedProperty: 'all', role: slug === 'aurem' ? 'direction' : 'reception', enquiry: 'new', cleaning: 'pending', stayOperation: 'original', arrivalRisk: 'detected', maintenance: 'new', channelReview: 'pending', tourMode: 'unset', tourStep: null, completedFlows: [], website: { publishedTitle: title, draftTitle: title, status: 'clean' } };
+    const defaults = { version: 2, selectedProperty: 'all', role: slug === 'aurem' ? 'direction' : 'reception', enquiry: 'new', cleaning: 'pending', stayOperation: 'original', arrivalRisk: 'detected', maintenance: 'new', channelReview: 'pending', aiDraft: null, aiReview: 'draft', aiRevision: 1, tourMode: 'unset', tourStep: null, completedFlows: [], website: { publishedTitle: title, draftTitle: title, status: 'clean' } };
     localStorage.setItem(key, JSON.stringify({ ...defaults, ...current, ...(slug === 'terrava' ? { enquiry: 'new' } : {}), stay: journey() }));
   };
   const showManager = () => managerNext?.removeAttribute('hidden');

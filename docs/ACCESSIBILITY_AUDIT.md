@@ -13,7 +13,7 @@ La suite `tests/e2e/accessibility.spec.ts` audita las 30 rutas públicas en Chro
 - Landing, soluciones, planes, diagnóstico, documentación y recursos comerciales.
 - Aviso legal, privacidad y cookies.
 - Nivora, Terrava y Aurem en ES/EN, incluidos los gestores de Terrava y Aurem.
-- Los estados profundos ES/EN de ingresos y canales de Aurem, abiertos mediante `?vista=reports` y `?vista=channels`, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas.
+- Los estados profundos ES/EN de ingresos, canales y automatización de Aurem, abiertos mediante `?vista=reports`, `?vista=channels` y `?vista=automation`, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas.
 
 Además comprueba:
 
@@ -44,8 +44,9 @@ La segunda pasada de interacción y reflow detectó y corrigió:
 - Anchura intrínseca de la tabla de capacidades, títulos editoriales largos, filas de recursos y hero de las demos a 320 px.
 - Foco inicial explícito en las decisiones y pasos de la visita guiada.
 - Diagnóstico permanente del selector y geometría responsables cuando una futura ruta vuelva a desbordar.
+- Anchura intrínseca del editor de IA y cabecera larga de Automatización a 320 px, manteniendo textarea, acciones y trazabilidad dentro del viewport.
 
-Después de las correcciones, axe no reporta violaciones en ninguna de las 30 rutas ni en los cuatro estados profundos de ingresos/canales. El QA visual responsive sobre portada a 1366 px y 375 px, Terrava, el gestor Aurem, el recurso largo español, Aurem inglés y las vistas de ingresos/canales a 320 px confirmó ausencia de overflow y regresiones visibles.
+Después de las correcciones, axe no reporta violaciones en ninguna de las 30 rutas ni en los seis estados profundos de ingresos/canales/automatización. El QA visual responsive sobre portada a 1366 px y 375 px, Terrava, el gestor Aurem, el recurso largo español, Aurem inglés y las vistas de ingresos/canales/automatización a 320 px confirmó ausencia de overflow y regresiones visibles.
 
 ## Evidencia reproducible
 
@@ -56,12 +57,12 @@ pnpm e2e
 pnpm peers check
 ```
 
-Resultado verificado el 2026-08-17: 14 pruebas específicas de accesibilidad correctas. La puerta global suma 45 E2E —28 funcionales, 14 de accesibilidad y 3 de SEO técnico—, además de 28 tareas de paquetes más lint de scripts/pruebas raíz y ninguna incidencia de peers.
+Resultado verificado el 2026-08-17: 14 pruebas específicas de accesibilidad correctas. La puerta global suma 47 E2E —30 funcionales, 14 de accesibilidad y 3 de SEO técnico—, además de 28 tareas de paquetes más lint de scripts/pruebas raíz y ninguna incidencia de peers.
 
 ## Deuda y siguiente revisión
 
 - Probar recorridos completos con VoiceOver y al menos otro lector de pantalla representativo.
 - Revisar manualmente los modos de alto contraste del sistema y del navegador.
-- Validar con personas el lenguaje, orden de lectura y comprensión de los cinco flujos profundos.
+- Validar con personas el lenguaje, orden de lectura y comprensión de los siete flujos profundos.
 - Repetir Lighthouse móvil y las matrices de reflow/foco cuando cambien layout, tipografía o componentes interactivos.
 - Repetir la revisión manual cuando cambien navegación, formularios, overlays, tokens de color o componentes interactivos.

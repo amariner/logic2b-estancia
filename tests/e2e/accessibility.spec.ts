@@ -31,6 +31,8 @@ const deepStateRoutes = [
   '/en/demos/aurem/gestion/?vista=reports',
   '/demos/aurem/gestion/?vista=channels',
   '/en/demos/aurem/gestion/?vista=channels',
+  '/demos/aurem/gestion/?vista=automation',
+  '/en/demos/aurem/gestion/?vista=automation',
 ];
 
 function formatViolations(path: string, violations: Awaited<ReturnType<AxeBuilder['analyze']>>['violations']) {
@@ -49,6 +51,7 @@ async function gotoStable(page: Page, path: string) {
 }
 
 test('representative ES/EN routes have no automated WCAG 2.2 AA violations', async ({ page }) => {
+  test.setTimeout(60_000);
   const violations = [];
   for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);
@@ -61,6 +64,7 @@ test('representative ES/EN routes have no automated WCAG 2.2 AA violations', asy
 });
 
 test('every audited route exposes one main landmark and one page heading', async ({ page }) => {
+  test.setTimeout(60_000);
   for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);
     await expect(page.locator('main'), `${path}: main landmark`).toHaveCount(1);
@@ -69,6 +73,7 @@ test('every audited route exposes one main landmark and one page heading', async
 });
 
 test('every audited route reflows without page-level horizontal scrolling at 320px', async ({ page }) => {
+  test.setTimeout(60_000);
   await page.setViewportSize({ width: 320, height: 900 });
   for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);

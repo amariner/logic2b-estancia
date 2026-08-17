@@ -7,6 +7,7 @@ export type StayOperationState = "original" | "reassigned" | "rate_updated";
 export type ArrivalRiskState = "detected" | "coordinating" | "resolved";
 export type MaintenanceState = "new" | "assigned" | "resolved";
 export type ChannelReviewState = "pending" | "reviewed";
+export type AiReviewState = "draft" | "reviewed";
 export type JourneySource = "fixture" | "website";
 export type TourMode = "unset" | "guided" | "free";
 
@@ -36,6 +37,9 @@ export interface DemoState {
   arrivalRisk: ArrivalRiskState;
   maintenance: MaintenanceState;
   channelReview: ChannelReviewState;
+  aiDraft: string | null;
+  aiReview: AiReviewState;
+  aiRevision: number;
   tourMode: TourMode;
   tourStep: number | null;
   completedFlows: string[];
@@ -78,6 +82,9 @@ export const initialState = (scenario: Scenario): DemoState => {
     arrivalRisk: "detected",
     maintenance: "new",
     channelReview: "pending",
+    aiDraft: null,
+    aiReview: "draft",
+    aiRevision: 1,
     tourMode: "unset",
     tourStep: null,
     completedFlows: [],
@@ -177,6 +184,19 @@ export function parseStored(raw: string | null, scenario: Scenario): DemoState {
     )
       ? (value.channelReview as ChannelReviewState)
       : fallback.channelReview;
+    const aiDraft =
+      value.aiDraft === null || value.aiDraft === undefined
+        ? null
+        : typeof value.aiDraft === "string" && value.aiDraft.trim() && value.aiDraft.length <= 1000
+          ? value.aiDraft
+          : fallback.aiDraft;
+    const aiReview = ["draft", "reviewed"].includes(String(value.aiReview))
+      ? (value.aiReview as AiReviewState)
+      : fallback.aiReview;
+    const aiRevision =
+      Number.isInteger(value.aiRevision) && Number(value.aiRevision) >= 1 && Number(value.aiRevision) <= 20
+        ? Number(value.aiRevision)
+        : fallback.aiRevision;
     const tourMode = ["unset", "guided", "free"].includes(
       String(value.tourMode),
     )
@@ -205,6 +225,9 @@ export function parseStored(raw: string | null, scenario: Scenario): DemoState {
       arrivalRisk,
       maintenance,
       channelReview,
+      aiDraft,
+      aiReview,
+      aiRevision,
       tourMode,
       tourStep: Number.isInteger(value.tourStep)
         ? Number(value.tourStep)

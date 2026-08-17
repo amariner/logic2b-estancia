@@ -356,6 +356,45 @@ test('Aurem channel review enforces roles and explains live requirements in Engl
   await expect(page.getByRole('button', { name: 'Publish disabled · no connection' })).toBeDisabled();
 });
 
+test('Aurem supervised AI draft stays local, reviewable and persistent', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method())) externalWrites.push(request.url());
+  });
+  await page.goto('/demos/aurem/gestion/?vista=automation');
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Automatización' })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('sin modelo ni proveedor');
+
+  const message = 'Hola Elena, la habitación estará lista a las 16:00. Confirma tu hora de llegada.';
+  await page.getByLabel('Mensaje preparado').fill(message);
+  await page.getByRole('button', { name: 'Guardar borrador local' }).click();
+  await expect(page.getByText('Versión 2 · edición local')).toBeVisible();
+  await expect(page.getByText('Guardada como versión 2')).toBeVisible();
+  await page.getByRole('button', { name: 'Marcar como revisado' }).click();
+  await expect(page.getByText('Revisado', { exact: true })).toBeVisible();
+  await expect(page.getByText('Aprobada solo en local')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Enviar deshabilitado · proveedor no conectado' })).toBeDisabled();
+  expect(externalWrites).toEqual([]);
+
+  await page.reload();
+  await expect(page.getByLabel('Mensaje preparado')).toHaveValue(message);
+  await expect(page.getByText('Revisado', { exact: true })).toBeVisible();
+  expect(externalWrites).toEqual([]);
+});
+
+test('Aurem supervised AI explains fixtures and enforces review roles in English', async ({ page }) => {
+  await page.goto('/en/demos/aurem/gestion/?vista=automation');
+  await page.getByRole('button', { name: 'Explore freely' }).click();
+  await page.getByLabel('Role').selectOption('cleaning');
+
+  await expect(page.getByRole('note')).toContainText('no model or provider');
+  await expect(page.getByLabel('Draft sources')).toContainText('Fixture sources');
+  await expect(page.getByText('No external model call')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Requires Direction or Reception' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Send disabled · provider not connected' })).toBeDisabled();
+});
+
 test('operational notifications expose context and open the related area', async ({ page }) => {
   await page.goto('/demos/aurem/gestion/');
   await page.getByRole('button', { name: 'Explorar libremente' }).click();
