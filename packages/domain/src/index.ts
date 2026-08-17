@@ -1,8 +1,20 @@
 export type Vertical = 'apartment' | 'rural' | 'hotel';
 export type BusinessMode = 'mono' | 'multi';
-export type PlanLevel = 'inicio' | 'gestion' | 'automatiza' | 'inteligente';
+export type PlanLevel = 'basico' | 'gestion' | 'inteligente';
+export type LegacyPlanLevel = 'inicio' | 'automatiza';
 export type DemoRole = 'direction' | 'reception' | 'cleaning';
-export type Maturity = 'available' | 'functional-demo' | 'next-to-validate' | 'future';
+export type Maturity = 'demo' | 'simulated' | 'to-validate' | 'future';
+export type CapabilityCategory = 'web' | 'reservations' | 'operations' | 'team' | 'revenue' | 'channels' | 'automation' | 'ai';
+
+export interface Capability {
+  id: string;
+  category: CapabilityCategory;
+  minimumPlan: PlanLevel;
+  maturity: Maturity;
+  evidence?: 'nivora' | 'terrava' | 'aurem';
+  label: { es: string; en: string };
+  description: { es: string; en: string };
+}
 
 export type AssignMode = 'specific-unit' | 'unit-type';
 
@@ -66,23 +78,42 @@ export function validateOrganization(org: StayOrganization): StayOrganization {
 }
 
 export const LEVELS: Record<PlanLevel, { rank: number; capabilities: string[] }> = {
-  inicio: { rank: 0, capabilities: ['web', 'seo', 'enquiries'] },
+  basico: { rank: 0, capabilities: ['web', 'seo', 'enquiries', 'hosting', 'maintenance'] },
   gestion: {
     rank: 1,
-    capabilities: ['booking-engine', 'payments-optional', 'planning', 'guests', 'cleaning-basic', 'ical'],
-  },
-  automatiza: {
-    rank: 2,
-    capabilities: ['templates', 'reminders', 'reviews', 'channel-provider', 'supervised-copilot'],
+    capabilities: ['enquiries-workspace', 'bookings', 'planning', 'guests', 'rates', 'reports-basic', 'website-editor'],
   },
   inteligente: {
-    rank: 3,
-    capabilities: ['operations-centre', 'advanced-cleaning', 'maintenance', 'teams', 'revenue', 'forecast'],
+    rank: 2,
+    capabilities: ['operations-centre', 'cleaning', 'maintenance', 'teams', 'channels', 'automation', 'supervised-copilot', 'revenue', 'forecast'],
   },
 };
 
+export const CAPABILITIES: readonly Capability[] = [
+  { id: 'brand-web', category: 'web', minimumPlan: 'basico', maturity: 'demo', evidence: 'nivora', label: { es: 'Web modular de marca', en: 'Modular brand website' }, description: { es: 'Diseño, contenido, SEO técnico y solicitud directa adaptados al alojamiento.', en: 'Design, content, technical SEO and direct enquiry adapted to the stay.' } },
+  { id: 'email-enquiries', category: 'reservations', minimumPlan: 'basico', maturity: 'demo', evidence: 'nivora', label: { es: 'Solicitudes por email', en: 'Email enquiries' }, description: { es: 'Fechas y contacto llegan por email sin bloquear inventario.', en: 'Dates and contact details arrive by email without holding inventory.' } },
+  { id: 'enquiry-workspace', category: 'reservations', minimumPlan: 'gestion', maturity: 'demo', evidence: 'terrava', label: { es: 'Solicitudes y reservas', en: 'Enquiries and bookings' }, description: { es: 'Convierte una consulta en alternativa y reserva conservando su contexto.', en: 'Turn an enquiry into an alternative and booking while keeping its context.' } },
+  { id: 'planning', category: 'reservations', minimumPlan: 'gestion', maturity: 'demo', evidence: 'terrava', label: { es: 'Planning y tarifas', en: 'Planning and rates' }, description: { es: 'Opera estancias, unidades, huéspedes y precios desde un calendario común.', en: 'Operate stays, units, guests and pricing from one shared calendar.' } },
+  { id: 'website-editor', category: 'web', minimumPlan: 'gestion', maturity: 'demo', evidence: 'terrava', label: { es: 'Editor web supervisado', en: 'Supervised website editor' }, description: { es: 'Prepara, previsualiza, publica y revierte cambios de contenido.', en: 'Prepare, preview, publish and revert content changes.' } },
+  { id: 'basic-reports', category: 'revenue', minimumPlan: 'gestion', maturity: 'simulated', evidence: 'terrava', label: { es: 'Informes básicos', en: 'Basic reports' }, description: { es: 'Lectura de reservas, ocupación e ingresos con datos de muestra.', en: 'Booking, occupancy and revenue reading with sample data.' } },
+  { id: 'operations-centre', category: 'operations', minimumPlan: 'inteligente', maturity: 'demo', evidence: 'aurem', label: { es: 'Centro operativo', en: 'Operations centre' }, description: { es: 'Prioriza llegadas en riesgo y coordina la respuesta del equipo.', en: 'Prioritise at-risk arrivals and coordinate the team response.' } },
+  { id: 'cleaning', category: 'operations', minimumPlan: 'inteligente', maturity: 'demo', evidence: 'aurem', label: { es: 'Limpieza y preparación', en: 'Cleaning and preparation' }, description: { es: 'Responsabilidades, revisión y estado de cada habitación.', en: 'Ownership, review and status for every room.' } },
+  { id: 'maintenance', category: 'operations', minimumPlan: 'inteligente', maturity: 'demo', evidence: 'aurem', label: { es: 'Mantenimiento', en: 'Maintenance' }, description: { es: 'Incidencias priorizadas, asignadas y resueltas con impacto visible.', en: 'Prioritised, assigned and resolved incidents with visible impact.' } },
+  { id: 'roles', category: 'team', minimumPlan: 'inteligente', maturity: 'demo', evidence: 'aurem', label: { es: 'Equipos y permisos', en: 'Teams and permissions' }, description: { es: 'Dirección, recepción y limpieza comparten contexto con acciones delimitadas.', en: 'Management, reception and cleaning share context with bounded actions.' } },
+  { id: 'channels', category: 'channels', minimumPlan: 'inteligente', maturity: 'to-validate', evidence: 'aurem', label: { es: 'Canales e inventario', en: 'Channels and inventory' }, description: { es: 'Vista de conectividad cuya integración real se valida por proveedor.', en: 'Connectivity view whose live integration is validated per provider.' } },
+  { id: 'automation', category: 'automation', minimumPlan: 'inteligente', maturity: 'simulated', evidence: 'aurem', label: { es: 'Automatizaciones', en: 'Automations' }, description: { es: 'Reglas y recordatorios representados sin ejecutar envíos externos.', en: 'Rules and reminders represented without external delivery.' } },
+  { id: 'supervised-ai', category: 'ai', minimumPlan: 'inteligente', maturity: 'simulated', evidence: 'aurem', label: { es: 'Copiloto supervisado', en: 'Supervised copilot' }, description: { es: 'Prepara recomendaciones y mensajes con fuentes y confirmación humana.', en: 'Prepares recommendations and messages with sources and human confirmation.' } },
+  { id: 'revenue', category: 'revenue', minimumPlan: 'inteligente', maturity: 'future', evidence: 'aurem', label: { es: 'Revenue y previsión', en: 'Revenue and forecasting' }, description: { es: 'Escenarios de demanda y precio pendientes de validación operacional.', en: 'Demand and pricing scenarios pending operational validation.' } },
+] as const;
+
 export function hasLevel(current: PlanLevel, required: PlanLevel): boolean {
   return LEVELS[current].rank >= LEVELS[required].rank;
+}
+
+export function normalizePlanLevel(value: PlanLevel | LegacyPlanLevel): PlanLevel {
+  if (value === 'inicio') return 'basico';
+  if (value === 'automatiza') return 'inteligente';
+  return value;
 }
 
 export interface ScopeSignals {
@@ -94,10 +125,7 @@ export interface ScopeSignals {
 }
 
 export function recommendLevel(signals: ScopeSignals): PlanLevel {
-  const properties = Math.max(1, Math.trunc(signals.propertyCount));
-  const units = Math.max(1, Math.trunc(signals.unitCount));
-  if (signals.wantsOperations || units >= 40) return 'inteligente';
-  if (signals.wantsAutomation || units >= 12) return 'automatiza';
-  if (signals.wantsBookings || properties > 1 || units > 1) return 'gestion';
-  return 'inicio';
+  if (signals.wantsOperations || signals.wantsAutomation) return 'inteligente';
+  if (signals.wantsBookings) return 'gestion';
+  return 'basico';
 }

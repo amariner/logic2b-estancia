@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@logic-estancia/domain": "workspace:*",
     "@logic-estancia/site": "workspace:*",
     "@logic-estancia/web": "workspace:*",
     "zod": "^4.4.3"

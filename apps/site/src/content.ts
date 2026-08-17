@@ -1,11 +1,11 @@
 export const content = {
   es: {
-    nav: { product: 'Producto', demos: 'Demos', levels: 'Niveles', docs: 'Guías', contact: 'Cuéntanos tu proyecto' },
+    nav: { product: 'Soluciones', demos: 'Demos', levels: 'Planes', docs: 'Guías', contact: 'Descubre tu configuración' },
     hero: {
       eyebrow: 'Logic Estancia · by Logic2B',
-      title: 'Reservas y operación, por fin en el mismo lugar.',
-      body: 'Una web que vende y un gestor que acompaña el trabajo diario. Desde un piso turístico hasta un hotel de 96 habitaciones.',
-      primary: 'Explorar las demos', secondary: 'Cuéntanos tu proyecto',
+      title: 'Tu web, tus reservas y tu operación.',
+      body: 'Una solución modular diseñada alrededor de tu alojamiento: empieza con una web que vende y evoluciona hasta un centro operativo cuando lo necesites.',
+      primary: 'Descubrir mi configuración', secondary: 'Explorar las demos',
     },
     proof: { eyebrow: 'Una sola operación', title: 'La reserva no termina cuando llega al calendario.', body: 'Consulta, disponibilidad, cobro, entrada, limpieza e incidencias comparten contexto. Sin hojas paralelas ni decisiones invisibles.' },
     modes: {
@@ -23,18 +23,17 @@ export const content = {
       booking: 'Reservas, huéspedes y planning', automation: 'Mensajes, recordatorios y canales', operations: 'Equipo, mantenimiento y revenue',
       result: 'Recomendación inicial', use: 'Usar esta recomendación',
       plans: {
-        inicio: ['Inicio', 'Web, SEO y consultas para una única unidad.'],
+        basico: ['Básico', 'Web de marca, SEO y solicitudes por email, sin dashboard ni falsa complejidad.'],
         gestion: ['Gestión', 'Una operación compartida para reservas, huéspedes, planning y preparación.'],
-        automatiza: ['Automatiza', 'Gestión más mensajes, recordatorios, canales y copiloto supervisado.'],
         inteligente: ['Inteligente', 'Centro operativo para equipos, mantenimiento, ingresos y previsión.'],
       },
       reasons: {
         single: 'Una sola unidad permite empezar sin complejidad operativa.',
-        multi: 'Varias propiedades o unidades necesitan una vista común.',
+        multi: 'El tamaño orienta el alcance, pero el plan se decide por capacidades.',
         booking: 'Has incluido reservas y trabajo diario.',
         automation: 'Has incluido automatización y canales.',
         operations: 'Has incluido coordinación avanzada de la operación.',
-        scale: 'El volumen aconseja más control y automatización desde el inicio.',
+        scale: 'Revisaremos el volumen contigo para dimensionar implantación y soporte.',
       },
     },
     activation: {
@@ -61,12 +60,12 @@ export const content = {
     contact: { eyebrow: 'Hablemos', title: 'Cuéntanos cómo alojas.', body: 'Te responderemos con un alcance claro, sin convertir una demo en una promesa de producción.', submit: 'Enviar proyecto', sending: 'Enviando…', ok: 'Solicitud entregada. Te responderemos pronto.', error: 'No hemos podido entregarla. Prueba por WhatsApp o vuelve a intentarlo.' },
   },
   en: {
-    nav: { product: 'Product', demos: 'Demos', levels: 'Levels', docs: 'Guides', contact: 'Tell us about your project' },
+    nav: { product: 'Solutions', demos: 'Demos', levels: 'Plans', docs: 'Guides', contact: 'Discover your setup' },
     hero: {
       eyebrow: 'Logic Estancia · by Logic2B',
-      title: 'Bookings and operations, finally in one place.',
-      body: 'A website that sells and a workspace for the daily operation. From one holiday apartment to a 96-room hotel.',
-      primary: 'Explore the demos', secondary: 'Tell us about your project',
+      title: 'Your website, bookings and operation.',
+      body: 'A modular solution designed around your stay: start with a website that sells and evolve into an operations centre when you need it.',
+      primary: 'Discover my setup', secondary: 'Explore the demos',
     },
     proof: { eyebrow: 'One operation', title: 'A booking does not end when it reaches the calendar.', body: 'Enquiry, availability, payment, arrival, cleaning and incidents share context. No parallel spreadsheets or invisible decisions.' },
     modes: {
@@ -84,18 +83,17 @@ export const content = {
       booking: 'Bookings, guests and planning', automation: 'Messages, reminders and channels', operations: 'Teams, maintenance and revenue',
       result: 'Initial recommendation', use: 'Use this recommendation',
       plans: {
-        inicio: ['Start', 'Website, SEO and enquiries for a single unit.'],
+        basico: ['Basic', 'Brand website, SEO and email enquiries, without a workspace you do not need.'],
         gestion: ['Manage', 'One shared operation for bookings, guests, planning and preparation.'],
-        automatiza: ['Automate', 'Management plus messages, reminders, channels and a supervised copilot.'],
         inteligente: ['Intelligent', 'Operations centre for teams, maintenance, revenue and forecasting.'],
       },
       reasons: {
         single: 'One unit can start without operational complexity.',
-        multi: 'Several properties or units need one shared view.',
+        multi: 'Size guides scope, while capabilities determine the plan.',
         booking: 'You included bookings and daily operations.',
         automation: 'You included automation and channels.',
         operations: 'You included advanced operations coordination.',
-        scale: 'The volume calls for more control and automation from the start.',
+        scale: 'We review scale with you to size implementation and support.',
       },
     },
     activation: {

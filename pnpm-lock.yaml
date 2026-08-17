@@ -146,6 +146,9 @@ importers:
 
   apps/worker:
     dependencies:
+      '@logic-estancia/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@logic-estancia/site':
         specifier: workspace:*
         version: link:../site

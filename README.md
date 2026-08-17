@@ -1,6 +1,6 @@
 # Logic Estancia
 
-Producto demo-first para alojamientos turísticos: web, reserva directa y operación desde una unidad hasta un hotel.
+Producto demo-first para alojamientos turísticos: web comercial, diagnóstico, reservas y operación desde una unidad hasta un hotel.
 
 ## Desarrollo
 
@@ -10,14 +10,16 @@ pnpm check
 pnpm dev
 ```
 
-El Worker local compone el sitio comercial, las tres webs ficticias y los gestores. Las demos guardan sus cambios exclusivamente en el navegador. En Terrava y Aurem, los datos introducidos en la web demo continúan en el gestor local para completar el recorrido sin enviar información a servicios externos. El sitio comercial incluye un configurador orientativo que recomienda el nivel mínimo según propiedades, unidades y procesos, y traspasa ese alcance al formulario de contacto.
+El Worker local compone el sitio comercial, las tres webs ficticias y los gestores. Las demos guardan sus cambios exclusivamente en el navegador. En Terrava y Aurem, los datos introducidos en la web demo continúan en el gestor local para completar el recorrido sin enviar información a servicios externos. El sitio comercial recomienda Básico, Gestión o Inteligente por capacidades y ofrece el resultado antes de solicitar datos de contacto.
 
 ## Producción
 
-La publicación es manual. Requiere `wrangler login` y el secreto `LEADS_RESEND_API_KEY` en el Worker `logic-estancia-demo`.
+La publicación es manual. Requiere `wrangler login` y el secreto `LEADS_RESEND_API_KEY` en el Worker `logic-estancia-demo`. Para sincronizar contactos y negocios con HubSpot, añade también `HUBSPOT_ACCESS_TOKEN`.
 
 ```bash
 pnpm deploy
 ```
 
 Las integraciones, pagos, canales, mensajería, SES.Hospedajes e IA visibles son demostraciones o estados preparados, nunca ejecuciones externas.
+
+La cadencia comercial, el pipeline, la configuración de HubSpot, la taxonomía de GA4 y el guion de entrevistas están documentados en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md).

@@ -2,6 +2,9 @@ import { expect, test, type Page } from '@playwright/test';
 
 const paths = [
   '/', '/en/', '/docs/', '/en/docs/',
+  '/soluciones/gestores/', '/soluciones/hoteles/', '/planes/', '/diagnostico/',
+  '/en/solutions/managers/', '/en/solutions/hotels/', '/en/plans/', '/en/assessment/',
+  '/recursos/gestor-reservas-apartamentos-turisticos/', '/recursos/web-hotel-reservas-directas-operacion/',
   '/legal/', '/privacidad/', '/cookies/',
   '/en/legal/', '/en/privacidad/', '/en/cookies/',
   '/demos/nivora/', '/demos/terrava/', '/demos/aurem/',
@@ -66,43 +69,73 @@ test('commercial pages expose bilingual SEO metadata and complete sitemap', asyn
   expect(xml).not.toContain('/demos/');
 });
 
-test('level interest carries the selected scope into the contact form', async ({ page }) => {
+test('plan interest carries the selected plan into the assessment', async ({ page }) => {
   await page.goto('/');
   await page.locator('.level-grid article').nth(1).getByRole('link', { name: /Me interesa/ }).click();
-  await expect(page.locator('[name="plan"]')).toHaveValue('gestion');
-  await expect(page).toHaveURL(/#contacto$/);
+  await expect(page).toHaveURL(/\/diagnostico\/\?plan=gestion$/);
+  await expect(page.locator('[name="bookingNeeds"][value="bookings"]')).toBeChecked();
 });
 
 test('scope configurator recommends progressively and prefills the commercial form', async ({ page }) => {
   await page.goto('/');
   const scope = page.locator('[data-scope-estimator]');
-  await expect(scope).toHaveAttribute('data-level', 'inicio');
-  await expect(scope.getByRole('heading', { name: 'Inicio', exact: true })).toBeVisible();
+  await expect(scope).toHaveAttribute('data-level', 'basico');
+  await expect(scope.getByRole('heading', { name: 'Básico', exact: true })).toBeVisible();
 
   await scope.getByLabel('Propiedades').fill('8');
   await scope.getByLabel('Unidades').fill('8');
+  await expect(scope).toHaveAttribute('data-level', 'basico');
+
+  await scope.getByLabel('Reservas, huéspedes y planning').check();
   await expect(scope).toHaveAttribute('data-level', 'gestion');
   await expect(scope.getByRole('heading', { name: 'Gestión', exact: true })).toBeVisible();
 
   await scope.getByLabel('Mensajes, recordatorios y canales').check();
-  await expect(scope).toHaveAttribute('data-level', 'automatiza');
+  await expect(scope).toHaveAttribute('data-level', 'inteligente');
   await scope.getByLabel('Equipo, mantenimiento y revenue').check();
   await expect(scope).toHaveAttribute('data-level', 'inteligente');
   await scope.getByRole('link', { name: 'Usar esta recomendación' }).click();
 
-  await expect(page).toHaveURL(/#contacto$/);
-  await expect(page.locator('[data-lead] [name="plan"]')).toHaveValue('inteligente');
-  await expect(page.locator('[data-lead] [name="propertyCount"]')).toHaveValue('8');
-  await expect(page.locator('[data-lead] [name="unitCount"]')).toHaveValue('8');
+  await expect(page).toHaveURL(/\/diagnostico\/\?plan=inteligente&properties=8&units=8$/);
+  await expect(page.locator('[name="propertyCount"]')).toHaveValue('8');
+  await expect(page.locator('[name="unitCount"]')).toHaveValue('8');
 });
 
 test('scope configurator remains localized in English', async ({ page }) => {
   await page.goto('/en/');
   const scope = page.locator('[data-scope-estimator]');
   await scope.getByLabel('Messages, reminders and channels').check();
-  await expect(scope).toHaveAttribute('data-level', 'automatiza');
-  await expect(scope.getByRole('heading', { name: 'Automate', exact: true })).toBeVisible();
+  await expect(scope).toHaveAttribute('data-level', 'inteligente');
+  await expect(scope.getByRole('heading', { name: 'Intelligent', exact: true })).toBeVisible();
   await expect(scope.getByText('You included automation and channels.')).toBeVisible();
+});
+
+test('assessment reveals an operations recommendation before asking for contact details', async ({ page }) => {
+  await page.goto('/diagnostico/');
+  await page.getByText('Hotel', { exact: true }).click();
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByLabel('Propiedades').fill('1');
+  await page.getByLabel('Unidades o habitaciones').fill('48');
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByText('PMS', { exact: true }).click();
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByText('Reservas', { exact: true }).click();
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByText('Mantenimiento', { exact: true }).click();
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByRole('button', { name: /Ver recomendación/ }).click();
+  await expect(page.locator('[data-result-name]')).toHaveText('Inteligente');
+  await expect(page.getByRole('heading', { name: 'Recibe el resumen y una respuesta personalizada.' })).toBeVisible();
+  await expect(page.locator('[data-demo-link]')).toHaveAttribute('href', '/demos/aurem/');
+});
+
+test('analytics remains consent-gated on commercial pages and demos', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('script[data-gtm]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Aceptar analítica' }).click();
+  await expect(page.locator('script[data-gtm]')).toHaveCount(1);
+  await page.goto('/demos/terrava/');
+  await expect(page.locator('script[data-gtm]')).toHaveCount(1);
 });
 
 test('Terrava carries a website enquiry into the workspace, converts it and resets', async ({ page }) => {
@@ -113,6 +146,7 @@ test('Terrava carries a website enquiry into the workspace, converts it and rese
   await page.getByLabel('Salida').fill('2026-08-26');
   await page.locator('[data-demo-form] button[type="submit"]').click();
   await page.getByRole('link', { name: 'Abrir la solicitud en el gestor' }).click();
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
   await expect(page).toHaveURL(/vista=enquiries/);
   await expect(page.getByText('Lucía Prado · 3 huéspedes')).toBeVisible();
   await expect(page.getByText('Desde la web demo')).toBeVisible();
@@ -132,13 +166,29 @@ test('the shared Terrava journey remains localized in English', async ({ page })
   await page.getByLabel('Name').fill('Jamie Demo');
   await page.locator('[data-demo-form] button[type="submit"]').click();
   await page.getByRole('link', { name: 'Open the enquiry in the workspace' }).click();
+  await page.getByRole('button', { name: 'Explore freely' }).click();
   await expect(page.getByRole('heading', { name: 'Enquiries' })).toBeVisible();
   await expect(page.getByText('Jamie Demo · 2 guests')).toBeVisible();
   await expect(page.getByText('From demo website')).toBeVisible();
 });
 
+test('Terrava operates a stay and publishes a reversible website draft', async ({ page }) => {
+  await page.goto('/demos/terrava/gestion/');
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
+  await page.getByRole('button', { name: 'Planning', exact: true }).click();
+  await page.getByRole('button', { name: 'Reasignar a Casa Bruma' }).click();
+  await page.getByRole('button', { name: 'Aplicar tarifa flexible +48 €' }).click();
+  await expect(page.getByText('Planning y perfil actualizados')).toBeVisible();
+  await page.getByRole('button', { name: 'Mi web', exact: true }).click();
+  await page.getByLabel('Texto del hero').fill('Ocho casas. Una forma distinta de volver.');
+  await page.getByRole('button', { name: 'Publicar cambio simulado' }).click();
+  await expect(page.getByText('Publicada en esta demo')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ocho casas. Una forma distinta de volver.' })).toBeVisible();
+});
+
 test('workspace search opens from the keyboard and navigates to a matching area', async ({ page }) => {
   await page.goto('/demos/aurem/gestion/');
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
   await page.getByRole('button', { name: 'Buscar en el gestor' }).click();
   const search = page.getByRole('dialog', { name: 'Búsqueda rápida' });
   await expect(search).toBeVisible();
@@ -159,6 +209,7 @@ test('workspace search opens from the keyboard and navigates to a matching area'
 
 test('operational notifications expose context and open the related area', async ({ page }) => {
   await page.goto('/demos/aurem/gestion/');
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
   await page.getByRole('button', { name: 'Abrir avisos' }).click();
   const notifications = page.getByRole('dialog', { name: 'Avisos operativos' });
   await expect(notifications.getByText('Habitación 408 requiere atención')).toBeVisible();
@@ -169,6 +220,7 @@ test('operational notifications expose context and open the related area', async
 
 test('Aurem completes checkout-cleaning-arrival handoff and resets', async ({ page }) => {
   await page.goto('/demos/aurem/gestion/');
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
   await page.locator('.role-select select').selectOption('cleaning');
   await page.getByRole('button', { name: 'Limpieza', exact: true }).click();
   await page.getByRole('button', { name: 'Empezar preparación' }).click();
@@ -181,6 +233,16 @@ test('Aurem completes checkout-cleaning-arrival handoff and resets', async ({ pa
   await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
   await page.getByRole('button', { name: /Restablecer/ }).click();
   await expect(page.getByText('Pendiente', { exact: true })).toBeVisible();
+});
+
+test('Aurem assigns and resolves a maintenance incident locally', async ({ page }) => {
+  await page.goto('/demos/aurem/gestion/');
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
+  await page.getByRole('button', { name: 'Mantenimiento', exact: true }).click();
+  await page.getByRole('button', { name: 'Asignar a mantenimiento' }).click();
+  await page.getByRole('button', { name: 'Resolver y liberar' }).click();
+  await expect(page.getByText('Sin impacto en la llegada')).toBeVisible();
+  await expect(page.getByText('Resuelta', { exact: true })).toBeVisible();
 });
 
 test('Aurem rejects an impossible stay before opening demo payment', async ({ page }) => {
@@ -211,6 +273,7 @@ test('Aurem neutral payment carries the simulated booking into the workspace', a
   await page.getByRole('button', { name: 'Confirmar reserva simulada' }).click();
   await expect(page.locator('.demo-result')).toContainText('No se ha realizado ningún cobro');
   await page.getByRole('link', { name: 'Ver la reserva en el gestor' }).click();
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
   await expect(page).toHaveURL(/vista=bookings/);
   await expect(page.getByText('Álex Moreno llega desde la reserva simulada de la web.')).toBeVisible();
   await expect(page.getByText('Álex Moreno', { exact: true })).toBeVisible();

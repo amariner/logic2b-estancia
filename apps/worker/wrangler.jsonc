@@ -5,7 +5,9 @@
   "compatibility_date": "2026-08-01",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
-    "LEADS_TRANSPORT": "resend"
+    "LEADS_TRANSPORT": "resend",
+    "HUBSPOT_PIPELINE": "default",
+    "HUBSPOT_DEAL_STAGE": "appointmentscheduled"
   },
   "routes": [{ "pattern": "estancia.logic2b.com/*", "zone_name": "logic2b.com" }],
   "assets": {

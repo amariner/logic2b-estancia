@@ -7,15 +7,18 @@ import { PRODUCT, type Locale } from '@logic-estancia/config';
 import { logic2bContact } from '@logic-estancia/config/contact';
 import { content } from '../content';
 
-interface Props { locale: Locale; title?: string; description?: string; route?: string; }
-const { locale, title = 'Logic Estancia', description = 'Web, reserva directa y operación para alojamientos.', route = '' } = Astro.props;
+interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; }
+const { locale, title = 'Logic Estancia', description = 'Web, reserva directa y operación para alojamientos.', route = '', alternateRoute } = Astro.props;
 const c = content[locale];
 const prefix = locale === 'en' ? '/en' : '';
 const cleanRoute = route.replace(/^\//, '').replace(/\/$/, '');
 const routePath = cleanRoute ? `/${cleanRoute}/` : '/';
 const canonical = `${PRODUCT.url}${prefix}${routePath}`;
-const alternateEs = `${PRODUCT.url}${routePath}`;
-const alternateEn = `${PRODUCT.url}/en${routePath}`;
+const cleanAlternate = (alternateRoute ?? route).replace(/^\//, '').replace(/\/$/, '');
+const alternatePath = cleanAlternate ? `/${cleanAlternate}/` : '/';
+const alternateEs = `${PRODUCT.url}${locale === 'es' ? routePath : alternatePath}`;
+const alternateEn = `${PRODUCT.url}/en${locale === 'en' ? routePath : alternatePath}`;
+const localeHref = locale === 'es' ? `/en${alternatePath}` : alternatePath;
 const socialLocale = locale === 'es' ? 'es_ES' : 'en_GB';
 const alternateSocialLocale = locale === 'es' ? 'en_GB' : 'es_ES';
 const wa = logic2bContact(locale, route.startsWith('docs') ? 'docs' : 'commercial');
@@ -74,25 +77,24 @@ const structuredData = [
           <span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancias</span>
         </a>
         <nav aria-label={locale === 'es' ? 'Principal' : 'Main'}>
-          <a href={`${prefix}/#producto`}>{c.nav.product}</a>
+          <a href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}>{c.nav.product}</a>
           <a href={`${prefix}/#demos`}>{c.nav.demos}</a>
-          <a href={`${prefix}/#niveles`}>{c.nav.levels}</a>
-          <a href={`${prefix}/docs/`}>{c.nav.docs}</a>
+          <a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a>
         </nav>
         <div class="top-actions">
-          <a class="locale" href={locale === 'es' ? '/en/' : '/'}>{locale === 'es' ? 'EN' : 'ES'}</a>
-          <a class="pill" href={`${prefix}/#contacto`}>{c.nav.contact}</a>
+          <a class="locale" href={localeHref}>{locale === 'es' ? 'EN' : 'ES'}</a>
+          <a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="header">{c.nav.contact}</a>
         </div>
         <button class="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">Menu</button>
       </div>
       <div id="mobile-nav" class="mobile-nav" hidden>
-        <a href={`${prefix}/#producto`}>{c.nav.product}</a><a href={`${prefix}/#demos`}>{c.nav.demos}</a><a href={`${prefix}/#niveles`}>{c.nav.levels}</a><a href={`${prefix}/docs/`}>{c.nav.docs}</a>
+        <a href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}>{c.nav.product}</a><a href={`${prefix}/#demos`}>{c.nav.demos}</a><a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`}>{c.nav.contact}</a>
       </div>
     </header>
     <main id="contenido"><slot /></main>
     <footer class="footer shell">
       <a class="wordmark" href={`${prefix}/`} aria-label="Logic2B Estancias"><span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancias</span></a>
-      <div><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
+      <div><a href={`${prefix}/docs/`}>{c.nav.docs}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
       <p>© 2026 Logic2B · Castelló</p>
     </footer>
     <a class="whatsapp" href={wa.href} target="_blank" rel="noopener noreferrer" aria-label={`${wa.label} · WhatsApp`} data-whatsapp hidden>{wa.label}<span aria-hidden="true">↗</span></a>
@@ -108,13 +110,22 @@ const structuredData = [
       const stored = localStorage.getItem('logic-estancia-consent-v1');
       if (stored) consent?.setAttribute('hidden', '');
       function loadGtm() {
+        if (document.querySelector('script[data-gtm]')) return;
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
-        const script = document.createElement('script'); script.async = true; script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-TVDWZ9LC'; document.head.append(script);
+        const script = document.createElement('script'); script.dataset.gtm = 'true'; script.async = true; script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-TVDWZ9LC'; document.head.append(script);
       }
       if (stored === 'analytics') loadGtm();
       document.querySelector('[data-accept]')?.addEventListener('click', () => { localStorage.setItem('logic-estancia-consent-v1', 'analytics'); consent?.setAttribute('hidden', ''); loadGtm(); });
       document.querySelector('[data-reject]')?.addEventListener('click', () => { localStorage.setItem('logic-estancia-consent-v1', 'essential'); consent?.setAttribute('hidden', ''); });
+      const allowedEvents = new Set(['solution_view','plan_select','assessment_start','assessment_step','assessment_complete','assessment_submit','demo_open','demo_mode_select','demo_step_complete','demo_flow_complete','demo_cta','lead_submit','meeting_click','cta_click']);
+      window.estanciaTrack = (event, parameters = {}) => {
+        if (localStorage.getItem('logic-estancia-consent-v1') !== 'analytics' || !allowedEvents.has(event)) return;
+        const allowed = ['locale','segment','plan','demo','flow','step_index','source_section'];
+        const safe = Object.fromEntries(Object.entries(parameters).filter(([key, value]) => allowed.includes(key) && (typeof value === 'string' || typeof value === 'number')));
+        window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event, ...safe });
+      };
+      document.addEventListener('click', (event) => { const target = event.target.closest?.('[data-track]'); if (!target) return; window.estanciaTrack?.(target.dataset.track, { locale: document.documentElement.lang, plan: target.dataset.plan, segment: target.dataset.segment, source_section: target.dataset.section }); });
       const wa = document.querySelector('[data-whatsapp]');
       const toggleWa = () => { if (wa) wa.hidden = window.scrollY < 280 || !consent?.hasAttribute('hidden'); };
       addEventListener('scroll', toggleWa, { passive: true }); toggleWa();

@@ -5,7 +5,7 @@ type ScopeCopy = {
   reasons: Record<'single' | 'multi' | 'booking' | 'automation' | 'operations' | 'scale', string>;
 };
 
-const levelCodes: Record<PlanLevel, string> = { inicio: '00', gestion: '01', automatiza: '02', inteligente: '03' };
+const levelCodes: Record<PlanLevel, string> = { basico: '00', gestion: '01', inteligente: '02' };
 
 function positiveInteger(input: HTMLInputElement): number {
   return Math.max(1, Math.trunc(Number(input.value) || 1));
@@ -26,7 +26,7 @@ document.querySelectorAll<HTMLElement>('[data-scope-estimator]').forEach((estima
   if (!controls || !properties || !units || !bookings || !automation || !operations || !name || !code || !description || !reasons || !apply) return;
 
   const copy = JSON.parse(estimator.dataset.copy ?? '{}') as ScopeCopy;
-  let currentLevel: PlanLevel = 'inicio';
+  let currentLevel: PlanLevel = 'basico';
 
   const currentSignals = (): ScopeSignals => ({
     propertyCount: positiveInteger(properties),
@@ -50,7 +50,7 @@ document.querySelectorAll<HTMLElement>('[data-scope-estimator]').forEach((estima
     if (signals.wantsBookings) reasonKeys.push('booking');
     if (signals.wantsAutomation) reasonKeys.push('automation');
     if (signals.wantsOperations) reasonKeys.push('operations');
-    if (signals.unitCount >= 12) reasonKeys.push('scale');
+    if (signals.unitCount >= 12 || signals.propertyCount >= 4) reasonKeys.push('scale');
     if (reasonKeys.length === 0) reasonKeys.push('single');
     reasons.replaceChildren(...reasonKeys.map((key) => {
       const item = document.createElement('li');
@@ -62,15 +62,13 @@ document.querySelectorAll<HTMLElement>('[data-scope-estimator]').forEach((estima
   controls.addEventListener('input', render);
   controls.addEventListener('change', render);
   apply.addEventListener('click', () => {
-    const lead = document.querySelector<HTMLFormElement>('[data-lead]');
-    const plan = lead?.elements.namedItem('plan') as HTMLSelectElement | null;
-    const propertyCount = lead?.elements.namedItem('propertyCount') as HTMLInputElement | null;
-    const unitCount = lead?.elements.namedItem('unitCount') as HTMLInputElement | null;
-    if (plan) plan.value = currentLevel;
-    if (propertyCount) propertyCount.value = String(positiveInteger(properties));
-    if (unitCount) unitCount.value = String(positiveInteger(units));
+    const target = new URL(apply.href, location.href);
+    target.searchParams.set('plan', currentLevel);
+    target.searchParams.set('properties', String(positiveInteger(properties)));
+    target.searchParams.set('units', String(positiveInteger(units)));
+    apply.href = `${target.pathname}${target.search}`;
     const analyticsWindow = window as Window & { dataLayer?: Record<string, unknown>[] };
-    analyticsWindow.dataLayer?.push({ event: 'estancia_scope_recommendation', plan: currentLevel, properties: positiveInteger(properties), units: positiveInteger(units) });
+    analyticsWindow.dataLayer?.push({ event: 'assessment_complete', plan: currentLevel, source_section: 'homepage_scope' });
   });
   render();
 });

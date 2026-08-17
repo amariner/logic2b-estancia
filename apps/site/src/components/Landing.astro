@@ -7,24 +7,22 @@ const c = content[locale];
 const prefix = locale === 'en' ? '/en' : '';
 const wa = logic2bContact(locale, 'commercial');
 const demos = locale === 'es' ? [
-  { slug: 'nivora', level: 'Inicio · monoestancia', name: 'Nivora One', text: 'Un piso turístico con una web que convierte interés en una consulta clara.', image: '/media/nivora/hero.webp' },
+  { slug: 'nivora', level: 'Básico · sin dashboard', name: 'Nivora One', text: 'Un piso turístico con una web que convierte interés en una solicitud por email.', image: '/media/nivora/hero.webp' },
   { slug: 'terrava', level: 'Gestión · 8 propiedades', name: 'Terrava Collection', text: 'Una solicitud, ocho casas y una alternativa que acaba en reserva.', image: '/media/terrava/hero.webp' },
-  { slug: 'aurem', level: 'Visión · 96 habitaciones', name: 'Aurem Hotel', text: 'Reserva directa, canales y una habitación que debe estar lista a tiempo.', image: '/media/aurem/hero.webp' },
+  { slug: 'aurem', level: 'Inteligente · 96 habitaciones', name: 'Aurem Hotel', text: 'Un centro operativo para coordinar llegadas, equipos e incidencias.', image: '/media/aurem/hero.webp' },
 ] : [
-  { slug: 'nivora', level: 'Start · single stay', name: 'Nivora One', text: 'One holiday apartment and a website that turns interest into a clear enquiry.', image: '/media/nivora/hero.webp' },
+  { slug: 'nivora', level: 'Basic · no dashboard', name: 'Nivora One', text: 'One holiday apartment and a website that turns interest into an email enquiry.', image: '/media/nivora/hero.webp' },
   { slug: 'terrava', level: 'Manage · 8 properties', name: 'Terrava Collection', text: 'One enquiry, eight homes and an alternative that becomes a booking.', image: '/media/terrava/hero.webp' },
-  { slug: 'aurem', level: 'Vision · 96 rooms', name: 'Aurem Hotel', text: 'Direct booking, channels and a room that must be ready on time.', image: '/media/aurem/hero.webp' },
+  { slug: 'aurem', level: 'Intelligent · 96 rooms', name: 'Aurem Hotel', text: 'An operations centre for coordinating arrivals, teams and incidents.', image: '/media/aurem/hero.webp' },
 ];
 const levels = locale === 'es' ? [
-  ['00', 'Inicio', 'Web, SEO y consultas. Sin un gestor que no necesitas todavía.', 'inicio'],
-  ['01', 'Gestión', 'Reservas, huéspedes, planning, cobro opcional, limpieza básica e iCal.', 'gestion'],
-  ['02', 'Automatiza', 'Mensajes, recordatorios, reseñas, canales y copiloto supervisado.', 'automatiza'],
-  ['03', 'Inteligente', 'Centro operativo, equipo, mantenimiento, revenue y previsión.', 'inteligente'],
+  ['00', 'Básico', 'Web de marca, SEO, hosting, mantenimiento y solicitudes por email. Sin dashboard.', 'basico'],
+  ['01', 'Gestión', 'Solicitudes, reservas, planning, huéspedes, tarifas, informes y editor web.', 'gestion'],
+  ['02', 'Inteligente', 'Centro operativo, limpieza, equipo, mantenimiento, automatización e IA supervisada.', 'inteligente'],
 ] : [
-  ['00', 'Start', 'Website, SEO and enquiries. No workspace you do not need yet.', 'inicio'],
-  ['01', 'Manage', 'Bookings, guests, planning, optional payment, basic cleaning and iCal.', 'gestion'],
-  ['02', 'Automate', 'Messages, reminders, reviews, channels and a supervised copilot.', 'automatiza'],
-  ['03', 'Intelligent', 'Operations centre, teams, maintenance, revenue and forecasting.', 'inteligente'],
+  ['00', 'Basic', 'Brand website, SEO, hosting, maintenance and email enquiries. No dashboard.', 'basico'],
+  ['01', 'Management', 'Enquiries, bookings, planning, guests, rates, reports and website editor.', 'gestion'],
+  ['02', 'Intelligent', 'Operations centre, cleaning, teams, maintenance, automation and supervised AI.', 'inteligente'],
 ];
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -41,11 +39,16 @@ const faqSchema = {
     <p class="eyebrow">{c.hero.eyebrow}</p>
     <h1 class="display">{c.hero.title.split(', ')[0]}, <em>{c.hero.title.split(', ').slice(1).join(', ')}</em></h1>
     <p>{c.hero.body}</p>
-    <div class="hero-actions"><a class="pill" href="#demos">{c.hero.primary}</a><a class="pill ghost" href="#contacto">{c.hero.secondary}</a></div>
+    <div class="hero-actions"><a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="hero">{c.hero.primary}</a><a class="pill ghost" href="#demos">{c.hero.secondary}</a></div>
   </div>
   <article class="floating artifact a"><span>{locale === 'es' ? 'Llegadas de hoy' : 'Today’s arrivals'}</span><strong>18</strong><span class="status">{locale === 'es' ? '3 requieren atención' : '3 need attention'}</span></article>
   <article class="floating artifact b"><span>{locale === 'es' ? 'Habitaciones listas' : 'Rooms ready'}</span><strong>92%</strong><span class="status">{locale === 'es' ? '6 en preparación' : '6 in preparation'}</span></article>
   <article class="floating artifact c"><span>{locale === 'es' ? 'Ocupación prevista · próximos 14 días' : 'Forecast occupancy · next 14 days'}</span><div class="mini-chart" aria-hidden="true">{[42,55,62,48,68,78,72,83,91,88,74,86,92,80].map((h) => <i style={`--h:${h}%`}></i>)}</div></article>
+</section>
+
+<section class="section segment-section shell" aria-labelledby="segment-title">
+  <div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Dos recorridos, una arquitectura' : 'Two journeys, one architecture'}</p><h2 id="segment-title" class="heading">{locale === 'es' ? 'Diseñada para la forma en que alojas.' : 'Designed around how you host.'}</h2></div>
+  <div class="mode-grid segment-grid"><a class="card" href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}><span>01</span><h3>{locale === 'es' ? 'Gestores y alojamientos rurales' : 'Managers and rural stays'}</h3><p>{locale === 'es' ? 'Web, solicitudes y reservas para portfolios que necesitan una vista común sin perder el carácter de cada propiedad.' : 'Website, enquiries and bookings for portfolios that need one view without losing each property’s character.'}</p><b>{locale === 'es' ? 'Ver solución' : 'View solution'} →</b></a><a class="card" href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}><span>02</span><h3>{locale === 'es' ? 'Hoteles y equipos operativos' : 'Hotels and operations teams'}</h3><p>{locale === 'es' ? 'Reservas, llegadas, limpieza, incidencias y decisiones coordinadas desde un centro operativo.' : 'Bookings, arrivals, cleaning, incidents and decisions coordinated from an operations centre.'}</p><b>{locale === 'es' ? 'Ver solución' : 'View solution'} →</b></a></div>
 </section>
 
 <section id="producto" class="section shell">
@@ -54,7 +57,7 @@ const faqSchema = {
     <ul class="feature-list">
       <li><strong>{locale === 'es' ? 'Una fuente de verdad' : 'One source of truth'}</strong><span class="muted">{locale === 'es' ? 'Empresa, propiedad y unidad comparten el mismo modelo.' : 'Organisation, property and unit share one model.'}</span></li>
       <li><strong>{locale === 'es' ? 'Acciones supervisadas' : 'Supervised actions'}</strong><span class="muted">{locale === 'es' ? 'Precio, cobro y mensajes siempre exigen confirmación.' : 'Pricing, payments and messages always require confirmation.'}</span></li>
-      <li><strong>{locale === 'es' ? 'La realidad a la vista' : 'Truth in plain sight'}</strong><span class="muted">{locale === 'es' ? 'Disponible, demo, por validar o futuro: nunca una promesa ambigua.' : 'Available, demo, to validate or future: never an ambiguous promise.'}</span></li>
+      <li><strong>{locale === 'es' ? 'La realidad a la vista' : 'Truth in plain sight'}</strong><span class="muted">{locale === 'es' ? 'Demo, simulada, a validar o futura: nunca una promesa ambigua.' : 'Demo, simulated, to validate or future: never an ambiguous promise.'}</span></li>
     </ul>
     <div class="product-window artifact" aria-label={locale === 'es' ? 'Vista simulada del gestor' : 'Simulated workspace view'}>
       <div class="window-bar"><span>Aurem Hotel · {locale === 'es' ? 'Todas las propiedades' : 'All properties'}</span><span>{locale === 'es' ? 'Dirección' : 'Direction'} · Demo</span></div>
@@ -73,7 +76,7 @@ const faqSchema = {
 </section>
 
 <section id="niveles" class="section levels">
-  <div class="shell"><div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2></div><div class="level-grid">{levels.map(([n, name, text, value]) => <article><span>{n}</span><h3>{name}</h3><p>{text}</p><a href="#contacto" data-plan={value}>{locale === 'es' ? 'Me interesa' : 'I’m interested'} <span aria-hidden="true">→</span></a></article>)}</div><p class="level-note">{c.levels.note}</p></div>
+  <div class="shell"><div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2></div><div class="level-grid">{levels.map(([n, name, text, value]) => <article><span>{n}</span><h3>{name}</h3><p>{text}</p><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/?plan=${value}`} data-plan={value} data-track="plan_select" data-section="homepage_plans">{locale === 'es' ? 'Me interesa' : 'I’m interested'} <span aria-hidden="true">→</span></a></article>)}</div><p class="level-note">{c.levels.note}</p></div>
 </section>
 
 <section id="alcance" class="section scope-section">
@@ -95,11 +98,11 @@ const faqSchema = {
         <div aria-live="polite" aria-atomic="true">
           <span>{c.scope.result}</span>
           <p class="scope-plan-code" data-scope-code>00</p>
-          <h3 data-scope-name>{c.scope.plans.inicio[0]}</h3>
-          <p data-scope-description>{c.scope.plans.inicio[1]}</p>
+          <h3 data-scope-name>{c.scope.plans.basico[0]}</h3>
+          <p data-scope-description>{c.scope.plans.basico[1]}</p>
           <ul data-scope-reasons><li>{c.scope.reasons.single}</li></ul>
         </div>
-        <a class="pill" href="#contacto" data-use-scope>{c.scope.use}<span aria-hidden="true">→</span></a>
+        <a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-use-scope>{c.scope.use}<span aria-hidden="true">→</span></a>
       </article>
     </div>
   </div>
@@ -126,12 +129,13 @@ const faqSchema = {
     <label>Email<input name="email" required type="email" maxlength="200" autocomplete="email" /></label>
     <label>{locale === 'es' ? 'Teléfono (opcional)' : 'Phone (optional)'}<input name="phone" maxlength="60" autocomplete="tel" /></label>
     <label>{locale === 'es' ? 'Tipo' : 'Type'}<select name="accommodationType" required><option value="apartment">{locale === 'es' ? 'Piso turístico' : 'Holiday apartment'}</option><option value="rural">{locale === 'es' ? 'Casas rurales' : 'Rural stays'}</option><option value="hotel">Hotel</option></select></label>
-    <label>{locale === 'es' ? 'Plan de interés' : 'Plan of interest'}<select name="plan"><option value="">—</option><option value="inicio">{locale === 'es' ? 'Inicio' : 'Start'}</option><option value="gestion">{locale === 'es' ? 'Gestión' : 'Manage'}</option><option value="automatiza">{locale === 'es' ? 'Automatiza' : 'Automate'}</option><option value="inteligente">{locale === 'es' ? 'Inteligente' : 'Intelligent'}</option></select></label>
+    <label>{locale === 'es' ? 'Plan de interés' : 'Plan of interest'}<select name="plan"><option value="">—</option><option value="basico">{locale === 'es' ? 'Básico' : 'Basic'}</option><option value="gestion">{locale === 'es' ? 'Gestión' : 'Management'}</option><option value="inteligente">{locale === 'es' ? 'Inteligente' : 'Intelligent'}</option></select></label>
     <label>{locale === 'es' ? 'Propiedades' : 'Properties'}<input name="propertyCount" type="number" min="1" max="10000" value="1" required /></label>
     <label>{locale === 'es' ? 'Unidades' : 'Units'}<input name="unitCount" type="number" min="1" max="100000" value="1" required /></label>
     <label class="wide">{locale === 'es' ? 'Qué quieres poner en marcha' : 'What do you want to launch'}<textarea name="message" rows="5" maxlength="2000" placeholder={locale === 'es' ? 'Cuéntanos qué gestionas hoy, qué te frena y qué te gustaría conectar.' : 'Tell us what you manage today, what gets in the way and what you would like to connect.'}></textarea></label>
     <label><span class="sr-only">Website</span><input name="website" tabindex="-1" autocomplete="off" /></label>
     <label class="check wide"><input name="accept" type="checkbox" required /><span>{locale === 'es' ? 'He leído la política de privacidad y acepto que Logic2B use estos datos para responder.' : 'I have read the privacy policy and accept that Logic2B uses these details to reply.'}</span></label>
+    <label class="check wide"><input name="marketingConsent" type="checkbox" /><span>{locale === 'es' ? 'También quiero recibir seguimiento comercial relevante (opcional).' : 'I would also like to receive relevant commercial follow-up (optional).'}</span></label>
     <div class="wide"><button class="pill" type="submit"><span>{c.contact.submit}</span><span aria-hidden="true">→</span></button></div>
     <p class="form-status wide" role="status" aria-live="polite"></p>
   </form></div>
@@ -150,8 +154,8 @@ const faqSchema = {
     const button = form.querySelector('button[type=submit]'); const label = button?.querySelector('span');
     if (button) button.disabled = true; if (label) label.textContent = sending; if (status) status.textContent = '';
     const d = Object.fromEntries(new FormData(form));
-    const payload = { ...d, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', lang: locale };
-    try { const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error('delivery'); form.reset(); if (status) status.textContent = ok; window.dataLayer?.push({ event: 'estancia_submit_lead', accommodation_type: payload.accommodationType, plan: payload.plan || 'none' }); }
+    const payload = { ...d, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: location.pathname };
+    try { const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error('delivery'); form.reset(); if (status) status.textContent = ok; window.estanciaTrack?.('lead_submit', { locale, plan: payload.plan || 'none', source_section: 'homepage_contact' }); }
     catch { if (status) status.textContent = error; }
     finally { if (button) button.disabled = false; if (label) label.textContent = locale === 'es' ? 'Enviar proyecto' : 'Send project'; }
   });
