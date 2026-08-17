@@ -2,11 +2,13 @@
 
 Última actualización: 2026-08-17
 
-Commit verificado en GitHub: `6f08b244c4f9b84fc565ff50bf073c4f1ac7fddc`
+Último incremento de producto verificado: `6f08b244c4f9b84fc565ff50bf073c4f1ac7fddc`
 
 Rama: `main`
 
 Estado general: base comercial y demostrativa implementada; validación real y endurecimiento de producción pendientes.
+
+El SHA actual de continuidad se obtiene siempre con `git rev-parse HEAD`; no se fija aquí para evitar que el propio commit de actualización deje el dato obsoleto.
 
 ## Cómo reanudar
 
