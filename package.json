@@ -14,6 +14,7 @@
     "check": "turbo run typecheck lint test build",
     "e2e": "pnpm build && playwright test",
     "images": "node scripts/images.mjs",
+    "smoke:resend": "pnpm --filter @logic-estancia/worker smoke:resend",
     "deploy": "pnpm --filter @logic-estancia/worker deploy"
   },
   "devDependencies": {

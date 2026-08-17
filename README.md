@@ -22,6 +22,8 @@ Para desarrollo local, copia `apps/worker/.dev.vars.example` a `apps/worker/.dev
 pnpm deploy
 ```
 
+El smoke de Resend es seco por defecto y requiere autorización explícita para enviar dos correos inequívocamente marcados como prueba. El procedimiento seguro, la repetición idempotente y la comprobación manual en Resend están en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md#smoke-reproducible-de-resend).
+
 Las integraciones, formularios, reservas, pagos, canales, mensajería, SES.Hospedajes e IA visibles en Nivora, Terrava, Aurem y sus dashboards son demostraciones locales, nunca ejecuciones externas.
 
 La cadencia comercial, la taxonomía de GA4 y el guion de entrevistas están documentados en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md). La referencia histórica de HubSpot permanece diferida y no describe una integración activa.

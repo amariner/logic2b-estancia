@@ -8,6 +8,8 @@ Rama: `main`
 
 Estado general: base comercial y demostrativa implementada; consentimiento y legales equiparados al patrón de Camp; producción consolidada en el Worker `logic-estancia`, sin HubSpot, con dominio personalizado, HTTPS y Resend verificado mediante smoke idempotente. La landing comercial es el único punto que envía solicitudes reales y las dirige a `marinerandreu+logic@gmail.com`; diagnóstico, demos y dashboards permanecen estrictamente locales y ficticios. El Worker anterior `logic-estancia-demo` está retirado y la clave de Resend ya fue regenerada y guardada cifrada.
 
+El smoke operativo de Resend ya es reproducible mediante una CLI segura: permanece offline por defecto, exige autorización explícita y un buzón controlado para ejecutar, marca todo el payload como prueba técnica, verifica entrega/repetición y solo imprime una respuesta saneada. Su ejecución real sigue siendo una actividad humana autorizada y no forma parte de las pruebas automáticas.
+
 El SHA actual de continuidad se obtiene siempre con `git rev-parse HEAD`; no se fija aquí para evitar que el propio commit de actualización deje el dato obsoleto.
 
 ## Cómo reanudar
@@ -44,16 +46,13 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Dos recursos SEO iniciales y playbook comercial.
 - QA visual realizado; `pnpm check` con 28 tareas correctas y `pnpm e2e` con 24 pruebas correctas.
 - Worker `logic-estancia` publicado en `https://estancia.logic2b.com`, sin variables ni token de HubSpot, con assets, `LeadCoordinator`, cuatro secretos de correo cifrados y `workers.dev` desactivado. La versión activa es `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`; `logic-estancia-demo` fue eliminado después de verificar el corte.
+- CLI `pnpm smoke:resend` con modo seco predeterminado, autorización explícita, origen validado, payload no comercial estable, comprobación opcional de referencia idempotente y salida allowlisted sin PII ni secretos.
 
 ## Siguiente cola priorizada
 
 ### P0 · Resiliencia real del embudo
 
-- Añadir una herramienta de smoke test de integraciones que use un lead marcado como prueba y no exponga secretos.
-
-Siguiente punto exacto de desarrollo: añadir una herramienta de smoke test de Resend que envíe una solicitud inequívocamente marcada como prueba desde un entorno autorizado, verifique referencia/outcome sin imprimir PII ni secretos y documente la comprobación manual en Resend.
-
-Bloqueos del siguiente punto: ninguno para implementar y probar localmente la herramienta. Su ejecución contra proveedores o producción depende de credenciales, valores definitivos y autorización humana.
+- Completado: herramienta reproducible y segura de smoke de Resend, con dry-run, autorización humana explícita, datos de prueba, verificación de referencia/outcome y procedimiento manual documentado.
 
 Siguiente punto exacto de activación: confirmar humanamente en el buzón interno que el mensaje del último smoke con referencia `e27e5bf3-a462-4db6-9f49-80d8486fe23c` está visible. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
 
@@ -63,6 +62,10 @@ Siguiente punto exacto de activación: confirmar humanamente en el buzón intern
 - Automatizar comprobaciones adicionales de foco, reduced motion, contraste y landmarks.
 - Medir Lighthouse móvil y corregir regresiones hasta superar 90 en accesibilidad y SEO.
 - Revisar datos estructurados, canonical y `hreflang` con URLs finales de producción.
+
+Siguiente punto exacto de desarrollo: incorporar una auditoría E2E automatizada con axe sobre las rutas comerciales, legales, diagnóstico y demos canónicas en ES/EN; corregir primero cualquier violación crítica o seria y añadir comprobaciones específicas de landmarks, foco visible y `prefers-reduced-motion` que axe no cubra por sí solo.
+
+Bloqueos del siguiente punto: ninguno para la auditoría local y sus correcciones. Lighthouse contra producción y la revisión jurídica siguen requiriendo condiciones externas independientes.
 
 ### P2 · Profundidad comercial de las demos
 
@@ -88,7 +91,7 @@ Estas actividades no se deben declarar completadas sin evidencia humana o acceso
 - Revisar textos legales específicamente para España.
 - Realizar 15 entrevistas cualificadas y presentar 5 propuestas reales antes de publicar precios.
 - Conseguir 3 proyectos firmados al mes 6 y 8 al mes 12.
-- Convertir el smoke ya ejecutado contra producción en una herramienta reproducible y segura.
+- Ejecutar la nueva CLI de smoke contra producción solo con autorización humana y un buzón de visitante controlado; verificar después ambos mensajes y sus claves idempotentes en Resend.
 
 ## Puerta mínima de calidad
 
@@ -101,8 +104,10 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- `pnpm check`: 28 tareas correctas; Worker con 20 pruebas unitarias correctas.
+- `pnpm check`: 28 tareas correctas; Worker con 29 pruebas unitarias correctas.
 - `pnpm e2e`: 24 pruebas Chromium correctas, incluidos consentimiento completo ES/EN, revocación, legales, el único formulario comercial real y la ausencia de llamadas de lead desde diagnóstico y demos.
+- `pnpm smoke:resend -- --run-id release-20260817-a`: modo seco correcto, destino validado y `networkRequest: false`; no se ejecutó ningún envío externo.
+- CLI cubierta por 9 pruebas nuevas: bloqueo sin autorización, separador de pnpm, validación de origen/run-id, marcado no comercial, saneado de respuesta, referencia esperada y fallo ante entrega degradada. El Worker suma ahora 29 pruebas correctas.
 - QA visual en navegador local: el resultado del diagnóstico explica el alcance local y conduce correctamente al formulario comercial, sin regresiones visibles en escritorio.
 - `wrangler deploy --dry-run`: 118 assets, `LeadCoordinator` y variables versionadas reconocidos.
 - Producción consolidada en `logic-estancia`, versión `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`, con trigger exclusivo `estancia.logic2b.com (custom domain)`. El Worker `logic-estancia-demo` fue eliminado tras un dry-run y la verificación del corte.
@@ -118,16 +123,16 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: correcto — toda la demanda comercial converge en una sola landing y un único buzón operativo, sin fragmentar leads entre formularios de muestra.
-- Diseño de producto: corregido — el diagnóstico mantiene su utilidad recomendadora sin convertirse en otro canal de captación y las demos preservan su alcance demostrativo.
-- UX: corregido — el resultado del diagnóstico explica que las respuestas permanecen en el navegador y ofrece un CTA inequívoco al formulario comercial.
-- UI/dirección visual: correcto — el cambio conserva la jerarquía visual y el CTA fue verificado en navegador local sin regresiones.
-- SEO: correcto — canonical y `hreflang` no cambian; privacidad refleja únicamente el proveedor realmente activo.
-- Arquitectura frontend: corregido — solo la landing contiene la llamada a `/api/leads`; diagnóstico y demos no comparten transporte de producción.
-- Full stack: corregido — `logic-estancia` sirve el dominio con cuatro secretos cifrados, destinatario exacto, Resend operativo y ausencia total de bindings HubSpot.
-- QA/accesibilidad/rendimiento/confianza: correcto — 28 tareas, 20 unitarias y 24 E2E en verde; auditoría del build y smoke `202 delivered` demuestran el límite de una sola captura real e idempotencia.
+- Marketing estratégico: correcto — el smoke se etiqueta repetidamente como prueba técnica, desactiva consentimiento comercial y prohíbe tratarlo como oportunidad; no abre otro formulario ni altera el recorrido de captación.
+- Diseño de producto: correcto — valida la resiliencia del único canal real mediante el mismo contrato `/api/leads`, con un `run-id` que diferencia una nueva comprobación de una repetición idempotente.
+- UX: corregido — ayuda, dry-run predeterminado, mensajes accionables y `--expect-ref` convierten la comprobación en un procedimiento recuperable; el correo no se acepta como argumento para que no quede en el historial.
+- UI/dirección visual: no aplica — no cambia ninguna superficie visual del producto; los 24 E2E existentes confirman que las rutas públicas no sufren regresiones.
+- SEO: no aplica — no cambia HTML, metadatos, indexación, sitemap ni URLs públicas.
+- Arquitectura frontend: correcto — la herramienta vive en el paquete Worker, fuera de los bundles y de las demos, y reutiliza el contrato público sin duplicar lógica en el cliente.
+- Full stack: corregido — ejecución bloqueada por frase explícita, base URL segura, payload estable, salida allowlisted, estado degradado como fallo y comparación de referencias; no lee secretos de Resend ni activa HubSpot.
+- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check` completa 28 tareas, el Worker pasa 29 pruebas y los 24 E2E siguen verdes; el dry-run observado confirma cero red. La auditoría visual no aplica y no existe impacto de bundle o runtime público.
 
-Deuda aceptada: los textos legales están adaptados desde Camp pero requieren revisión jurídica española y falta la confirmación humana de recepción del último smoke. La agenda real es opcional y HubSpot está deliberadamente fuera de alcance. La herramienta reproducible de smoke queda como siguiente P0; WCAG y Lighthouse completos permanecen en P1.
+Deuda aceptada: falta ejecutar la nueva CLI contra producción con autorización humana y un buzón controlado, además de confirmar el mensaje del smoke anterior. Los textos legales requieren revisión jurídica española; la agenda real es opcional y HubSpot continúa fuera de alcance. WCAG y Lighthouse completos permanecen en P1.
 
 ## Registro de continuaciones
 
@@ -140,3 +145,4 @@ Deuda aceptada: los textos legales están adaptados desde Camp pero requieren re
 - 2026-08-17 — Se preparó la migración de `logic-estancia-demo` a `logic-estancia`: nuevo Worker creado sin HubSpot, preview y producción simultáneamente sanos y tres secretos de correo trasladados. Pendiente añadir Resend al Worker nuevo, mover el dominio y ejecutar el smoke antes de retirar el Worker anterior.
 - 2026-08-17 — Se completó el corte a `logic-estancia`: clave convertida a secreto, cuatro bindings cifrados consolidados, Resend validado con `202 delivered` e idempotencia por dominio, `workers.dev` desactivado y `logic-estancia-demo` eliminado. HubSpot permanece fuera de alcance; queda rotar la clave para invalidar el borrador histórico `plain_text`.
 - 2026-08-17 — Se fijó la landing como único formulario productivo, con entrega exclusiva a `marinerandreu+logic@gmail.com`; diagnóstico, demos y dashboards quedaron explícitamente locales. Se regeneró la clave de Resend, se eliminó HubSpot de los legales y se desplegó la versión `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`, validada con 24 E2E y smoke idempotente `202 delivered`.
+- 2026-08-17 — Se añadió la CLI segura y reproducible de smoke de Resend, offline por defecto, con autorización explícita, payload inequívocamente técnico, verificación idempotente y salida sin PII. Validada con 9 pruebas específicas, 28 tareas de `pnpm check`, 29 pruebas del Worker y 24 E2E. Próximo punto: auditoría WCAG 2.2 AA automatizada sobre rutas principales.

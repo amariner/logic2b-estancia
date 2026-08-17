@@ -1,0 +1,86 @@
+import { describe, expect, it, vi } from 'vitest';
+import { createTestLead, runSmoke, sanitizeResponse, validateOptions } from './smoke-resend.mjs';
+
+const authorization = {
+  LOGIC_ESTANCIA_SMOKE_AUTHORIZATION: 'SEND_IDENTIFIED_TEST_EMAIL',
+  LOGIC_ESTANCIA_SMOKE_VISITOR_EMAIL: 'smoke@example.test',
+};
+const reference = '36c0d872-4eb2-4f47-8c06-380b82834758';
+
+describe('Resend smoke tool', () => {
+  it('stays offline by default and does not require an email', async () => {
+    const fetchImplementation = vi.fn();
+    const result = await runSmoke({ args: ['--run-id', 'release-20260817'], environment: {}, fetchImplementation });
+    expect(result).toMatchObject({ exitCode: 0, stream: 'stdout' });
+    expect(JSON.parse(result.output)).toMatchObject({ mode: 'dry-run', networkRequest: false });
+    expect(fetchImplementation).not.toHaveBeenCalled();
+  });
+
+  it('accepts the pnpm option separator', async () => {
+    const result = await runSmoke({ args: ['--', '--run-id', 'release-20260817'], environment: {}, fetchImplementation: vi.fn() });
+    expect(result.exitCode).toBe(0);
+  });
+
+  it('requires an explicit authorization value before sending', () => {
+    expect(() => validateOptions({ execute: true, runId: 'release-20260817', baseUrl: 'https://estancia.logic2b.com' }, {}))
+      .toThrow(/autorización explícita/);
+  });
+
+  it('rejects short run identifiers and unsafe origins', () => {
+    expect(() => validateOptions({ execute: false, runId: 'short', baseUrl: 'https://estancia.logic2b.com' }, {})).toThrow(/run-id/);
+    expect(() => validateOptions({ execute: false, runId: 'release-20260817', baseUrl: 'ftp://localhost' }, {})).toThrow(/base-url/);
+    expect(() => validateOptions({ execute: false, runId: 'release-20260817', baseUrl: 'https://user:secret@example.test' }, {})).toThrow(/base-url/);
+  });
+
+  it('marks every submitted field as a technical test without marketing consent', () => {
+    const lead = createTestLead('release-20260817', 'smoke@example.test');
+    expect(lead).toMatchObject({ marketingConsent: false, accept: true, sourcePath: '/ops/resend-smoke' });
+    expect(`${lead.name} ${lead.businessName} ${lead.message}`).toMatch(/SMOKE TEST|PRUEBA TECNICA/);
+  });
+
+  it('prints only an allowlisted response summary and never the email', async () => {
+    const fetchImplementation = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      ok: true,
+      outcome: 'delivered',
+      ref: reference,
+      meetingUrl: 'https://calendar.example.test/private',
+      echoedEmail: 'smoke@example.test',
+    }), { status: 202 }));
+    const result = await runSmoke({
+      args: ['--execute', '--run-id', 'release-20260817'],
+      environment: authorization,
+      fetchImplementation,
+    });
+    expect(result.exitCode).toBe(0);
+    expect(result.output).toContain(reference);
+    expect(result.output).not.toContain('smoke@example.test');
+    expect(result.output).not.toContain('calendar.example.test');
+  });
+
+  it('fails when replay verification returns a different reference', async () => {
+    const fetchImplementation = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, outcome: 'delivered', ref: reference, replayed: true }), { status: 202 }));
+    const result = await runSmoke({
+      args: ['--execute', '--run-id', 'release-20260817', '--expect-ref', 'ce74de03-c7db-4cf7-9624-133e09be6972'],
+      environment: authorization,
+      fetchImplementation,
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('expectedReferenceMatched');
+  });
+
+  it('treats a degraded provider result as a failed smoke', async () => {
+    const fetchImplementation = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, outcome: 'delivered_degraded', ref: reference }), { status: 202 }));
+    const result = await runSmoke({
+      args: ['--execute', '--run-id', 'release-20260817'],
+      environment: authorization,
+      fetchImplementation,
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('entrega completa');
+  });
+
+  it('drops unexpected provider fields from error output', () => {
+    const result = sanitizeResponse(400, { outcome: 'person@example.test', error: 'secret-value', issues: [{ input: 'secret' }], email: 'person@example.test' });
+    expect(result).toEqual({ ok: false, httpStatus: 400, outcome: 'unknown', ref: undefined, replayed: false, error: undefined, retryAfter: undefined });
+  });
+});

@@ -115,6 +115,31 @@ Use the structured Worker log event and its `ref` when a provider is degraded:
 
 Do not create CRM records while HubSpot remains outside the production scope.
 
+### Smoke reproducible de Resend
+
+La herramienta operativa usa el mismo `/api/leads` que la landing, no conoce secretos de Resend y permanece en modo seco por defecto. El payload identifica en nombre, alojamiento, campaña y mensaje que es una prueba técnica sin consentimiento comercial. La salida solo permite estado HTTP, `outcome`, referencia, repetición y espera del rate limit; nunca imprime el buzón de prueba, la respuesta completa ni valores del entorno.
+
+1. Elige un identificador estable de 6–64 caracteres, por ejemplo `release-20260817-a`. Reutilizarlo con el mismo buzón conserva exactamente el mismo payload y comprueba la idempotencia durante 24 horas; cambiarlo crea deliberadamente un envío nuevo.
+2. Comprueba primero el modo seco, que no hace peticiones:
+
+   ```bash
+   pnpm smoke:resend -- --run-id release-20260817-a
+   ```
+
+3. Solo desde un entorno autorizado, proporciona el buzón controlado que recibirá el resumen de visitante y la confirmación explícita. No pases el correo como argumento para evitar guardarlo en el historial del shell:
+
+   ```bash
+   export LOGIC_ESTANCIA_SMOKE_VISITOR_EMAIL='buzon-controlado@example.test'
+   export LOGIC_ESTANCIA_SMOKE_AUTHORIZATION='SEND_IDENTIFIED_TEST_EMAIL'
+   pnpm smoke:resend -- --execute --run-id release-20260817-a
+   ```
+
+4. Guarda la `ref` mostrada. Repite con el mismo entorno, `run-id` y `--expect-ref <ref>`; el resultado debe mantener la referencia y mostrar `replayed: true` sin crear otros correos.
+5. En Resend, busca `estancia-lead/<ref>/internal` y `estancia-lead/<ref>/visitor`. Confirma que ambos aparecen entregados y que el mensaje interno está inequívocamente marcado como prueba. Verifica también la llegada a los dos buzones controlados antes de cerrar el smoke.
+6. Borra las variables del shell al terminar con `unset LOGIC_ESTANCIA_SMOKE_VISITOR_EMAIL LOGIC_ESTANCIA_SMOKE_AUTHORIZATION`. Un `delivered_degraded`, una referencia distinta, un estado diferente de 202 o un `outcome` distinto de `delivered` hacen fallar la herramienta y requieren revisar los canales antes de reintentar.
+
+No ejecutes esta comprobación contra producción sin autorización humana para generar los dos correos de prueba. No uses direcciones de prospectos, no actives HubSpot y no conviertas el smoke en un registro comercial.
+
 ## GA4/GTM contract
 
 Only configure the allowlisted events emitted by the site:
