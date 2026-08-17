@@ -35,3 +35,5 @@ La orden `/goal continua con el desarrollo de este proyecto` reanuda el trabajo 
 Cada incremento pasa además por el [`consejo multidisciplinar`](docs/MULTIDISCIPLINARY_REVIEW.md): estrategia de marketing, diseño de producto, UX, UI y dirección visual, SEO, arquitectura frontend, ingeniería full stack y controles transversales de QA, accesibilidad, rendimiento y confianza comercial.
 
 La baseline WCAG 2.2 AA automatizada, sus hallazgos y los recorridos manuales todavía pendientes se mantienen en [`docs/ACCESSIBILITY_AUDIT.md`](docs/ACCESSIBILITY_AUDIT.md).
+
+Las métricas Lighthouse móvil, sus umbrales reproducibles y la matriz de canonical, `hreflang`, sitemap y JSON-LD se mantienen en [`docs/PERFORMANCE_SEO_AUDIT.md`](docs/PERFORMANCE_SEO_AUDIT.md).

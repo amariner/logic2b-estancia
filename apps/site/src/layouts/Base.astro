@@ -8,8 +8,8 @@ import { logic2bContact } from '@logic-estancia/config/contact';
 import CookieBanner from '../components/CookieBanner.astro';
 import { content } from '../content';
 
-interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; }
-const { locale, title = 'Logic Estancia', description = 'Web, reserva directa y operación para alojamientos.', route = '', alternateRoute } = Astro.props;
+interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; translated?: boolean; }
+const { locale, title = 'Logic Estancia', description = 'Web, reserva directa y operación para alojamientos.', route = '', alternateRoute, translated = true } = Astro.props;
 const c = content[locale];
 const prefix = locale === 'en' ? '/en' : '';
 const cleanRoute = route.replace(/^\//, '').replace(/\/$/, '');
@@ -53,9 +53,9 @@ const structuredData = [
     <meta name="robots" content="index,follow,max-image-preview:large" />
     <meta name="theme-color" content="#ffffff" />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" hreflang="es" href={alternateEs} />
-    <link rel="alternate" hreflang="en" href={alternateEn} />
-    <link rel="alternate" hreflang="x-default" href={alternateEs} />
+    {translated && <link rel="alternate" hreflang="es" href={alternateEs} />}
+    {translated && <link rel="alternate" hreflang="en" href={alternateEn} />}
+    {translated && <link rel="alternate" hreflang="x-default" href={alternateEs} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={PRODUCT.name} />
@@ -83,7 +83,7 @@ const structuredData = [
           <a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a>
         </nav>
         <div class="top-actions">
-          <a class="locale" href={localeHref}>{locale === 'es' ? 'EN' : 'ES'}</a>
+          {translated && <a class="locale" href={localeHref}>{locale === 'es' ? 'EN' : 'ES'}</a>}
           <a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="header">{c.nav.contact}</a>
         </div>
         <button class="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">Menu</button>

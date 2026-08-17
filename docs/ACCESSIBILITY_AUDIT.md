@@ -42,7 +42,7 @@ pnpm e2e
 pnpm peers check
 ```
 
-Resultado verificado el 2026-08-17: 8 pruebas específicas de accesibilidad, 28 tareas del monorepo y 32 E2E correctas; ninguna incidencia de peers.
+Resultado verificado el 2026-08-17: 8 pruebas específicas de accesibilidad, 28 tareas de paquetes más lint de scripts/pruebas raíz y 35 E2E correctas; ninguna incidencia de peers.
 
 ## Deuda y siguiente revisión
 
