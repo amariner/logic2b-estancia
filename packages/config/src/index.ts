@@ -9,6 +9,12 @@ export const PRODUCT = {
   demoSlugs: ['nivora', 'terrava', 'aurem'] as const,
 };
 
+export const CONSENT = {
+  key: 'logic-estancia-consent',
+  legacyKey: 'logic-estancia-consent-v1',
+  version: '1.0.0',
+} as const;
+
 export type Locale = (typeof PRODUCT.locales)[number];
 
 export const demoUrl = (slug: (typeof PRODUCT.demoSlugs)[number], locale: Locale = 'es') =>

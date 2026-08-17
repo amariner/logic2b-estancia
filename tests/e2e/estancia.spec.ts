@@ -157,13 +157,57 @@ for (const meeting of [
   });
 }
 
-test('analytics remains consent-gated on commercial pages and demos', async ({ page }) => {
+test('cookie preferences remain consent-gated, revocable and shared with demos', async ({ page }) => {
   await page.goto('/');
+  const banner = page.getByRole('dialog', { name: 'Configuración de cookies' });
+  await expect(banner).toBeVisible();
   await expect(page.locator('script[data-gtm]')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Aceptar analítica' }).click();
+  await page.getByRole('button', { name: 'Configurar preferencias' }).click();
+  await expect(page.getByRole('heading', { name: 'Almacenamiento esencial' })).toBeVisible();
+  await expect(page.getByText('Siempre activo')).toBeVisible();
+  await page.getByRole('checkbox', { name: 'Cookies de analítica' }).check();
+  await page.getByRole('button', { name: 'Guardar preferencias' }).click();
+  await expect(banner).toBeHidden();
   await expect(page.locator('script[data-gtm]')).toHaveCount(1);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('logic-estancia-consent') ?? 'null'))).toMatchObject({
+    essential: true,
+    analytics: true,
+    version: '1.0.0',
+  });
+
   await page.goto('/demos/terrava/');
   await expect(page.locator('script[data-gtm]')).toHaveCount(1);
+
+  await page.goto('/cookies/');
+  await expect(page.getByRole('heading', { name: 'Almacenamiento y cookies' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cambiar mi elección de cookies' }).click();
+  await expect(banner).toBeVisible();
+  await expect(page.locator('script[data-gtm]')).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem('logic-estancia-consent'))).toBeNull();
+  await page.getByRole('button', { name: 'Rechazar' }).click();
+  await expect(banner).toBeHidden();
+  await expect(page.locator('script[data-gtm]')).toHaveCount(0);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('logic-estancia-consent') ?? 'null'))).toMatchObject({ analytics: false });
+});
+
+test('the cookie choice and complete legal surfaces are localized in English', async ({ page }) => {
+  await page.goto('/en/');
+  const banner = page.getByRole('dialog', { name: 'Cookie settings' });
+  await expect(banner).toBeVisible();
+  await page.getByRole('button', { name: 'Configure preferences' }).click();
+  await expect(page.getByText('Always active')).toBeVisible();
+  await page.getByRole('button', { name: 'Reject all' }).click();
+  await expect(banner).toBeHidden();
+
+  await page.goto('/en/legal/');
+  await expect(page.getByText('Logic2b S.L.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Demonstrations and scope' })).toBeVisible();
+  await page.goto('/en/privacidad/');
+  await expect(page.getByRole('heading', { name: 'Data, purpose and lawful basis' })).toBeVisible();
+  await expect(page.getByText(/HubSpot: management/)).toBeVisible();
+  await page.goto('/en/cookies/');
+  await expect(page.getByRole('columnheader', { name: 'Category' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Change my cookie choice' })).toBeVisible();
 });
 
 test('Terrava carries a website enquiry into the workspace, converts it and resets', async ({ page }) => {

@@ -1,16 +1,219 @@
 ---
 import type { Locale } from '@logic-estancia/config';
-const { locale, kind } = Astro.props as { locale: Locale; kind: 'legal' | 'privacy' | 'cookies' };
-const es = {
-  legal: ['Aviso legal', 'Este sitio presenta Logic Estancia, un producto de Logic2B. Las marcas Nivora One, Terrava Collection y Aurem Hotel son demostraciones ficticias. Contacto: hola@logic2b.com.'],
-  privacy: ['Privacidad', 'El diagnóstico puede recoger nombre, empresa o alojamiento, email, teléfono opcional, tipo y dimensión del negocio, situación actual, capacidades, plan recomendado, plazo, inversión y origen para responder a una solicitud comercial. La base jurídica es tu consentimiento. El seguimiento comercial es opcional y separado. No vendemos los datos. Cloudflare aloja el servicio, Resend entrega el correo y HubSpot gestiona el contacto comercial cuando está configurado. Puedes ejercer tus derechos escribiendo a hola@logic2b.com.'],
-  cookies: ['Cookies', 'El almacenamiento esencial conserva tu decisión de consentimiento y el estado local de las demos. Google Tag Manager y GA4 solo se cargan después de aceptar analítica. Las demos pueden medir hitos anónimos tras ese consentimiento, pero nunca envían nombres, textos, fechas, importes ni el estado introducido.'],
+
+type LegalKind = 'legal' | 'privacy' | 'cookies';
+interface LegalSection { title: string; paragraphs: string[]; items?: string[]; }
+interface LegalPage {
+  heading: string;
+  intro: string;
+  updated: string;
+  owner?: { title: string; labels: string[] };
+  sections: LegalSection[];
+  table?: { title: string; headers: string[]; rows: string[][] };
+  action?: { description: string; label: string };
+}
+
+const { locale, kind } = Astro.props as { locale: Locale; kind: LegalKind };
+const ownerValues = ['Logic2b S.L.', 'B70960588', 'C/ Xilxes, 16, 2.º A, 12520 Nules (Castellón), España', 'hola@logic2b.com'];
+
+const es: Record<LegalKind, LegalPage> = {
+  legal: {
+    heading: 'Aviso legal',
+    intro: 'Información del titular y condiciones de uso de la superficie comercial y demostrativa de Logic Estancia.',
+    updated: 'Última actualización: agosto de 2026',
+    owner: { title: 'Titular', labels: ['Titular', 'NIF', 'Domicilio', 'Contacto y derechos'] },
+    sections: [
+      { title: 'Objeto del sitio', paragraphs: ['Este sitio presenta Logic Estancia, sus planes, recursos, diagnóstico y demostraciones ficticias, y permite que responsables de alojamientos soliciten información o una valoración comercial.'] },
+      { title: 'Condiciones de uso', paragraphs: ['El acceso es gratuito. La persona usuaria se compromete a utilizar los contenidos de buena fe y a no interferir con el funcionamiento, la seguridad o la disponibilidad del servicio.'] },
+      { title: 'Demostraciones y alcance', paragraphs: ['Nivora One, Terrava Collection y Aurem Hotel, junto con sus inventarios, reservas, métricas, huéspedes y operaciones, son demostraciones ficticias. No constituyen disponibilidad, oferta o contratación de un alojamiento real y no ejecutan reservas, pagos, comunicaciones ni sincronizaciones reales.'] },
+      { title: 'Propiedad intelectual y responsabilidad', paragraphs: ['Los textos, diseños, marcas, software y materiales son titularidad de Logic2b S.L. o se utilizan con autorización. No se garantiza la disponibilidad ininterrumpida y el titular no responde de usos ilícitos o de circunstancias ajenas a su control.'] },
+      { title: 'Legislación aplicable', paragraphs: ['Se aplica la normativa española vigente. Cualquier controversia se someterá a los juzgados y tribunales que correspondan conforme a derecho.'] },
+    ],
+  },
+  privacy: {
+    heading: 'Política de privacidad',
+    intro: 'Esta política se aplica a las solicitudes comerciales enviadas desde estancia.logic2b.com, no a los datos ficticios y locales de las demos ni a futuras instalaciones de clientes.',
+    updated: 'Última actualización: agosto de 2026',
+    owner: { title: 'Responsable del tratamiento', labels: ['Responsable', 'NIF', 'Domicilio', 'Contacto y derechos'] },
+    sections: [
+      {
+        title: 'Datos, finalidad y base legal',
+        paragraphs: ['Podemos recoger nombre, empresa o alojamiento, email, teléfono opcional, tipo y dimensión del negocio, situación actual, capacidades solicitadas, plan recomendado, plazo, inversión orientativa y origen para responder a una solicitud, preparar un diagnóstico o valorar un proyecto.'],
+        items: ['Consentimiento prestado al enviar el formulario.', 'Medidas precontractuales solicitadas por la persona interesada.', 'El seguimiento comercial adicional solo se realiza cuando se acepta por separado.'],
+      },
+      {
+        title: 'Proveedores',
+        paragraphs: ['Solo comunicamos los datos a proveedores necesarios para operar el sitio y atender la solicitud, bajo sus respectivos contratos y garantías.'],
+        items: ['Cloudflare: alojamiento, seguridad y entrega del sitio.', 'Resend: transporte del correo con la solicitud hacia Logic2B.', 'HubSpot: gestión del contacto y oportunidad comercial cuando la integración está configurada.', 'Google: analítica del sitio y de hitos anónimos de las demos, únicamente si aceptas cookies analíticas.'],
+      },
+      { title: 'Conservación y destinatarios', paragraphs: ['Conservamos la solicitud durante el tiempo necesario para responder y, si nace una relación comercial, durante los plazos aplicables. No vendemos los datos ni los usamos para publicidad de terceros.'] },
+      { title: 'Transferencias internacionales', paragraphs: ['Algunos proveedores pueden tratar datos fuera del Espacio Económico Europeo. Cuando ocurre, se aplican los mecanismos de garantía previstos por el RGPD, como decisiones de adecuación o cláusulas contractuales tipo.'] },
+      { title: 'Tus derechos', paragraphs: ['Puedes solicitar acceso, rectificación, supresión, oposición, limitación o portabilidad escribiendo al email indicado arriba. También puedes retirar el consentimiento y reclamar ante la Agencia Española de Protección de Datos.'] },
+    ],
+  },
+  cookies: {
+    heading: 'Política de cookies',
+    intro: 'La analítica se activa solo después de una elección afirmativa. El sitio comercial y las demos comparten esa decisión, pero nunca envían a analítica los datos introducidos en formularios o estados locales.',
+    updated: 'Última actualización: agosto de 2026',
+    sections: [
+      {
+        title: 'Qué utilizamos',
+        paragraphs: ['El almacenamiento local esencial recuerda tu decisión y conserva el progreso de las demostraciones. Google Tag Manager y Google Analytics solo se cargan si aceptas la categoría de analítica; si rechazas, no se solicita ningún recurso de Google.'],
+        items: ['Esencial: elección versionada logic-estancia-consent en el almacenamiento local.', 'Esencial: estado local logic-estancia-demo-*-v2 para continuar y restablecer las demos ficticias.', 'Analítica: cookies de Google Analytics para medir uso agregado y conversiones comerciales.'],
+      },
+      { title: 'Qué no utilizamos', paragraphs: ['No activamos cookies publicitarias, remarketing, Google Ads ni píxeles sociales. Los eventos de analítica nunca incluyen nombre, email, teléfono, mensajes, fechas, importes, huéspedes ni el estado introducido en una demo.'] },
+      { title: 'Cómo retirar el consentimiento', paragraphs: ['Puedes cambiar tu decisión en cualquier momento con el botón de esta página. Al retirar la analítica se borran las cookies de Google accesibles desde el navegador y se impiden nuevas emisiones. Un recurso de medición ya cargado deja de emitir después de recargar la página.'] },
+    ],
+    table: {
+      title: 'Almacenamiento y cookies',
+      headers: ['Nombre', 'Proveedor', 'Finalidad', 'Duración', 'Categoría'],
+      rows: [
+        ['logic-estancia-consent', 'Logic2B', 'Recordar la elección versionada', 'Persistente hasta borrado o nueva versión', 'Esencial'],
+        ['logic-estancia-demo-*-v2', 'Logic2B', 'Conservar el estado ficticio de cada demo', 'Persistente hasta restablecer o borrar datos del navegador', 'Esencial'],
+        ['_ga, _ga_*', 'Google Analytics', 'Distinguir sesiones y medir uso agregado', 'Hasta 2 años', 'Analítica'],
+        ['_gid, _gat (si el contenedor las establece)', 'Google Analytics', 'Medición y limitación de solicitudes', 'Hasta 24 horas', 'Analítica'],
+      ],
+    },
+    action: { description: 'Borra tu decisión, retira las cookies de analítica accesibles y vuelve a abrir el panel.', label: 'Cambiar mi elección de cookies' },
+  },
 };
-const en = {
-  legal: ['Legal notice', 'This site presents Logic Estancia, a Logic2B product. Nivora One, Terrava Collection and Aurem Hotel are fictitious demonstrations. Contact: hola@logic2b.com.'],
-  privacy: ['Privacy', 'The assessment may collect name, business or stay, email, optional phone, business type and size, current setup, requested capabilities, recommended plan, timeline, investment and source to answer a commercial request. The legal basis is your consent. Commercial follow-up is optional and separate. We do not sell data. Cloudflare hosts the service, Resend delivers email and HubSpot manages the commercial contact when configured. Contact hola@logic2b.com to exercise your rights.'],
-  cookies: ['Cookies', 'Essential storage keeps your consent choice and local demo state. Google Tag Manager and GA4 load only after analytics consent. Demos may measure anonymous milestones after that consent, but never send names, text, dates, amounts or entered demo state.'],
+
+const en: Record<LegalKind, LegalPage> = {
+  legal: {
+    heading: 'Legal notice',
+    intro: 'Owner information and terms of use for the Logic Estancia commercial and demonstration site.',
+    updated: 'Last updated: August 2026',
+    owner: { title: 'Owner', labels: ['Owner', 'Tax ID', 'Registered address', 'Contact and rights'] },
+    sections: [
+      { title: 'Purpose of the site', paragraphs: ['This site presents Logic Estancia, its plans, resources, assessment and fictional demonstrations, and allows accommodation managers to request information or a commercial assessment.'] },
+      { title: 'Terms of use', paragraphs: ['Access is free. Users agree to use the content in good faith and not to interfere with the operation, security or availability of the service.'] },
+      { title: 'Demonstrations and scope', paragraphs: ['Nivora One, Terrava Collection and Aurem Hotel, together with their inventory, bookings, metrics, guests and operations, are fictional demonstrations. They do not constitute availability, an offer or a booking for real accommodation and do not execute real bookings, payments, communications or synchronisations.'] },
+      { title: 'Intellectual property and liability', paragraphs: ['Texts, designs, brands, software and materials belong to Logic2b S.L. or are used with permission. Uninterrupted availability is not guaranteed and the owner is not liable for unlawful use or circumstances beyond its control.'] },
+      { title: 'Applicable law', paragraphs: ['Spanish law applies. Any dispute will be submitted to the courts with jurisdiction under applicable law.'] },
+    ],
+  },
+  privacy: {
+    heading: 'Privacy policy',
+    intro: 'This policy applies to commercial enquiries submitted through estancia.logic2b.com, not to fictional local demo data or future customer deployments.',
+    updated: 'Last updated: August 2026',
+    owner: { title: 'Data controller', labels: ['Controller', 'Tax ID', 'Registered address', 'Contact and rights'] },
+    sections: [
+      {
+        title: 'Data, purpose and lawful basis',
+        paragraphs: ['We may collect a name, business or accommodation, email, optional phone, business type and size, current setup, requested capabilities, recommended plan, timeframe, indicative investment and source to answer an enquiry, prepare an assessment or evaluate a project.'],
+        items: ['Consent given when submitting the form.', 'Pre-contractual steps requested by the interested person.', 'Additional commercial follow-up only takes place when accepted separately.'],
+      },
+      {
+        title: 'Providers',
+        paragraphs: ['We only share data with providers required to operate the site and handle the enquiry, under their respective contracts and safeguards.'],
+        items: ['Cloudflare: hosting, security and delivery of the site.', 'Resend: transport of the enquiry email to Logic2B.', 'HubSpot: management of the commercial contact and opportunity when the integration is configured.', 'Google: analytics for the site and anonymous demo milestones, only if you accept analytics cookies.'],
+      },
+      { title: 'Retention and recipients', paragraphs: ['We retain the enquiry for as long as needed to respond and, if a commercial relationship starts, for the applicable periods. We do not sell the data or use it for third-party advertising.'] },
+      { title: 'International transfers', paragraphs: ['Some providers may process data outside the European Economic Area. Where this occurs, safeguards under the GDPR are used, such as adequacy decisions or standard contractual clauses.'] },
+      { title: 'Your rights', paragraphs: ['You may request access, correction, erasure, objection, restriction or portability by writing to the email above. You may also withdraw consent and lodge a complaint with the Spanish Data Protection Agency.'] },
+    ],
+  },
+  cookies: {
+    heading: 'Cookie policy',
+    intro: 'Analytics is enabled only after an affirmative choice. The commercial site and demos share that choice, but never send form details or local demo state to analytics.',
+    updated: 'Last updated: August 2026',
+    sections: [
+      {
+        title: 'What we use',
+        paragraphs: ['Essential local storage remembers your choice and keeps demonstration progress. Google Tag Manager and Google Analytics only load if you accept the analytics category; if you reject it, no Google resource is requested.'],
+        items: ['Essential: the versioned logic-estancia-consent choice in local storage.', 'Essential: logic-estancia-demo-*-v2 local state for continuing and resetting fictional demos.', 'Analytics: Google Analytics cookies measuring aggregate use and commercial conversions.'],
+      },
+      { title: 'What we do not use', paragraphs: ['We do not activate advertising cookies, remarketing, Google Ads or social pixels. Analytics events never include a name, email, phone, messages, dates, amounts, guests or state entered in a demo.'] },
+      { title: 'How to withdraw consent', paragraphs: ['You can change your choice at any time with the button on this page. Withdrawing analytics removes Google cookies accessible to the browser and prevents new emissions. A measurement resource already loaded stops emitting after the page reloads.'] },
+    ],
+    table: {
+      title: 'Storage and cookies',
+      headers: ['Name', 'Provider', 'Purpose', 'Duration', 'Category'],
+      rows: [
+        ['logic-estancia-consent', 'Logic2B', 'Remember the versioned choice', 'Persistent until deletion or a new version', 'Essential'],
+        ['logic-estancia-demo-*-v2', 'Logic2B', 'Keep fictional state for each demo', 'Persistent until reset or browser data is deleted', 'Essential'],
+        ['_ga, _ga_*', 'Google Analytics', 'Distinguish sessions and measure aggregate use', 'Up to 2 years', 'Analytics'],
+        ['_gid, _gat (if set by the container)', 'Google Analytics', 'Measurement and request throttling', 'Up to 24 hours', 'Analytics'],
+      ],
+    },
+    action: { description: 'Deletes your choice, removes accessible analytics cookies and opens the panel again.', label: 'Change my cookie choice' },
+  },
 };
-const [title, body] = (locale === 'es' ? es : en)[kind];
+
+const page = (locale === 'es' ? es : en)[kind];
 ---
-<div class="prose shell"><p class="eyebrow">Logic Estancia · by Logic2B</p><h1>{title}</h1><p>{body}</p><h2>{locale === 'es' ? 'Última revisión' : 'Last reviewed'}</h2><p>17·08·2026</p></div>
+
+<article class="prose legal-prose shell">
+  <header class="legal-header">
+    <p class="eyebrow">estancia.logic2b.com</p>
+    <h1>{page.heading}</h1>
+    <p class="legal-intro">{page.intro}</p>
+    <p class="legal-updated">{page.updated}</p>
+  </header>
+
+  {page.owner && (
+    <section class="legal-section">
+      <h2>{page.owner.title}</h2>
+      <dl class="legal-owner">
+        {page.owner.labels.map((label, index) => (
+          <div><dt>{label}</dt><dd>{index === 3 ? <a href="mailto:hola@logic2b.com">{ownerValues[index]}</a> : ownerValues[index]}</dd></div>
+        ))}
+      </dl>
+    </section>
+  )}
+
+  {page.sections.map((section) => (
+    <section class="legal-section">
+      <h2>{section.title}</h2>
+      {section.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+      {section.items && section.items.length > 0 && <ul>{section.items.map((item) => <li>{item}</li>)}</ul>}
+    </section>
+  ))}
+
+  {page.table && (
+    <section class="legal-section">
+      <h2>{page.table.title}</h2>
+      <div class="legal-table-scroll">
+        <table>
+          <thead><tr>{page.table.headers.map((header) => <th scope="col">{header}</th>)}</tr></thead>
+          <tbody>{page.table.rows.map((row) => <tr>{row.map((cell) => <td>{cell}</td>)}</tr>)}</tbody>
+        </table>
+      </div>
+    </section>
+  )}
+
+  {page.action && (
+    <section class="legal-section legal-action">
+      <p>{page.action.description}</p>
+      <button type="button" class="pill" data-consent-reset>{page.action.label}</button>
+    </section>
+  )}
+</article>
+
+<style>
+  .legal-prose { max-width: 860px; }
+  .legal-header { padding-bottom: 34px; border-bottom: 1px solid var(--line); }
+  .legal-header h1 { margin: 10px 0 18px; }
+  .legal-intro { max-width: 720px; margin: 0; font-size: 1.05rem; }
+  .legal-updated { margin: 18px 0 0; font-size: .82rem; }
+  .legal-section { padding-top: 34px; }
+  .legal-section h2 { margin: 0 0 14px; }
+  .legal-section p { margin: 0; }
+  .legal-section p + p { margin-top: 12px; }
+  .legal-section ul { margin: 14px 0 0; padding-left: 1.25rem; }
+  .legal-section li + li { margin-top: 7px; }
+  .legal-owner { margin: 0; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; color: var(--slate); line-height: 1.6; }
+  .legal-owner div { display: grid; grid-template-columns: minmax(150px, .55fr) 1.45fr; gap: 20px; padding: 14px 17px; }
+  .legal-owner div + div { border-top: 1px solid var(--line); }
+  .legal-owner dt { color: var(--ink); font-weight: 650; }
+  .legal-owner dd { margin: 0; }
+  .legal-owner a { color: var(--sienna); text-underline-offset: 3px; }
+  .legal-table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; }
+  table { width: 100%; min-width: 760px; border-collapse: collapse; color: var(--slate); font-size: .86rem; }
+  th, td { padding: 13px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { color: var(--sienna); background: var(--peach); font-weight: 650; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .legal-action { margin-top: 34px; border-top: 1px solid var(--line); }
+  .legal-action .pill { margin-top: 16px; }
+  @media (max-width: 560px) { .legal-owner div { grid-template-columns: 1fr; gap: 2px; } }
+</style>

@@ -131,11 +131,7 @@
 .footer a, .footer p { font-size: .72rem; text-decoration: none; }
 .footer .wordmark { font-size: 1.02rem; }
 .whatsapp { position: fixed; z-index: 20; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); display: flex; min-height: 48px; align-items: center; gap: 10px; border: 1px solid var(--ink); border-radius: 999px; padding: 0 18px; background: var(--paper); box-shadow: var(--shadow-artifact); font-size: .76rem; text-decoration: none; }
-.whatsapp[hidden], .consent[hidden] { display: none; }
-.consent { position: fixed; z-index: 30; right: 18px; bottom: 18px; left: 18px; display: flex; max-width: 760px; align-items: center; justify-content: space-between; gap: 24px; margin-inline: auto; border: 1px solid var(--line); border-radius: 20px; padding: 16px; background: white; box-shadow: var(--shadow-artifact); }
-.consent p { margin: 0; color: var(--slate); font-size: .76rem; line-height: 1.4; }
-.consent div { display: flex; gap: 8px; }
-.consent .pill { min-height: 38px; white-space: nowrap; font-size: .7rem; }
+.whatsapp[hidden] { display: none; }
 .prose { max-width: 760px; padding: 80px 0 120px; }
 .prose h1, .prose h2 { font-family: var(--serif); font-weight: 400; }
 .prose h1 { font-size: clamp(3rem, 8vw, 5.5rem); line-height: .95; }
@@ -309,6 +305,4 @@
   .faq { gap: 42px; }
   .faq-list summary { font-size: 1.18rem; }
   .footer { grid-template-columns: 1fr; gap: 18px; }
-  .consent { align-items: stretch; flex-direction: column; }
-  .consent div { display: grid; grid-template-columns: 1fr 1fr; }
 }
