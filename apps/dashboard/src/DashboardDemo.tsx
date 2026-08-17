@@ -50,6 +50,7 @@ type View =
   | "settings";
 type Utility = "search" | "notifications" | null;
 type Notice = { title: string; detail: string; view: View; urgent?: boolean };
+type RevenueMetric = "revenue" | "occupancy" | "adr" | "revpar";
 
 const properties = {
   terrava: [
@@ -97,6 +98,13 @@ const labels = {
     settings: "Settings",
   },
 } as const;
+
+const labelFor = (scenario: Scenario, locale: Locale, view: View) =>
+  scenario === "aurem" && view === "reports"
+    ? locale === "es"
+      ? "Ingresos"
+      : "Revenue"
+    : labels[locale][view];
 
 const icons: Record<View, typeof House> = {
   home: LayoutDashboard,
@@ -348,7 +356,7 @@ export function DashboardDemo({
     .trim()
     .toLocaleLowerCase(locale === "es" ? "es-ES" : "en-GB");
   const searchResults = availableViews.filter((item) =>
-    labels[locale][item]
+    labelFor(scenario, locale, item)
       .toLocaleLowerCase(locale === "es" ? "es-ES" : "en-GB")
       .includes(normalizedQuery),
   );
@@ -455,7 +463,7 @@ export function DashboardDemo({
                 onClick={() => go(item)}
               >
                 <Icon size={17} />
-                <span>{labels[locale][item]}</span>
+                <span>{labelFor(scenario, locale, item)}</span>
               </button>
             );
           })}
@@ -570,7 +578,7 @@ export function DashboardDemo({
               <p>
                 {level} · {brand}
               </p>
-              <h1>{labels[locale][view]}</h1>
+              <h1>{labelFor(scenario, locale, view)}</h1>
             </div>
             <div className="page-meta">
               <button
@@ -779,7 +787,7 @@ export function DashboardDemo({
                     return (
                       <button type="button" key={item} onClick={() => go(item)}>
                         <Icon size={18} />
-                        <span>{labels[locale][item]}</span>
+                        <span>{labelFor(scenario, locale, item)}</span>
                         <ChevronRight size={16} />
                       </button>
                     );
@@ -881,7 +889,7 @@ function ViewContent({
   if (view === "control")
     return <Control locale={locale} state={state} go={go} />;
   if (view === "reports")
-    return <Reports scenario={scenario} locale={locale} />;
+    return <Reports scenario={scenario} locale={locale} go={go} />;
   return <SettingsPage locale={locale} scenario={scenario} />;
 }
 
@@ -910,8 +918,8 @@ function Home({
             "cleaning",
           ],
           [
-            locale === "es" ? "Ocupación 14 días" : "14-day occupancy",
-            "87%",
+            locale === "es" ? "Ocupación 28 días" : "28-day occupancy",
+            "89%",
             "reports",
           ],
           [locale === "es" ? "Canales" : "Channels", "4 demo", "channels"],
@@ -1971,11 +1979,196 @@ function Control({
   );
 }
 
-function Reports({ scenario, locale }: { scenario: Scenario; locale: Locale }) {
+function Reports({
+  scenario,
+  locale,
+  go,
+}: {
+  scenario: Scenario;
+  locale: Locale;
+  go: (view: View) => void;
+}) {
   const values =
     scenario === "aurem"
       ? [62, 68, 74, 70, 79, 83, 87, 91, 88, 92, 86, 90]
       : [50, 63, 75, 75, 88, 75, 63, 75, 88, 75, 63, 50];
+  const [selected, setSelected] = useState<RevenueMetric>("revenue");
+
+  if (scenario === "aurem") {
+    const weeks = [
+      { occupancy: 88, occupied: 591, revenue: 73284 },
+      { occupancy: 92, occupied: 618, revenue: 76632 },
+      { occupancy: 86, occupied: 578, revenue: 71672 },
+      { occupancy: 90, occupied: 605, revenue: 75020 },
+    ];
+    const metrics: Record<RevenueMetric, {
+      label: string;
+      value: string;
+      summary: string;
+      formula: string;
+      evidence: string;
+      target: View;
+    }> = locale === "es" ? {
+      revenue: {
+        label: "Ingresos simulados",
+        value: "€ 296.608",
+        summary: "28 días · antes de impuestos y costes",
+        formula: "2.392 noches ocupadas × €124 de tarifa media.",
+        evidence: "Abrir reservas ficticias",
+        target: "bookings",
+      },
+      occupancy: {
+        label: "Ocupación",
+        value: "89%",
+        summary: "2.392 de 2.688 noches disponibles",
+        formula: "2.392 noches ocupadas ÷ 2.688 noches disponibles.",
+        evidence: "Abrir planning ficticio",
+        target: "planning",
+      },
+      adr: {
+        label: "Tarifa media diaria",
+        value: "€ 124",
+        summary: "ADR del escenario, no una tarifa publicada",
+        formula: "€296.608 de ingresos ÷ 2.392 noches ocupadas.",
+        evidence: "Abrir reservas ficticias",
+        target: "bookings",
+      },
+      revpar: {
+        label: "Ingreso por habitación disponible",
+        value: "€ 110",
+        summary: "RevPAR redondeado del escenario",
+        formula: "€296.608 de ingresos ÷ 2.688 noches disponibles.",
+        evidence: "Abrir planning ficticio",
+        target: "planning",
+      },
+    } : {
+      revenue: {
+        label: "Simulated revenue",
+        value: "€296,608",
+        summary: "28 days · before tax and costs",
+        formula: "2,392 occupied room nights × €124 average daily rate.",
+        evidence: "Open fictitious bookings",
+        target: "bookings",
+      },
+      occupancy: {
+        label: "Occupancy",
+        value: "89%",
+        summary: "2,392 of 2,688 available room nights",
+        formula: "2,392 occupied room nights ÷ 2,688 available room nights.",
+        evidence: "Open fictitious planning",
+        target: "planning",
+      },
+      adr: {
+        label: "Average daily rate",
+        value: "€124",
+        summary: "Scenario ADR, not a published rate",
+        formula: "€296,608 revenue ÷ 2,392 occupied room nights.",
+        evidence: "Open fictitious bookings",
+        target: "bookings",
+      },
+      revpar: {
+        label: "Revenue per available room",
+        value: "€110",
+        summary: "Rounded scenario RevPAR",
+        formula: "€296,608 revenue ÷ 2,688 available room nights.",
+        evidence: "Open fictitious planning",
+        target: "planning",
+      },
+    };
+    const active = metrics[selected];
+    return (
+      <>
+        <div className="revenue-boundary" role="note">
+          <strong>{locale === "es" ? "Escenario local explicable" : "Explainable local scenario"}</strong>
+          <span>
+            {locale === "es"
+              ? "Todas las cifras se calculan con 96 habitaciones ficticias durante 28 días. No proceden de PMS, canales, contabilidad ni pagos reales."
+              : "Every figure is calculated from 96 fictitious rooms over 28 days. Nothing comes from a live PMS, channel, accounting or payment provider."}
+          </span>
+        </div>
+        <div className="revenue-metrics" aria-label={locale === "es" ? "Indicadores de ingresos simulados" : "Simulated revenue indicators"}>
+          {(Object.entries(metrics) as [RevenueMetric, typeof active][]).map(([id, metric]) => (
+            <button
+              type="button"
+              key={id}
+              aria-pressed={selected === id}
+              onClick={() => setSelected(id)}
+            >
+              <span>{metric.label}</span>
+              <strong>{metric.value}</strong>
+              <small>{metric.summary}</small>
+            </button>
+          ))}
+        </div>
+        <div className="revenue-layout">
+          <article className="panel revenue-chart">
+            <div className="panel-head">
+              <div>
+                <span className="tag">{locale === "es" ? "28 días ficticios" : "28 fictitious days"}</span>
+                <h2>{locale === "es" ? "Ocupación semanal" : "Weekly occupancy"}</h2>
+                <p>{locale === "es" ? "672 noches disponibles por semana" : "672 available room nights per week"}</p>
+              </div>
+            </div>
+            <div
+              className="bar-chart"
+              role="img"
+              aria-label={locale === "es" ? "Ocupación semanal: 88, 92, 86 y 90 por ciento" : "Weekly occupancy: 88, 92, 86 and 90 percent"}
+            >
+              {weeks.map((week, index) => (
+                <i key={week.occupancy} style={{ height: `${week.occupancy}%` }} aria-hidden="true">
+                  <span>{week.occupancy}%</span>
+                  <b>{locale === "es" ? `S${index + 1}` : `W${index + 1}`}</b>
+                </i>
+              ))}
+            </div>
+          </article>
+          <aside className="panel revenue-explanation" aria-live="polite">
+            <span>{locale === "es" ? "Cómo se calcula" : "How it is calculated"}</span>
+            <h2>{active.label}</h2>
+            <strong>{active.value}</strong>
+            <p>{active.formula}</p>
+            <button type="button" className="primary" onClick={() => go(active.target)}>
+              {active.evidence} <ChevronRight size={16} />
+            </button>
+            <small>
+              {locale === "es"
+                ? "La pantalla enlazada aporta contexto de la demo; no representa una fuente externa conectada."
+                : "The linked screen provides demo context; it is not a connected external source."}
+            </small>
+          </aside>
+        </div>
+        <article className="panel table-wrap revenue-ledger">
+          <div className="revenue-ledger-head">
+            <h2 id="revenue-ledger-title">{locale === "es" ? "Libro de cálculo del escenario" : "Scenario calculation ledger"}</h2>
+            <span>{locale === "es" ? "ADR constante · €124" : "Constant ADR · €124"}</span>
+          </div>
+          <table aria-labelledby="revenue-ledger-title">
+            <thead>
+              <tr>
+                <th>{locale === "es" ? "Semana" : "Week"}</th>
+                <th>{locale === "es" ? "Disponibles" : "Available"}</th>
+                <th>{locale === "es" ? "Ocupadas" : "Occupied"}</th>
+                <th>{locale === "es" ? "Ocupación" : "Occupancy"}</th>
+                <th>{locale === "es" ? "Ingresos" : "Revenue"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {weeks.map((week, index) => (
+                <tr key={week.occupancy}>
+                  <td>{locale === "es" ? `Semana ${index + 1}` : `Week ${index + 1}`}</td>
+                  <td>672</td>
+                  <td>{week.occupied}</td>
+                  <td>{week.occupancy}%</td>
+                  <td>{new Intl.NumberFormat(locale === "es" ? "es-ES" : "en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(week.revenue)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </article>
+      </>
+    );
+  }
+
   return (
     <div className="dash-grid">
       <article className="panel wide">
@@ -1992,9 +2185,7 @@ function Reports({ scenario, locale }: { scenario: Scenario; locale: Locale }) {
       </article>
       <article className="panel">
         <h2>{locale === "es" ? "Ingresos preparados" : "Prepared revenue"}</h2>
-        <strong className="big-number">
-          {scenario === "aurem" ? "€ 184k" : "€ 26.4k"}
-        </strong>
+        <strong className="big-number">€ 26.4k</strong>
         <p className="body-copy">
           {locale === "es"
             ? "Dato de escenario. No procede de contabilidad ni pasarela real."

@@ -26,6 +26,10 @@ const demoRoutes = [
 ];
 
 const auditedRoutes = [...commercialRoutes, ...legalRoutes, ...demoRoutes];
+const deepStateRoutes = [
+  '/demos/aurem/gestion/?vista=reports',
+  '/en/demos/aurem/gestion/?vista=reports',
+];
 
 function formatViolations(path: string, violations: Awaited<ReturnType<AxeBuilder['analyze']>>['violations']) {
   return violations.map((violation) => ({
@@ -44,7 +48,7 @@ async function gotoStable(page: Page, path: string) {
 
 test('representative ES/EN routes have no automated WCAG 2.2 AA violations', async ({ page }) => {
   const violations = [];
-  for (const path of auditedRoutes) {
+  for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);
     const result = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
@@ -55,7 +59,7 @@ test('representative ES/EN routes have no automated WCAG 2.2 AA violations', asy
 });
 
 test('every audited route exposes one main landmark and one page heading', async ({ page }) => {
-  for (const path of auditedRoutes) {
+  for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);
     await expect(page.locator('main'), `${path}: main landmark`).toHaveCount(1);
     await expect(page.locator('h1'), `${path}: page heading`).toHaveCount(1);
@@ -64,7 +68,7 @@ test('every audited route exposes one main landmark and one page heading', async
 
 test('every audited route reflows without page-level horizontal scrolling at 320px', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 900 });
-  for (const path of auditedRoutes) {
+  for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);
     const reflow = await page.evaluate(() => {
       const pageScrollWidth = document.documentElement.scrollWidth;
@@ -88,7 +92,7 @@ test('every audited route reflows without page-level horizontal scrolling at 320
 
 test('representative families tolerate text resized to 200 percent', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  for (const path of ['/', '/planes/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/']) {
+  for (const path of ['/', '/planes/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/?vista=reports']) {
     await gotoStable(page, path);
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);

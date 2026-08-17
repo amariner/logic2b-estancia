@@ -139,6 +139,28 @@ blockquote { margin: 20px 0; border-left: 2px solid var(--ink); padding: 4px 0 4
 .bar-chart i { position: relative; flex: 1; min-width: 14px; border-radius: 7px 7px 0 0; background: var(--ink); opacity: .82; }
 .bar-chart span { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); color: var(--slate); font-size: .52rem; }
 .big-number { display: block; margin: 60px 0 12px; font-family: var(--serif); font-size: 2.6rem; font-weight: 400; }
+.revenue-boundary { display: flex; align-items: flex-start; gap: 14px; border: 1px solid #ead4c9; border-radius: 16px; padding: 14px 18px; color: var(--sienna); background: var(--peach); font-size: .7rem; line-height: 1.5; }
+.revenue-boundary strong { flex: 0 0 auto; }
+.revenue-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+.revenue-metrics button { display: flex; min-width: 0; min-height: 164px; flex-direction: column; align-items: flex-start; border: 1px solid transparent; border-radius: 20px; padding: 20px; color: var(--ink); background: var(--paper); text-align: left; cursor: pointer; }
+.revenue-metrics button[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.revenue-metrics span, .revenue-metrics small { color: var(--slate); font-size: .68rem; line-height: 1.45; }
+.revenue-metrics strong { margin: auto 0 10px; font-family: var(--serif); font-size: 2rem; font-weight: 400; }
+.revenue-layout { display: grid; grid-template-columns: 1.35fr .65fr; gap: 10px; margin-top: 10px; }
+.revenue-chart .bar-chart { height: 300px; margin-bottom: 28px; gap: 20px; }
+.revenue-chart .bar-chart i { background: #45464a; opacity: 1; }
+.revenue-chart .bar-chart i span { color: var(--slate); }
+.revenue-chart .bar-chart i b { position: absolute; right: 0; bottom: -24px; left: 0; color: var(--ash); font-size: .58rem; font-style: normal; font-weight: 400; text-align: center; }
+.revenue-explanation { display: flex; min-width: 0; flex-direction: column; }
+.revenue-explanation > span { color: var(--ash); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.revenue-explanation h2 { margin-top: 18px; }
+.revenue-explanation > strong { overflow-wrap: break-word; font-family: var(--serif); font-size: clamp(2.6rem, 5vw, 4.2rem); font-weight: 400; line-height: .95; }
+.revenue-explanation p { color: var(--slate); font-size: .72rem; line-height: 1.55; }
+.revenue-explanation .primary { align-self: flex-start; gap: 8px; margin-top: auto; }
+.revenue-explanation small { margin-top: 12px; color: var(--ash); font-size: .62rem; line-height: 1.5; }
+.revenue-ledger { margin-top: 10px; }
+.revenue-ledger-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; padding: 22px 22px 4px; }
+.revenue-ledger-head span { color: var(--ash); font-size: .64rem; }
 .settings-grid { grid-template-columns: 1fr 1fr; }
 .settings-grid dl { display: grid; grid-template-columns: 1fr 1fr; margin: 0; }
 .settings-grid dt, .settings-grid dd { margin: 0; border-top: 1px solid var(--line); padding: 13px 0; font-size: .7rem; }
@@ -191,6 +213,8 @@ blockquote { margin: 20px 0; border-left: 2px solid var(--ink); padding: 4px 0 4
   .mobile-menu { display: flex !important; }
   .metric-grid { grid-template-columns: 1fr 1fr; }
   .dash-grid { grid-template-columns: 1fr; }
+  .revenue-metrics { grid-template-columns: 1fr 1fr; }
+  .revenue-layout { grid-template-columns: 1fr; }
   .channel-grid, .family-grid { grid-template-columns: 1fr 1fr; }
   .website-editor { grid-template-columns: 1fr; }
   .tour-choice { left: 50%; }
@@ -213,6 +237,11 @@ blockquote { margin: 20px 0; border-left: 2px solid var(--ink); padding: 4px 0 4
   .tape { overflow-x: auto; }
   .bar-chart { height: 220px; gap: 4px; }
   .bar-chart span { display: none; }
+  .revenue-boundary { flex-direction: column; gap: 4px; }
+  .revenue-metrics { grid-template-columns: 1fr; }
+  .revenue-metrics button { min-height: 145px; }
+  .revenue-chart .bar-chart { gap: 10px; }
+  .revenue-ledger-head { align-items: flex-start; flex-direction: column; }
   .tour-pop { right: 12px; bottom: 12px; width: calc(100% - 24px); }
   .page-meta { gap: 5px; }
   .page-meta button { min-width: 38px; height: 38px; padding: 0 9px; }

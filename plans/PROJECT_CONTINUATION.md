@@ -44,12 +44,13 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Diagnóstico sin captación duplicada: conserva sus respuestas en el navegador y conduce al único formulario comercial de la landing.
 - Formularios, dashboards y acciones de las demos limitados a interacción visual/local; no envían correo, ni escriben en CRM, inventario, reservas, pagos, mensajes o proveedores externos.
 - Dos recursos SEO iniciales y playbook comercial.
-- QA visual responsive realizado; `pnpm check` con 28 tareas de paquetes más lint raíz correcto y `pnpm e2e` con 41 pruebas correctas, incluidas 14 de accesibilidad y 3 de SEO técnico.
+- QA visual responsive realizado; `pnpm check` con 28 tareas de paquetes más lint raíz correcto y `pnpm e2e` con 43 pruebas correctas, incluidas 14 de accesibilidad y 3 de SEO técnico.
 - Worker `logic-estancia` publicado en `https://estancia.logic2b.com`, sin variables ni token de HubSpot, con assets, `LeadCoordinator`, cuatro secretos de correo cifrados y `workers.dev` desactivado. La versión activa es `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`; `logic-estancia-demo` fue eliminado después de verificar el corte.
 - CLI `pnpm smoke:resend` con modo seco predeterminado, autorización explícita, origen validado, payload no comercial estable, comprobación opcional de referencia idempotente y salida allowlisted sin PII ni secretos.
 - Baseline automatizada WCAG 2.2 AA sobre las 30 rutas públicas, sin violaciones axe después de corregir contraste y objetivos táctiles; landmarks, foco visible, movimiento reducido, reflow a 320 px, texto al 200 %, foco contextual y estados dinámicos cubiertos por E2E, con las limitaciones humanas documentadas.
 - Auditoría Lighthouse móvil reproducible: 99–100 en rendimiento, 100 en accesibilidad/buenas prácticas/SEO para rutas indexables; la demo mantiene `noindex` y queda exceptuada del umbral SEO por diseño.
 - Matriz SEO sobre las 20 URLs indexables: canonical propio, nueve parejas `hreflang`, JSON-LD y sitemap verificados; los dos recursos monolingües ya no anuncian traducciones inexistentes.
+- Vista de ingresos Aurem ES/EN con escenario local explicable de 28 días, KPI seleccionables, fórmulas, libro semanal y enlaces a planning/reservas ficticios; ninguna cifra procede de PMS, canales, contabilidad o pagos.
 
 ## Siguiente cola priorizada
 
@@ -72,7 +73,9 @@ Bloqueos humanos de P1: recorridos completos con VoiceOver y otro lector represe
 
 ### P2 · Profundidad comercial de las demos
 
-- Mejorar pantallas navegables de revenue, canales, informes e IA supervisada sin simular conexiones reales.
+- Completado: pantalla navegable de revenue de Aurem, con ingresos, ocupación, ADR y RevPAR matemáticamente consistentes, límites visibles y evidencia contextual enlazada.
+- Siguiente punto exacto: profundizar Canales en Aurem con una matriz local de cobertura/estado, explicación de qué requeriría una conexión real y una revisión supervisada que nunca publique inventario ni tarifas.
+- Después: mejorar informes e IA supervisada sin simular conexiones reales.
 - Completar la guía narrativa de tres minutos, sus hitos contextuales y la recuperación entre sesiones.
 - Reforzar el mapa de capacidades con evidencia enlazada desde cada flujo.
 
@@ -108,8 +111,9 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 ## Evidencia del último incremento
 
 - `pnpm check`: 7 tareas de lint de paquetes, lint de scripts/E2E raíz y 21 tareas de typecheck/test/build correctas; Worker con 29 pruebas unitarias.
-- `pnpm e2e`: 41 pruebas Chromium correctas; 24 funcionales, 14 de accesibilidad y 3 de SEO técnico.
-- `tests/e2e/accessibility.spec.ts`: las 30 rutas públicas pasan axe con etiquetas WCAG 2.0/2.1/2.2 AA, un único `main`/`h1`, reflow a 320 px y diagnóstico del nodo que desborda; cinco familias toleran texto al 200 %.
+- `pnpm e2e`: 43 pruebas Chromium correctas; 26 funcionales, 14 de accesibilidad y 3 de SEO técnico.
+- `tests/e2e/accessibility.spec.ts`: las 30 rutas públicas y los dos estados profundos ES/EN de ingresos pasan axe con etiquetas WCAG 2.0/2.1/2.2 AA, un único `main`/`h1`, reflow a 320 px y diagnóstico del nodo que desborda; cinco familias toleran texto al 200 %.
+- Revenue Aurem: dos E2E recorren ES/EN, seleccionan ADR/RevPAR, verifican fórmulas, tabla semanal y navegación contextual a reservas/planning. El escenario cuadra 96 habitaciones × 28 días, 2.392 noches ocupadas, 89 % de ocupación, ADR €124, €296.608 y RevPAR €110 redondeado.
 - Interacción accesible: el diagnóstico enfoca cada nueva pregunta y el resultado; cookies, pago ficticio, visita guiada y utilidades del gestor reciben y restauran foco; los errores y estados usan regiones semánticas verificadas.
 - Reflow corregido: tabla de capacidades contenida en scroll propio, títulos compartidos con corte seguro, recursos apilados en móvil y hero de demos sin anchura intrínseca superior al viewport.
 - Primera auditoría corregida: contraste serio de texto secundario en web, demos y dashboards, acentos de Terrava/Aurem y dos enlaces de gestor por debajo de 24 px. Reejecución sin violaciones.
@@ -118,7 +122,7 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 - Regresión SEO: 20 canonical exactos, nueve parejas ES/EN recíprocas y existentes, JSON-LD `Organization`/`WebSite`, sitemap completo sin demos y recursos ES-only sin enlaces alternativos falsos.
 - `pnpm smoke:resend -- --run-id release-20260817-a`: modo seco correcto, destino validado y `networkRequest: false`; no se ejecutó ningún envío externo.
 - CLI cubierta por 9 pruebas nuevas: bloqueo sin autorización, separador de pnpm, validación de origen/run-id, marcado no comercial, saneado de respuesta, referencia esperada y fallo ante entrega degradada. El Worker suma ahora 29 pruebas correctas.
-- QA visual en navegador local: portada a 1366 px y 375 px, Terrava, gestor Aurem, recurso monolingüe a 320 px y Aurem inglés a 320 px sin overflow ni regresiones; la paleta conserva jerarquía y la cabecera sigue equilibrada sin selector de idioma ficticio.
+- QA visual en navegador local: portada a 1366 px y 375 px, Terrava, gestor Aurem, recurso monolingüe a 320 px, Aurem inglés a 320 px y revenue Aurem en escritorio/320 px sin overflow ni regresiones; la tabla mantiene scroll interno y los KPI se apilan sin perder jerarquía.
 - `wrangler deploy --dry-run`: 118 assets, `LeadCoordinator` y variables versionadas reconocidos.
 - Producción consolidada en `logic-estancia`, versión `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`, con trigger exclusivo `estancia.logic2b.com (custom domain)`. El Worker `logic-estancia-demo` fue eliminado tras un dry-run y la verificación del corte.
 - `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT`, `LEADS_REPLY_TO` y `LEADS_RESEND_API_KEY` figuran como `secret_text`; `LEADS_TRANSPORT` es la única variable de canal. No existen bindings `HUBSPOT_*`.
@@ -133,14 +137,14 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: correcto — el cambio reduce fricción y riesgo reputacional en diagnóstico y demostración sin añadir promesas, precios ni datos comerciales ficticios.
-- Diseño de producto: corregido — cada cambio de contexto devuelve una posición operable y el resultado del diagnóstico sigue apareciendo antes de cualquier captación.
-- UX: corregido — reflow completo a 320 px, texto al 200 %, foco de pasos/resultados/overlays y recuperación al disparador quedan cubiertos en los recorridos críticos.
-- UI/dirección visual: corregido — se preservan jerarquía editorial y fotografía al apilar recursos y contener imágenes; recurso español y Aurem inglés se revisaron a 320 px sin overflow.
-- SEO: correcto — las correcciones responsive no alteran canonical, `hreflang`, datos estructurados, sitemap ni la política `noindex` de las demos.
-- Arquitectura frontend: corregido — las reglas de anchura se fijan en componentes compartidos y la regresión centralizada informa selector y geometría del futuro desbordamiento.
-- Full stack: correcto — el incremento es exclusivamente local, no modifica API, analítica, PII, Resend, CRM ni integraciones externas.
-- QA/accesibilidad/rendimiento/confianza: correcto — 14 pruebas específicas y 41 E2E cubren 30 rutas, reflow, texto, foco, estados y preferencias; axe permanece limpio y el QA móvil no muestra regresiones.
+- Marketing estratégico: correcto — revenue convierte una capacidad abstracta en una conversación comercial explicable sin atribuir resultados, clientes ni datos reales.
+- Diseño de producto: corregido — “Informes” pasa a “Ingresos” solo en Aurem y cada KPI conduce a planning o reservas, manteniendo la narrativa del plan Inteligente.
+- UX: correcto — selección, fórmula, contexto y siguiente pantalla forman un recorrido reversible y bilingüe; el libro semanal permite comprobar las cifras.
+- UI/dirección visual: corregido — jerarquía ejecutiva de cuatro KPI, gráfica, explicación y tabla; la opacidad que reducía contraste de etiquetas fue detectada por axe y corregida.
+- SEO: no aplica — es un estado interno de demos con `noindex`; no cambia metadata ni superficies indexables.
+- Arquitectura frontend: correcto — reutiliza `View`, navegación y estado React local; el nombre contextual se centraliza con `labelFor` y no duplica rutas.
+- Full stack: correcto — todos los datos son constantes de escenario en cliente; no hay fetch, escritura remota, PMS, canal, contabilidad, pago ni analítica con importes.
+- QA/accesibilidad/rendimiento/confianza: correcto — 43 E2E, axe ES/EN sobre el estado profundo, reflow y texto 200 % en verde; QA visual escritorio/320 px y fórmulas consistentes.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Lighthouse debe repetirse en producción tras un despliegue autorizado. También queda ejecutar la CLI de smoke con autorización y confirmar el smoke anterior. Los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance.
 
@@ -159,3 +163,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-17 — Se automatizó la baseline WCAG 2.2 AA de las 30 rutas públicas y se corrigieron contraste sistémico y objetivos táctiles; se añadieron controles de landmarks, foco y movimiento reducido, documentación de límites y alineación de tipos Cloudflare. Verificado con 28 tareas, 32 E2E, axe limpio, peers limpios y QA visual responsive. Próximo punto: Lighthouse móvil y revisión técnica SEO final.
 - 2026-08-17 — Se añadió Lighthouse móvil reproducible y la matriz SEO de las 20 URLs indexables. Portada logra 100 en las cuatro categorías; planes/diagnóstico 99 de rendimiento y 100 restantes. Se corrigieron `hreflang` y selector inexistentes en recursos ES-only. Verificado con 28 tareas de paquetes más lint raíz, 35 E2E y QA visual. Próximo punto: reflow/zoom, foco dinámico y validación asistiva manual.
 - 2026-08-17 — Se completó el alcance WCAG reproducible local con reflow de 30 rutas a 320 px, texto al 200 %, foco contextual y estados dinámicos en diagnóstico, cookies, demos y gestor. Verificado con 14 pruebas específicas, 41 E2E y QA visual a 320 px. Próximo punto: pantalla local y ficticia de revenue para Aurem; lectores de pantalla y alto contraste quedan como validación humana.
+- 2026-08-17 — Se profundizó Aurem con una vista ES/EN de revenue íntegramente local: KPI coherentes, fórmulas, libro semanal y navegación a evidencia ficticia. Axe corrigió contraste de etiquetas de gráfica; QA escritorio/320 px y 43 E2E quedan en verde. Próximo punto: matriz de Canales local y supervisada, sin publicar inventario ni tarifas.

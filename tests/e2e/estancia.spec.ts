@@ -293,6 +293,34 @@ test('workspace search opens from the keyboard and navigates to a matching area'
   await expect(page.getByRole('dialog', { name: 'Búsqueda rápida' })).toBeHidden();
 });
 
+test('Aurem revenue explains every fictitious metric and links to demo evidence', async ({ page }) => {
+  await page.goto('/demos/aurem/gestion/?vista=reports');
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Ingresos' })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('96 habitaciones ficticias durante 28 días');
+  await expect(page.locator('.revenue-metrics button')).toHaveCount(4);
+
+  await page.getByRole('button', { name: /Tarifa media diaria/ }).click();
+  await expect(page.locator('.revenue-explanation')).toContainText('€296.608 de ingresos ÷ 2.392 noches ocupadas');
+  await page.getByRole('button', { name: 'Abrir reservas ficticias' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Reservas' })).toBeVisible();
+  await expect(page).toHaveURL(/vista=bookings/);
+});
+
+test('Aurem revenue remains explainable and navigable in English', async ({ page }) => {
+  await page.goto('/en/demos/aurem/gestion/?vista=reports');
+  await page.getByRole('button', { name: 'Explore freely' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Revenue' })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('96 fictitious rooms over 28 days');
+  await expect(page.locator('.revenue-ledger tbody tr')).toHaveCount(4);
+
+  await page.getByRole('button', { name: /Revenue per available room/ }).click();
+  await expect(page.locator('.revenue-explanation')).toContainText('€296,608 revenue ÷ 2,688 available room nights');
+  await page.getByRole('button', { name: 'Open fictitious planning' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Planning' })).toBeVisible();
+  await expect(page).toHaveURL(/vista=planning/);
+});
+
 test('operational notifications expose context and open the related area', async ({ page }) => {
   await page.goto('/demos/aurem/gestion/');
   await page.getByRole('button', { name: 'Explorar libremente' }).click();
