@@ -39,7 +39,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Semántica de entrega reforzada: el correo interno es obligatorio para devolver éxito, el resumen al visitante puede degradarse sin perder el lead y un `202` no reconocido nunca abre el recibo; las consultas directas ya no reciben una recomendación Básico inventada.
 - Transporte de Resend acotado: cada mensaje interno o resumen al visitante se aborta tras 10 segundos; un proveedor bloqueado entra en el contrato existente de fallo/degradación y permite reintento seguro con las mismas claves idempotentes.
 - Rate limit persistente en Cloudflare Durable Objects, con cinco solicitudes por minuto e IP y fallo cerrado si la coordinación no está disponible.
-- Idempotencia integral de Resend durante 24 horas: referencia durable, concurrencia coalescida y claves estables separadas para mensaje interno y resumen al visitante.
+- Idempotencia integral de Resend en una ventana fija de 24 horas desde el primer intento: referencia durable incluso tras fallo, concurrencia coalescida, caducidad no extensible y claves estables separadas para mensaje interno y resumen al visitante.
 - Recuperación manual de entregas degradadas documentada sin exponer secretos.
 - Remitente, destinatario interno, reply-to y agenda extraídos a entorno, validados sin registrar valores; email falla cerrado si queda incompleto y la agenda insegura nunca llega al enlace público.
 - Observabilidad de agenda alineada con su contrato opcional: una variable ausente es configuración saludable; solo un valor presente pero inválido genera una alerta saneada.
@@ -90,6 +90,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Completado y verificado localmente: la ausencia de `LEADS_MEETING_URL` ya no emite un error operativo porque la agenda es opcional; una URL presente pero inválida continúa omitiéndose del recibo y genera una única alerta sin registrar el valor. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: un payload inválido recibe únicamente `{ ok: false, outcome: "invalid", error: "invalid" }`; se retiraron los detalles de Zod que la landing no consumía y no se refleja ningún valor enviado. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: nombre, negocio, contacto, contexto y listas estructuradas rechazan CR/LF y separadores Unicode antes de componer correos; el mensaje libre sigue admitiendo varias líneas y el markup adversarial se escapa en ambos HTML. Falta un despliegue de producción autorizado.
+- Completado y verificado localmente: la referencia durable y su resultado comparten una única ventana de 24 horas desde el primer intento, también si falla; reintentar no extiende la caducidad, los estados heredados conservan su referencia y tras expirar se crea una nueva. Falta un despliegue de producción autorizado.
 
 Siguiente punto exacto de activación: confirmar humanamente en el buzón interno que el mensaje del último smoke con referencia `e27e5bf3-a462-4db6-9f49-80d8486fe23c` está visible. Después, obtener autorización explícita para desplegar este incremento y repetir el smoke con un buzón controlado para verificar la nueva semántica en producción. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
 
@@ -152,24 +153,24 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- Alcance: esquema de campos estructurados del lead, composición de los dos correos, dos pruebas adversariales y este checkpoint. No se añadieron dependencias, proveedores, PII, eventos, cambios visuales ni despliegues.
-- Seguridad y confianza: CR, LF y separadores Unicode ya no pueden entrar en asunto o filas estructuradas; etiquetas como `svg`, `script`, `img` y `a` se prueban como texto escapado, nunca como markup ejecutable.
-- Compatibilidad: el mensaje mantiene saltos de línea legítimos; el formulario usa inputs de una sola línea para los campos endurecidos y el payload normal sigue entregándose.
-- Privacidad: no cambia el conjunto de datos enviado a Resend ni se añade logging; la validación negativa conserva la respuesta mínima no reflectiva.
-- `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 42/42 pruebas del Worker.
-- E2E relevante: 2/2 pruebas Chromium correctas para el contrato privado/negativo y la entrega del único formulario real; la matriz completa anterior permanece en 69/69.
+- Alcance: ciclo de vida durable de referencia/resultado, migración de estado anterior, playbook operativo, tres escenarios unitarios y este checkpoint. No se añadieron proveedores, PII, eventos, cambios visuales ni despliegues.
+- Fiabilidad: un fallo programa caducidad; un éxito posterior conserva referencia y vencimiento originales; tras 24 horas se inicia una referencia nueva en vez de reutilizar claves potencialmente vencidas de Resend.
+- Compatibilidad: una referencia heredada sin metadato de expiración se conserva y recibe su ventana al primer acceso, evitando duplicados durante una futura actualización.
+- Privacidad y retención: los estados fallidos dejan de conservar una referencia indefinidamente; no se persiste el payload y la alarma elimina todo el objeto al vencer.
+- `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 44/44 pruebas del Worker.
+- E2E relevante: 1/1 prueba Chromium correcta para la entrega del único formulario real; la matriz completa anterior permanece en 69/69.
 - QA visual: no aplica — no cambia DOM, estilos, copy ni estado interactivo.
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: correcto — no cambia la propuesta, el acuse ni el seguimiento comercial.
-- Diseño de producto: corregido — la información estructurada llega al correo sin permitir que un campo suplante filas o cabeceras.
-- UX: correcto — los controles visibles ya son de una sola línea y el campo mensaje conserva su libertad multilínea.
+- Marketing estratégico: correcto — no cambia la propuesta ni el seguimiento visible; se reduce el riesgo de duplicar comunicaciones.
+- Diseño de producto: corregido — la promesa de reintento seguro queda delimitada por una ventana real y no extensible.
+- UX: correcto — referencia, recibo, timeout y reintento visible permanecen idénticos durante la ventana operativa.
 - UI/dirección visual: no aplica — no hay cambios de interfaz ni contenido visible.
 - SEO: correcto — no cambian contenido indexable, metadata, headings, canonical, `hreflang`, sitemap ni datos estructurados; las cuatro pruebas SEO permanecen verdes.
 - Arquitectura frontend: no aplica — no cambia código cliente.
-- Full stack: corregido — la frontera se aplica en el esquema antes de hashing, coordinación y composición; el escape HTML sigue siendo la segunda defensa.
-- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check`, 42/42 pruebas del Worker y 2/2 E2E relevantes cubren inyección de líneas, markup adversarial y entrega legítima; la matriz completa anterior es 69/69 y no quedan bloqueantes conocidos.
+- Full stack: corregido — referencia y resultado comparten un único TTL; fallo, reintento, expiración y migración quedan modelados explícitamente.
+- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E relevante cubren las transiciones durables y la entrega visible; la matriz completa anterior es 69/69 y no quedan bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Los timeouts de cliente y proveedor, el contrato de entrega y Lighthouse deben comprobarse en producción tras un despliegue autorizado; el estado específico de timeout no conserva captura visual por la restricción del navegador integrado, aunque su DOM y comportamiento están cubiertos. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -213,3 +214,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se alineó la observabilidad de `LEADS_MEETING_URL` con su carácter opcional: ausencia silenciosa y saludable; alerta saneada solo ante un valor presente pero inválido. Verificado con `pnpm check`, 39/39 pruebas del Worker y 2/2 E2E relevantes. No se desplegó producción.
 - 2026-08-18 — Se eliminó la exposición de detalles internos de Zod en los `400` de `/api/leads`; la respuesta mínima no refleja valores recibidos y la landing conserva su contrato. Verificado con `pnpm check`, 40/40 pruebas del Worker y 1/1 E2E compuesto. No se desplegó producción.
 - 2026-08-18 — Se endureció la frontera de contenido de Resend: campos estructurados sin separadores de línea, mensaje multilínea intacto y HTML dinámico probado frente a markup adversarial. Verificado con `pnpm check`, 42/42 pruebas del Worker y 2/2 E2E relevantes. No se desplegó producción.
+- 2026-08-18 — Se fijó la idempotencia durable a una única ventana de 24 horas desde el primer intento: fallos con caducidad, reintentos sin extensión, nueva referencia tras vencer y migración conservadora de estados heredados. Verificado con `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E relevante. No se desplegó producción.

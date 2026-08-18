@@ -71,7 +71,7 @@ Use `apps/worker/.dev.vars.example` only as a local shape reference. Definitive 
 
 ## Lead delivery resilience and recovery
 
-Cloudflare Durable Objects keep the five-submissions-per-minute IP limit outside individual Worker isolates. They also retain a submission reference and the completed response for 24 hours in the EU jurisdiction. Equivalent retries reuse that reference, and Resend receives `estancia-lead/{ref}/internal` and `estancia-lead/{ref}/visitor` idempotency keys.
+Cloudflare Durable Objects keep the five-submissions-per-minute IP limit outside individual Worker isolates. They also retain a submission reference for one fixed 24-hour window from the first delivery attempt in the EU jurisdiction; a completed response is cached only for the remainder of that same window. Failed attempts schedule the same expiry, equivalent retries do not extend it, and Resend receives `estancia-lead/{ref}/internal` and `estancia-lead/{ref}/visitor` idempotency keys.
 
 Use the structured Worker log event and its `ref` when a provider is degraded:
 
@@ -81,7 +81,7 @@ Use the structured Worker log event and its `ref` when a provider is degraded:
 4. If `lead_coordination_failed` appears, restore the Durable Object binding before retrying. The endpoint fails closed instead of bypassing rate limiting or idempotency.
 5. For `lead_email_configuration_invalid`, repair every named field before relying on Resend. For `lead_meeting_configuration_invalid`, verify the public HTTPS agenda value; no unsafe value is returned to the browser.
 
-An internal Resend message is the mandatory delivery. A visitor summary without the internal message is a failed submission, returns `502` and remains retryable with the same durable reference; an internal message without the visitor summary returns `202 delivered_degraded`. Each Resend request is aborted after 10 seconds so a stalled provider cannot hold the form indefinitely. A timeout follows the same failed/degraded contract, and retrying the unchanged payload remains safe because both messages keep their stable idempotency keys. Do not create CRM records while HubSpot remains outside the production scope.
+An internal Resend message is the mandatory delivery. A visitor summary without the internal message is a failed submission, returns `502` and remains retryable with the same durable reference during its original 24-hour window; an internal message without the visitor summary returns `202 delivered_degraded`. Each Resend request is aborted after 10 seconds so a stalled provider cannot hold the form indefinitely. A timeout follows the same failed/degraded contract, and retrying the unchanged payload within that window remains safe because both messages keep their stable idempotency keys. After expiry, a retry intentionally starts a new reference and must be treated as a new delivery attempt. Do not create CRM records while HubSpot remains outside the production scope.
 
 ### Demo form boundary
 

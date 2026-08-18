@@ -76,6 +76,9 @@ describe('LeadCoordinator', () => {
   });
 
   it('reuses its durable reference when the mandatory internal email is retried', async () => {
+    vi.useFakeTimers();
+    const startedAt = new Date('2026-08-18T10:00:00Z');
+    vi.setSystemTime(startedAt);
     let internalAttempts = 0;
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
       const payload = JSON.parse(String(init?.body)) as { to: string[] };
@@ -89,9 +92,46 @@ describe('LeadCoordinator', () => {
     const first = await deliver(new LeadCoordinator(state(storage), emailEnv));
     expect(first.status).toBe(502);
     const firstBody = await first.json() as { ref: string };
+    expect(storage.alarm).toBe(startedAt.getTime() + 24 * 60 * 60 * 1_000);
+    vi.setSystemTime(new Date(startedAt.getTime() + 12 * 60 * 60 * 1_000));
     const second = await deliver(new LeadCoordinator(state(storage), emailEnv));
     expect(second.status).toBe(202);
     expect(await second.json()).toMatchObject({ ref: firstBody.ref });
     expect(internalAttempts).toBe(2);
+    expect(storage.alarm).toBe(startedAt.getTime() + 24 * 60 * 60 * 1_000);
+  });
+
+  it('starts a fresh reference after a failed delivery window expires', async () => {
+    vi.useFakeTimers();
+    const startedAt = new Date('2026-08-18T10:00:00Z');
+    vi.setSystemTime(startedAt);
+    let succeeds = false;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+      const payload = JSON.parse(String(init?.body)) as { to: string[] };
+      const internal = payload.to[0] === 'sales@example.test';
+      return new Response('{}', { status: internal && !succeeds ? 500 : 200 });
+    });
+    const storage = new MemoryStorage();
+    const coordinator = new LeadCoordinator(state(storage), emailEnv);
+    const first = await deliver(coordinator);
+    const firstRef = (await first.json() as { ref: string }).ref;
+    vi.setSystemTime(new Date(startedAt.getTime() + 24 * 60 * 60 * 1_000 + 1));
+    succeeds = true;
+    const second = await deliver(coordinator);
+    expect(second.status).toBe(202);
+    expect((await second.json() as { ref: string }).ref).not.toBe(firstRef);
+  });
+
+  it('preserves a legacy durable reference while adding its missing expiry', async () => {
+    vi.useFakeTimers();
+    const startedAt = new Date('2026-08-18T10:00:00Z');
+    vi.setSystemTime(startedAt);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    const storage = new MemoryStorage();
+    storage.values.set('ref', 'legacy-ref');
+    const response = await deliver(new LeadCoordinator(state(storage), emailEnv));
+    expect(await response.json()).toMatchObject({ ref: 'legacy-ref' });
+    expect(storage.values.get('refExpiresAt')).toBe(startedAt.getTime() + 24 * 60 * 60 * 1_000);
+    expect(storage.alarm).toBe(startedAt.getTime() + 24 * 60 * 60 * 1_000);
   });
 });

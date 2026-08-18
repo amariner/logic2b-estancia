@@ -65,12 +65,23 @@ export class LeadCoordinator {
 
   private async performDelivery(lead: Lead, now: number): Promise<DeliveryResult> {
     let ref = await this.state.storage.get<string>('ref');
+    let expiresAt = await this.state.storage.get<number>('refExpiresAt');
+    if (ref && expiresAt && expiresAt <= now) {
+      await this.state.storage.deleteAll();
+      ref = undefined;
+      expiresAt = undefined;
+    }
     if (!ref) {
       ref = crypto.randomUUID();
       await this.state.storage.put('ref', ref);
     }
+    if (!expiresAt) {
+      expiresAt = now + IDEMPOTENCY_TTL_MS;
+      await this.state.storage.put('refExpiresAt', expiresAt);
+      await this.state.storage.setAlarm(expiresAt);
+    }
     const response = await deliverLead(lead, this.env, ref);
-    const stored = { body: await response.text(), status: response.status, expiresAt: now + IDEMPOTENCY_TTL_MS };
+    const stored = { body: await response.text(), status: response.status, expiresAt };
     const cache = response.status >= 200 && response.status < 300;
     if (cache) {
       await this.state.storage.put('result', stored);
