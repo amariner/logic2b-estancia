@@ -34,6 +34,54 @@ test('public routes are complete and demos remain isolated', async ({ page }) =>
   }
 });
 
+test('capability maps expose truthful evidence and exact localized targets', async ({ page, request }) => {
+  await page.goto('/soluciones/gestores/');
+  await expect(page.locator('[data-capability-evidence]')).toHaveCount(6);
+  const planning = page.locator('[data-capability="planning"]');
+  await expect(planning).toContainText('Desde Gestión');
+  await expect(planning).toContainText('Reasignación de unidad y ajuste de tarifa reversibles');
+  await expect(planning).toContainText('Sin PMS, disponibilidad, pagos ni tarifas conectadas');
+  await expect(planning.locator('[data-capability-evidence]')).toHaveAttribute('href', '/demos/terrava/gestion/?vista=planning');
+
+  await page.goto('/soluciones/hoteles/');
+  await expect(page.locator('[data-capability-evidence]')).toHaveCount(12);
+  await expect(page.locator('[data-capability="channels"]')).toContainText('A validar');
+  await expect(page.locator('[data-capability-evidence="channels"]')).toHaveAttribute('href', '/demos/aurem/gestion/?vista=channels');
+
+  await page.goto('/en/plans/');
+  const evidenceLinks = page.locator('[data-capability-evidence]');
+  await expect(evidenceLinks).toHaveCount(14);
+  await expect(page.locator('[data-capability="revenue"]')).toContainText('Minimum plan: Intelligent');
+  await expect(page.locator('[data-capability="revenue"]')).toContainText('Future');
+  await expect(page.locator('[data-capability-evidence="revenue"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=reports');
+  await expect(page.locator('[data-capability-evidence="email-enquiries"]')).toHaveAttribute('href', '/en/demos/nivora/#reserva');
+
+  for (const href of await evidenceLinks.evaluateAll((links) => links.map((link) => link.getAttribute('href')).filter(Boolean) as string[])) {
+    expect((await request.get(href)).status(), href).toBe(200);
+  }
+});
+
+test('capability evidence opens the exact fictitious flow without external writes', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method())) externalWrites.push(request.url());
+  });
+
+  await page.goto('/soluciones/hoteles/');
+  await page.locator('[data-capability-evidence="channels"]').click();
+  await expect(page).toHaveURL(/\/demos\/aurem\/gestion\/\?vista=channels$/);
+  await page.getByRole('button', { name: 'Explorar libremente' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Canales' })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('0 canales conectados');
+
+  await page.goto('/planes/');
+  await page.locator('[data-capability-evidence="email-enquiries"]').click();
+  await expect(page).toHaveURL(/\/demos\/nivora\/#reserva$/);
+  await expect(page.locator('#reserva [data-demo-form]')).toBeVisible();
+  await expect(page.locator('#reserva')).toContainText('no bloquea inventario');
+  expect(externalWrites).toEqual([]);
+});
+
 for (const width of [320, 375, 430, 1366]) {
   test(`core experiences fit ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width < 500 ? 860 : 900 });

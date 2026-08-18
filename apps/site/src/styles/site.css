@@ -151,10 +151,16 @@
 .problem-list span { color: var(--ash); font-size: .72rem; }
 .problem-list p { margin: 0; font-family: var(--serif); font-size: 1.45rem; line-height: 1.25; }
 .capability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 54px; }
-.capability-grid article { min-height: 240px; padding: 24px; }
-.capability-grid h3 { margin: 48px 0 10px; font-family: var(--serif); font-size: 1.65rem; font-weight: 400; }
+.capability-grid article { display: flex; min-height: 430px; flex-direction: column; padding: 24px; }
+.capability-grid h3 { margin: 38px 0 10px; font-family: var(--serif); font-size: 1.65rem; font-weight: 400; }
 .capability-grid p { color: var(--slate); font-size: .82rem; line-height: 1.55; }
 .capability-meta { display: flex; align-items: center; justify-content: space-between; color: var(--ash); font-size: .68rem; text-transform: capitalize; }
+.capability-proof { margin-top: auto; border-top: 1px solid var(--line); padding-top: 18px; }
+.capability-proof > strong { font-size: .7rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.capability-proof p { margin: 8px 0 0; }
+.capability-proof .capability-boundary { color: var(--ash); font-size: .72rem; }
+.capability-proof .capability-boundary b { color: var(--ink); font-weight: 600; }
+.capability-proof a, .capability-table-evidence a { display: inline-flex; min-height: 28px; align-items: center; gap: 5px; margin-top: 12px; color: var(--ink); font-size: .75rem; font-weight: 600; text-underline-offset: 4px; }
 .maturity { display: inline-flex; border-radius: 999px; padding: 5px 8px; font-size: .63rem; font-style: normal; white-space: nowrap; }
 .maturity.demo { color: #215840; background: #e2f1e8; }
 .maturity.simulated { color: #745116; background: #f8edcf; }
@@ -179,13 +185,17 @@
 .plan-card > a { align-self: flex-start; border-bottom: 1px solid currentColor; padding-bottom: 4px; font-size: .78rem; text-decoration: none; }
 .pricing-note { max-width: 760px; margin: 28px 0 0; color: var(--slate); font-size: .8rem; line-height: 1.6; }
 .capability-table { margin-top: 50px; border: 1px solid var(--line); border-radius: 22px; overflow: hidden; background: var(--paper); }
-.capability-row { display: grid; grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(75px, .55fr)) minmax(105px, .7fr); align-items: center; border-bottom: 1px solid var(--line); }
+.capability-row { display: grid; grid-template-columns: minmax(260px, 1.7fr) minmax(220px, 1.2fr) repeat(3, minmax(75px, .45fr)) minmax(105px, .6fr); align-items: center; border-bottom: 1px solid var(--line); }
 .capability-row:last-child { border-bottom: 0; }
 .capability-row > span { min-width: 0; padding: 16px; text-align: center; }
 .capability-row > span:first-child { text-align: left; }
 .capability-row strong, .capability-row small { display: block; }
 .capability-row small { margin-top: 5px; color: var(--slate); font-size: .68rem; line-height: 1.4; }
+.capability-row .minimum-plan { color: var(--ink); font-weight: 600; }
+.capability-table-evidence a { margin-top: 0; }
+.capability-table-evidence small { display: block; }
 .capability-row.header { color: var(--ash); background: var(--fog); font-size: .68rem; text-transform: uppercase; }
+.table-scroll-hint { display: none; }
 .extras { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
 .extras ul { display: grid; margin: 0; padding: 0; list-style: none; }
 .extras li { border-top: 1px solid var(--line); padding: 18px 0; }
@@ -297,7 +307,8 @@
   .commercial-hero { padding-top: 80px; }
   .capability-grid, .choice-grid, .inline-fields { grid-template-columns: 1fr; }
   .capability-table { overflow-x: auto; }
-  .capability-row { grid-template-columns: 260px repeat(3, 95px) 110px; min-width: 655px; }
+  .capability-row { grid-template-columns: 260px 220px repeat(3, 95px) 110px; min-width: 875px; }
+  .table-scroll-hint { display: block; margin: 28px 0 -32px; color: var(--slate); font-size: .75rem; }
   .resource header .display { font-size: clamp(2.75rem, 14vw, 4.3rem); }
   .resource-body section { grid-template-columns: 1fr; gap: 12px; }
   .resource-cta { padding: 28px; }

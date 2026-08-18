@@ -28,7 +28,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 ## Entregado
 
 - Dominio consolidado en Básico, Gestión e Inteligente, con normalización de valores antiguos en el borde.
-- Fuente única de capacidades, categorías y madurez.
+- Fuente única de capacidades, categorías, madurez y evidencia localizada, con destino exacto, prueba observable y límite explícito por capacidad.
 - Portada, planes, soluciones para gestores y hoteles y diagnóstico de seis pasos en ES/EN.
 - Resultado del diagnóstico antes de solicitar datos personales y precarga desde soluciones, planes y demos.
 - Captación comercial exclusivamente mediante Resend desde el formulario de la landing, con consentimiento separado y parámetros controlados; HubSpot está desactivado y fuera de alcance.
@@ -46,7 +46,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Diagnóstico sin captación duplicada: conserva sus respuestas en el navegador y conduce al único formulario comercial de la landing.
 - Formularios, dashboards y acciones de las demos limitados a interacción visual/local; no envían correo, ni escriben en CRM, inventario, reservas, pagos, mensajes o proveedores externos.
 - Dos recursos SEO iniciales y playbook comercial.
-- QA visual responsive realizado; `pnpm check` con 7 tareas de lint y 21 tareas de typecheck/test/build correctas, y `pnpm e2e` con 50 pruebas correctas, incluidas 15 de accesibilidad y 3 de SEO técnico.
+- QA visual responsive realizado; `pnpm check` con 7 tareas de lint y 21 tareas de typecheck/test/build correctas, y `pnpm e2e` con 52 pruebas correctas, incluidas 15 de accesibilidad y 3 de SEO técnico.
 - Worker `logic-estancia` publicado en `https://estancia.logic2b.com`, sin variables ni token de HubSpot, con assets, `LeadCoordinator`, cuatro secretos de correo cifrados y `workers.dev` desactivado. La versión activa es `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`; `logic-estancia-demo` fue eliminado después de verificar el corte.
 - CLI `pnpm smoke:resend` con modo seco predeterminado, autorización explícita, origen validado, payload no comercial estable, comprobación opcional de referencia idempotente y salida allowlisted sin PII ni secretos.
 - Baseline automatizada WCAG 2.2 AA sobre las 30 rutas públicas, sin violaciones axe después de corregir contraste y objetivos táctiles; landmarks, foco visible, movimiento reducido, reflow a 320 px, texto al 200 %, foco contextual y estados dinámicos cubiertos por E2E, con las limitaciones humanas documentadas.
@@ -56,6 +56,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Matriz de Canales Aurem ES/EN con cero conexiones/publicaciones, cobertura por capacidad, inspección local, revisión persistente por rol y requisitos explícitos de una integración real; se eliminaron falsas horas de sincronización.
 - Copiloto supervisado de Aurem ES/EN convertido en un flujo honesto de edición: fixture y fuentes visibles, borrador versionado local, revisión humana limitada por rol, trazabilidad completa y envío permanentemente deshabilitado sin modelo o proveedor.
 - Guía narrativa de Aurem ES/EN ampliada a siete hitos de tres minutos: llegada en riesgo, coordinación, control, ingresos, canales, IA supervisada y encaje. Cada hito muestra evidencia y límites propios, conserva y valida el progreso local, recupera la vista contextual al volver y termina en un diagnóstico precargado sin enviar datos.
+- Mapa comercial de 14 capacidades reforzado en soluciones y planes ES/EN: cada elemento muestra plan mínimo, madurez, prueba verificable, límite y enlace profundo a la sección o vista ficticia exacta de Nivora, Terrava o Aurem. La tabla móvil acerca evidencia a la capacidad y explica su scroll propio.
 
 ## Siguiente cola priorizada
 
@@ -72,9 +73,9 @@ Siguiente punto exacto de activación: confirmar humanamente en el buzón intern
 - Completado: Lighthouse móvil reproducible por encima de 90 en accesibilidad y SEO de rutas indexables, con `noindex` de demos protegido como política.
 - Completado: datos estructurados, canonical, `hreflang` y sitemap contrastados con las 20 URLs finales indexables.
 
-P1 no conserva desarrollo local pendiente. La continuidad pasa a P2; sus validaciones humanas externas permanecen registradas como deuda y no se declaran completadas.
+P1 no conserva desarrollo local pendiente. Sus validaciones humanas externas permanecen registradas como deuda y no se declaran completadas.
 
-Bloqueos humanos de P1: recorridos completos con VoiceOver y otro lector representativo, modos de alto contraste, validación de comprensión, contraste Lighthouse contra producción y revisión jurídica. No bloquean el siguiente incremento local seguro de P2.
+Bloqueos humanos de P1: recorridos completos con VoiceOver y otro lector representativo, modos de alto contraste, validación de comprensión, contraste Lighthouse contra producción y revisión jurídica. No bloquean el siguiente incremento local seguro.
 
 ### P2 · Profundidad comercial de las demos
 
@@ -82,7 +83,9 @@ Bloqueos humanos de P1: recorridos completos con VoiceOver y otro lector represe
 - Completado: Canales Aurem con matriz local de cobertura/estado, requisitos de conexión real, permisos y revisión supervisada que nunca publica inventario ni tarifas.
 - Completado: copiloto de IA supervisada de Aurem con fixture y fuentes explícitos, edición/versionado local, revisión por rol, trazabilidad y envío bloqueado por diseño.
 - Completado: guía narrativa de tres minutos de Aurem con siete hitos contextuales, progreso recuperable entre sesiones, evidencia explícita de ingresos/canales/IA supervisada y salida clara al diagnóstico Inteligente precargado.
-- Siguiente punto exacto: reforzar el mapa de capacidades con evidencia enlazada desde cada flujo, manteniendo madurez, plan mínimo y límites visibles sin inventar integraciones ni resultados.
+- Completado: mapa de las 14 capacidades con plan mínimo, madurez, prueba y límite localizados, enlazado a la sección o vista ficticia exacta de Nivora, Terrava o Aurem desde soluciones y planes.
+
+P2 no conserva desarrollo local pendiente. La continuidad pasa a P3.
 
 ### P3 · Contenido y conversión
 
@@ -90,6 +93,8 @@ Bloqueos humanos de P1: recorridos completos con VoiceOver y otro lector represe
 - Preparar plantillas versionadas de resumen de diagnóstico, seguimiento y propuesta.
 - Instrumentar un informe reproducible del funnel usando solo eventos y parámetros permitidos.
 - Ejecutar un solo experimento principal de conversión cada vez y registrar hipótesis, variante y resultado.
+
+Bloqueo del primer punto: los nuevos contenidos necesitan objeciones obtenidas de entrevistas o conversaciones reales; no se inventarán. Siguiente punto exacto desbloqueado: preparar plantillas versionadas de resumen de diagnóstico, seguimiento y propuesta, sin precios ni afirmaciones no validadas.
 
 ## Actividades externas pendientes
 
@@ -116,10 +121,11 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 ## Evidencia del último incremento
 
 - `pnpm check`: 7 tareas de lint de paquetes, lint de scripts/E2E raíz y 21 tareas de typecheck/test/build correctas; Worker con 29 pruebas unitarias.
-- `pnpm e2e`: 50 pruebas Chromium correctas; 32 funcionales, 15 de accesibilidad y 3 de SEO técnico.
-- Guía Aurem: dos E2E recorren ES/EN los siete hitos de señal, coordinación, control, ingresos, canales, IA supervisada y encaje; verifican pausa, reanudación contextual desde la URL base, progreso accesible, CTA al diagnóstico precargado y ausencia de cualquier `POST`/`PUT`/`PATCH`/`DELETE`.
-- Estado guiado: `DemoState v2` valida límites distintos para los tres pasos de Terrava y los siete de Aurem mediante 12 unitarias del dashboard; índices negativos, fuera de rango o corruptos se descartan.
-- QA visual local de la guía: primer y último hito revisados a 1280 × 900 y 320 × 900, con siete segmentos legibles, jerarquía estable, acciones completas y `scrollWidth` exacto de 1280/320 px. No se generaron imágenes porque el incremento no requería nuevos recursos raster.
+- `pnpm e2e`: 52 pruebas Chromium correctas; 34 funcionales, 15 de accesibilidad y 3 de SEO técnico.
+- Mapa de capacidades: 14 contratos tipados y bilingües contienen plan mínimo, madurez, demo, superficie/vista, prueba observable y límite. Las unitarias rechazan destinos incoherentes entre web demo y workspace.
+- Dos E2E nuevos verifican 6 capacidades para gestores, 12 para hoteles y las 14 en planes, destinos ES/EN, respuestas HTTP correctas, navegación a Canales Aurem y formulario Nivora, y cero `POST`/`PUT`/`PATCH`/`DELETE`.
+- QA visual local: tarjetas uniformes a 1366 × 900; una columna legible a 320 × 900; enlaces de evidencia de 28 px; página con `scrollWidth` exacto de 1366/320 px; tabla móvil contenida en 290 px con scroll propio de 875 px, indicación visible y evidencia accesible tras un gesto horizontal. No se generaron imágenes porque el incremento no requería recursos raster.
+- Confianza comercial: el límite de Nivora aclara que el plan real entrega consultas por email mientras la demo no envía emails, no bloquea inventario ni confirma reservas; se eliminó una redacción ambigua detectada por E2E.
 - `tests/e2e/accessibility.spec.ts`: las 30 rutas públicas y seis estados profundos ES/EN de ingresos/canales/automatización pasan axe con etiquetas WCAG 2.0/2.1/2.2 AA, un único `main`/`h1`, reflow a 320 px y diagnóstico del nodo que desborda; cinco familias toleran texto al 200 %.
 - Revenue Aurem: dos E2E recorren ES/EN, seleccionan ADR/RevPAR, verifican fórmulas, tabla semanal y navegación contextual a reservas/planning. El escenario cuadra 96 habitaciones × 28 días, 2.392 noches ocupadas, 89 % de ocupación, ADR €124, €296.608 y RevPAR €110 redondeado.
 - Canales Aurem: dos E2E verifican matriz ES/EN, permisos, revisión local persistente, publicación siempre deshabilitada y ausencia de cualquier `POST`/`PUT`/`PATCH`/`DELETE`; `DemoState v2` conserva estados válidos y rechaza `published` mediante 8 unitarias del dashboard.
@@ -147,14 +153,14 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: corregido — la guía deja de enumerar pantallas y conecta la objeción operativa con evidencia de ingresos, canales e IA antes de conducir al diagnóstico; no promete resultados ni automatización real.
-- Diseño de producto: correcto — siete hitos forman un relato completo de Inteligente, mantienen explícitos los límites de cada capacidad y terminan en un siguiente paso útil sin convertir la demo en operación.
-- UX: corregido — cada paso aporta contexto propio, se puede pausar, vuelve a la vista exacta aunque se reabra la URL base y ofrece dos salidas finales claras: seguir explorando o abrir el diagnóstico precargado.
-- UI/dirección visual: correcto — progreso, fase, explicación, evidencia y acciones conservan jerarquía editorial a 1280 × 900 y 320 × 900 sin overflow ni contenido oculto.
-- SEO: no aplica — el recorrido pertenece a dashboards con `noindex` y no altera metadata, sitemap ni superficies indexables.
-- Arquitectura frontend: corregido — el contenido usa un contrato tipado de hito y `DemoState v2` valida el índice contra la longitud propia de Terrava o Aurem sin dependencias ni migración de versión.
-- Full stack: correcto — todo el progreso permanece en `localStorage`; las pruebas del recorrido demuestran cero escrituras HTTP y el diagnóstico solo precarga parámetros permitidos.
-- QA/accesibilidad/rendimiento/confianza: correcto — 50 E2E, 12 unitarias de dashboard, axe sin violaciones en el estado guiado, foco al cambiar de hito, progreso semántico y QA responsive en verde.
+- Marketing estratégico: corregido — cada promesa comercial abre ahora una prueba concreta y su límite; Nivora distingue la entrega real por email de la demo estrictamente local sin sugerir reservas o inventario conectados.
+- Diseño de producto: correcto — las 14 capacidades conservan plan mínimo y madurez, y el mapa conecta Básico/Nivora, Gestión/Terrava e Inteligente/Aurem sin añadir planes ni funciones.
+- UX: corregido — los enlaces profundos llevan a la sección o vista exacta; en móvil la evidencia se colocó junto a la capacidad y la tabla anuncia su desplazamiento horizontal.
+- UI/dirección visual: correcto — las tarjetas mantienen altura, ritmo y jerarquía a 1366 × 900 y se apilan a 320 × 900; prueba, límite y CTA permanecen legibles sin overflow de página.
+- SEO: correcto — las superficies comerciales indexables ganan enlaces internos descriptivos; las demos enlazadas mantienen `noindex` y siguen excluidas del sitemap.
+- Arquitectura frontend: corregido — evidencia, destino, prueba y límite forman un contrato discriminado en `@logic-estancia/domain`; un helper único compone rutas localizadas y evita mapas paralelos en planes y soluciones.
+- Full stack: correcto — los enlaces solo navegan a assets estáticos y estado local; E2E confirma ausencia de cualquier escritura HTTP y no se añadieron APIs, credenciales o integraciones.
+- QA/accesibilidad/rendimiento/confianza: corregido — 52 E2E, 11 unitarias de dominio, axe/reflow existentes y QA responsive en verde; se ampliaron los enlaces a 28 px y se eliminó el copy ambiguo de Nivora.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Lighthouse debe repetirse en producción tras un despliegue autorizado. También queda ejecutar la CLI de smoke con autorización y confirmar el smoke anterior. Los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance.
 
@@ -177,3 +183,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-17 — Se convirtió Canales Aurem en una matriz ES/EN honesta y supervisada: cero conexiones/publicaciones, cobertura por capacidad, revisión local persistente por rol y requisitos de integración real. Se eliminaron horas de sincronización ficticias; verificado con 45 E2E, 8 unitarias y QA escritorio/320 px. Próximo punto: copiloto IA editable y trazable, con envío siempre bloqueado.
 - 2026-08-17 — Se convirtió el copiloto de Aurem en un flujo IA supervisado ES/EN: fixture y fuentes visibles, edición/versionado local, revisión por rol, trazabilidad y envío permanentemente bloqueado. Verificado con 47 E2E, 10 unitarias y QA escritorio/320 px. Próximo punto: guía narrativa de tres minutos con hitos contextuales y recuperación entre sesiones.
 - 2026-08-18 — Se completó la guía narrativa de Aurem ES/EN con siete hitos, evidencia y límites contextuales, recuperación exacta entre sesiones y salida al diagnóstico precargado. Verificado con 50 E2E, 12 unitarias, axe/foco y QA visual 1280/320 px. No requirió generar imágenes. Próximo punto: mapa de capacidades con evidencia enlazada desde cada flujo.
+- 2026-08-18 — Se reforzó el mapa ES/EN de 14 capacidades con plan mínimo, madurez, prueba, límite y enlaces profundos a Nivora, Terrava y Aurem desde soluciones y planes. Se corrigieron la ambigüedad de Nivora y el acceso móvil a evidencia. Verificado con 52 E2E, `pnpm check` y QA visual 1366/320 px. No requirió generar imágenes. Próximo punto desbloqueado: plantillas versionadas de resumen, seguimiento y propuesta.

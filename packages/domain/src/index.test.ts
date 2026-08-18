@@ -20,6 +20,9 @@ describe('domain', () => {
   it('keeps the capability map internally valid', () => {
     expect(new Set(CAPABILITIES.map(({ id }) => id)).size).toBe(CAPABILITIES.length);
     expect(CAPABILITIES.every(({ minimumPlan }) => ['basico', 'gestion', 'inteligente'].includes(minimumPlan))).toBe(true);
+    expect(CAPABILITIES.every(({ evidence }) => evidence.proof.es && evidence.proof.en && evidence.boundary.es && evidence.boundary.en)).toBe(true);
+    expect(CAPABILITIES.filter(({ evidence }) => evidence.surface === 'demo-site').every(({ evidence }) => evidence.demo === 'nivora' && evidence.anchor && !evidence.view)).toBe(true);
+    expect(CAPABILITIES.filter(({ evidence }) => evidence.surface === 'workspace').every(({ evidence }) => evidence.demo !== 'nivora' && evidence.view && !evidence.anchor)).toBe(true);
   });
   it.each([
     [{ propertyCount: 1, unitCount: 1, wantsBookings: false, wantsAutomation: false, wantsOperations: false }, 'basico'],
