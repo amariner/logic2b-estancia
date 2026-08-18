@@ -3,10 +3,10 @@ import type { Locale } from '@logic-estancia/config';
 const { locale } = Astro.props as { locale: Locale };
 const en = locale === 'en'; const prefix = en ? '/en' : '';
 const labels = en ? {
-  eyebrow: 'Six-step assessment', title: 'See the right starting point before sharing your details.', body: 'Your recommendation is driven by capabilities. Portfolio size helps us scope implementation, not push you into a larger plan.', back: 'Back', next: 'Next', result: 'See recommendation', step: 'Step',
+  eyebrow: 'Six useful questions · no sign-up', title: 'Find the next improvement your business can actually use.', body: 'You will see the recommendation before sharing any details. Capabilities determine the plan; scale only helps size implementation.', back: 'Back', next: 'Next', result: 'See recommendation', step: 'Step',
   plans: { basico: ['Basic', 'A managed brand website with email enquiries and no dashboard.'], gestion: ['Management', 'A shared workspace for enquiries, bookings, planning, guests, rates and the website.'], inteligente: ['Intelligent', 'A daily operations centre for teams, incidents, automation, supervised AI and advanced metrics.'] },
 } : {
-  eyebrow: 'Diagnóstico en seis pasos', title: 'Descubre tu punto de partida antes de compartir tus datos.', body: 'La recomendación se decide por capacidades. El tamaño ayuda a dimensionar la implantación, no a empujarte a un plan superior.', back: 'Atrás', next: 'Siguiente', result: 'Ver recomendación', step: 'Paso',
+  eyebrow: 'Seis preguntas útiles · sin registro', title: 'Descubre la siguiente mejora que tu negocio sí puede aprovechar.', body: 'Verás la recomendación antes de compartir ningún dato. Las capacidades deciden el plan; la escala solo ayuda a dimensionar la implantación.', back: 'Atrás', next: 'Siguiente', result: 'Ver recomendación', step: 'Paso',
   plans: { basico: ['Básico', 'Una web de marca gestionada con solicitudes por email y sin dashboard.'], gestion: ['Gestión', 'Un espacio común para solicitudes, reservas, planning, huéspedes, tarifas y web.'], inteligente: ['Inteligente', 'Un centro operativo diario para equipos, incidencias, automatización, IA supervisada y métricas.'] },
 };
 ---

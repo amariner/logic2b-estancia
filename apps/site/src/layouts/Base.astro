@@ -1,6 +1,8 @@
 ---
 import '@fontsource-variable/inter';
 import '@fontsource-variable/source-serif-4';
+import interFontUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import sourceSerifFontUrl from '@fontsource-variable/source-serif-4/files/source-serif-4-latin-wght-normal.woff2?url';
 import '@logic-estancia/ui/theme.css';
 import '../styles/site.css';
 import { CONSENT, PRODUCT, type Locale } from '@logic-estancia/config';
@@ -9,8 +11,8 @@ import analyticsContract from '@logic-estancia/config/analytics-contract';
 import CookieBanner from '../components/CookieBanner.astro';
 import { content } from '../content';
 
-interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; translated?: boolean; }
-const { locale, title = 'Logic Estancia', description = 'Web, reserva directa y operación para alojamientos.', route = '', alternateRoute, translated = true } = Astro.props;
+interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; translated?: boolean; image?: string; }
+const { locale, title = 'Logic Estancia', description = 'Web, reservas y operación para alojamientos.', route = '', alternateRoute, translated = true, image = '/media/terrava/hero.webp' } = Astro.props;
 const c = content[locale];
 const prefix = locale === 'en' ? '/en' : '';
 const cleanRoute = route.replace(/^\//, '').replace(/\/$/, '');
@@ -23,6 +25,7 @@ const alternateEn = `${PRODUCT.url}/en${locale === 'en' ? routePath : alternateP
 const localeHref = locale === 'es' ? `/en${alternatePath}` : alternatePath;
 const socialLocale = locale === 'es' ? 'es_ES' : 'en_GB';
 const alternateSocialLocale = locale === 'es' ? 'en_GB' : 'es_ES';
+const socialImage = new URL(image, PRODUCT.url).toString();
 const wa = logic2bContact(locale, route.startsWith('docs') ? 'docs' : 'commercial');
 const structuredData = [
   {
@@ -51,23 +54,30 @@ const structuredData = [
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
-    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="theme-color" content="#ffffff" />
     <link rel="canonical" href={canonical} />
     {translated && <link rel="alternate" hreflang="es" href={alternateEs} />}
     {translated && <link rel="alternate" hreflang="en" href={alternateEn} />}
     {translated && <link rel="alternate" hreflang="x-default" href={alternateEs} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={sourceSerifFontUrl} as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href={interFontUrl} as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="/fonts/poppins-600-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="/fonts/poppins-800-logo.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={PRODUCT.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content={locale === 'es' ? 'Alojamiento rural del caso ficticio Terrava Collection' : 'Rural stay from the fictional Terrava Collection case'} />
     <meta property="og:locale" content={socialLocale} />
     <meta property="og:locale:alternate" content={alternateSocialLocale} />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
     <title>{title}</title>
   </head>
@@ -75,28 +85,28 @@ const structuredData = [
     <a class="skip" href="#contenido">{locale === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
     <header class="site-header">
       <div class="topbar shell">
-        <a class="wordmark" href={`${prefix}/`} aria-label="Logic2B Estancias">
-          <span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancias</span>
+        <a class="wordmark" href={`${prefix}/`} aria-label={locale === 'es' ? 'Logic Estancia, inicio' : 'Logic Estancia, home'}>
+          <span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancia</span>
         </a>
         <nav aria-label={locale === 'es' ? 'Principal' : 'Main'}>
           <a href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}>{c.nav.product}</a>
-          <a href={`${prefix}/#demos`}>{c.nav.demos}</a>
+          <a href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}>{c.nav.demos}</a>
           <a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a>
         </nav>
         <div class="top-actions">
           {translated && <a class="locale" href={localeHref}>{locale === 'es' ? 'EN' : 'ES'}</a>}
           <a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="header">{c.nav.contact}</a>
         </div>
-        <button class="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+        <button class="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">{locale === 'es' ? 'Menú' : 'Menu'}</button>
       </div>
       <div id="mobile-nav" class="mobile-nav" hidden>
-        <a href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}>{c.nav.product}</a><a href={`${prefix}/#demos`}>{c.nav.demos}</a><a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`}>{c.nav.contact}</a>
+        <a href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}>{c.nav.product}</a><a href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}>{c.nav.demos}</a><a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`}>{c.nav.contact}</a>
       </div>
     </header>
     <main id="contenido"><slot /></main>
     <footer class="footer shell">
-      <a class="wordmark" href={`${prefix}/`} aria-label="Logic2B Estancias"><span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancias</span></a>
-      <div><a href={`${prefix}/docs/`}>{c.nav.docs}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
+      <a class="wordmark" href={`${prefix}/`} aria-label={locale === 'es' ? 'Logic Estancia, inicio' : 'Logic Estancia, home'}><span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancia</span></a>
+      <div><a href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}>{c.nav.product}</a><a href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}>{c.nav.demos}</a><a href={`${prefix}/docs/`}>{c.nav.docs}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
       <p>© 2026 Logic2B · Castelló</p>
     </footer>
     <a class="whatsapp" href={wa.href} target="_blank" rel="noopener noreferrer" aria-label={`${wa.label} · WhatsApp`} data-whatsapp hidden>{wa.label}<span aria-hidden="true">↗</span></a>

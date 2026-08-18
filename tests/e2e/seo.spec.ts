@@ -61,3 +61,36 @@ test('sitemap contains every indexable final URL exactly once and excludes demos
   expect(xml).not.toContain('/demos/');
   for (const path of indexableRoutes) expect((await request.get(path)).status(), path).toBe(200);
 });
+
+test('commercial search surfaces use specific, unique metadata and people-first headings', async ({ page }) => {
+  const commercialRoutes = [
+    '/', '/en/', '/planes/', '/en/plans/',
+    '/soluciones/gestores/', '/en/solutions/managers/',
+    '/soluciones/hoteles/', '/en/solutions/hotels/',
+    '/diagnostico/', '/en/assessment/',
+  ];
+  const titles = new Set<string>();
+  const descriptions = new Set<string>();
+
+  for (const path of commercialRoutes) {
+    await page.goto(path);
+    const title = await page.title();
+    const description = await page.locator('meta[name="description"]').getAttribute('content');
+    const heading = (await page.locator('h1').innerText()).trim();
+    expect(title.length, `${path} title length`).toBeGreaterThanOrEqual(35);
+    expect(title.length, `${path} title length`).toBeLessThanOrEqual(75);
+    expect(description?.length, `${path} description length`).toBeGreaterThanOrEqual(110);
+    expect(description?.length, `${path} description length`).toBeLessThanOrEqual(180);
+    expect(heading.length, `${path} heading usefulness`).toBeGreaterThan(20);
+    expect(titles.has(title), `${path} duplicate title`).toBe(false);
+    expect(descriptions.has(description ?? ''), `${path} duplicate description`).toBe(false);
+    titles.add(title);
+    descriptions.add(description ?? '');
+  }
+
+  await page.goto('/');
+  const schemas = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((value) => JSON.parse(value));
+  expect(schemas.map((schema) => schema['@type'])).toEqual(expect.arrayContaining(['FAQPage', 'Service']));
+  await expect(page.getByRole('link', { name: 'Gestores', exact: true }).first()).toHaveAttribute('href', '/soluciones/gestores/');
+  await expect(page.getByRole('link', { name: 'Hoteles', exact: true }).first()).toHaveAttribute('href', '/soluciones/hoteles/');
+});

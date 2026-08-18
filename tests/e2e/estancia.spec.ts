@@ -130,7 +130,8 @@ test('commercial pages expose bilingual SEO metadata and complete sitemap', asyn
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://estancia.logic2b.com/');
   await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute('href', 'https://estancia.logic2b.com/en/');
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Logic Estancia/);
-  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary');
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://estancia.logic2b.com/media/terrava/hero.webp');
 
   const schemas = await page.locator('script[type="application/ld+json"]').allTextContents();
   const schemaTypes = schemas.flatMap((schema) => {
@@ -149,7 +150,7 @@ test('commercial pages expose bilingual SEO metadata and complete sitemap', asyn
 
 test('plan interest carries the selected plan into the assessment', async ({ page }) => {
   await page.goto('/');
-  await page.locator('.level-grid article').nth(1).getByRole('link', { name: /Me interesa/ }).click();
+  await page.locator('.level-grid article').nth(1).getByRole('link', { name: /Ver si encaja/ }).click();
   await expect(page).toHaveURL(/\/diagnostico\/\?plan=gestion$/);
   await expect(page.locator('[name="bookingNeeds"][value="bookings"]')).toBeChecked();
 });
@@ -238,7 +239,7 @@ test('the sales landing is the only form that calls the production lead endpoint
   await form.locator('[name="email"]').fill('ada@example.test');
   await form.locator('[name="message"]').fill('Solicitud comercial de prueba.');
   await form.locator('[name="accept"]').check();
-  await form.getByRole('button', { name: /Enviar proyecto/ }).click();
+  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
   await expect(form.getByRole('status')).toHaveText('Solicitud entregada. Te responderemos pronto.');
   expect(leadRequests).toBe(1);
 

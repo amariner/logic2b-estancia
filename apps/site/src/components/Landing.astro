@@ -7,22 +7,22 @@ const c = content[locale];
 const prefix = locale === 'en' ? '/en' : '';
 const wa = logic2bContact(locale, 'commercial');
 const demos = locale === 'es' ? [
-  { slug: 'nivora', level: 'Básico · sin dashboard', name: 'Nivora One', text: 'Un piso turístico con una web que convierte interés en una solicitud por email.', image: '/media/nivora/hero.webp' },
-  { slug: 'terrava', level: 'Gestión · 8 propiedades', name: 'Terrava Collection', text: 'Una solicitud, ocho casas y una alternativa que acaba en reserva.', image: '/media/terrava/hero.webp' },
-  { slug: 'aurem', level: 'Inteligente · 96 habitaciones', name: 'Aurem Hotel', text: 'Un centro operativo para coordinar llegadas, equipos e incidencias.', image: '/media/aurem/hero.webp' },
+  { slug: 'nivora', level: 'Caso ficticio · Básico', name: 'Nivora One', text: 'Cuando una buena estancia necesita una web que esté a su altura y abra una conversación directa.', image: '/media/nivora/hero.webp' },
+  { slug: 'terrava', level: 'Caso ficticio · Gestión', name: 'Terrava Collection', text: 'Cuando ocho casas comparten demanda, pero no deberían repetir ocho veces el mismo trabajo.', image: '/media/terrava/hero.webp' },
+  { slug: 'aurem', level: 'Caso ficticio · Inteligente', name: 'Aurem Hotel', text: 'Cuando el huésped aún no ve el problema, pero el equipo necesita detectarlo y coordinarse.', image: '/media/aurem/hero.webp' },
 ] : [
-  { slug: 'nivora', level: 'Basic · no dashboard', name: 'Nivora One', text: 'One holiday apartment and a website that turns interest into an email enquiry.', image: '/media/nivora/hero.webp' },
-  { slug: 'terrava', level: 'Manage · 8 properties', name: 'Terrava Collection', text: 'One enquiry, eight homes and an alternative that becomes a booking.', image: '/media/terrava/hero.webp' },
-  { slug: 'aurem', level: 'Intelligent · 96 rooms', name: 'Aurem Hotel', text: 'An operations centre for coordinating arrivals, teams and incidents.', image: '/media/aurem/hero.webp' },
+  { slug: 'nivora', level: 'Fictional case · Basic', name: 'Nivora One', text: 'When a distinctive stay needs a website that does it justice and starts a direct conversation.', image: '/media/nivora/hero.webp' },
+  { slug: 'terrava', level: 'Fictional case · Management', name: 'Terrava Collection', text: 'When eight homes share demand but should not repeat the same work eight times.', image: '/media/terrava/hero.webp' },
+  { slug: 'aurem', level: 'Fictional case · Intelligent', name: 'Aurem Hotel', text: 'When the guest cannot see the problem yet, but the team needs to spot it and coordinate.', image: '/media/aurem/hero.webp' },
 ];
 const levels = locale === 'es' ? [
-  ['00', 'Básico', 'Web de marca, SEO, hosting, mantenimiento y solicitudes por email. Sin dashboard.', 'basico'],
-  ['01', 'Gestión', 'Solicitudes, reservas, planning, huéspedes, tarifas, informes y editor web.', 'gestion'],
-  ['02', 'Inteligente', 'Centro operativo, limpieza, equipo, mantenimiento, automatización e IA supervisada.', 'inteligente'],
+  ['00', 'Básico', 'Deja de parecer uno más cuando te comparan y convierte el interés en consultas por email.', 'basico'],
+  ['01', 'Gestión', 'Da continuidad a cada consulta y reserva sin reconstruir su historia en varias herramientas.', 'gestion'],
+  ['02', 'Inteligente', 'Haz visible lo que necesita atención antes de que se convierta en una urgencia para el equipo.', 'inteligente'],
 ] : [
-  ['00', 'Basic', 'Brand website, SEO, hosting, maintenance and email enquiries. No dashboard.', 'basico'],
-  ['01', 'Management', 'Enquiries, bookings, planning, guests, rates, reports and website editor.', 'gestion'],
-  ['02', 'Intelligent', 'Operations centre, cleaning, teams, maintenance, automation and supervised AI.', 'inteligente'],
+  ['00', 'Basic', 'Stop looking interchangeable when guests compare and turn interest into email enquiries.', 'basico'],
+  ['01', 'Management', 'Give every enquiry and booking continuity without rebuilding its story across several tools.', 'gestion'],
+  ['02', 'Intelligent', 'Make what needs attention visible before it turns into an urgent problem for the team.', 'inteligente'],
 ];
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -33,6 +33,21 @@ const faqSchema = {
     acceptedAnswer: { '@type': 'Answer', text: answer },
   })),
 };
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': 'https://estancia.logic2b.com/#service',
+  name: 'Logic Estancia',
+  serviceType: locale === 'es' ? 'Web, gestión de reservas y operación para alojamientos' : 'Website, booking management and operations for accommodation businesses',
+  provider: { '@id': 'https://estancia.logic2b.com/#organization' },
+  areaServed: { '@type': 'Country', name: 'Spain' },
+  audience: { '@type': 'BusinessAudience', audienceType: locale === 'es' ? 'Alojamientos turísticos, gestores y hoteles' : 'Accommodation businesses, managers and hotels' },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: locale === 'es' ? 'Planes de Logic Estancia' : 'Logic Estancia plans',
+    itemListElement: levels.map(([, name, description]) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name, description } })),
+  },
+};
 ---
 <section class="hero">
   <div class="hero-copy shell">
@@ -40,27 +55,32 @@ const faqSchema = {
     <h1 class="display">{c.hero.title.split(', ')[0]}, <em>{c.hero.title.split(', ').slice(1).join(', ')}</em></h1>
     <p>{c.hero.body}</p>
     <div class="hero-actions"><a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="hero">{c.hero.primary}</a><a class="pill ghost" href="#demos">{c.hero.secondary}</a></div>
+    <ul class="hero-assurances" aria-label={locale === 'es' ? 'Principios del servicio' : 'Service principles'}><li>{locale === 'es' ? 'Por fases' : 'Phased'}</li><li>{locale === 'es' ? 'Sin dependencia innecesaria' : 'No needless lock-in'}</li><li>{locale === 'es' ? 'Decisiones bajo control humano' : 'Human-controlled decisions'}</li></ul>
   </div>
-  <article class="floating artifact a"><span>{locale === 'es' ? 'Llegadas de hoy' : 'Today’s arrivals'}</span><strong>18</strong><span class="status">{locale === 'es' ? '3 requieren atención' : '3 need attention'}</span></article>
-  <article class="floating artifact b"><span>{locale === 'es' ? 'Habitaciones listas' : 'Rooms ready'}</span><strong>92%</strong><span class="status">{locale === 'es' ? '6 en preparación' : '6 in preparation'}</span></article>
-  <article class="floating artifact c"><span>{locale === 'es' ? 'Ocupación prevista · próximos 14 días' : 'Forecast occupancy · next 14 days'}</span><div class="mini-chart" aria-hidden="true">{[42,55,62,48,68,78,72,83,91,88,74,86,92,80].map((h) => <i style={`--h:${h}%`}></i>)}</div></article>
+  <article class="floating artifact a"><span>{locale === 'es' ? 'Antes de reservar' : 'Before booking'}</span><strong>{locale === 'es' ? 'Que te elijan' : 'Be chosen'}</strong><span class="status">{locale === 'es' ? 'Marca · SEO · consulta directa' : 'Brand · SEO · direct enquiry'}</span></article>
+  <article class="floating artifact b"><span>{locale === 'es' ? 'Después de reservar' : 'After booking'}</span><strong>{locale === 'es' ? 'Llegar preparados' : 'Arrive prepared'}</strong><span class="status">{locale === 'es' ? 'Contexto · equipo · seguimiento' : 'Context · team · follow-through'}</span></article>
+  <article class="floating artifact c"><span>{locale === 'es' ? 'Un recorrido, sin saltos' : 'One journey, without gaps'}</span><ol class="journey-line"><li>{locale === 'es' ? 'Encontrar' : 'Find'}</li><li>{locale === 'es' ? 'Consultar' : 'Enquire'}</li><li>{locale === 'es' ? 'Reservar' : 'Book'}</li><li>{locale === 'es' ? 'Preparar' : 'Prepare'}</li></ol></article>
+</section>
+
+<section class="section tension-section">
+  <div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{locale === 'es' ? 'El coste de seguir igual' : 'The cost of standing still'}</p><h2 class="heading">{locale === 'es' ? 'No te falta otra herramienta. Te falta que el recorrido completo tenga sentido.' : 'You do not need another tool. You need the whole journey to make sense.'}</h2><p>{locale === 'es' ? 'La fricción rara vez está en un único lugar. Se acumula entre la búsqueda del huésped, la respuesta, la reserva y el trabajo que nadie ve.' : 'Friction rarely sits in one place. It builds between guest search, response, booking and the work no one sees.'}</p></div><ol class="problem-list"><li><span>01</span><p>{locale === 'es' ? 'Te encuentran, pero tu web no termina de explicar por qué elegirte.' : 'Guests find you, but your website does not quite explain why they should choose you.'}</p></li><li><span>02</span><p>{locale === 'es' ? 'Responder una consulta obliga a comprobar canales, calendarios y conversaciones.' : 'Answering an enquiry means checking channels, calendars and conversations.'}</p></li><li><span>03</span><p>{locale === 'es' ? 'El equipo resuelve hoy lo que podía haber visto ayer.' : 'The team solves today what it could have seen yesterday.'}</p></li></ol></div>
 </section>
 
 <section class="section segment-section shell" aria-labelledby="segment-title">
-  <div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Dos recorridos, una arquitectura' : 'Two journeys, one architecture'}</p><h2 id="segment-title" class="heading">{locale === 'es' ? 'Diseñada para la forma en que alojas.' : 'Designed around how you host.'}</h2></div>
-  <div class="mode-grid segment-grid"><a class="card" href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}><span>01</span><h3>{locale === 'es' ? 'Gestores y alojamientos rurales' : 'Managers and rural stays'}</h3><p>{locale === 'es' ? 'Web, solicitudes y reservas para portfolios que necesitan una vista común sin perder el carácter de cada propiedad.' : 'Website, enquiries and bookings for portfolios that need one view without losing each property’s character.'}</p><b>{locale === 'es' ? 'Ver solución' : 'View solution'} →</b></a><a class="card" href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}><span>02</span><h3>{locale === 'es' ? 'Hoteles y equipos operativos' : 'Hotels and operations teams'}</h3><p>{locale === 'es' ? 'Reservas, llegadas, limpieza, incidencias y decisiones coordinadas desde un centro operativo.' : 'Bookings, arrivals, cleaning, incidents and decisions coordinated from an operations centre.'}</p><b>{locale === 'es' ? 'Ver solución' : 'View solution'} →</b></a></div>
+  <div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Dos realidades de negocio' : 'Two business realities'}</p><h2 id="segment-title" class="heading">{locale === 'es' ? 'El mismo huésped. Retos muy distintos detrás.' : 'The same guest. Very different challenges behind the scenes.'}</h2></div>
+  <div class="mode-grid segment-grid"><a class="card" href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}><span>01</span><h3>{locale === 'es' ? 'Haz crecer tu cartera sin multiplicar el caos.' : 'Grow your portfolio without multiplying the chaos.'}</h3><p>{locale === 'es' ? 'Para gestores, apartamentos y alojamientos rurales que necesitan vender bajo una marca propia y compartir reservas sin borrar el carácter de cada estancia.' : 'For managers, apartments and rural stays that need to sell under their own brand and share bookings without erasing each stay’s character.'}</p><b>{locale === 'es' ? 'Soy gestor o alojamiento rural' : 'I manage apartments or rural stays'} →</b></a><a class="card" href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}><span>02</span><h3>{locale === 'es' ? 'Anticípate al turno antes de que el huésped note el problema.' : 'Get ahead of the shift before the guest notices the problem.'}</h3><p>{locale === 'es' ? 'Para hoteles donde llegadas, habitaciones, incidencias y decisiones cruzan equipos y necesitan un contexto compartido.' : 'For hotels where arrivals, rooms, incidents and decisions cross teams and need shared context.'}</p><b>{locale === 'es' ? 'Trabajo en un hotel' : 'I work in a hotel'} →</b></a></div>
 </section>
 
 <section id="producto" class="section shell">
   <div class="section-head"><p class="eyebrow">{c.proof.eyebrow}</p><h2 class="heading">{c.proof.title}</h2><p>{c.proof.body}</p></div>
   <div class="product-stage">
     <ul class="feature-list">
-      <li><strong>{locale === 'es' ? 'Una fuente de verdad' : 'One source of truth'}</strong><span class="muted">{locale === 'es' ? 'Empresa, propiedad y unidad comparten el mismo modelo.' : 'Organisation, property and unit share one model.'}</span></li>
-      <li><strong>{locale === 'es' ? 'Acciones supervisadas' : 'Supervised actions'}</strong><span class="muted">{locale === 'es' ? 'Precio, cobro y mensajes siempre exigen confirmación.' : 'Pricing, payments and messages always require confirmation.'}</span></li>
-      <li><strong>{locale === 'es' ? 'La realidad a la vista' : 'Truth in plain sight'}</strong><span class="muted">{locale === 'es' ? 'Demo, simulada, a validar o futura: nunca una promesa ambigua.' : 'Demo, simulated, to validate or future: never an ambiguous promise.'}</span></li>
+      <li><strong>{locale === 'es' ? 'Más oportunidades bajo tu marca' : 'More opportunities under your brand'}</strong><span class="muted">{locale === 'es' ? 'Una web pensada para ser encontrada, entendida y contactada.' : 'A website designed to be found, understood and contacted.'}</span></li>
+      <li><strong>{locale === 'es' ? 'Menos persecución interna' : 'Less internal chasing'}</strong><span class="muted">{locale === 'es' ? 'La reserva conserva el contexto que necesita el siguiente paso.' : 'The booking keeps the context the next step needs.'}</span></li>
+      <li><strong>{locale === 'es' ? 'Automatizar sin perder el criterio' : 'Automate without losing judgement'}</strong><span class="muted">{locale === 'es' ? 'Precios, cobros, canales y mensajes requieren validación antes de actuar.' : 'Pricing, payments, channels and messages require validation before action.'}</span></li>
     </ul>
     <div class="product-window artifact" aria-label={locale === 'es' ? 'Vista simulada del gestor' : 'Simulated workspace view'}>
-      <div class="window-bar"><span>Aurem Hotel · {locale === 'es' ? 'Todas las propiedades' : 'All properties'}</span><span>{locale === 'es' ? 'Dirección' : 'Direction'} · Demo</span></div>
+      <div class="window-bar"><span>Aurem Hotel · {locale === 'es' ? 'Escenario ficticio' : 'Fictional scenario'}</span><span>{locale === 'es' ? 'Vista local' : 'Local view'} · Demo</span></div>
       <div class="window-grid"><article><span>{locale === 'es' ? 'Riesgos para las entradas' : 'Arrival risks'}</span><b>3</b><small class="muted">{locale === 'es' ? 'Limpieza · pago · asignación' : 'Cleaning · payment · assignment'}</small></article><article><span>{locale === 'es' ? 'Ocupación' : 'Occupancy'}</span><b>87%</b></article><article><span>{locale === 'es' ? 'Preparación' : 'Preparation'}</span><b>14/18</b></article><article><span>Canales</span><b>4</b><small class="muted">{locale === 'es' ? 'Demo · no conectados' : 'Demo · not connected'}</small></article></div>
     </div>
   </div>
@@ -71,12 +91,12 @@ const faqSchema = {
 </section>
 
 <section id="demos" class="section shell">
-  <div class="section-head"><p class="eyebrow">{c.demos.eyebrow}</p><h2 class="heading">{c.demos.title}</h2></div>
+  <div class="section-head"><p class="eyebrow">{c.demos.eyebrow}</p><h2 class="heading">{c.demos.title}</h2><p>{locale === 'es' ? 'Puedes recorrer cada caso sin registrarte. Todo lo que ocurre dentro es local, ficticio y está etiquetado para que la evidencia no se confunda con una promesa.' : 'Explore every case without registering. Everything inside is local, fictional and labelled so evidence is never confused with a promise.'}</p></div>
   <div class="demo-grid">{demos.map((demo) => <a class="demo-card card" href={`${prefix}/demos/${demo.slug}/`}><picture><source type="image/avif" srcset={`/media/${demo.slug}/hero-640.avif 640w, /media/${demo.slug}/hero-960.avif 960w`} sizes="(max-width: 760px) 100vw, 33vw" /><img src={demo.image} alt="" loading="lazy" width="2016" height="1344" /></picture><div><span class="eyebrow">{demo.level}</span><h3>{demo.name}</h3><p>{demo.text}</p><span>{c.demos.open} →</span></div></a>)}</div>
 </section>
 
 <section id="niveles" class="section levels">
-  <div class="shell"><div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2></div><div class="level-grid">{levels.map(([n, name, text, value]) => <article><span>{n}</span><h3>{name}</h3><p>{text}</p><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/?plan=${value}`} data-plan={value} data-track="plan_select" data-section="homepage_plans">{locale === 'es' ? 'Me interesa' : 'I’m interested'} <span aria-hidden="true">→</span></a></article>)}</div><p class="level-note">{c.levels.note}</p></div>
+  <div class="shell"><div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2></div><div class="level-grid">{levels.map(([n, name, text, value]) => <article><span>{n}</span><h3>{name}</h3><p>{text}</p><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/?plan=${value}`} data-plan={value} data-track="plan_select" data-section="homepage_plans">{locale === 'es' ? 'Ver si encaja' : 'See if it fits'} <span aria-hidden="true">→</span></a></article>)}</div><p class="level-note">{c.levels.note}</p><a class="text-link" href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{locale === 'es' ? 'Comparar los tres planes y sus límites' : 'Compare all three plans and their boundaries'} <span aria-hidden="true">→</span></a></div>
 </section>
 
 <section id="alcance" class="section scope-section">
@@ -120,9 +140,10 @@ const faqSchema = {
   <div class="faq-list">{c.faq.items.map(([question, answer], index) => <details open={index === 0}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div>
 </section>
 <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
+<script is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)}></script>
 
 <section id="contacto" class="section shell">
-  <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 class="heading">{c.contact.title}</h2><p>{c.contact.body}</p><p><a href={wa.href} target="_blank" rel="noopener noreferrer">WhatsApp · {wa.phone} →</a></p></div>
+  <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 class="heading">{c.contact.title}</h2><p>{c.contact.body}</p><ul class="contact-promises"><li>{locale === 'es' ? 'Revisamos el cuello de botella, no solo el número de habitaciones.' : 'We review the bottleneck, not only the number of rooms.'}</li><li>{locale === 'es' ? 'Separamos lo que ya puede demostrarse de lo que requiere integración.' : 'We separate what can be demonstrated now from what needs integration.'}</li><li>{locale === 'es' ? 'Tus datos se usan únicamente para responder y, si lo autorizas, hacer seguimiento.' : 'Your details are used only to reply and, if authorised, follow up.'}</li></ul><p><a href={wa.href} target="_blank" rel="noopener noreferrer">WhatsApp · {wa.phone} →</a></p></div>
   <form class="lead-form" data-lead novalidate>
     <label>{locale === 'es' ? 'Nombre' : 'Name'}<input name="name" required maxlength="120" autocomplete="name" /></label>
     <label>{locale === 'es' ? 'Empresa o alojamiento' : 'Business or stay'}<input name="businessName" required maxlength="160" autocomplete="organization" /></label>
@@ -141,7 +162,7 @@ const faqSchema = {
   </form></div>
 </section>
 
-<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error }}>
+<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, submit: c.contact.submit }}>
   const form = document.querySelector('[data-lead]');
   const status = form?.querySelector('.form-status');
   document.querySelectorAll('[data-plan]').forEach((link) => link.addEventListener('click', () => {
@@ -157,7 +178,7 @@ const faqSchema = {
     const payload = { ...d, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: location.pathname };
     try { const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error('delivery'); form.reset(); if (status) status.textContent = ok; window.estanciaTrack?.('lead_submit', { locale, plan: payload.plan || 'none', source_section: 'homepage_contact' }); }
     catch { if (status) status.textContent = error; }
-    finally { if (button) button.disabled = false; if (label) label.textContent = locale === 'es' ? 'Enviar proyecto' : 'Send project'; }
+    finally { if (button) button.disabled = false; if (label) label.textContent = submit; }
   });
 </script>
 
