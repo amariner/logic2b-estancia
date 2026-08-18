@@ -4,16 +4,50 @@ on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Write DEPLOY to confirm estancia.logic2b.com production'
+        description: "Write DEPLOY to confirm estancia.logic2b.com production"
         required: true
+  push:
+    tags:
+      - "deploy-production-*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: estancia-production
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    if: ${{ inputs.confirm == 'DEPLOY' && vars.ESTANCIA_DEPLOY_ENABLED == 'true' }}
+    if: >-
+      ${{
+        vars.ESTANCIA_DEPLOY_ENABLED == 'true' &&
+        (
+          (
+            github.event_name == 'workflow_dispatch' &&
+            inputs.confirm == 'DEPLOY' &&
+            github.ref == 'refs/heads/main'
+          ) ||
+          (
+            github.event_name == 'push' &&
+            github.ref_type == 'tag' &&
+            startsWith(github.ref_name, 'deploy-production-')
+          )
+        )
+      }}
     runs-on: ubuntu-latest
     environment: production
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify tagged revision is current main
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          git fetch origin main
+          test "$(git rev-parse "${GITHUB_SHA}^{commit}")" = "$(git rev-parse "origin/main^{commit}")"
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
