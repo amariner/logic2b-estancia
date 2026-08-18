@@ -101,7 +101,7 @@ const structuredData = [
     </footer>
     <a class="whatsapp" href={wa.href} target="_blank" rel="noopener noreferrer" aria-label={`${wa.label} · WhatsApp`} data-whatsapp hidden>{wa.label}<span aria-hidden="true">↗</span></a>
     <CookieBanner locale={locale} />
-    <script is:inline define:vars={{ consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, allowedAnalyticsEvents: analyticsContract.surfaces.site, allowedAnalyticsParameters: analyticsContract.parameters }}>
+    <script is:inline define:vars={{ consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, gtmContainerId: analyticsContract.containerId, allowedAnalyticsEvents: analyticsContract.surfaces.site, allowedAnalyticsParameters: analyticsContract.parameters }}>
       const menu = document.querySelector('.menu');
       const mobile = document.querySelector('#mobile-nav');
       menu?.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') === 'true'; menu.setAttribute('aria-expanded', String(!open)); if (mobile) mobile.hidden = open; });
@@ -118,7 +118,7 @@ const structuredData = [
         if (document.querySelector('script[data-gtm]')) return;
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
-        const script = document.createElement('script'); script.dataset.gtm = 'true'; script.async = true; script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-TVDWZ9LC'; document.head.append(script);
+        const script = document.createElement('script'); script.dataset.gtm = 'true'; script.async = true; script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmContainerId)}`; document.head.append(script);
       }
       window.estanciaLoadGtm = loadGtm;
       if (hasAnalyticsConsent()) loadGtm();

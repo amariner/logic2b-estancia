@@ -15,7 +15,7 @@ const other = locale === 'es' ? `/en/demos/${slug}/${dashboard ? 'gestion/' : ''
   {!dashboard && <div class="fiction"><span>{locale === 'es' ? 'Demostración ficticia de Logic Estancia' : 'Fictitious Logic Estancia demonstration'}</span><a href={`${prefix}/`}>{locale === 'es' ? 'Volver al producto' : 'Back to product'} ↗</a></div>}
   <slot />
   {!dashboard && <footer class="demo-footer"><span>{demo.brand}</span><small>{locale === 'es' ? 'Marca ficticia · Sin reservas ni cobros reales' : 'Fictitious brand · No live bookings or charges'}</small><div><a href={other}>{locale === 'es' ? 'EN' : 'ES'}</a><a href={`${prefix}/legal/`}>Legal</a><a href="https://wa.me/34626432316" target="_blank" rel="noopener noreferrer">Logic2B ↗</a></div></footer>}
-  <script is:inline define:vars={{ slug, locale, dashboard, consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, allowedAnalyticsEvents: analyticsContract.surfaces.demo, allowedAnalyticsParameters: analyticsContract.parameters }}>
+  <script is:inline define:vars={{ slug, locale, dashboard, consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, gtmContainerId: analyticsContract.containerId, allowedAnalyticsEvents: analyticsContract.surfaces.demo, allowedAnalyticsParameters: analyticsContract.parameters }}>
     const hasAnalyticsConsent = () => {
       try {
         const raw = localStorage.getItem(consentKey);
@@ -32,7 +32,7 @@ const other = locale === 'es' ? `/en/demos/${slug}/${dashboard ? 'gestion/' : ''
     };
     if (hasAnalyticsConsent()) {
       window.dataLayer = window.dataLayer || []; window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
-      const script = document.createElement('script'); script.dataset.gtm = 'true'; script.async = true; script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-TVDWZ9LC'; document.head.append(script);
+      const script = document.createElement('script'); script.dataset.gtm = 'true'; script.async = true; script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmContainerId)}`; document.head.append(script);
       if (!dashboard) window.estanciaTrack('demo_open', { locale, demo: slug, source_section: 'website' });
     }
   </script>

@@ -230,6 +230,7 @@ test('cookie preferences remain consent-gated, revocable and shared with demos',
   await page.getByRole('button', { name: 'Guardar preferencias' }).click();
   await expect(banner).toBeHidden();
   await expect(page.locator('script[data-gtm]')).toHaveCount(1);
+  await expect(page.locator('script[data-gtm]')).toHaveAttribute('src', 'https://www.googletagmanager.com/gtm.js?id=GTM-TVDWZ9LC');
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('logic-estancia-consent') ?? 'null'))).toMatchObject({
     essential: true,
     analytics: true,
@@ -238,6 +239,7 @@ test('cookie preferences remain consent-gated, revocable and shared with demos',
 
   await page.goto('/demos/terrava/');
   await expect(page.locator('script[data-gtm]')).toHaveCount(1);
+  await expect(page.locator('script[data-gtm]')).toHaveAttribute('src', 'https://www.googletagmanager.com/gtm.js?id=GTM-TVDWZ9LC');
 
   await page.goto('/cookies/');
   await expect(page.getByRole('heading', { name: 'Almacenamiento y cookies' })).toBeVisible();

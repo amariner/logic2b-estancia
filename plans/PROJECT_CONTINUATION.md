@@ -47,8 +47,8 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Formularios, dashboards y acciones de las demos limitados a interacción visual/local; no envían correo, ni escriben en CRM, inventario, reservas, pagos, mensajes o proveedores externos.
 - Dos recursos SEO iniciales y playbook comercial.
 - Kit comercial español `1.0.0` con plantillas versionadas de resumen de diagnóstico, seguimiento y propuesta, manifiesto, revisión humana obligatoria y CLI offline que recibe JSON por `stdin` sin escribir documentos ni hacer peticiones.
-- Informe reproducible del embudo digital `1.0.0` sobre recuentos agregados consentidos, con contrato único de eventos/parámetros, tasas direccionales, desgloses, advertencias de calidad y rechazo de identificadores o dimensiones libres.
-- QA visual responsive realizado; `pnpm check` con 7 tareas de lint, 21 tareas de typecheck/test/build y 13 pruebas operativas correctas, y `pnpm e2e` con 53 pruebas correctas, incluidas 15 de accesibilidad y 3 de SEO técnico.
+- Informe reproducible del embudo digital `1.0.0` sobre recuentos agregados consentidos, con contrato único de contenedor/eventos/parámetros, tasas direccionales, desgloses, advertencias de calidad y rechazo de identificadores o dimensiones libres. Estancia comparte explícitamente con Camp el contenedor `GTM-TVDWZ9LC`.
+- QA visual responsive realizado; `pnpm check` con 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas, y `pnpm e2e` con 53 pruebas correctas, incluidas 15 de accesibilidad y 3 de SEO técnico.
 - Worker `logic-estancia` publicado en `https://estancia.logic2b.com`, sin variables ni token de HubSpot, con assets, `LeadCoordinator`, cuatro secretos de correo cifrados y `workers.dev` desactivado. La versión activa es `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`; `logic-estancia-demo` fue eliminado después de verificar el corte.
 - CLI `pnpm smoke:resend` con modo seco predeterminado, autorización explícita, origen validado, payload no comercial estable, comprobación opcional de referencia idempotente y salida allowlisted sin PII ni secretos.
 - Baseline automatizada WCAG 2.2 AA sobre las 30 rutas públicas, sin violaciones axe después de corregir contraste y objetivos táctiles; landmarks, foco visible, movimiento reducido, reflow a 320 px, texto al 200 %, foco contextual y estados dinámicos cubiertos por E2E, con las limitaciones humanas documentadas.
@@ -97,7 +97,7 @@ P2 no conserva desarrollo local pendiente. La continuidad pasa a P3.
 - Completado: contrato analítico único compartido por landing, demos e informe; el configurador de alcance ya no escribe directamente en `dataLayer` y el E2E demuestra que PII, parámetros y eventos desconocidos se descartan.
 - Pendiente: ejecutar un único experimento principal de conversión y registrar hipótesis, variante y resultado. No se elige ni se declara un experimento sin línea base real.
 
-P3 no conserva otro desarrollo local seguro y respaldado por evidencia. Siguiente punto exacto de activación: configurar humanamente las etiquetas definitivas de GTM/GA4, obtener un primer periodo comparable de recuentos agregados consentidos con el contrato `1.0.0`, ejecutar `pnpm funnel:report` y seleccionar desde esa línea base una única hipótesis principal. Hasta entonces no se cambia copy ni CTA para simular un experimento.
+P3 no conserva otro desarrollo local seguro y respaldado por evidencia. Siguiente punto exacto de activación: configurar humanamente dentro del contenedor compartido `GTM-TVDWZ9LC` las etiquetas y activadores de Estancia sin alterar los de Camp, obtener un primer periodo comparable de recuentos agregados consentidos con el contrato `1.0.0`, ejecutar `pnpm funnel:report` y seleccionar desde esa línea base una única hipótesis principal. Hasta entonces no se cambia copy ni CTA para simular un experimento.
 
 ## Actividades externas pendientes
 
@@ -106,7 +106,7 @@ Estas actividades no se deben declarar completadas sin evidencia humana o acceso
 - Confirmar humanamente la recepción del smoke de Resend; la API respondió `202 delivered` en el Worker y en el dominio con la misma referencia idempotente.
 - Configurar una URL real `LEADS_MEETING_URL` solo si se decide ofrecer agenda directa.
 - HubSpot está desactivado por decisión de producto; no configurar token, pipeline ni propiedades hasta que se autorice expresamente esa integración.
-- Configurar las etiquetas definitivas de GTM/GA4.
+- Configurar las etiquetas y activadores definitivos de Estancia dentro de `GTM-TVDWZ9LC`, el mismo contenedor de Camp, sin modificar el comportamiento de Camp. El identificador ya está confirmado y centralizado en código; la configuración del contenedor sigue siendo una actividad humana externa.
 - Exportar después un periodo agregado y consentido con el contrato analítico `1.0.0`; no incluir identificadores ni dimensiones libres. Este dato desbloquea la elección del primer experimento.
 - Revisar textos legales específicamente para España.
 - Realizar 15 entrevistas cualificadas y presentar 5 propuestas reales antes de publicar precios.
@@ -124,11 +124,12 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- `pnpm check`: 7 tareas de lint de paquetes, lint de scripts/E2E raíz, 21 tareas de typecheck/test/build y 13 pruebas operativas nuevas correctas; Worker con 29 pruebas unitarias.
+- `pnpm check`: 7 tareas de lint de paquetes, lint de scripts/E2E raíz, 21 tareas de typecheck/test/build y 14 pruebas operativas nuevas correctas; Worker con 29 pruebas unitarias.
 - `pnpm e2e`: 53 pruebas Chromium correctas; 35 funcionales, 15 de accesibilidad y 3 de SEO técnico.
 - Kit comercial: tres plantillas Markdown `1.0.0`, manifiesto de tokens y CLI `pnpm commercial:template`; `--validate`, `--list`, ejemplos ficticios y render por `stdin` verificados con 6 pruebas. Rechaza campos ausentes/desconocidos, planes antiguos, planes no canónicos, importes versionados y tokens sin resolver.
 - Informe de embudo: CLI `pnpm funnel:report` y contrato agregado `1.0.0` verificados con 7 pruebas; calcula las cuatro etapas, tasas no truncadas, desglose ES/EN y advertencias, y rechaza PII, claves desconocidas, fechas inválidas, dimensiones libres o cobertura distinta de `analytics-consent-only`.
 - Analítica: `packages/config/src/analytics-contract.json` es la fuente compartida por landing, demos e informe. El configurador usa `estanciaTrack`; un E2E con consentimiento confirma que solo entra `lead_submit` con `locale`, `plan` y `source_section`, mientras email, mensaje y un evento inventado se descartan.
+- Contenedor GTM: contrastado con `camp.logic2b.com/apps/site/src/config.ts`; ambos productos usan `GTM-TVDWZ9LC`. El ID se centralizó en el contrato analítico y 2 E2E relevantes verifican el `src` exacto tanto en la landing como en Terrava después del consentimiento.
 - QA visual: no aplica una nueva captura porque no cambiaron DOM, CSS ni contenido público; la regresión responsive, reflow y axe completa sí se reejecutó dentro de los 53 E2E.
 - Mapa de capacidades: 14 contratos tipados y bilingües contienen plan mínimo, madurez, demo, superficie/vista, prueba observable y límite. Las unitarias rechazan destinos incoherentes entre web demo y workspace.
 - Dos E2E nuevos verifican 6 capacidades para gestores, 12 para hoteles y las 14 en planes, destinos ES/EN, respuestas HTTP correctas, navegación a Canales Aurem y formulario Nivora, y cero `POST`/`PUT`/`PATCH`/`DELETE`.
@@ -166,11 +167,11 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 - UX: corregido — `--list`, `--validate`, `--example` y errores accionables hacen explícitos los contratos; Markdown conserva jerarquía, decisiones abiertas, responsable y fecha o condición sin guardar PII en el repositorio.
 - UI/dirección visual: correcto — la salida interna mantiene una jerarquía Markdown legible y estados visibles de borrador/versión. No cambiaron componentes, CSS o contenido público, por lo que no correspondía generar nuevas capturas.
 - SEO: no aplica — el kit y el informe son herramientas internas no publicadas; canonical, `hreflang`, sitemap y las 20 URLs indexables no cambian y sus 3 E2E siguen en verde.
-- Arquitectura frontend: corregido — eventos, parámetros, valores y superficies dependen de un único contrato JSON; se eliminó la escritura directa del configurador a `dataLayer` y landing/demos conservan sus subconjuntos permitidos.
+- Arquitectura frontend: corregido — contenedor, eventos, parámetros, valores y superficies dependen de un único contrato JSON; se eliminó la escritura directa del configurador a `dataLayer` y landing/demos conservan sus subconjuntos permitidos.
 - Full stack: correcto — ambas CLI son offline, leen exclusivamente archivos versionados y `stdin`, no escriben documentos ni llaman a red, CRM o proveedores. El informe rechaza identificadores, texto libre y cobertura sin consentimiento explícito.
-- QA/accesibilidad/rendimiento/confianza: corregido — 13 pruebas nuevas y 53 E2E validan contratos, cálculos, planes, salvaguardas, filtro de PII y regresión completa; no se detectaron problemas de seguridad, privacidad, veracidad o accesibilidad que bloqueen el cierre.
+- QA/accesibilidad/rendimiento/confianza: corregido — 14 pruebas operativas, 53 E2E de regresión y 2 E2E relevantes reejecutados validan contratos, cálculos, planes, salvaguardas, filtro de PII y contenedor compartido; no se detectaron problemas de seguridad, privacidad, veracidad o accesibilidad que bloqueen el cierre.
 
-Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Lighthouse debe repetirse en producción tras un despliegue autorizado. También queda ejecutar la CLI de smoke con autorización y confirmar el smoke anterior. Los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. GTM/GA4 definitivo y una línea base agregada real bloquean la selección y ejecución del primer experimento; no se ha inventado variante ni resultado.
+Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Lighthouse debe repetirse en producción tras un despliegue autorizado. También queda ejecutar la CLI de smoke con autorización y confirmar el smoke anterior. Los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y una línea base agregada real bloquean la selección y ejecución del primer experimento; no se ha inventado variante ni resultado.
 
 ## Registro de continuaciones
 
@@ -193,3 +194,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se completó la guía narrativa de Aurem ES/EN con siete hitos, evidencia y límites contextuales, recuperación exacta entre sesiones y salida al diagnóstico precargado. Verificado con 50 E2E, 12 unitarias, axe/foco y QA visual 1280/320 px. No requirió generar imágenes. Próximo punto: mapa de capacidades con evidencia enlazada desde cada flujo.
 - 2026-08-18 — Se reforzó el mapa ES/EN de 14 capacidades con plan mínimo, madurez, prueba, límite y enlaces profundos a Nivora, Terrava y Aurem desde soluciones y planes. Se corrigieron la ambigüedad de Nivora y el acceso móvil a evidencia. Verificado con 52 E2E, `pnpm check` y QA visual 1366/320 px. No requirió generar imágenes. Próximo punto desbloqueado: plantillas versionadas de resumen, seguimiento y propuesta.
 - 2026-08-18 — Se completaron el kit comercial español `1.0.0` y el informe reproducible del embudo `1.0.0`, ambos offline, versionados y cubiertos por 13 pruebas. La analítica usa ahora un contrato único y un E2E prueba el descarte de PII. Verificado con `pnpm check` y 53 E2E; no hubo cambios visuales. Próxima activación: etiquetas definitivas y línea base agregada real antes de elegir un único experimento.
+- 2026-08-18 — Se confirmó y centralizó `GTM-TVDWZ9LC`, el mismo contenedor usado por Camp, para landing y demos de Estancia. La carga sigue condicionada al consentimiento y el E2E verifica la URL exacta en ambas superficies. Pendiente configurar humanamente etiquetas/activadores propios de Estancia dentro del contenedor compartido sin afectar Camp.

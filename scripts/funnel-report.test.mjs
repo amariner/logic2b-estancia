@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildReport, CONTRACT_VERSION, parseArguments, runFunnelReport, validateDataset } from './funnel-report.mjs';
+import { readFile } from 'node:fs/promises';
 
 const dataset = {
   contractVersion: CONTRACT_VERSION,
@@ -13,6 +14,11 @@ const dataset = {
 };
 
 describe('funnel report', () => {
+  it('shares the Camp GTM container through the analytics contract', async () => {
+    const contract = JSON.parse(await readFile(new URL('../packages/config/src/analytics-contract.json', import.meta.url), 'utf8'));
+    expect(contract.containerId).toBe('GTM-TVDWZ9LC');
+  });
+
   it('documents the versioned aggregate-only contract', async () => {
     const result = await runFunnelReport({ args: ['--validate'] });
     expect(result.exitCode).toBe(0);
