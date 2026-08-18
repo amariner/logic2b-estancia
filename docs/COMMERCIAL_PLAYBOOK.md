@@ -81,7 +81,7 @@ Use the structured Worker log event and its `ref` when a provider is degraded:
 4. If `lead_coordination_failed` appears, restore the Durable Object binding before retrying. The endpoint fails closed instead of bypassing rate limiting or idempotency.
 5. For `lead_email_configuration_invalid`, repair every named field before relying on Resend. For `lead_meeting_configuration_invalid`, verify the public HTTPS agenda value; no unsafe value is returned to the browser.
 
-An internal Resend message is the mandatory delivery. A visitor summary without the internal message is a failed submission, returns `502` and remains retryable with the same durable reference; an internal message without the visitor summary returns `202 delivered_degraded`. Do not create CRM records while HubSpot remains outside the production scope.
+An internal Resend message is the mandatory delivery. A visitor summary without the internal message is a failed submission, returns `502` and remains retryable with the same durable reference; an internal message without the visitor summary returns `202 delivered_degraded`. Each Resend request is aborted after 10 seconds so a stalled provider cannot hold the form indefinitely. A timeout follows the same failed/degraded contract, and retrying the unchanged payload remains safe because both messages keep their stable idempotency keys. Do not create CRM records while HubSpot remains outside the production scope.
 
 ### Demo form boundary
 

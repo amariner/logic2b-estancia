@@ -12,6 +12,7 @@ export interface LeadEnv {
 }
 
 const planInput = z.enum(['basico', 'gestion', 'inteligente', 'inicio', 'automatiza']);
+const RESEND_TIMEOUT_MS = 10_000;
 
 const emailConfigurationSchema = z.object({
   apiKey: z.string().trim().min(1),
@@ -222,10 +223,13 @@ function leadRows(lead: Lead): [string, string][] {
 }
 
 async function resend(apiKey: string, idempotencyKey: string, payload: Record<string, unknown>): Promise<boolean> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), RESEND_TIMEOUT_MS);
   try {
-    const response = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json', 'idempotency-key': idempotencyKey }, body: JSON.stringify(payload) });
+    const response = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json', 'idempotency-key': idempotencyKey }, body: JSON.stringify(payload), signal: controller.signal });
     return response.ok;
   } catch { return false; }
+  finally { clearTimeout(timeout); }
 }
 
 async function sendInternalEmail(lead: Lead, ref: string, configuration: EmailConfiguration): Promise<boolean> {

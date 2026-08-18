@@ -22,7 +22,7 @@ function submit(env: LeadEnv, body: unknown = lead, ip: string = crypto.randomUU
 }
 
 describe('leads', () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
   it('requires explicit consent', () => expect(leadSchema.safeParse({ ...lead, accept: false }).success).toBe(false));
   it('normalizes legacy plan values at the API edge', () => expect(leadSchema.parse({ ...lead, plan: 'automatiza' }).plan).toBe('inteligente'));
   it('normalizes email casing for a stable submission identity', () => expect(leadSchema.parse({ ...lead, email: 'ADA@Example.Test' }).email).toBe('ada@example.test'));
@@ -109,6 +109,22 @@ describe('leads', () => {
     const env = emailEnv;
     const response = await submit(env);
     expect(response.status).toBe(502); expect(await response.json()).toMatchObject({ outcome: 'failed' });
+  });
+  it('bounds stalled Resend calls and returns a retryable delivery failure', async () => {
+    vi.useFakeTimers();
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockImplementation((_input, init) => new Promise<Response>((_resolve, reject) => {
+      const signal = init?.signal;
+      if (!signal) return reject(new Error('missing_abort_signal'));
+      signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+    }));
+    const responsePromise = deliverLead(leadSchema.parse(lead), emailEnv, 'timeout-ref');
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(10_000);
+    const response = await responsePromise;
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ outcome: 'failed', error: 'lead_delivery_failed' });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher.mock.calls.every(([, init]) => init?.signal?.aborted)).toBe(true);
   });
   it('fails instead of losing the lead when only the visitor summary succeeds', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
