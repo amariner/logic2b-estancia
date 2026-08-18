@@ -36,6 +36,7 @@ const faqSchema = {
     acceptedAnswer: { '@type': 'Answer', text: answer },
   })),
 };
+const leadRequestTimeoutMs = 15_000;
 const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
@@ -173,7 +174,7 @@ const serviceSchema = {
   </form></div>
 </section>
 
-<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback }}>
+<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, timeout: c.contact.timeout, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback, leadRequestTimeoutMs }}>
   const form = document.querySelector('[data-lead]');
   const status = form?.querySelector('.form-status');
   const receipt = form?.querySelector('[data-lead-receipt]');
@@ -189,8 +190,10 @@ const serviceSchema = {
     const d = Object.fromEntries(new FormData(form));
     const assessmentFields = window.estanciaAssessment?.leadFields() || {};
     const payload = { ...d, ...assessmentFields, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: assessmentFields.sourcePath || location.pathname };
+    const controller = new AbortController();
+    const requestTimeout = setTimeout(() => controller.abort(), leadRequestTimeoutMs);
     try {
-      const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+      const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: controller.signal });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !['delivered', 'delivered_degraded'].includes(result.outcome)) throw new Error('delivery');
       const reference = typeof result.ref === 'string' && /^[a-zA-Z0-9-]{1,100}$/.test(result.ref) ? result.ref : null;
@@ -210,8 +213,8 @@ const serviceSchema = {
       if (receipt) { receipt.hidden = false; receipt.focus(); }
       window.estanciaTrack?.('lead_submit', { locale, plan: payload.plan || 'none', source_section: 'homepage_contact' });
     }
-    catch { if (status) status.textContent = error; }
-    finally { if (button && !form.dataset.submitted) button.disabled = false; if (label) label.textContent = submit; }
+    catch { if (status) status.textContent = controller.signal.aborted ? timeout : error; }
+    finally { clearTimeout(requestTimeout); if (button && !form.dataset.submitted) button.disabled = false; if (label) label.textContent = submit; }
   });
 </script>
 

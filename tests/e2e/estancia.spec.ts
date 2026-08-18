@@ -462,6 +462,32 @@ test('the sales form does not claim delivery for a non-delivery 202 response', a
   await expect(form.getByRole('button', { name: /Quiero una recomendación/ })).toBeEnabled();
 });
 
+test('the sales form bounds a stalled request and can retry without claiming delivery', async ({ page }) => {
+  await page.clock.install();
+  let requests = 0;
+  await page.route('**/api/leads', () => { requests += 1; });
+  await page.goto('/');
+  const form = page.locator('[data-lead]');
+  await form.locator('[name="name"]').fill('Ada Demo');
+  await form.locator('[name="businessName"]').fill('Casa Demo');
+  await form.locator('[name="email"]').fill('ada@example.test');
+  await form.locator('[name="accept"]').check();
+  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
+  await expect(form.getByRole('button', { name: /Enviando/ })).toBeDisabled();
+
+  await page.clock.fastForward(15_000);
+
+  await expect(form.locator('[data-lead-receipt]')).toBeHidden();
+  await expect(form.locator('.form-status')).toHaveText('La conexión está tardando demasiado y no podemos confirmar la entrega. Vuelve a intentarlo: si la solicitud ya llegó, conservaremos una única referencia.');
+  await expect(form.getByRole('button', { name: /Quiero una recomendación/ })).toBeEnabled();
+  expect(requests).toBe(1);
+
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await page.route('**/api/leads', (route) => route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'retry-ref', meetingUrl: null }) }));
+  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
+  await expect(form.locator('[data-lead-receipt]')).toContainText('retry-ref');
+});
+
 test('cookie preferences remain consent-gated, revocable and shared with demos', async ({ page }) => {
   await page.goto('/');
   const banner = page.getByRole('dialog', { name: 'Configuración de cookies' });
