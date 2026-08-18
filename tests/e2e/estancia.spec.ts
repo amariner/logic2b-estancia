@@ -119,7 +119,7 @@ test('all demo forms stay local and cannot use Resend', async ({ page }) => {
 
 test('the lead endpoint rejects demo sources before Resend eligibility', async ({ request }) => {
   const response = await request.post('/api/leads', { data: {
-    name: 'Demo local', businessName: 'Terrava ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/demos/terrava/', accept: true,
+    name: 'Demo local', businessName: 'Terrava ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/%2564emos/terrava/', accept: true,
   } });
   expect(response.status()).toBe(403);
   expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'demo_submission_disabled' });

@@ -87,12 +87,13 @@ describe('leads', () => {
     const response = await submit(env, { ...lead, website: 'spam.test' });
     expect(response.status).toBe(202); expect(fetcher).not.toHaveBeenCalled();
   });
-  it('blocks a demo source path before coordinating or calling Resend', async () => {
+  it('blocks an encoded demo source after rate limiting but before delivery', async () => {
     const fetcher = vi.spyOn(globalThis, 'fetch');
-    const coordination: LeadCoordination = { rateLimit: async () => null, submit: vi.fn(async () => new Response()) };
-    const response = await submit(emailEnv, { ...lead, sourcePath: '/en/demos/terrava/' }, 'demo-source', coordination);
+    const coordination: LeadCoordination = { rateLimit: vi.fn(async () => null), submit: vi.fn(async () => new Response()) };
+    const response = await submit(emailEnv, { ...lead, sourcePath: '/%2565n/%2564emos/terrava/' }, 'demo-source', coordination);
     expect(response.status).toBe(403);
     expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'demo_submission_disabled' });
+    expect(coordination.rateLimit).toHaveBeenCalledOnce();
     expect(coordination.submit).not.toHaveBeenCalled();
     expect(fetcher).not.toHaveBeenCalled();
   });
@@ -100,7 +101,7 @@ describe('leads', () => {
     const coordination: LeadCoordination = { rateLimit: vi.fn(async () => null), submit: vi.fn(async () => new Response()) };
     const request = new Request('https://test/api/leads', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', referer: 'https://test/demos/aurem/' },
+      headers: { 'content-type': 'application/json', referer: 'https://test/%2564emos/aurem/' },
       body: JSON.stringify({ ...lead, sourcePath: '/' }),
     });
     const response = await handleLead(request, emailEnv, coordination);

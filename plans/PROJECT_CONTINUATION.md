@@ -53,7 +53,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Diagnóstico sin captación duplicada: conserva sus respuestas en el navegador y conduce al único formulario comercial de la landing.
 - Traspaso ES/EN del diagnóstico al formulario único mediante contexto `sessionStorage` validado y efímero: precarga tipo, plan y escala, permite revisar o descartar todas las respuestas adicionales y las adjunta solo con el envío comercial; no guarda PII y se limpia al enviar, descartar, caducar o cerrar la pestaña.
 - Formularios, dashboards y acciones de las demos limitados a interacción visual/local; no envían correo, ni escriben en CRM, inventario, reservas, pagos, mensajes o proveedores externos.
-- Límite de formularios demo reforzado en profundidad: Nivora, Terrava y Aurem explican que no usan Resend; sus seis variantes ES/EN realizan cero escrituras HTTP; las páginas llevan `form-action 'none'` y `/api/leads` rechaza ruta o referer de demo con `403` antes de rate limit o proveedores.
+- Límite de formularios demo reforzado en profundidad: Nivora, Terrava y Aurem explican que no usan Resend; sus seis variantes ES/EN realizan cero escrituras HTTP; las páginas llevan `form-action 'none'` y `/api/leads` rechaza rutas demo incluso codificadas. Un referer demo se bloquea antes del rate limit; un `sourcePath` del cuerpo consume una cuota y se bloquea antes de la entrega durable o proveedores.
 - Protección de origen del formulario real: los navegadores cross-site se rechazan con `403` mediante `Origin` y `Sec-Fetch-Site` antes de rate limit, coordinación o Resend; la landing same-origin y el smoke sin cabeceras de navegador conservan su contrato.
 - Respuestas de validación del formulario real reducidas a un contrato estable y mínimo; un `400` no refleja valores recibidos ni detalles internos del esquema.
 - Frontera de contenido de Resend endurecida: campos estructurados y de asunto rechazan separadores de línea, el mensaje conserva texto multilínea y todo valor dinámico del HTML permanece escapado.
@@ -93,6 +93,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Completado y verificado localmente: nombre, negocio, contacto, contexto y listas estructuradas rechazan CR/LF y separadores Unicode antes de componer correos; el mensaje libre sigue admitiendo varias líneas y el markup adversarial se escapa en ambos HTML. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: la referencia durable y su resultado comparten una única ventana de 24 horas desde el primer intento, también si falla; reintentar no extiende la caducidad, los estados heredados conservan su referencia y tras expirar se crea una nueva. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: `/api` exacto ya no cae al servidor público de assets; todo el namespace desconocido responde `404` JSON con `no-store`/`same-origin`. Las páginas reciben CSP base mediante `_headers` nativo y las demos mantienen `form-action 'none'` sin ejecutar el Worker para cada asset. Falta un despliegue de producción autorizado.
+- Completado y verificado localmente: rutas demo codificadas hasta tres capas se normalizan tanto en `Referer` como en `sourcePath`. El referer se rechaza antes del rate limit; el campo del cuerpo consume una cuota y se rechaza después de lectura/validación acotada, siempre antes de entrega durable o Resend. Falta un despliegue de producción autorizado.
 
 Siguiente punto exacto de activación: confirmar humanamente en el buzón interno que el mensaje del último smoke con referencia `e27e5bf3-a462-4db6-9f49-80d8486fe23c` está visible. Después, obtener autorización explícita para desplegar este incremento y repetir el smoke con un buzón controlado para verificar la nueva semántica en producción. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
 
@@ -155,24 +156,24 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- Alcance: routing del namespace API, CSP común de Static Assets/Worker, playbook operativo, ampliación de una prueba HTTP compuesta y este checkpoint. No se añadieron proveedores, PII, eventos, cambios visuales ni despliegues.
-- Seguridad: todas las páginas bloquean `base` externo, formularios a otros orígenes, framing y objetos; las demos elevan el bloqueo a cualquier submit mediante `form-action 'none'`.
-- Privacidad y caché: `/api` y `/api/unknown` ya no pueden heredar una respuesta HTML/cacheable de assets; ambos usan el mismo `404` JSON privado que el resto del namespace.
-- Rendimiento y compatibilidad: `_headers` aplica la política en el servicio nativo de Static Assets; `run_worker_first` sigue limitado a API y demos, y el formulario same-origin continúa operativo.
+- Alcance: normalización de rutas demo, dos pruebas unitarias adversariales, un E2E negativo, corrección del playbook/checkpoint y este registro. No se añadieron proveedores, PII, eventos, cambios visuales ni despliegues.
+- Seguridad: rutas como `/%2564emos/` y `/%2565n/%2564emos/` ya no eluden la barrera; ninguna llega al `LeadCoordinator` ni a Resend.
+- Veracidad operativa: la documentación distingue el rechazo temprano por `Referer` del rechazo de `sourcePath` posterior al rate limit, en lugar de afirmar que ambos ocurren antes.
+- Rendimiento y abuso: se conserva el rate limit previo a leer/validar el cuerpo; solo señales de cabecera confiables se cortan antes de consumir cuota.
 - `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 44/44 pruebas del Worker.
-- E2E relevante: 3/3 pruebas Chromium correctas para CSP de demos, contrato API/portada y entrega del formulario real; la matriz completa anterior permanece en 69/69.
-- QA visual: correcto — no cambia DOM ni estilos; las tres familias cargan e interactúan con la política activa.
+- E2E relevante: 1/1 prueba Chromium correcta para rechazo de `sourcePath` doblemente codificado; la matriz completa anterior permanece en 69/69.
+- QA visual: no aplica — no cambia DOM, estilos, copy ni estado interactivo.
 
 ## Revisión multidisciplinar del checkpoint actual
 
 - Marketing estratégico: correcto — no cambia la propuesta ni el recorrido comercial.
-- Diseño de producto: correcto — conserva la landing como único canal real y refuerza la separación técnica de demos.
-- UX: correcto — navegación, formulario same-origin y acciones locales siguen funcionando sin mensajes nuevos.
+- Diseño de producto: corregido — la frontera entre demostración ficticia y captación real cubre también rutas codificadas.
+- UX: correcto — demos y formulario real mantienen exactamente sus interacciones visibles.
 - UI/dirección visual: no aplica — no hay cambios de interfaz ni contenido visible.
 - SEO: correcto — no cambian contenido indexable, metadata, headings, canonical, `hreflang`, sitemap ni datos estructurados; las cuatro pruebas SEO permanecen verdes.
-- Arquitectura frontend: correcto — la CSP mínima es compatible con scripts/estilos actuales y no fuerza el paso de assets por el Worker.
-- Full stack: corregido — se unifica `/api` con `/api/*` y se separa correctamente la política nativa de assets de la sobrescritura específica de demos.
-- QA/accesibilidad/rendimiento/confianza: corregido — el primer E2E detectó que la portada evitaba el Worker; `_headers` resolvió la causa y `pnpm check` más 3/3 E2E relevantes quedan verdes. La matriz completa anterior es 69/69 y no quedan bloqueantes conocidos.
+- Arquitectura frontend: correcto — no cambia el cliente ni el paso rápido de assets.
+- Full stack: corregido — `isDemoPath` normaliza de forma acotada y el orden real de cabecera, rate limit, cuerpo y entrega queda explícito.
+- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E adversarial prueban codificación múltiple y orden de coordinación; la matriz completa anterior es 69/69 y no quedan bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Los timeouts de cliente y proveedor, el contrato de entrega y Lighthouse deben comprobarse en producción tras un despliegue autorizado; el estado específico de timeout no conserva captura visual por la restricción del navegador integrado, aunque su DOM y comportamiento están cubiertos. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -218,3 +219,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se endureció la frontera de contenido de Resend: campos estructurados sin separadores de línea, mensaje multilínea intacto y HTML dinámico probado frente a markup adversarial. Verificado con `pnpm check`, 42/42 pruebas del Worker y 2/2 E2E relevantes. No se desplegó producción.
 - 2026-08-18 — Se fijó la idempotencia durable a una única ventana de 24 horas desde el primer intento: fallos con caducidad, reintentos sin extensión, nueva referencia tras vencer y migración conservadora de estados heredados. Verificado con `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E relevante. No se desplegó producción.
 - 2026-08-18 — Se cerró `/api` exacto bajo el contrato JSON privado y se añadió CSP base mediante `_headers` de Static Assets, con `form-action 'none'` específico de demos y sin ejecutar el Worker para todo asset. El QA corrigió la primera implementación al detectar la ruta rápida de assets. Verificado con `pnpm check`, 44/44 pruebas del Worker y 3/3 E2E relevantes. No se desplegó producción.
+- 2026-08-18 — Se normalizaron hasta tres capas de codificación en rutas demo y se corrigió la evidencia del orden real: referer antes de rate limit, `sourcePath` después de una cuota y siempre antes de entrega. Verificado con `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E adversarial. No se desplegó producción.

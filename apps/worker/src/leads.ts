@@ -68,7 +68,15 @@ export interface LeadCoordination {
 }
 
 export function isDemoPath(pathname: string): boolean {
-  return /^\/(?:en\/)?demos(?:\/|$)/.test(pathname);
+  let normalized = pathname;
+  try {
+    for (let pass = 0; pass < 3; pass += 1) {
+      const decoded = decodeURIComponent(normalized);
+      if (decoded === normalized) break;
+      normalized = decoded;
+    }
+  } catch { return false; }
+  return /^\/(?:en\/)?demos(?:\/|$)/.test(normalized);
 }
 
 export async function handleLead(request: Request, env: LeadEnv, coordination = cloudflareCoordination(env)): Promise<Response> {
