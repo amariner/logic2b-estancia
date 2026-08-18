@@ -502,6 +502,34 @@ test('the sales form does not claim delivery for a non-delivery 202 response', a
   await expect(form.getByRole('button', { name: /Quiero una recomendación/ })).toBeEnabled();
 });
 
+test('the sales form explains rate limiting and re-enables itself in both locales', async ({ page }) => {
+  await page.clock.install();
+  let requests = 0;
+  await page.route('**/api/leads', (route) => {
+    requests += 1;
+    return route.fulfill({ status: 429, headers: { 'retry-after': '2' }, contentType: 'application/json', body: JSON.stringify({ ok: false, outcome: 'limited', error: 'rate_limited', retryAfter: 2 }) });
+  });
+  const cases = [
+    { path: '/', submit: 'Quiero una recomendación', waiting: 'Reintentar en 2 s', status: 'Has hecho varios intentos. Conservamos tus datos en el formulario; podrás volver a enviarlo en 2 s.' },
+    { path: '/en/', submit: 'Get my recommendation', waiting: 'Try again in 2s', status: 'You have made several attempts. Your details remain in the form; you can send it again in 2s.' },
+  ];
+  for (const item of cases) {
+    await page.goto(item.path);
+    const form = page.locator('[data-lead]');
+    await form.locator('[name="name"]').fill('Ada Demo');
+    await form.locator('[name="businessName"]').fill('Casa Demo');
+    await form.locator('[name="email"]').fill('ada@example.test');
+    await form.locator('[name="accept"]').check();
+    await form.getByRole('button', { name: item.submit }).click();
+    await expect(form.locator('[data-lead-receipt]')).toBeHidden();
+    await expect(form.locator('.form-status')).toHaveText(item.status);
+    await expect(form.getByRole('button', { name: item.waiting })).toBeDisabled();
+    await page.clock.fastForward(2_000);
+    await expect(form.getByRole('button', { name: item.submit })).toBeEnabled();
+  }
+  expect(requests).toBe(2);
+});
+
 test('the sales form bounds a stalled request and can retry without claiming delivery', async ({ page }) => {
   await page.clock.install();
   let requests = 0;

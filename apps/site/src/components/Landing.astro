@@ -174,7 +174,7 @@ const serviceSchema = {
   </form></div>
 </section>
 
-<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, timeout: c.contact.timeout, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback, leadRequestTimeoutMs }}>
+<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, timeout: c.contact.timeout, rateLimited: c.contact.rateLimited, retrying: c.contact.retrying, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback, leadRequestTimeoutMs }}>
   const form = document.querySelector('[data-lead]');
   const status = form?.querySelector('.form-status');
   const receipt = form?.querySelector('[data-lead-receipt]');
@@ -192,9 +192,15 @@ const serviceSchema = {
     const payload = { ...d, ...assessmentFields, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: assessmentFields.sourcePath || location.pathname };
     const controller = new AbortController();
     const requestTimeout = setTimeout(() => controller.abort(), leadRequestTimeoutMs);
+    let retryAfter = 0;
     try {
       const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: controller.signal });
       const result = await response.json().catch(() => ({}));
+      if (response.status === 429) {
+        const delay = Number(result.retryAfter ?? response.headers.get('retry-after'));
+        retryAfter = Number.isFinite(delay) ? Math.min(60, Math.max(1, Math.ceil(delay))) : 60;
+        throw new Error('rate_limited');
+      }
       if (!response.ok || !['delivered', 'delivered_degraded'].includes(result.outcome)) throw new Error('delivery');
       const reference = typeof result.ref === 'string' && /^[a-zA-Z0-9-]{1,100}$/.test(result.ref) ? result.ref : null;
       let meetingUrl = null;
@@ -213,8 +219,23 @@ const serviceSchema = {
       if (receipt) { receipt.hidden = false; receipt.focus(); }
       window.estanciaTrack?.('lead_submit', { locale, plan: payload.plan || 'none', source_section: 'homepage_contact' });
     }
-    catch { if (status) status.textContent = controller.signal.aborted ? timeout : error; }
-    finally { clearTimeout(requestTimeout); if (button && !form.dataset.submitted) button.disabled = false; if (label) label.textContent = submit; }
+    catch (failure) {
+      if (status) status.textContent = controller.signal.aborted ? timeout : failure instanceof Error && failure.message === 'rate_limited' ? rateLimited.replace('{seconds}', String(retryAfter)) : error;
+    }
+    finally {
+      clearTimeout(requestTimeout);
+      if (button && !form.dataset.submitted && retryAfter > 0) {
+        let remaining = retryAfter;
+        const updateRetry = () => { if (label) label.textContent = retrying.replace('{seconds}', String(remaining)); };
+        updateRetry();
+        const retryTimer = setInterval(() => {
+          remaining -= 1;
+          if (remaining > 0) updateRetry();
+          else { clearInterval(retryTimer); button.disabled = false; if (label) label.textContent = submit; }
+        }, 1_000);
+      }
+      else { if (button && !form.dataset.submitted) button.disabled = false; if (label) label.textContent = submit; }
+    }
   });
 </script>
 

@@ -83,6 +83,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Completado y verificado localmente: `/api/leads` rechaza navegadores cross-site mediante `Origin` o `Sec-Fetch-Site` antes de consumir rate limit, coordinación o proveedores. Los envíos same-origin y el smoke servidor-a-servidor sin esas cabeceras siguen admitidos. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: `/api/leads` limita el cuerpo JSON a 32 KiB. Un `Content-Length` excesivo se rechaza antes del rate limit y un cuerpo sin tamaño declarado se lee de forma acotada y se cancela con `413` antes de validación o entrega. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: `/api/leads` solo admite `POST application/json`, devuelve `415` o `405` antes de coordinación y marca todas sus respuestas como `no-store` y `same-origin`; los assets públicos no heredan estas cabeceras privadas. Falta un despliegue de producción autorizado.
+- Completado y verificado localmente: la landing interpreta `429` y `retryAfter`, conserva los datos, oculta el recibo, explica la espera ES/EN y reactiva el botón al terminar una cuenta atrás validada entre 1 y 60 segundos. Falta un despliegue de producción autorizado.
 
 Siguiente punto exacto de activación: confirmar humanamente en el buzón interno que el mensaje del último smoke con referencia `e27e5bf3-a462-4db6-9f49-80d8486fe23c` está visible. Después, obtener autorización explícita para desplegar este incremento y repetir el smoke con un buzón controlado para verificar la nueva semántica en producción. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
 
@@ -145,24 +146,24 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- Alcance: semántica HTTP del único endpoint comercial, una prueba E2E del Worker compuesto y este checkpoint. No se añadieron dependencias, contenido, estados visibles, proveedores, PII, eventos ni despliegues.
-- Conversión y resiliencia: peticiones accidentales con método o medio incorrecto ya no consumen coordinación; el cliente válido conserva exactamente su contrato JSON.
-- Compatibilidad: landing y CLI usan `POST application/json`; se admite el parámetro `charset` y `Allow: POST` documenta la recuperación del método inválido.
-- Seguridad y privacidad: todas las respuestas `/api/*` declaran `Cache-Control: no-store` y `Cross-Origin-Resource-Policy: same-origin`; estas políticas no se aplican a la portada ni a assets públicos.
+- Alcance: estado de rate limit del formulario comercial, copia ES/EN, cuenta atrás determinista, una prueba E2E bilingüe y este checkpoint. No se añadieron dependencias, proveedores, PII, eventos ni despliegues.
+- Conversión y resiliencia: un `429` ya no parece una pérdida de entrega; conserva campos, mantiene oculto el recibo, informa cuándo reintentar y evita clics repetidos durante la ventana.
+- Compatibilidad: éxito, degradación, timeout y error genérico conservan su comportamiento; solo `429` con plazo válido usa el nuevo estado y cualquier plazo queda acotado entre 1 y 60 segundos.
+- Seguridad y privacidad: la espera vive solo en memoria, no persiste ni registra payload o PII y no emite `lead_submit`; el rate limit durable del Worker permanece como autoridad.
 - `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 38/38 pruebas del Worker.
-- E2E relevante: 1/1 prueba Chromium correcta para `415`, `405`, `Allow`, `no-store`, aislamiento same-origin y separación de la portada; la regresión completa anterior permanece en 66/66.
-- QA visual: no aplica una captura nueva porque no cambian DOM, estilos, copy ni geometría; la regresión visual, responsive y accesible completa permanece verde.
+- E2E relevante: 1/1 prueba Chromium correcta sobre ES y EN para mensaje, recibo oculto, botón bloqueado, cuenta atrás y reactivación; la regresión completa anterior permanece en 66/66.
+- QA visual: el nuevo estado reutiliza la geometría y estilos existentes; el DOM renderizado bilingüe y su transición completa quedan verificados sin cambio de layout.
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: corregido — se protege la disponibilidad del embudo frente a clientes mal configurados sin añadir promesas ni fricción visible.
+- Marketing estratégico: corregido — el prospecto recibe una recuperación concreta en lugar de interpretar el límite como una solicitud perdida.
 - Diseño de producto: correcto — la landing sigue siendo el único canal real y el smoke técnico sigue siendo reproducible; no se introduce un flujo nuevo.
-- UX: correcto — una solicitud legítima same-origin mantiene exactamente sus estados, errores, timeout, recibo y recuperación.
-- UI/dirección visual: no aplica — no cambian DOM, componentes, copy, estilos ni geometría.
+- UX: corregido — el formulario conserva campos, explica la espera, evita reintentos inútiles y recupera la acción automáticamente sin recibo falso.
+- UI/dirección visual: correcto — la cuenta atrás reutiliza botón y estado existentes sin introducir ruido ni cambio de geometría.
 - SEO: correcto — no cambian contenido indexable, metadata, headings, canonical, `hreflang`, sitemap ni datos estructurados; las cuatro pruebas SEO permanecen verdes.
-- Arquitectura frontend: correcto — el contrato de la landing no cambia y no se añade lógica o dependencia al cliente.
-- Full stack: corregido — método y medio se validan antes de coordinación; API y assets reciben políticas de caché/origen deliberadamente distintas.
-- QA/accesibilidad/rendimiento/confianza: corregido — `pnpm check` y el E2E compuesto cubren contrato y cabeceras sin regresión visible; la regresión completa anterior es 66/66 y no quedan bloqueantes conocidos.
+- Arquitectura frontend: correcto — el estado se encapsula en el listener existente, valida el plazo y limpia su intervalo al reactivar sin dependencias.
+- Full stack: correcto — consume `retryAfter` y `Retry-After` existentes sin cambiar el contrato ni debilitar el Durable Object.
+- QA/accesibilidad/rendimiento/confianza: corregido — `pnpm check` y el E2E bilingüe con reloj simulado cubren todo el estado; la regresión completa anterior es 66/66 y no quedan bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Los timeouts de cliente y proveedor, el contrato de entrega y Lighthouse deben comprobarse en producción tras un despliegue autorizado; el estado específico de timeout no conserva captura visual por la restricción del navegador integrado, aunque su DOM y comportamiento están cubiertos. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -202,3 +203,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se rechazaron los envíos cross-site identificables de navegador antes de rate limit, coordinación y Resend, conservando compatibilidad same-origin y servidor-a-servidor. Verificado con `pnpm check`, 36/36 pruebas del Worker y 66/66 E2E. No se desplegó producción.
 - 2026-08-18 — Se limitó a 32 KiB el cuerpo de `/api/leads`, con rechazo temprano por tamaño declarado y lectura/cancelación acotada para streams sin tamaño. Verificado con `pnpm check`, 38/38 pruebas del Worker y 3/3 E2E relevantes. No se desplegó producción.
 - 2026-08-18 — Se cerró el contrato HTTP de `/api/leads` a JSON POST y se hicieron privadas/no cacheables todas las respuestas API sin afectar assets. Verificado con `pnpm check` y 1/1 E2E compuesto relevante. No se desplegó producción.
+- 2026-08-18 — Se añadió recuperación bilingüe del `429`: campos conservados, recibo oculto, espera explícita y botón reactivado tras cuenta atrás acotada. Verificado con `pnpm check` y 1/1 E2E bilingüe relevante. No se desplegó producción.
