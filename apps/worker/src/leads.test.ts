@@ -166,6 +166,21 @@ describe('leads', () => {
     expect(coordination.rateLimit).toHaveBeenCalledOnce();
     expect(coordination.submit).not.toHaveBeenCalled();
   });
+  it('returns a minimal invalid response when the request body stream fails', async () => {
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const coordination: LeadCoordination = { rateLimit: vi.fn(async () => null), submit: vi.fn(async () => new Response()) };
+    const body = new ReadableStream({ start(controller) { controller.error(new Error('sensitive-stream-detail')); } });
+    const request = new Request('https://test/api/leads', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body, duplex: 'half',
+    } as RequestInit & { duplex: 'half' });
+    const response = await handleLead(request, emailEnv, coordination);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ ok: false, outcome: 'invalid', error: 'invalid' });
+    expect(coordination.rateLimit).toHaveBeenCalledOnce();
+    expect(coordination.submit).not.toHaveBeenCalled();
+    expect(logger).toHaveBeenCalledWith(JSON.stringify({ event: 'lead_body_read_failed' }));
+    expect(logger.mock.calls.flat().join(' ')).not.toContain('sensitive-stream-detail');
+  });
   it('reports provider failure instead of claiming delivery', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('no', { status: 500 }));
     const env = emailEnv;

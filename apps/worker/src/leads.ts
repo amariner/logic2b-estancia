@@ -96,7 +96,12 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
     return json({ ok: false, outcome: 'failed', error: 'lead_coordination_failed' }, 503);
   }
   if (retryAfter) return json({ ok: false, outcome: 'limited', error: 'rate_limited', retryAfter }, 429, { 'retry-after': String(retryAfter) });
-  const parsedBody = await readBoundedJson(request);
+  let parsedBody: Awaited<ReturnType<typeof readBoundedJson>>;
+  try { parsedBody = await readBoundedJson(request); }
+  catch {
+    console.error(JSON.stringify({ event: 'lead_body_read_failed' }));
+    return json({ ok: false, outcome: 'invalid', error: 'invalid' }, 400);
+  }
   if (parsedBody.tooLarge) return json({ ok: false, outcome: 'invalid', error: 'payload_too_large' }, 413);
   const raw = parsedBody.value;
   const bot = z.object({ website: z.string().optional() }).passthrough().safeParse(raw);
@@ -160,7 +165,7 @@ async function readBoundedJson(request: Request): Promise<{ value: unknown; tooL
     if (done) break;
     total += value.byteLength;
     if (total > MAX_LEAD_BODY_BYTES) {
-      await reader.cancel();
+      await reader.cancel().catch(() => undefined);
       return { value: null, tooLarge: true };
     }
     text += decoder.decode(value, { stream: true });
