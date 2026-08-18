@@ -124,6 +124,9 @@
 .scope-result li::before { color: var(--peach); content: '•'; }
 .scope-result .pill { align-self: flex-start; margin-top: auto; border-color: var(--paper); color: var(--ink); background: var(--paper); }
 .activation { border-bottom: 1px solid var(--line); }
+.human-service { border: 0; background: var(--peach); }
+.human-service .eyebrow { color: #7a3e2d; }
+.human-service .activation-steps li { border-color: rgb(122 62 45 / .24); }
 .activation-wrap { display: grid; grid-template-columns: .8fr 1.2fr; gap: 90px; align-items: start; }
 .activation .section-head > p:not(.eyebrow) { max-width: 520px; margin: 24px 0 0; color: var(--slate); line-height: 1.55; }
 .activation .pill { margin-top: 28px; }

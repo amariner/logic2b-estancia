@@ -3,6 +3,7 @@ import type { Locale } from '@logic-estancia/config';
 import { CAPABILITIES, type PlanLevel } from '@logic-estancia/domain';
 import { capabilityEvidenceHref, capabilityEvidenceLabel } from '../capability-evidence';
 import { getBusiness, type BusinessSegment } from '../businesses';
+import HumanService from './HumanService.astro';
 
 const { locale, segment } = Astro.props as { locale: Locale; segment: BusinessSegment };
 const en = locale === 'en';
@@ -127,6 +128,8 @@ const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEn
 <section class="section soft"><div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{en ? 'Where value slips away' : 'Dónde se escapa el valor'}</p><h2 class="heading">{copy.painTitle}</h2><p>{copy.painBody}</p></div><ol class="problem-list">{copy.problems.map((problem, index) => <li><span>0{index + 1}</span><p>{problem}</p></li>)}</ol></div></section>
 
 <section class="section shell"><div class="section-head"><p class="eyebrow">{en ? 'A result before a feature list' : 'Un resultado antes que una lista de funciones'}</p><h2 class="heading">{copy.outcomeTitle}</h2><p>{copy.outcomeBody}</p></div><div class="outcome-grid">{copy.outcomes.map(([title, text], index) => <article><span>0{index + 1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
+
+<HumanService locale={locale} ctaHref={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} />
 
 <section class="section capability-section"><div class="shell"><div class="section-head"><p class="eyebrow">{en ? 'What you can verify today' : 'Lo que puedes comprobar hoy'}</p><h2 class="heading">{en ? 'Open the evidence. Keep the boundary visible.' : 'Abre la evidencia. Mantén el límite a la vista.'}</h2><p>{en ? 'Each capability shows its minimum plan, what the fictional case demonstrates and what a real implementation still needs.' : 'Cada capacidad muestra su plan mínimo, lo que demuestra el caso ficticio y lo que una implantación real todavía necesita.'}</p></div><div class="capability-grid">{visible.map((capability) => <article class="card" data-capability={capability.id}><div class="capability-meta"><span>{en ? 'From' : 'Desde'} {planNames[capability.minimumPlan]}</span><span class={`maturity ${capability.maturity}`}>{maturity[capability.maturity]}</span></div><h3>{capability.label[locale]}</h3><p>{capability.description[locale]}</p><div class="capability-proof"><strong>{en ? 'What you can verify' : 'Qué puedes comprobar'}</strong><p>{capability.evidence.proof[locale]}</p><p class="capability-boundary"><b>{en ? 'Boundary' : 'Límite'}:</b> {capability.evidence.boundary[locale]}</p><a href={capabilityEvidenceHref(capability, locale)} data-capability-evidence={capability.id}>{capabilityEvidenceLabel(capability, locale)} <span aria-hidden="true">→</span></a></div></article>)}</div></div></section>
 

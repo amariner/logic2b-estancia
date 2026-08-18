@@ -6,7 +6,7 @@
 
 Rama: `main`
 
-Estado general: base comercial y demostrativa implementada; la portada ES/EN abre ahora tres recorridos prospectables y diferenciados para casas rurales, apartamentos turísticos y hoteles, unidos a planes, diagnóstico, evidencia y conversación comercial. Consentimiento y legales siguen equiparados al patrón de Camp; producción está consolidada en el Worker `logic-estancia`, sin HubSpot, con dominio personalizado, HTTPS y Resend verificado mediante smoke idempotente. La landing comercial es el único punto que envía solicitudes reales y las dirige a `marinerandreu+logic@gmail.com`; diagnóstico, demos y dashboards permanecen estrictamente locales y ficticios.
+Estado general: base comercial y demostrativa implementada; la portada ES/EN abre tres recorridos prospectables y diferenciados para casas rurales, apartamentos turísticos y hoteles, unidos a planes, diagnóstico, evidencia y conversación comercial. Todo el recorrido presenta Logic Estancia como un servicio gestionado: el equipo de Logic2B entiende la operación, configura lo acordado y acompaña la puesta en marcha, con el soporte base y los extras delimitados. Consentimiento y legales siguen equiparados al patrón de Camp; producción está consolidada en el Worker `logic-estancia`, sin HubSpot, con dominio personalizado, HTTPS y Resend verificado mediante smoke idempotente. La landing comercial es el único punto que envía solicitudes reales y las dirige a `marinerandreu+logic@gmail.com`; diagnóstico, demos y dashboards permanecen estrictamente locales y ficticios.
 
 El smoke operativo de Resend ya es reproducible mediante una CLI segura: permanece offline por defecto, exige autorización explícita y un buzón controlado para ejecutar, marca todo el payload como prueba técnica, verifica entrega/repetición y solo imprime una respuesta saneada. Su ejecución real sigue siendo una actividad humana autorizada y no forma parte de las pruebas automáticas.
 
@@ -30,6 +30,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Dominio consolidado en Básico, Gestión e Inteligente, con normalización de valores antiguos en el borde.
 - Fuente única de capacidades, categorías, madurez y evidencia localizada, con destino exacto, prueba observable y límite explícito por capacidad.
 - Portada, planes, soluciones para gestores y hoteles y diagnóstico de seis pasos en ES/EN, unidos por la secuencia problema → punto de partida → evidencia → conversación comercial.
+- Propuesta de servicio humano gestionado transversal en portada, landings verticales y planes: Logic2B adapta y configura lo acordado, prueba los casos importantes y mantiene soporte base tras la puesta en marcha; migraciones, integraciones, mejoras y soporte extendido conservan alcance separado.
 - Resultado del diagnóstico antes de solicitar datos personales y precarga desde soluciones, planes y demos.
 - Captación comercial exclusivamente mediante Resend desde el formulario de la landing, con consentimiento separado y parámetros controlados; HubSpot está desactivado y fuera de alcance.
 - Rate limit persistente en Cloudflare Durable Objects, con cinco solicitudes por minuto e IP y fallo cerrado si la coordinación no está disponible.
@@ -49,7 +50,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Dos recursos SEO iniciales y playbook comercial.
 - Kit comercial español `1.0.0` con plantillas versionadas de resumen de diagnóstico, seguimiento y propuesta, manifiesto, revisión humana obligatoria y CLI offline que recibe JSON por `stdin` sin escribir documentos ni hacer peticiones.
 - Informe reproducible del embudo digital `1.0.0` sobre recuentos agregados consentidos, con contrato único de contenedor/eventos/parámetros, tasas direccionales, desgloses, advertencias de calidad y rechazo de identificadores o dimensiones libres. Estancia comparte explícitamente con Camp el contenedor `GTM-TVDWZ9LC`.
-- QA visual responsive realizado; `pnpm check` con 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas, y `pnpm e2e` con 56 pruebas correctas, incluidas 15 de accesibilidad y 4 de SEO técnico.
+- QA visual responsive realizado; `pnpm check` con 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas, y `pnpm e2e` con 57 pruebas correctas, incluidas 15 de accesibilidad y 4 de SEO técnico.
 - Worker `logic-estancia` publicado en `https://estancia.logic2b.com`, sin variables ni token de HubSpot, con assets, `LeadCoordinator`, cuatro secretos de correo cifrados y `workers.dev` desactivado. La versión activa es `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`; `logic-estancia-demo` fue eliminado después de verificar el corte.
 - CLI `pnpm smoke:resend` con modo seco predeterminado, autorización explícita, origen validado, payload no comercial estable, comprobación opcional de referencia idempotente y salida allowlisted sin PII ni secretos.
 - Baseline automatizada WCAG 2.2 AA sobre las 30 rutas públicas, sin violaciones axe después de corregir contraste y objetivos táctiles; landmarks, foco visible, movimiento reducido, reflow a 320 px, texto al 200 %, foco contextual y estados dinámicos cubiertos por E2E, con las limitaciones humanas documentadas.
@@ -128,28 +129,27 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- Alcance: 19 archivos de producto/pruebas más este checkpoint; 369 inserciones y 97 eliminaciones antes de documentar. No se añadieron dependencias, imágenes, proveedores ni campos de PII.
-- Hero: se retiraron las tres tarjetas flotantes que competían con el H1. La nueva composición separa promesa y elección de negocio, utiliza las imágenes existentes de Nivora, Terrava y Aurem y mantiene CTA, principios y los tres accesos visibles sin solapamientos.
-- Segmentación: menú, pie y home enlazan Casa rural, Apartamentos y Hoteles. Se crearon seis URLs ES/EN con contenido específico por negocio, FAQ propia, prueba ficticia relevante, límites y CTA que conserva `rural`, `apartments` u `hotels` hasta el diagnóstico.
-- Compatibilidad: `/soluciones/gestores/` y `/en/solutions/managers/` siguen sirviendo contenido, pero declaran canonical/hreflang hacia apartamentos y quedan fuera del sitemap para no fragmentar indexación.
-- SEO: la matriz sube a 22 URLs indexables y diez parejas `hreflang`; títulos, descripciones y H1 de las doce superficies comerciales son únicos. El sitemap excluye aliases y demos, y el menú aporta enlazado interno directo para prospección y rastreo.
-- UX/UI: QA visual local correcto en portada y tres landings a 1280 × 720 y 320 × 860. El hero no presenta overflow; las landings usan jerarquía problema → resultado → capacidades verificables → caso → objeciones → diagnóstico.
-- Accesibilidad: axe detectó contraste insuficiente en la tarjeta oscura del selector y en la banda de evidencia; ambos se corrigieron. Las 15 pruebas WCAG vuelven a quedar verdes, incluido reflow a 320 px, zoom, foco y movimiento reducido.
-- Rendimiento: `pnpm audit:lighthouse` cubre ahora siete rutas. Casas rurales, apartamentos, hoteles, planes y diagnóstico quedan en 100/100/100/100; portada 96/100/100/100 con CLS 0; Terrava 99/100/100/58 por su `noindex` deliberado.
+- Alcance: seis archivos de producto, una prueba E2E y este checkpoint. No se añadieron dependencias, imágenes, proveedores, endpoints ni campos de PII.
+- Propuesta: portada, las seis landings verticales ES/EN y planes presentan ahora Logic Estancia como un servicio gestionado, no como un acceso autoservicio. El mensaje se apoya en tres compromisos verificables: entender la operación, configurar lo acordado y acompañar tras la puesta en marcha.
+- Veracidad comercial: se evitó convertir “trabajamos para que todo vaya bien siempre” en una promesa absoluta de disponibilidad o SLA. Hosting, seguridad, mantenimiento técnico y soporte base quedan incluidos; migraciones, integraciones, mejoras y soporte extendido se acotan por separado.
+- Conversión: el hero incorpora “Configurado por Logic2B” y “Acompañamiento humano”; contacto indica que responde una persona; una nueva FAQ resuelve si el cliente debe configurar la plataforma por su cuenta.
+- UX/UI: el bloque reutilizable `HumanService` crea una banda cálida y reconocible dentro del hilo comercial. QA visual correcto en portada, casa rural y planes a 1280 × 720 y 320 × 860, sin desbordamiento horizontal.
+- SEO: la FAQ ES/EN añade una objeción de intención comercial concreta sin alterar canonical, `hreflang`, sitemap ni la matriz de 22 URLs indexables.
+- Accesibilidad y rendimiento: axe y reflow permanecen limpios. Lighthouse móvil mantiene casa rural, apartamentos, hoteles, planes y diagnóstico en 100/100/100/100; portada en 96/100/100/100 con CLS 0; Terrava queda en 100/100/100/58 por su `noindex` deliberado.
 - `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; Worker con 31 unitarias.
-- `pnpm e2e`: 56/56 pruebas Chromium correctas; 37 funcionales, 15 de accesibilidad y 4 de SEO técnico.
-- Seguridad y privacidad: sin cambios de Worker/API, Resend, rate limit o idempotencia. El contrato analítico solo amplía la allowlist cerrada del parámetro `segment`; sigue condicionado al consentimiento y sin PII.
+- `pnpm e2e`: 57/57 pruebas Chromium correctas; la nueva prueba protege el mensaje gestionado en portada, planes y landings ES/EN, además de las 15 pruebas de accesibilidad y 4 de SEO técnico existentes.
+- Seguridad y privacidad: sin cambios de Worker/API, Resend, rate limit, idempotencia, analítica o consentimiento.
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: corregido — cada URL permite prospectar con un argumento reconocible para casa rural, apartamentos u hotel; no se atribuyen resultados, precios o integraciones inexistentes.
-- Diseño de producto: correcto — el tipo de negocio orienta el relato, pero el diagnóstico continúa recomendando Básico, Gestión o Inteligente por capacidades; tamaño solo dimensiona la implantación.
-- UX: corregido — el usuario puede identificarse desde hero, menú, pie y selector; el segmento llega al diagnóstico sin crear un segundo formulario ni pedir datos antes del resultado.
-- UI/dirección visual: corregido — se eliminó la competencia entre H1 y tarjetas flotantes; la nueva composición fotográfica mantiene jerarquía, identidad y legibilidad en escritorio y móvil.
-- SEO: corregido — cada intención vertical dispone de URL, title, description, H1, FAQ, canonical, `hreflang` y enlaces internos propios. Las 22 URLs indexables y la exclusión de aliases/demos están cubiertas por E2E.
-- Arquitectura frontend: correcto — rutas, etiquetas, imágenes y resúmenes de negocio viven en una fuente tipada compartida; la estructura comercial se reutiliza sin duplicar lógica de capacidades.
-- Full stack: correcto — API y formulario no cambian; solo se amplía una allowlist analítica cerrada para los nuevos segmentos y se conserva compatibilidad con `managers` en el borde.
-- QA/accesibilidad/rendimiento/confianza: corregido — 56 E2E, axe, reflow y siete Lighthouse detectaron y cerraron contraste y ambigüedad de selectores; no quedan bloqueantes conocidos.
+- Marketing estratégico: corregido — la web diferencia a Logic2B por el trabajo humano de adaptación y configuración, no solo por las capacidades del producto; no promete un SLA, resultado o disponibilidad no demostrados.
+- Diseño de producto: correcto — implantación, configuración y soporte base se entienden como parte del servicio de Básico, Gestión e Inteligente, mientras los extras conservan alcance explícito.
+- UX: corregido — se reduce la objeción “tendré que configurarlo yo” en hero, cuerpo, FAQ y contacto sin añadir pasos ni formularios al recorrido.
+- UI/dirección visual: correcto — la banda cálida da entidad al componente humano y conserva jerarquía, contraste y reflow en escritorio y móvil.
+- SEO: corregido — la nueva pregunta ES/EN responde una intención comercial específica y forma parte del `FAQPage` visible, sin duplicar URLs ni metadata.
+- Arquitectura frontend: correcto — un único componente localizado mantiene el relato y sus límites coherentes en home, soluciones y planes.
+- Full stack: no aplica — no cambian formulario, API, Worker, datos, proveedores ni comportamiento de las demos.
+- QA/accesibilidad/rendimiento/confianza: correcto — 57 E2E, axe, reflow, QA visual y siete Lighthouse permanecen verdes; no quedan bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Lighthouse debe repetirse en producción tras un despliegue autorizado. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -178,3 +178,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se blindó la separación de Resend: solo la landing comercial puede entregar leads. Los seis formularios demo ES/EN permanecen locales, muestran su límite, reciben `form-action 'none'` y cualquier intento demo contra `/api/leads` se bloquea con `403` antes de proveedores. Verificado con 31 unitarias del Worker, `pnpm check`, 54 E2E y dry-run de 118 assets.
 - 2026-08-18 — Se reconstruyó la línea base comercial ES/EN alrededor de margen, tiempo, venta directa y coordinación: portada, segmentos, planes, diagnóstico, FAQs, contacto, navegación y metadata SEO forman un único recorrido. Se retiraron métricas hero ambiguas y un SLA no respaldado; se corrigieron solapamiento, contraste y CLS mediante QA/axe/preload. Verificado con `pnpm check`, 55 E2E y Lighthouse móvil 100/100/100/100 en portada, planes y diagnóstico. Próxima activación: recoger un periodo agregado posterior a esta línea base antes de elegir un único experimento.
 - 2026-08-18 — Se rehízo el hero como composición editorial con elección visual de negocio y se abrieron landings prospectables ES/EN para casas rurales, apartamentos y hoteles. Menú, pie, home, diagnóstico, analítica, sitemap y SEO técnico comparten los tres segmentos; aliases antiguos conservan canonical de compatibilidad. Verificado con `pnpm check`, 56 E2E, axe/reflow y Lighthouse móvil 100/100/100/100 en las tres landings. El dev permanece local; no se desplegó producción.
+- 2026-08-18 — Se hizo transversal la propuesta de servicio humano gestionado: Logic2B entiende la operación, configura lo acordado y acompaña tras la puesta en marcha, con soporte base y extras delimitados. Portada, planes, landings ES/EN, FAQ y contacto comparten el mensaje. Verificado con `pnpm check`, 57 E2E, QA visual 1280/320 px y Lighthouse móvil; no se desplegó producción.

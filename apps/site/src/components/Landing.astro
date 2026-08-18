@@ -3,6 +3,7 @@ import type { Locale } from '@logic-estancia/config';
 import { logic2bContact } from '@logic-estancia/config/contact';
 import { content } from '../content';
 import { getBusinesses } from '../businesses';
+import HumanService from './HumanService.astro';
 const { locale } = Astro.props as { locale: Locale };
 const c = content[locale];
 const prefix = locale === 'en' ? '/en' : '';
@@ -58,7 +59,7 @@ const serviceSchema = {
       <h1 class="display">{c.hero.title} <em>{c.hero.accent}</em></h1>
       <p>{c.hero.body}</p>
       <div class="hero-actions"><a class="pill" href="#negocio" data-track="cta_click" data-section="hero">{c.hero.primary}</a><a class="pill ghost" href="#demos">{c.hero.secondary}</a></div>
-      <ul class="hero-assurances" aria-label={locale === 'es' ? 'Principios del servicio' : 'Service principles'}><li>{locale === 'es' ? 'Empieza por la web' : 'Start with the website'}</li><li>{locale === 'es' ? 'Crece por capacidades' : 'Grow by capabilities'}</li><li>{locale === 'es' ? 'Mantén el control' : 'Stay in control'}</li></ul>
+      <ul class="hero-assurances" aria-label={locale === 'es' ? 'Principios del servicio' : 'Service principles'}><li>{locale === 'es' ? 'Adaptado a tu negocio' : 'Adapted to your business'}</li><li>{locale === 'es' ? 'Configurado por Logic2B' : 'Configured by Logic2B'}</li><li>{locale === 'es' ? 'Acompañamiento humano' : 'Human support'}</li></ul>
     </div>
     <div class="hero-businesses" aria-label={locale === 'es' ? 'Soluciones por tipo de alojamiento' : 'Solutions by accommodation type'}>
       {businesses.map((business, index) => <a class={`hero-business ${index === 0 ? 'featured' : ''}`} href={business.href}><img src={business.image} alt="" width="2016" height="1344" /><span><small>{locale === 'es' ? 'Solución para' : 'Solution for'}</small><strong>{business.plural}</strong></span><b aria-hidden="true">↗</b></a>)}
@@ -132,12 +133,7 @@ const serviceSchema = {
   </div>
 </section>
 
-<section class="section activation">
-  <div class="shell activation-wrap">
-    <div class="section-head"><p class="eyebrow">{c.activation.eyebrow}</p><h2 class="heading">{c.activation.title}</h2><p>{c.activation.body}</p><a class="pill ghost" href="#contacto">{c.activation.cta}</a></div>
-    <ol class="activation-steps">{c.activation.steps.map(([name, text], index) => <li><span>0{index + 1}</span><div><h3>{name}</h3><p>{text}</p></div></li>)}</ol>
-  </div>
-</section>
+<HumanService locale={locale} ctaHref="#contacto" />
 
 <section class="section shell faq">
   <div class="section-head"><p class="eyebrow">{c.faq.eyebrow}</p><h2 class="heading">{c.faq.title}</h2></div>

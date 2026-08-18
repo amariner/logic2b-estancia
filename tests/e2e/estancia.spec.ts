@@ -168,6 +168,23 @@ test('business landing links preserve the prospect segment in the assessment', a
   }
 });
 
+test('managed human service is explicit across the commercial journey', async ({ page }) => {
+  for (const path of ['/', '/soluciones/casas-rurales/', '/planes/']) {
+    await page.goto(path);
+    const service = page.locator('.human-service');
+    await expect(service.getByRole('heading', { name: 'No te damos un software para que te apañes solo.' })).toBeVisible();
+    await expect(service.getByRole('heading', { name: 'Lo configuramos por ti' })).toBeVisible();
+    await expect(service).toContainText('todo lo acordado');
+    await expect(service).toContainText('soporte base');
+  }
+
+  await page.goto('/en/solutions/apartments/');
+  const service = page.locator('.human-service');
+  await expect(service.getByRole('heading', { name: "We don't hand you software and leave you to figure it out." })).toBeVisible();
+  await expect(service.getByRole('heading', { name: 'We configure it for you' })).toBeVisible();
+  await expect(service).toContainText('everything agreed in scope');
+});
+
 test('scope configurator recommends progressively and prefills the commercial form', async ({ page }) => {
   await page.goto('/');
   const scope = page.locator('[data-scope-estimator]');

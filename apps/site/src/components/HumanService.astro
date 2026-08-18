@@ -1,0 +1,26 @@
+---
+import type { Locale } from '@logic-estancia/config';
+
+const { locale, ctaHref } = Astro.props as { locale: Locale; ctaHref?: string };
+const en = locale === 'en';
+const steps = en ? [
+  ['We understand your operation', 'We follow a real booking, identify the friction that costs you most and agree what should stay, change or connect.'],
+  ['We configure it for you', 'The Logic2B team prepares the structure, content, roles and included workflows. You do not receive an empty platform and a manual.'],
+  ['We stay involved after launch', 'Hosting, security, technical maintenance and base support are part of the service. We review how it is working and scope improvements when the business needs them.'],
+] : [
+  ['Entendemos tu operación', 'Seguimos una reserva real, localizamos la fricción que más cuesta y acordamos qué conviene mantener, cambiar o conectar.'],
+  ['Lo configuramos por ti', 'El equipo de Logic2B prepara la estructura, el contenido, los permisos y los flujos incluidos. No recibes una plataforma vacía y un manual.'],
+  ['Seguimos cuando ya está en marcha', 'Hosting, seguridad, mantenimiento técnico y soporte base forman parte del servicio. Revisamos cómo funciona y acotamos mejoras cuando el negocio las necesita.'],
+];
+---
+<section class="section activation human-service">
+  <div class="shell activation-wrap">
+    <div class="section-head">
+      <p class="eyebrow">{en ? 'A managed service, with people behind it' : 'Un servicio gestionado, con personas detrás'}</p>
+      <h2 class="heading">{en ? "We don't hand you software and leave you to figure it out." : 'No te damos un software para que te apañes solo.'}</h2>
+      <p>{en ? 'Logic2B adapts and configures everything agreed in scope to fit the way your business actually works. Our job is to help you get value from it—not simply hand over access.' : 'Logic2B adapta y configura todo lo acordado para que encaje con tu forma real de trabajar. Nuestro trabajo es ayudarte a sacarle partido, no limitarnos a entregarte un acceso.'}</p>
+      {ctaHref && <a class="pill ghost" href={ctaHref}>{en ? 'Tell us how you work' : 'Cuéntanos cómo trabajas'}</a>}
+    </div>
+    <ol class="activation-steps">{steps.map(([name, text], index) => <li><span>0{index + 1}</span><div><h3>{name}</h3><p>{text}</p></div></li>)}</ol>
+  </div>
+</section>
