@@ -29,6 +29,7 @@ import {
   canOperate,
   initialState,
   parseStored,
+  TOUR_STEP_COUNTS,
   type DemoState,
   type Scenario,
 } from "./state";
@@ -52,6 +53,14 @@ type Utility = "search" | "notifications" | null;
 type Notice = { title: string; detail: string; view: View; urgent?: boolean };
 type RevenueMetric = "revenue" | "occupancy" | "adr" | "revpar";
 type ChannelId = "booking" | "airbnb" | "expedia" | "ical";
+
+type TourStep = {
+  phase: string;
+  title: string;
+  description: string;
+  evidence: string;
+  view: View;
+};
 
 const properties = {
   terrava: [
@@ -362,59 +371,191 @@ export function DashboardDemo({
       .includes(normalizedQuery),
   );
 
-  const tourSteps: [string, View][] =
+  const tourSteps: TourStep[] =
     scenario === "terrava"
       ? [
-          [
-            locale === "es"
-              ? "Una solicitud sin encaje"
-              : "An enquiry without a fit",
-            "enquiries" as View,
-          ],
-          [
-            locale === "es"
-              ? "Compara las ocho casas"
-              : "Compare all eight homes",
-            "planning" as View,
-          ],
-          [
-            locale === "es"
-              ? "Convierte la alternativa"
-              : "Convert the alternative",
-            "bookings" as View,
-          ],
+          {
+            phase: locale === "es" ? "01 · Solicitud" : "01 · Enquiry",
+            title:
+              locale === "es"
+                ? "Una solicitud sin encaje"
+                : "An enquiry without a fit",
+            description:
+              locale === "es"
+                ? "Abre el caso ficticio y entiende por qué la primera casa no cubre toda la estancia."
+                : "Open the fictitious case and see why the first home cannot cover the full stay.",
+            evidence:
+              locale === "es"
+                ? "Fixture local · sin CRM ni mensajería"
+                : "Local fixture · no CRM or messaging",
+            view: "enquiries",
+          },
+          {
+            phase:
+              locale === "es" ? "02 · Disponibilidad" : "02 · Availability",
+            title:
+              locale === "es"
+                ? "Compara las ocho casas"
+                : "Compare all eight homes",
+            description:
+              locale === "es"
+                ? "El planning comparte el contexto necesario para preparar una alternativa sin confirmar ninguna reserva real."
+                : "The planning view shares enough context to prepare an alternative without confirming a real booking.",
+            evidence:
+              locale === "es"
+                ? "Inventario ficticio · cambio reversible"
+                : "Fictitious inventory · reversible change",
+            view: "planning",
+          },
+          {
+            phase: locale === "es" ? "03 · Resultado" : "03 · Outcome",
+            title:
+              locale === "es"
+                ? "Convierte la alternativa"
+                : "Convert the alternative",
+            description:
+              locale === "es"
+                ? "La reserva de muestra cierra el relato de Gestión y permanece únicamente en este navegador."
+                : "The sample booking closes the Management story and remains only in this browser.",
+            evidence:
+              locale === "es"
+                ? "Sin cobro ni confirmación externa"
+                : "No payment or external confirmation",
+            view: "bookings",
+          },
         ]
       : [
-          [
-            locale === "es"
-              ? "Detecta la habitación en riesgo"
-              : "Find the room at risk",
-            "home" as View,
-          ],
-          [
-            locale === "es"
-              ? "Limpieza prepara la 408"
-              : "Cleaning prepares room 408",
-            "cleaning" as View,
-          ],
-          [
-            locale === "es"
-              ? "Recepción valida la entrada"
-              : "Reception validates the arrival",
-            "planning" as View,
-          ],
+          {
+            phase: locale === "es" ? "01 · Señal" : "01 · Signal",
+            title:
+              locale === "es"
+                ? "Detecta la habitación en riesgo"
+                : "Find the room at risk",
+            description:
+              locale === "es"
+                ? "El centro abre con una llegada ficticia que necesita coordinación antes de las 15:00."
+                : "The workspace opens with a fictitious arrival that needs coordination before 15:00.",
+            evidence:
+              locale === "es"
+                ? "Fixture local · sin PMS conectado"
+                : "Local fixture · no connected PMS",
+            view: "home",
+          },
+          {
+            phase: locale === "es" ? "02 · Coordinación" : "02 · Coordination",
+            title:
+              locale === "es"
+                ? "Limpieza prepara la 408"
+                : "Cleaning prepares room 408",
+            description:
+              locale === "es"
+                ? "Los roles ordenan la preparación y la revisión; cada cambio es visible, reversible y local."
+                : "Roles structure preparation and review; every change is visible, reversible and local.",
+            evidence:
+              locale === "es"
+                ? "Permisos de muestra · sin avisos enviados"
+                : "Sample permissions · no notifications sent",
+            view: "cleaning",
+          },
+          {
+            phase: locale === "es" ? "03 · Control" : "03 · Control",
+            title:
+              locale === "es"
+                ? "Recepción valida la entrada"
+                : "Reception validates the arrival",
+            description:
+              locale === "es"
+                ? "El planning reúne estancia y estado de habitación para que una persona tome la decisión final."
+                : "Planning brings stay and room status together so a person can make the final decision.",
+            evidence:
+              locale === "es"
+                ? "Validación humana · sin reserva real"
+                : "Human validation · no real booking",
+            view: "planning",
+          },
+          {
+            phase: locale === "es" ? "04 · Ingresos" : "04 · Revenue",
+            title:
+              locale === "es" ? "Explica cada métrica" : "Explain every metric",
+            description:
+              locale === "es"
+                ? "El escenario de 28 días permite contrastar ocupación, ADR, RevPAR e ingresos con sus fórmulas y libro semanal."
+                : "The 28-day scenario lets you check occupancy, ADR, RevPAR and revenue against their formulas and weekly ledger.",
+            evidence:
+              locale === "es"
+                ? "96 habitaciones ficticias · sin predicción ni contabilidad"
+                : "96 fictitious rooms · no forecast or accounting",
+            view: "reports",
+          },
+          {
+            phase: locale === "es" ? "05 · Canales" : "05 · Channels",
+            title:
+              locale === "es"
+                ? "Revisa antes de conectar"
+                : "Review before connecting",
+            description:
+              locale === "es"
+                ? "La matriz muestra cobertura y requisitos sin fingir sincronizaciones, inventario publicado o credenciales."
+                : "The matrix shows coverage and requirements without pretending to sync, publish inventory or hold credentials.",
+            evidence:
+              locale === "es"
+                ? "0 canales conectados · publicación bloqueada"
+                : "0 connected channels · publishing blocked",
+            view: "channels",
+          },
+          {
+            phase:
+              locale === "es" ? "06 · IA supervisada" : "06 · Supervised AI",
+            title:
+              locale === "es"
+                ? "Edita, revisa y conserva el control"
+                : "Edit, review and keep control",
+            description:
+              locale === "es"
+                ? "El copiloto parte de fuentes visibles, guarda versiones locales y exige revisión humana; el envío permanece deshabilitado."
+                : "The copilot starts from visible sources, saves local versions and requires human review; sending remains disabled.",
+            evidence:
+              locale === "es"
+                ? "Sin modelo ni proveedor · sin envío"
+                : "No model or provider · no delivery",
+            view: "automation",
+          },
+          {
+            phase: locale === "es" ? "07 · Tu encaje" : "07 · Your fit",
+            title:
+              locale === "es"
+                ? "Convierte la evidencia en alcance"
+                : "Turn evidence into scope",
+            description:
+              locale === "es"
+                ? "Ya has visto operación, ingresos, canales e IA con sus límites. El diagnóstico traduce tus necesidades en un punto de partida Básico, Gestión o Inteligente."
+                : "You have seen operations, revenue, channels and AI with their boundaries. The assessment turns your needs into a Basic, Management or Intelligent starting point.",
+            evidence:
+              locale === "es"
+                ? "Resultado visible antes de pedir datos"
+                : "Result shown before any data is requested",
+            view: "home",
+          },
         ];
+
+  const assessmentHref = `${locale === "en" ? "/en/assessment/" : "/diagnostico/"}?segment=${scenario === "aurem" ? "hotels" : "managers"}&plan=${scenario === "aurem" ? "inteligente" : "gestion"}&demo=${scenario}`;
+
+  useEffect(() => {
+    if (tour === null) return;
+    const step = tourSteps[Math.min(tour, tourSteps.length - 1)];
+    if (step && step.view !== view) go(step.view);
+  }, []);
 
   const startTour = () => {
     setTour(0);
-    go(tourSteps[0]![1]);
+    go(tourSteps[0]!.view);
     patch({ tourMode: "guided", tourStep: 0 });
     track("demo_mode_select", { locale, demo: scenario, flow: "guided" });
   };
   const resumeTour = () => {
     const step = state.tourStep ?? 0;
     setTour(step);
-    go(tourSteps[Math.min(step, tourSteps.length - 1)]![1]);
+    go(tourSteps[Math.min(step, tourSteps.length - 1)]!.view);
   };
   const closeTour = () => {
     patch({ tourStep: tour });
@@ -431,13 +572,31 @@ export function DashboardDemo({
     });
     if (next >= tourSteps.length) {
       setTour(null);
-      patch({ tourStep: null });
+      patch({
+        tourStep: null,
+        completedFlows: [...new Set([...state.completedFlows, "guided-tour"])],
+      });
       track("demo_flow_complete", { locale, demo: scenario, flow: "guided" });
     } else {
       setTour(next);
       patch({ tourStep: next });
-      go(tourSteps[next]![1]);
+      go(tourSteps[next]!.view);
     }
+  };
+  const finishTour = (destination: "workspace" | "assessment") => {
+    setTour(null);
+    patch({
+      tourStep: null,
+      completedFlows: [...new Set([...state.completedFlows, "guided-tour"])],
+    });
+    track("demo_flow_complete", { locale, demo: scenario, flow: "guided" });
+    if (destination === "assessment")
+      track("demo_cta", {
+        locale,
+        demo: scenario,
+        plan: scenario === "aurem" ? "inteligente" : "gestion",
+        source_section: "guided_tour",
+      });
   };
 
   return (
@@ -641,9 +800,14 @@ export function DashboardDemo({
           </h2>
           <p>
             {locale === "es"
-              ? "La visita guiada recorre la historia principal. La exploración libre mantiene todas las secciones disponibles."
-              : "The guided journey covers the main story. Free exploration keeps every area available."}
+              ? scenario === "aurem"
+                ? "Siete hitos conectan una llegada en riesgo con ingresos, canales e IA supervisada. Puedes pausar y reanudar; la exploración libre mantiene todas las secciones disponibles."
+                : "Tres hitos recorren una solicitud hasta su reserva ficticia. Puedes pausar y reanudar; la exploración libre mantiene todas las secciones disponibles."
+              : scenario === "aurem"
+                ? "Seven milestones connect an at-risk arrival with revenue, channels and supervised AI. Pause and resume at any time; free exploration keeps every area available."
+                : "Three milestones take an enquiry to its fictitious booking. Pause and resume at any time; free exploration keeps every area available."}
           </p>
+
           <div>
             <button className="primary" onClick={startTour} autoFocus>
               {locale === "es" ? "Visita guiada" : "Guided tour"}
@@ -665,40 +829,71 @@ export function DashboardDemo({
       )}
       {tour !== null && (
         <div
+          key={tour}
           className="tour-pop"
           role="dialog"
-          aria-modal="true"
-          aria-label={locale === "es" ? "Recorrido guiado" : "Guided tour"}
+          aria-labelledby={`tour-title-${tour}`}
         >
+          <div
+            className="tour-progress"
+            style={{
+              gridTemplateColumns: `repeat(${TOUR_STEP_COUNTS[scenario]}, minmax(0, 1fr))`,
+            }}
+            role="progressbar"
+            aria-label={
+              locale === "es" ? "Progreso del recorrido" : "Tour progress"
+            }
+            aria-valuemin={1}
+            aria-valuemax={tourSteps.length}
+            aria-valuenow={tour + 1}
+          >
+            {tourSteps.map((_, index) => (
+              <i key={index} className={index <= tour ? "active" : ""} />
+            ))}
+          </div>
           <span>
-            {tour + 1}/{tourSteps.length}
+            {tourSteps[tour]!.phase} · {tour + 1}/{tourSteps.length}
           </span>
-          <h2>{tourSteps[tour]![0]}</h2>
-          <p>
+          <h2 id={`tour-title-${tour}`}>{tourSteps[tour]!.title}</h2>
+          <p>{tourSteps[tour]!.description}</p>
+          <strong className="tour-evidence">{tourSteps[tour]!.evidence}</strong>
+          <p className="tour-memory">
             {locale === "es"
-              ? "La demo conserva el progreso en este navegador. Puedes cerrarla y reanudarla desde la cabecera."
-              : "The demo keeps progress in this browser. Close it and resume from the header."}
+              ? "El progreso queda en este navegador."
+              : "Progress stays in this browser."}
           </p>
-          <div>
-            <button onClick={closeTour} autoFocus>
-              {locale === "es" ? "Cerrar" : "Close"}
-            </button>
-            <button className="primary" onClick={advanceTour}>
-              {tour === tourSteps.length - 1
-                ? locale === "es"
-                  ? "Terminar"
-                  : "Finish"
-                : locale === "es"
-                  ? "Siguiente"
-                  : "Next"}
-              <ChevronRight size={16} />
-            </button>
+          <div className="tour-actions">
+            {tour === tourSteps.length - 1 ? (
+              <>
+                <button onClick={() => finishTour("workspace")} autoFocus>
+                  {locale === "es" ? "Seguir explorando" : "Keep exploring"}
+                </button>
+                <a
+                  className="primary"
+                  href={assessmentHref}
+                  onClick={() => finishTour("assessment")}
+                >
+                  {locale === "es" ? "Abrir diagnóstico" : "Open assessment"}
+                  <ChevronRight size={16} />
+                </a>
+              </>
+            ) : (
+              <>
+                <button onClick={closeTour} autoFocus>
+                  {locale === "es" ? "Pausar" : "Pause"}
+                </button>
+                <button className="primary" onClick={advanceTour}>
+                  {locale === "es" ? "Siguiente hito" : "Next milestone"}
+                  <ChevronRight size={16} />
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
       <a
         className="demo-conversion"
-        href={`${locale === "en" ? "/en/assessment/" : "/diagnostico/"}?segment=${scenario === "aurem" ? "hotels" : "managers"}&plan=${scenario === "aurem" ? "inteligente" : "gestion"}&demo=${scenario}`}
+        href={assessmentHref}
         onClick={() =>
           track("demo_cta", {
             locale,

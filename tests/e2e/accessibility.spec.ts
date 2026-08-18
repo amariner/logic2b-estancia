@@ -155,6 +155,34 @@ test('workspace utility panel restores focus to its opener on Escape', async ({ 
   await expect(search).toBeFocused();
 });
 
+test("Aurem guided milestones expose accessible progress and move focus with their context", async ({
+  page,
+}) => {
+  await gotoStable(page, "/demos/aurem/gestion/");
+  await page.getByRole("button", { name: "Visita guiada" }).click();
+  const first = page.getByRole("dialog", {
+    name: "Detecta la habitación en riesgo",
+  });
+  await expect(first.getByRole("button", { name: "Pausar" })).toBeFocused();
+  await expect(first.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "1",
+  );
+  await first.getByRole("button", { name: "Siguiente hito" }).click();
+  const second = page.getByRole("dialog", { name: "Limpieza prepara la 408" });
+  await expect(second.getByRole("button", { name: "Pausar" })).toBeFocused();
+  await expect(second.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "2",
+  );
+  const result = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(formatViolations("Aurem guided journey", result.violations)).toEqual(
+    [],
+  );
+});
+
 for (const path of ['/', '/demos/terrava/', '/demos/aurem/gestion/']) {
   test(`${path} exposes a visible keyboard focus indicator`, async ({ page }) => {
     await gotoStable(page, path);

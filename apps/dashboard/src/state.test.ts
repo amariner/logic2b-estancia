@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canOperate, initialState, parseStored } from "./state";
+import { canOperate, initialState, parseStored, TOUR_STEP_COUNTS } from "./state";
 
 describe("demo state", () => {
   it("recovers from corrupted storage", () =>
@@ -77,5 +77,15 @@ describe("demo state", () => {
   it("rejects invalid AI workflow state", () => {
     const state = { ...initialState("aurem"), aiDraft: "x".repeat(1001), aiReview: "sent", aiRevision: 99 };
     expect(parseStored(JSON.stringify(state), "aurem")).toMatchObject({ aiDraft: null, aiReview: "draft", aiRevision: 1 });
+  });
+  it("keeps guided progress inside the scenario journey", () => {
+    const state = { ...initialState("aurem"), tourMode: "guided" as const, tourStep: TOUR_STEP_COUNTS.aurem - 1 };
+    expect(parseStored(JSON.stringify(state), "aurem").tourStep).toBe(6);
+  });
+  it("rejects negative and out-of-range guided progress", () => {
+    for (const tourStep of [-1, TOUR_STEP_COUNTS.terrava, 99]) {
+      const state = { ...initialState("terrava"), tourMode: "guided" as const, tourStep };
+      expect(parseStored(JSON.stringify(state), "terrava").tourStep).toBeNull();
+    }
   });
 });

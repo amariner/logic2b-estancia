@@ -293,6 +293,108 @@ test('workspace search opens from the keyboard and navigates to a matching area'
   await expect(page.getByRole('dialog', { name: 'Búsqueda rápida' })).toBeHidden();
 });
 
+test("Aurem guided journey connects operational evidence to the assessment and resumes exactly", async ({
+  page,
+}) => {
+  const externalWrites: string[] = [];
+  page.on("request", (request) => {
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method()))
+      externalWrites.push(request.url());
+  });
+  await page.goto("/demos/aurem/gestion/");
+  await page.getByRole("button", { name: "Visita guiada" }).click();
+
+  await expect(
+    page.getByRole("dialog", { name: "Detecta la habitación en riesgo" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("progressbar", { name: "Progreso del recorrido" }),
+  ).toHaveAttribute("aria-valuenow", "1");
+  await page.getByRole("button", { name: "Siguiente hito" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Limpieza" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Siguiente hito" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Planning" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Siguiente hito" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Explica cada métrica" }),
+  ).toContainText("96 habitaciones ficticias · sin predicción ni contabilidad");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Ingresos" }),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Pausar" }).click();
+  await expect(
+    page.getByRole("button", { name: "Reanudar recorrido" }),
+  ).toBeVisible();
+  await page.goto("/demos/aurem/gestion/");
+  await expect(
+    page.getByRole("dialog", { name: "Explica cada métrica" }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/vista=reports/);
+
+  await page.getByRole("button", { name: "Siguiente hito" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Revisa antes de conectar" }),
+  ).toContainText("0 canales conectados · publicación bloqueada");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Canales" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Siguiente hito" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Edita, revisa y conserva el control" }),
+  ).toContainText("Sin modelo ni proveedor · sin envío");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Automatización" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Siguiente hito" }).click();
+
+  const finalStep = page.getByRole("dialog", {
+    name: "Convierte la evidencia en alcance",
+  });
+  await expect(finalStep).toContainText(
+    "Resultado visible antes de pedir datos",
+  );
+  await expect(
+    finalStep.getByRole("link", { name: "Abrir diagnóstico" }),
+  ).toHaveAttribute(
+    "href",
+    "/diagnostico/?segment=hotels&plan=inteligente&demo=aurem",
+  );
+  await finalStep.getByRole("link", { name: "Abrir diagnóstico" }).click();
+  await expect(page).toHaveURL(
+    /\/diagnostico\/\?segment=hotels&plan=inteligente&demo=aurem$/,
+  );
+  await expect(page.getByLabel("Hotel")).toBeChecked();
+  await expect(page.getByLabel("Automatización")).toBeChecked();
+  expect(externalWrites).toEqual([]);
+});
+
+test("Aurem guided journey keeps its evidence and exit localized in English", async ({
+  page,
+}) => {
+  await page.goto("/en/demos/aurem/gestion/");
+  await page.getByRole("button", { name: "Guided tour" }).click();
+  for (let step = 0; step < 5; step += 1)
+    await page.getByRole("button", { name: "Next milestone" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Edit, review and keep control" }),
+  ).toContainText("No model or provider · no delivery");
+  await page.getByRole("button", { name: "Next milestone" }).click();
+  const finalStep = page.getByRole("dialog", {
+    name: "Turn evidence into scope",
+  });
+  await expect(
+    finalStep.getByRole("link", { name: "Open assessment" }),
+  ).toHaveAttribute(
+    "href",
+    "/en/assessment/?segment=hotels&plan=inteligente&demo=aurem",
+  );
+});
+
 test('Aurem revenue explains every fictitious metric and links to demo evidence', async ({ page }) => {
   await page.goto('/demos/aurem/gestion/?vista=reports');
   await page.getByRole('button', { name: 'Explorar libremente' }).click();

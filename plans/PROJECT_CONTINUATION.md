@@ -1,6 +1,6 @@
 # Logic Estancia · Checkpoint de continuidad
 
-Última actualización: 2026-08-17
+Última actualización: 2026-08-18
 
 Último incremento de infraestructura verificado: consultar `git rev-parse HEAD`
 
@@ -9,6 +9,8 @@ Rama: `main`
 Estado general: base comercial y demostrativa implementada; consentimiento y legales equiparados al patrón de Camp; producción consolidada en el Worker `logic-estancia`, sin HubSpot, con dominio personalizado, HTTPS y Resend verificado mediante smoke idempotente. La landing comercial es el único punto que envía solicitudes reales y las dirige a `marinerandreu+logic@gmail.com`; diagnóstico, demos y dashboards permanecen estrictamente locales y ficticios. El Worker anterior `logic-estancia-demo` está retirado y la clave de Resend ya fue regenerada y guardada cifrada.
 
 El smoke operativo de Resend ya es reproducible mediante una CLI segura: permanece offline por defecto, exige autorización explícita y un buzón controlado para ejecutar, marca todo el payload como prueba técnica, verifica entrega/repetición y solo imprime una respuesta saneada. Su ejecución real sigue siendo una actividad humana autorizada y no forma parte de las pruebas automáticas.
+
+Para no saturar Higgsfield, cualquier imagen raster nueva que llegue a ser necesaria se generará con la suscripción integrada de OpenAI, mediante una llamada por recurso, pausa entre generaciones e inspección individual. El incremento actual no necesitó imágenes nuevas: reutiliza el sistema visual existente y no consumió ningún generador.
 
 El SHA actual de continuidad se obtiene siempre con `git rev-parse HEAD`; no se fija aquí para evitar que el propio commit de actualización deje el dato obsoleto.
 
@@ -44,7 +46,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Diagnóstico sin captación duplicada: conserva sus respuestas en el navegador y conduce al único formulario comercial de la landing.
 - Formularios, dashboards y acciones de las demos limitados a interacción visual/local; no envían correo, ni escriben en CRM, inventario, reservas, pagos, mensajes o proveedores externos.
 - Dos recursos SEO iniciales y playbook comercial.
-- QA visual responsive realizado; `pnpm check` con 28 tareas de paquetes más lint raíz correcto y `pnpm e2e` con 47 pruebas correctas, incluidas 14 de accesibilidad y 3 de SEO técnico.
+- QA visual responsive realizado; `pnpm check` con 7 tareas de lint y 21 tareas de typecheck/test/build correctas, y `pnpm e2e` con 50 pruebas correctas, incluidas 15 de accesibilidad y 3 de SEO técnico.
 - Worker `logic-estancia` publicado en `https://estancia.logic2b.com`, sin variables ni token de HubSpot, con assets, `LeadCoordinator`, cuatro secretos de correo cifrados y `workers.dev` desactivado. La versión activa es `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`; `logic-estancia-demo` fue eliminado después de verificar el corte.
 - CLI `pnpm smoke:resend` con modo seco predeterminado, autorización explícita, origen validado, payload no comercial estable, comprobación opcional de referencia idempotente y salida allowlisted sin PII ni secretos.
 - Baseline automatizada WCAG 2.2 AA sobre las 30 rutas públicas, sin violaciones axe después de corregir contraste y objetivos táctiles; landmarks, foco visible, movimiento reducido, reflow a 320 px, texto al 200 %, foco contextual y estados dinámicos cubiertos por E2E, con las limitaciones humanas documentadas.
@@ -53,6 +55,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Vista de ingresos Aurem ES/EN con escenario local explicable de 28 días, KPI seleccionables, fórmulas, libro semanal y enlaces a planning/reservas ficticios; ninguna cifra procede de PMS, canales, contabilidad o pagos.
 - Matriz de Canales Aurem ES/EN con cero conexiones/publicaciones, cobertura por capacidad, inspección local, revisión persistente por rol y requisitos explícitos de una integración real; se eliminaron falsas horas de sincronización.
 - Copiloto supervisado de Aurem ES/EN convertido en un flujo honesto de edición: fixture y fuentes visibles, borrador versionado local, revisión humana limitada por rol, trazabilidad completa y envío permanentemente deshabilitado sin modelo o proveedor.
+- Guía narrativa de Aurem ES/EN ampliada a siete hitos de tres minutos: llegada en riesgo, coordinación, control, ingresos, canales, IA supervisada y encaje. Cada hito muestra evidencia y límites propios, conserva y valida el progreso local, recupera la vista contextual al volver y termina en un diagnóstico precargado sin enviar datos.
 
 ## Siguiente cola priorizada
 
@@ -78,8 +81,8 @@ Bloqueos humanos de P1: recorridos completos con VoiceOver y otro lector represe
 - Completado: pantalla navegable de revenue de Aurem, con ingresos, ocupación, ADR y RevPAR matemáticamente consistentes, límites visibles y evidencia contextual enlazada.
 - Completado: Canales Aurem con matriz local de cobertura/estado, requisitos de conexión real, permisos y revisión supervisada que nunca publica inventario ni tarifas.
 - Completado: copiloto de IA supervisada de Aurem con fixture y fuentes explícitos, edición/versionado local, revisión por rol, trazabilidad y envío bloqueado por diseño.
-- Siguiente punto exacto: completar la guía narrativa de tres minutos incorporando hitos contextuales de ingresos, canales e IA supervisada, progreso recuperable entre sesiones y una salida clara hacia el diagnóstico.
-- Reforzar el mapa de capacidades con evidencia enlazada desde cada flujo.
+- Completado: guía narrativa de tres minutos de Aurem con siete hitos contextuales, progreso recuperable entre sesiones, evidencia explícita de ingresos/canales/IA supervisada y salida clara al diagnóstico Inteligente precargado.
+- Siguiente punto exacto: reforzar el mapa de capacidades con evidencia enlazada desde cada flujo, manteniendo madurez, plan mínimo y límites visibles sin inventar integraciones ni resultados.
 
 ### P3 · Contenido y conversión
 
@@ -113,7 +116,10 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 ## Evidencia del último incremento
 
 - `pnpm check`: 7 tareas de lint de paquetes, lint de scripts/E2E raíz y 21 tareas de typecheck/test/build correctas; Worker con 29 pruebas unitarias.
-- `pnpm e2e`: 47 pruebas Chromium correctas; 30 funcionales, 14 de accesibilidad y 3 de SEO técnico.
+- `pnpm e2e`: 50 pruebas Chromium correctas; 32 funcionales, 15 de accesibilidad y 3 de SEO técnico.
+- Guía Aurem: dos E2E recorren ES/EN los siete hitos de señal, coordinación, control, ingresos, canales, IA supervisada y encaje; verifican pausa, reanudación contextual desde la URL base, progreso accesible, CTA al diagnóstico precargado y ausencia de cualquier `POST`/`PUT`/`PATCH`/`DELETE`.
+- Estado guiado: `DemoState v2` valida límites distintos para los tres pasos de Terrava y los siete de Aurem mediante 12 unitarias del dashboard; índices negativos, fuera de rango o corruptos se descartan.
+- QA visual local de la guía: primer y último hito revisados a 1280 × 900 y 320 × 900, con siete segmentos legibles, jerarquía estable, acciones completas y `scrollWidth` exacto de 1280/320 px. No se generaron imágenes porque el incremento no requería nuevos recursos raster.
 - `tests/e2e/accessibility.spec.ts`: las 30 rutas públicas y seis estados profundos ES/EN de ingresos/canales/automatización pasan axe con etiquetas WCAG 2.0/2.1/2.2 AA, un único `main`/`h1`, reflow a 320 px y diagnóstico del nodo que desborda; cinco familias toleran texto al 200 %.
 - Revenue Aurem: dos E2E recorren ES/EN, seleccionan ADR/RevPAR, verifican fórmulas, tabla semanal y navegación contextual a reservas/planning. El escenario cuadra 96 habitaciones × 28 días, 2.392 noches ocupadas, 89 % de ocupación, ADR €124, €296.608 y RevPAR €110 redondeado.
 - Canales Aurem: dos E2E verifican matriz ES/EN, permisos, revisión local persistente, publicación siempre deshabilitada y ausencia de cualquier `POST`/`PUT`/`PATCH`/`DELETE`; `DemoState v2` conserva estados válidos y rechaza `published` mediante 8 unitarias del dashboard.
@@ -141,14 +147,14 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: corregido — el reclamo genérico de IA se convierte en evidencia de un proceso supervisado, con fuentes y límites que responden a la objeción de confianza sin prometer automatización inexistente.
-- Diseño de producto: correcto — el flujo Inteligente produce un borrador editable y revisable, pero diferencia de forma estable generar, editar, aprobar y enviar; no simula ninguna entrega real.
-- UX: correcto — edición, descarte, guardado versionado, permiso por rol, revisión y recuperación tras recarga forman un recorrido bilingüe comprensible y reversible mediante reset.
-- UI/dirección visual: corregido — editor y trazabilidad mantienen jerarquía a 1280 px; se corrigieron el ancho intrínseco del textarea y el wrapping de cabecera para obtener reflow exacto a 320 px.
-- SEO: no aplica — es un estado interno de una demo con `noindex`; no altera metadata ni superficies indexables.
-- Arquitectura frontend: correcto — ampliación compatible de `DemoState v2`, validación defensiva, estado controlado y reutilización de permisos/analítica existentes sin dependencias nuevas.
-- Full stack: correcto — no existe llamada a modelo, proveedor, mensajería o API; E2E demuestra ausencia de escrituras de red y el envío permanece deshabilitado por diseño.
-- QA/accesibilidad/rendimiento/confianza: correcto — 47 E2E, 10 unitarias de dashboard, axe ES/EN, reflow a 320 px y QA visual escritorio/móvil en verde; los límites son visibles antes de interactuar.
+- Marketing estratégico: corregido — la guía deja de enumerar pantallas y conecta la objeción operativa con evidencia de ingresos, canales e IA antes de conducir al diagnóstico; no promete resultados ni automatización real.
+- Diseño de producto: correcto — siete hitos forman un relato completo de Inteligente, mantienen explícitos los límites de cada capacidad y terminan en un siguiente paso útil sin convertir la demo en operación.
+- UX: corregido — cada paso aporta contexto propio, se puede pausar, vuelve a la vista exacta aunque se reabra la URL base y ofrece dos salidas finales claras: seguir explorando o abrir el diagnóstico precargado.
+- UI/dirección visual: correcto — progreso, fase, explicación, evidencia y acciones conservan jerarquía editorial a 1280 × 900 y 320 × 900 sin overflow ni contenido oculto.
+- SEO: no aplica — el recorrido pertenece a dashboards con `noindex` y no altera metadata, sitemap ni superficies indexables.
+- Arquitectura frontend: corregido — el contenido usa un contrato tipado de hito y `DemoState v2` valida el índice contra la longitud propia de Terrava o Aurem sin dependencias ni migración de versión.
+- Full stack: correcto — todo el progreso permanece en `localStorage`; las pruebas del recorrido demuestran cero escrituras HTTP y el diagnóstico solo precarga parámetros permitidos.
+- QA/accesibilidad/rendimiento/confianza: correcto — 50 E2E, 12 unitarias de dashboard, axe sin violaciones en el estado guiado, foco al cambiar de hito, progreso semántico y QA responsive en verde.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Lighthouse debe repetirse en producción tras un despliegue autorizado. También queda ejecutar la CLI de smoke con autorización y confirmar el smoke anterior. Los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance.
 
@@ -170,3 +176,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-17 — Se profundizó Aurem con una vista ES/EN de revenue íntegramente local: KPI coherentes, fórmulas, libro semanal y navegación a evidencia ficticia. Axe corrigió contraste de etiquetas de gráfica; QA escritorio/320 px y 43 E2E quedan en verde. Próximo punto: matriz de Canales local y supervisada, sin publicar inventario ni tarifas.
 - 2026-08-17 — Se convirtió Canales Aurem en una matriz ES/EN honesta y supervisada: cero conexiones/publicaciones, cobertura por capacidad, revisión local persistente por rol y requisitos de integración real. Se eliminaron horas de sincronización ficticias; verificado con 45 E2E, 8 unitarias y QA escritorio/320 px. Próximo punto: copiloto IA editable y trazable, con envío siempre bloqueado.
 - 2026-08-17 — Se convirtió el copiloto de Aurem en un flujo IA supervisado ES/EN: fixture y fuentes visibles, edición/versionado local, revisión por rol, trazabilidad y envío permanentemente bloqueado. Verificado con 47 E2E, 10 unitarias y QA escritorio/320 px. Próximo punto: guía narrativa de tres minutos con hitos contextuales y recuperación entre sesiones.
+- 2026-08-18 — Se completó la guía narrativa de Aurem ES/EN con siete hitos, evidencia y límites contextuales, recuperación exacta entre sesiones y salida al diagnóstico precargado. Verificado con 50 E2E, 12 unitarias, axe/foco y QA visual 1280/320 px. No requirió generar imágenes. Próximo punto: mapa de capacidades con evidencia enlazada desde cada flujo.

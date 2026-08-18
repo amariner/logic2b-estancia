@@ -11,6 +11,11 @@ export type AiReviewState = "draft" | "reviewed";
 export type JourneySource = "fixture" | "website";
 export type TourMode = "unset" | "guided" | "free";
 
+export const TOUR_STEP_COUNTS: Record<Scenario, number> = {
+  terrava: 3,
+  aurem: 7,
+};
+
 export interface DemoStay {
   name: string;
   email: string;
@@ -229,9 +234,12 @@ export function parseStored(raw: string | null, scenario: Scenario): DemoState {
       aiReview,
       aiRevision,
       tourMode,
-      tourStep: Number.isInteger(value.tourStep)
-        ? Number(value.tourStep)
-        : null,
+      tourStep:
+        Number.isInteger(value.tourStep) &&
+        Number(value.tourStep) >= 0 &&
+        Number(value.tourStep) < TOUR_STEP_COUNTS[scenario]
+          ? Number(value.tourStep)
+          : null,
       completedFlows: Array.isArray(value.completedFlows)
         ? value.completedFlows
             .filter((item): item is string => typeof item === "string")
