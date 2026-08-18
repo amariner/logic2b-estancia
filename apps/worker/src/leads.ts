@@ -66,7 +66,14 @@ export interface LeadCoordination {
   submit(fingerprint: string, lead: Lead): Promise<Response>;
 }
 
+export function isDemoPath(pathname: string): boolean {
+  return /^\/(?:en\/)?demos(?:\/|$)/.test(pathname);
+}
+
 export async function handleLead(request: Request, env: LeadEnv, coordination = cloudflareCoordination(env)): Promise<Response> {
+  // Demo forms are deliberately local fixtures. This server-side guard keeps a
+  // future accidental fetch from turning them into Resend or CRM submissions.
+  if (hasDemoReferrer(request)) return json({ ok: false, outcome: 'blocked', error: 'demo_submission_disabled' }, 403);
   if (!coordination) return json({ ok: false, outcome: 'disabled', error: 'lead_coordination_unavailable' }, 503);
   const ip = request.headers.get('cf-connecting-ip') ?? 'local';
   let retryAfter: number | null;
@@ -82,6 +89,7 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
   const parsed = leadSchema.safeParse(raw);
   if (!parsed.success) return json({ ok: false, outcome: 'invalid', error: 'invalid', issues: parsed.error.issues }, 400);
   const lead = parsed.data;
+  if (lead.sourcePath && isDemoPath(lead.sourcePath)) return json({ ok: false, outcome: 'blocked', error: 'demo_submission_disabled' }, 403);
   const transport = env.LEADS_TRANSPORT ?? (env.LEADS_RESEND_API_KEY ? 'resend' : 'disabled');
   if (transport === 'demo') return json({ ok: true, outcome: 'demo', meetingUrl: parseMeetingUrl(env.LEADS_MEETING_URL) }, 202);
   const expectedEmail = transport === 'resend';
@@ -97,6 +105,18 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
   } catch {
     console.error(JSON.stringify({ event: 'lead_coordination_failed' }));
     return json({ ok: false, outcome: 'failed', error: 'lead_coordination_failed' }, 503);
+  }
+}
+
+function hasDemoReferrer(request: Request): boolean {
+  const referrer = request.headers.get('referer');
+  if (!referrer) return false;
+  try {
+    const requestUrl = new URL(request.url);
+    const referrerUrl = new URL(referrer);
+    return requestUrl.origin === referrerUrl.origin && isDemoPath(referrerUrl.pathname);
+  } catch {
+    return false;
   }
 }
 

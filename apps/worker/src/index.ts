@@ -1,4 +1,4 @@
-import { handleLead, type LeadEnv } from './leads';
+import { handleLead, isDemoPath, type LeadEnv } from './leads';
 
 export { LeadCoordinator } from './lead-coordinator';
 
@@ -25,7 +25,10 @@ export default {
     const response = await env.ASSETS.fetch(request);
     const headers = new Headers(response.headers);
     Object.entries(securityHeaders).forEach(([key, value]) => headers.set(key, value));
-    if (url.pathname.startsWith('/demos/') || url.pathname.startsWith('/en/demos/')) headers.set('x-robots-tag', 'noindex, nofollow');
+    if (isDemoPath(url.pathname)) {
+      headers.set('x-robots-tag', 'noindex, nofollow');
+      headers.set('content-security-policy', "form-action 'none'");
+    }
     return new Response(response.body, { status: response.status, headers });
   },
 };

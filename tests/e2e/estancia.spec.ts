@@ -89,10 +89,40 @@ for (const width of [320, 375, 430, 1366]) {
   });
 }
 
-test('Nivora submits a local enquiry without inventory', async ({ page }) => {
-  await page.goto('/demos/nivora/');
-  await page.locator('[data-demo-form] button[type="submit"]').click();
-  await expect(page.locator('.demo-result')).toContainText('No se ha bloqueado inventario');
+test('all demo forms stay local and cannot use Resend', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method())) externalWrites.push(request.url());
+  });
+  for (const [path, expected] of [
+    ['/demos/nivora/', 'No se ha bloqueado inventario'],
+    ['/demos/terrava/', 'Solicitud demo creada'],
+    ['/en/demos/nivora/', 'No inventory was blocked'],
+    ['/en/demos/terrava/', 'Demo enquiry created'],
+  ] as const) {
+    const response = await page.goto(path);
+    expect(response?.headers()['content-security-policy']).toContain("form-action 'none'");
+    await expect(page.locator('#reserva')).toContainText(/Resend/);
+    await page.locator('[data-demo-form] button[type="submit"]').click();
+    await expect(page.locator('.demo-result')).toContainText(expected);
+  }
+  for (const path of ['/demos/aurem/', '/en/demos/aurem/']) {
+    const response = await page.goto(path);
+    expect(response?.headers()['content-security-policy']).toContain("form-action 'none'");
+    await expect(page.locator('#reserva')).toContainText(/Resend/);
+    await page.locator('[data-demo-form] button[type="submit"]').click();
+    await expect(page.locator('[data-payment]')).toBeVisible();
+    await page.locator('[data-close]').click();
+  }
+  expect(externalWrites).toEqual([]);
+});
+
+test('the lead endpoint rejects demo sources before Resend eligibility', async ({ request }) => {
+  const response = await request.post('/api/leads', { data: {
+    name: 'Demo local', businessName: 'Terrava ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/demos/terrava/', accept: true,
+  } });
+  expect(response.status()).toBe(403);
+  expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'demo_submission_disabled' });
 });
 
 test('commercial pages expose bilingual SEO metadata and complete sitemap', async ({ page, request }) => {

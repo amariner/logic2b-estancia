@@ -115,6 +115,12 @@ Use the structured Worker log event and its `ref` when a provider is degraded:
 
 Do not create CRM records while HubSpot remains outside the production scope.
 
+### Demo form boundary
+
+Only the commercial form on the Logic Estancia landing may call `/api/leads` and become eligible for Resend. Nivora, Terrava, Aurem and their workspaces are local fixtures: their controls may validate fields, open a simulated checkout or persist fictitious state in the browser, but they must never send email, create a lead, write to CRM or contact an operational provider.
+
+This boundary is enforced in depth. Demo responses carry `Content-Security-Policy: form-action 'none'`; the Worker runs first on ES/EN demo pages to attach that policy; and `/api/leads` rejects a same-origin demo referrer or demo `sourcePath` with `403 demo_submission_disabled` before rate limiting, coordination or provider delivery. Keep the Resend implementation active only for the landing and the explicitly authorised smoke tool. Any future demo form must retain the local interaction and the E2E zero-write guarantee.
+
 ### Smoke reproducible de Resend
 
 La herramienta operativa usa el mismo `/api/leads` que la landing, no conoce secretos de Resend y permanece en modo seco por defecto. El payload identifica en nombre, alojamiento, campaña y mensaje que es una prueba técnica sin consentimiento comercial. La salida solo permite estado HTTP, `outcome`, referencia, repetición y espera del rate limit; nunca imprime el buzón de prueba, la respuesta completa ni valores del entorno.
