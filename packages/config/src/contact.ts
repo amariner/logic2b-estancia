@@ -5,8 +5,8 @@ const WA = '34626432316';
 
 export function logic2bContact(locale: Locale, context: 'commercial' | 'docs' | 'tenant' | 'dashboard') {
   const labels = locale === 'en'
-    ? { commercial: 'Talk to Logic2B', docs: 'Ask Logic2B', tenant: 'Logic2B · Contact', dashboard: 'Logic2B help' }
-    : { commercial: 'Habla con Logic2B', docs: 'Pregunta a Logic2B', tenant: 'Logic2B · Contacta', dashboard: 'Ayuda Logic2B' };
+    ? { commercial: 'Contact', docs: 'Help', tenant: 'Logic2B · Contact', dashboard: 'Logic2B help' }
+    : { commercial: 'Contacta', docs: 'Ayuda', tenant: 'Logic2B · Contacta', dashboard: 'Ayuda Logic2B' };
   const message = locale === 'en'
     ? `Hello Logic2B, I would like to know more about Logic Estancia (${context}).`
     : `Hola Logic2B, quiero conocer mejor Logic Estancia (${context}).`;

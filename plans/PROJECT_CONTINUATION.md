@@ -6,7 +6,7 @@
 
 Rama: `main`
 
-Estado general: base comercial y demostrativa implementada; la portada ES/EN abre tres recorridos prospectables y diferenciados para casas rurales, apartamentos turísticos y hoteles, unidos a planes, diagnóstico, evidencia y conversación comercial. Cada vertical explica ahora su operación mediante un workflow visual propio de cinco etapas, con entradas, salidas, bifurcación, decisión humana y límite de integración. Todo el recorrido presenta Logic Estancia como un servicio gestionado: el equipo de Logic2B entiende la operación, configura lo acordado y acompaña la puesta en marcha, con el soporte base y los extras delimitados. Consentimiento y legales siguen equiparados al patrón de Camp; producción está consolidada en el Worker `logic-estancia`, sin HubSpot, con dominio personalizado, HTTPS y Resend verificado mediante smoke idempotente. La landing comercial es el único punto que envía solicitudes reales y las dirige a `marinerandreu+logic@gmail.com`; diagnóstico, demos y dashboards permanecen estrictamente locales y ficticios.
+Estado general: base comercial y demostrativa implementada; la portada ES/EN abre tres recorridos prospectables y diferenciados para casas rurales, apartamentos turísticos y hoteles, unidos a planes, diagnóstico, evidencia y conversación comercial. Cada vertical explica ahora su operación mediante un workflow visual propio de cinco etapas, con entradas, salidas, bifurcación, decisión humana y límite de integración. Todo el recorrido presenta Logic Estancia como un servicio gestionado: el equipo de Logic2B entiende la operación, configura lo acordado y acompaña la puesta en marcha, con el soporte base y los extras delimitados. Consentimiento, legales y contacto flotante de WhatsApp siguen el lenguaje visual de Camp; producción está consolidada en el Worker `logic-estancia`, sin HubSpot, con dominio personalizado, HTTPS y Resend verificado mediante smoke idempotente. La landing comercial es el único punto que envía solicitudes reales y las dirige a `marinerandreu+logic@gmail.com`; diagnóstico, demos y dashboards permanecen estrictamente locales y ficticios.
 
 El smoke operativo de Resend ya es reproducible mediante una CLI segura: permanece offline por defecto, exige autorización explícita y un buzón controlado para ejecutar, marca todo el payload como prueba técnica, verifica entrega/repetición y solo imprime una respuesta saneada. Su ejecución real sigue siendo una actividad humana autorizada y no forma parte de las pruebas automáticas.
 
@@ -31,6 +31,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Fuente única de capacidades, categorías, madurez y evidencia localizada, con destino exacto, prueba observable y límite explícito por capacidad.
 - Portada, planes, soluciones para gestores y hoteles y diagnóstico de seis pasos en ES/EN, unidos por la secuencia problema → punto de partida → evidencia → conversación comercial.
 - Propuesta de servicio humano gestionado transversal en portada, landings verticales y planes: Logic2B adapta y configura lo acordado, prueba los casos importantes y mantiene soporte base tras la puesta en marcha; migraciones, integraciones, mejoras y soporte extendido conservan alcance separado.
+- Contacto flotante de WhatsApp ES/EN alineado con Camp: icono reconocible, CTA breve, geometría responsive, aparición progresiva y retirada automática ante consentimiento o pie de página para no tapar contenido.
 - Workflows operativos detallados ES/EN para casas rurales, apartamentos y hoteles: cinco etapas específicas, entradas y salidas, bifurcación, control humano, resultado y límites reales, renderizados de forma nativa y responsive sin imágenes ni JavaScript adicional.
 - Resultado del diagnóstico antes de solicitar datos personales y precarga desde soluciones, planes y demos.
 - Captación comercial exclusivamente mediante Resend desde el formulario de la landing, con consentimiento separado y parámetros controlados; HubSpot está desactivado y fuera de alcance.
@@ -51,7 +52,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Dos recursos SEO iniciales y playbook comercial.
 - Kit comercial español `1.0.0` con plantillas versionadas de resumen de diagnóstico, seguimiento y propuesta, manifiesto, revisión humana obligatoria y CLI offline que recibe JSON por `stdin` sin escribir documentos ni hacer peticiones.
 - Informe reproducible del embudo digital `1.0.0` sobre recuentos agregados consentidos, con contrato único de contenedor/eventos/parámetros, tasas direccionales, desgloses, advertencias de calidad y rechazo de identificadores o dimensiones libres. Estancia comparte explícitamente con Camp el contenedor `GTM-TVDWZ9LC`.
-- QA visual responsive realizado; `pnpm check` con 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas, y `pnpm e2e` con 59 pruebas correctas, incluidas 15 de accesibilidad y 4 de SEO técnico.
+- QA visual responsive realizado; `pnpm check` con 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas, y `pnpm e2e` con 60 pruebas correctas, incluidas 15 de accesibilidad y 4 de SEO técnico.
 - Worker `logic-estancia` publicado en `https://estancia.logic2b.com`, sin variables ni token de HubSpot, con assets, `LeadCoordinator`, cuatro secretos de correo cifrados y `workers.dev` desactivado. La versión activa es `2c2df127-2af5-4d54-906b-6c16ccf2fbb6`; `logic-estancia-demo` fue eliminado después de verificar el corte.
 - CLI `pnpm smoke:resend` con modo seco predeterminado, autorización explícita, origen validado, payload no comercial estable, comprobación opcional de referencia idempotente y salida allowlisted sin PII ni secretos.
 - Baseline automatizada WCAG 2.2 AA sobre las 30 rutas públicas, sin violaciones axe después de corregir contraste y objetivos táctiles; landmarks, foco visible, movimiento reducido, reflow a 320 px, texto al 200 %, foco contextual y estados dinámicos cubiertos por E2E, con las limitaciones humanas documentadas.
@@ -130,29 +131,27 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- Alcance: tres archivos de producto, dos pruebas E2E y este checkpoint. No se añadieron dependencias, imágenes, scripts cliente, proveedores, endpoints ni campos de PII.
-- Gráficos: `BusinessWorkflow` representa quince etapas específicas entre las tres verticales y las localiza para seis landings ES/EN. Cada gráfico muestra fase, entrada, salida, conexión principal, bifurcación, decisión humana, resultado operativo, configuración de Logic2B y límite de la demo.
-- Casas rurales: descubrimiento → consulta → propuesta o alternativa → confirmación → preparación de la estancia, preservando la relación directa y el contexto.
-- Apartamentos: marca → solicitud estructurada → elección de unidad → planning compartido → tareas de llegada, sin afirmar disponibilidad ni conexión de canales reales.
-- Hoteles: señales → priorización → responsable o escalado → supervisión → cierre trazable, con PMS, mensajería, canales e IA expresamente fuera de la demo.
-- Simplificación: los antiguos bloques separados de problema y resultados se sustituyeron por el workflow; hero y caso ficticio usan textos más breves. Las tarjetas de capacidades conservan el enlace visible y esconden prueba/límite bajo un `details` nativo hasta que el usuario lo solicita.
-- UX/UI: QA visual correcto en casa rural, apartamentos y hoteles a 1280 × 720 y 320 × 860. El gráfico pasa de cinco columnas conectadas a una secuencia vertical sin desbordamiento; cada segmento mantiene un acento propio.
-- SEO: el contenido sigue siendo HTML semántico visible (`section`, `ol`, headings y descripciones), sin canvas ni texto embebido en imágenes. Canonical, `hreflang`, sitemap, FAQ y matriz de 22 URLs no cambian.
-- Accesibilidad y rendimiento: axe detectó contraste insuficiente en etiquetas verdes y azules; se oscurecieron los acentos y la suite volvió a cero violaciones. Reflow a 320 px permanece limpio. Lighthouse móvil mantiene las tres landings, planes y diagnóstico en 100/100/100/100; portada en 96/100/100/100 con CLS 0.
+- Alcance: tres archivos de producto, una prueba E2E y este checkpoint. No se añadieron dependencias, imágenes raster, proveedores, endpoints, eventos analíticos ni campos de PII.
+- Referencia visual: el contacto adopta el patrón compacto de Camp con icono de WhatsApp, 48 px de altura, borde verde de 3 px, radio de 14 px, fondo verde translúcido y offsets diferenciados de 40 px en escritorio y 24 px en móvil.
+- Copy y localización: `Contacta`/`Contact` en superficies comerciales y `Ayuda`/`Help` en documentación. El nombre accesible especifica que el enlace abre WhatsApp con Logic2B.
+- UX: aparece al avanzar 280 px, solo cuando el consentimiento no ocupa la vista, y se retira al llegar al pie para no cubrir navegación o legales. Cuando queda oculto sale también del orden de tabulación.
+- UI y movimiento: el SVG se integra en línea, conserva color y tamaño del patrón de referencia y respeta `prefers-reduced-motion`. No se añadió aviso sonoro por ser innecesario para la acción solicitada y más intrusivo.
+- SEO: no cambian contenido indexable, metadatos, rutas, canonical, `hreflang`, datos estructurados ni sitemap.
+- Accesibilidad y responsive: QA visual correcto a 1280 y 320 px, sin desbordamiento horizontal; foco, nombre accesible, visibilidad y convivencia con el pie están protegidos por E2E. Axe mantiene cero violaciones en las rutas representativas ES/EN.
 - `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; Worker con 31 unitarias.
-- `pnpm e2e`: 59/59 pruebas Chromium correctas; dos pruebas nuevas protegen los tres workflows, su localización, la decisión humana y el despliegue progresivo de prueba/límite.
-- Seguridad y privacidad: sin cambios de Worker/API, Resend, rate limit, idempotencia, analítica o consentimiento.
+- `pnpm e2e`: 60/60 pruebas Chromium correctas; la prueba nueva protege el patrón visual, la localización, el estado de foco y la retirada ante el pie.
+- Seguridad y privacidad: el destino y el mensaje de WhatsApp no cambian; tampoco cambian Worker/API, Resend, rate limit, idempotencia, analítica o consentimiento.
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: corregido — cada URL de prospección explica un recorrido reconocible para su negocio y acerca la propuesta a una operación concreta, sin inventar resultados ni integraciones.
-- Diseño de producto: correcto — los workflows respetan Básico, Gestión e Inteligente y hacen visible dónde Logic Estancia ordena el contexto, dónde decide el equipo y qué necesita integración real.
-- UX: corregido — se eliminan dos secciones de lectura repetitiva y la información técnica de capacidades se ofrece de forma progresiva, manteniendo enlaces directos a la evidencia.
-- UI/dirección visual: corregido — la composición conectada de cinco columnas se transforma en móvil en una secuencia vertical; se corrigieron los acentos verde y azul tras la detección de contraste.
-- SEO: correcto — los gráficos son estructura HTML semántica con copy específico e indexable; no introducen canvas, imágenes de texto ni cambios en metadatos o URLs.
-- Arquitectura frontend: correcto — un solo componente tipado contiene las variantes de workflow ES/EN y no añade hidratación, dependencias o duplicación de estructura.
-- Full stack: no aplica — no cambian formulario, API, Worker, datos, proveedores ni comportamiento de las demos.
-- QA/accesibilidad/rendimiento/confianza: corregido — 59 E2E, axe, reflow, detalle nativo, QA visual y siete Lighthouse quedan verdes; no permanecen bloqueantes conocidos.
+- Marketing estratégico: corregido — el CTA breve y reconocible reduce fricción para una conversación comercial sin añadir promesas ni canales nuevos.
+- Diseño de producto: correcto — el contacto conserva el contrato existente y sigue siendo una vía directa hacia el equipo humano de Logic2B.
+- UX: corregido — la acción aparece con contexto, no compite con el consentimiento ni tapa el pie y se evita el sonido no solicitado.
+- UI/dirección visual: corregido — geometría, icono, color y comportamiento responsive comparten el patrón visual consolidado en Camp.
+- SEO: no aplica — no cambian superficies indexables, estructura editorial, metadatos, datos estructurados o enlazado interno.
+- Arquitectura frontend: correcto — SVG en línea y observación del pie reutilizan la capa existente sin dependencias; el estado visual y el orden de foco permanecen sincronizados.
+- Full stack: no aplica — no cambian formulario, API, Worker, datos, proveedores ni destino de WhatsApp.
+- QA/accesibilidad/rendimiento/confianza: correcto — 60 E2E, axe, reflow y QA visual a 1280/320 px quedan verdes; no permanecen bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Lighthouse debe repetirse en producción tras un despliegue autorizado. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -183,3 +182,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se rehízo el hero como composición editorial con elección visual de negocio y se abrieron landings prospectables ES/EN para casas rurales, apartamentos y hoteles. Menú, pie, home, diagnóstico, analítica, sitemap y SEO técnico comparten los tres segmentos; aliases antiguos conservan canonical de compatibilidad. Verificado con `pnpm check`, 56 E2E, axe/reflow y Lighthouse móvil 100/100/100/100 en las tres landings. El dev permanece local; no se desplegó producción.
 - 2026-08-18 — Se hizo transversal la propuesta de servicio humano gestionado: Logic2B entiende la operación, configura lo acordado y acompaña tras la puesta en marcha, con soporte base y extras delimitados. Portada, planes, landings ES/EN, FAQ y contacto comparten el mensaje. Verificado con `pnpm check`, 57 E2E, QA visual 1280/320 px y Lighthouse móvil; no se desplegó producción.
 - 2026-08-18 — Se sustituyeron los bloques narrativos de las landings por workflows operativos ES/EN específicos para casas rurales, apartamentos y hoteles. Cada gráfico representa cinco etapas, entradas, salidas, bifurcación, decisión humana, resultado y límites; el copy y las capacidades se compactaron. Verificado con `pnpm check`, 59 E2E, axe/reflow, QA 1280/320 px y Lighthouse 100/100/100/100 en las tres verticales. No se desplegó producción.
+- 2026-08-18 — Se alineó el contacto flotante de WhatsApp ES/EN con el patrón visual de Camp: icono, CTA breve, geometría responsive, foco accesible y retirada automática ante consentimiento o pie de página. Verificado con `pnpm check`, 60 E2E, axe, reflow y QA visual 1280/320 px. No se añadió sonido ni se desplegó producción.

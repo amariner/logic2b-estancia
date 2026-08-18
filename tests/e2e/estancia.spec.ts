@@ -185,6 +185,44 @@ test('managed human service is explicit across the commercial journey', async ({
   await expect(service).toContainText('everything agreed in scope');
 });
 
+test('WhatsApp contact follows the Camp pattern without covering the footer', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Rechazar' }).click();
+  const contact = page.getByRole('link', { name: 'Contacta con Logic2B por WhatsApp' });
+  await expect(contact).toHaveAttribute('data-visible', 'false');
+  await page.evaluate(() => window.scrollTo(0, 700));
+  await expect(contact).toHaveAttribute('data-visible', 'true');
+  await expect(contact).toHaveAttribute('tabindex', '0');
+  await expect(contact.locator('svg')).toBeVisible();
+
+  expect(await contact.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const rect = node.getBoundingClientRect();
+    return {
+      text: node.textContent?.trim(),
+      height: rect.height,
+      border: style.border,
+      borderRadius: style.borderRadius,
+      background: style.backgroundColor,
+      color: style.color,
+    };
+  })).toEqual({
+    text: 'Contacta',
+    height: 48,
+    border: '3px solid rgb(19, 122, 59)',
+    borderRadius: '14px',
+    background: 'rgba(19, 122, 59, 0.1)',
+    color: 'rgb(19, 122, 59)',
+  });
+
+  await page.locator('footer').scrollIntoViewIfNeeded();
+  await expect(contact).toHaveAttribute('data-visible', 'false');
+  await expect(contact).toHaveAttribute('tabindex', '-1');
+
+  await page.goto('/en/');
+  await expect(page.getByRole('link', { name: 'Contact Logic2B on WhatsApp' })).toContainText('Contact');
+});
+
 test('each accommodation landing explains its own detailed workflow', async ({ page }) => {
   for (const [path, heading, result] of [
     ['/soluciones/casas-rurales/', 'De descubrir tu historia a preparar la llegada.', 'Relación directa · contexto hasta la estancia'],
