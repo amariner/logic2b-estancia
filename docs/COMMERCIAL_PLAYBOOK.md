@@ -166,6 +166,14 @@ Initial clusters:
 
 Competitor comparisons must be checked against current official sources immediately before publication. Do not reuse unverified feature or price claims.
 
+## Versioned diagnostic, follow-up and proposal kit
+
+The internal Spanish templates live in [`docs/commercial/templates`](commercial/templates/README.md) and currently use contract version `1.0.0`. The kit contains a diagnostic summary, a requested follow-up and a proposal draft. It does not provide prices or evidence for claims: operators must use only confirmed context, open the cited fictitious demo evidence and retain its visible boundary.
+
+Run `pnpm commercial:template -- --validate` before using the kit. Use `--list` to inspect the exact input contract and `--example` to render clearly fictitious sample content. For an authorised case, pass JSON through standard input; the CLI returns Markdown through standard output, writes nothing and makes no network request. Generated documents and their PII must remain outside the repository under the applicable retention policy.
+
+Before sending any output, a human must confirm the plan, scope, exclusions, dependencies, acceptance criteria and one dated or conditional next action. A response to a request does not grant marketing consent. Do not turn a demo into a claim of a live integration, and do not insert public or reusable pricing before the interview and proposal gate is met.
+
 ## Monthly review
 
 Review the funnel in this order:
@@ -178,3 +186,5 @@ Review the funnel in this order:
 6. Won and lost projects.
 
 Change one main conversion hypothesis at a time. Keep the three canonical demos and five deep flows unless sales evidence justifies more scope.
+
+The reproducible digital report is documented in [`docs/commercial/FUNNEL_REPORT.md`](commercial/FUNNEL_REPORT.md). It accepts only aggregated counts for the runtime allowlist and reports assessment starts, visible recommendations, delivered requests and optional meeting clicks. It deliberately excludes proposals, won/lost projects, revenue and objections, which require separate verified commercial evidence. Run `pnpm funnel:report -- --validate` to inspect the contract and `pnpm funnel:report -- --example` for a fictitious report before handling an authorised aggregate export.

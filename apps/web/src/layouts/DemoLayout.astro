@@ -4,6 +4,7 @@ import '@fontsource-variable/source-serif-4';
 import '@logic-estancia/ui/theme.css';
 import '../styles/demos.css';
 import { CONSENT } from '@logic-estancia/config';
+import analyticsContract from '@logic-estancia/config/analytics-contract';
 import type { DemoLocale, DemoSlug } from '../data';
 import { demos } from '../data';
 const { slug, locale, dashboard = false } = Astro.props as { slug: DemoSlug; locale: DemoLocale; dashboard?: boolean };
@@ -14,7 +15,7 @@ const other = locale === 'es' ? `/en/demos/${slug}/${dashboard ? 'gestion/' : ''
   {!dashboard && <div class="fiction"><span>{locale === 'es' ? 'Demostración ficticia de Logic Estancia' : 'Fictitious Logic Estancia demonstration'}</span><a href={`${prefix}/`}>{locale === 'es' ? 'Volver al producto' : 'Back to product'} ↗</a></div>}
   <slot />
   {!dashboard && <footer class="demo-footer"><span>{demo.brand}</span><small>{locale === 'es' ? 'Marca ficticia · Sin reservas ni cobros reales' : 'Fictitious brand · No live bookings or charges'}</small><div><a href={other}>{locale === 'es' ? 'EN' : 'ES'}</a><a href={`${prefix}/legal/`}>Legal</a><a href="https://wa.me/34626432316" target="_blank" rel="noopener noreferrer">Logic2B ↗</a></div></footer>}
-  <script is:inline define:vars={{ slug, locale, dashboard, consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version }}>
+  <script is:inline define:vars={{ slug, locale, dashboard, consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, allowedAnalyticsEvents: analyticsContract.surfaces.demo, allowedAnalyticsParameters: analyticsContract.parameters }}>
     const hasAnalyticsConsent = () => {
       try {
         const raw = localStorage.getItem(consentKey);
@@ -23,11 +24,10 @@ const other = locale === 'es' ? `/en/demos/${slug}/${dashboard ? 'gestion/' : ''
         return localStorage.getItem(legacyConsentKey) === 'analytics';
       } catch { return false; }
     };
-    const allowedEvents = new Set(['demo_open','demo_mode_select','demo_step_complete','demo_flow_complete','demo_cta']);
+    const allowedEvents = new Set(allowedAnalyticsEvents);
     window.estanciaTrack = (event, parameters = {}) => {
       if (!hasAnalyticsConsent() || !allowedEvents.has(event)) return;
-      const allowed = ['locale','segment','plan','demo','flow','step_index','source_section'];
-      const safe = Object.fromEntries(Object.entries(parameters).filter(([key, value]) => allowed.includes(key) && (typeof value === 'string' || typeof value === 'number')));
+      const safe = Object.fromEntries(Object.entries(parameters).filter(([key, value]) => allowedAnalyticsParameters.includes(key) && (typeof value === 'string' || typeof value === 'number')));
       window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event, ...safe });
     };
     if (hasAnalyticsConsent()) {

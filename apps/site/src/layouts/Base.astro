@@ -5,6 +5,7 @@ import '@logic-estancia/ui/theme.css';
 import '../styles/site.css';
 import { CONSENT, PRODUCT, type Locale } from '@logic-estancia/config';
 import { logic2bContact } from '@logic-estancia/config/contact';
+import analyticsContract from '@logic-estancia/config/analytics-contract';
 import CookieBanner from '../components/CookieBanner.astro';
 import { content } from '../content';
 
@@ -100,7 +101,7 @@ const structuredData = [
     </footer>
     <a class="whatsapp" href={wa.href} target="_blank" rel="noopener noreferrer" aria-label={`${wa.label} · WhatsApp`} data-whatsapp hidden>{wa.label}<span aria-hidden="true">↗</span></a>
     <CookieBanner locale={locale} />
-    <script is:inline define:vars={{ consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version }}>
+    <script is:inline define:vars={{ consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, allowedAnalyticsEvents: analyticsContract.surfaces.site, allowedAnalyticsParameters: analyticsContract.parameters }}>
       const menu = document.querySelector('.menu');
       const mobile = document.querySelector('#mobile-nav');
       menu?.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') === 'true'; menu.setAttribute('aria-expanded', String(!open)); if (mobile) mobile.hidden = open; });
@@ -121,11 +122,10 @@ const structuredData = [
       }
       window.estanciaLoadGtm = loadGtm;
       if (hasAnalyticsConsent()) loadGtm();
-      const allowedEvents = new Set(['solution_view','plan_select','assessment_start','assessment_step','assessment_complete','assessment_submit','demo_open','demo_mode_select','demo_step_complete','demo_flow_complete','demo_cta','lead_submit','meeting_click','cta_click']);
+      const allowedEvents = new Set(allowedAnalyticsEvents);
       window.estanciaTrack = (event, parameters = {}) => {
         if (!hasAnalyticsConsent() || !allowedEvents.has(event)) return;
-        const allowed = ['locale','segment','plan','demo','flow','step_index','source_section'];
-        const safe = Object.fromEntries(Object.entries(parameters).filter(([key, value]) => allowed.includes(key) && (typeof value === 'string' || typeof value === 'number')));
+        const safe = Object.fromEntries(Object.entries(parameters).filter(([key, value]) => allowedAnalyticsParameters.includes(key) && (typeof value === 'string' || typeof value === 'number')));
         window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event, ...safe });
       };
       document.addEventListener('click', (event) => { const target = event.target.closest?.('[data-track]'); if (!target) return; window.estanciaTrack?.(target.dataset.track, { locale: document.documentElement.lang, plan: target.dataset.plan, segment: target.dataset.segment, source_section: target.dataset.section }); });

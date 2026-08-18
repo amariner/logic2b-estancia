@@ -67,8 +67,11 @@ document.querySelectorAll<HTMLElement>('[data-scope-estimator]').forEach((estima
     target.searchParams.set('properties', String(positiveInteger(properties)));
     target.searchParams.set('units', String(positiveInteger(units)));
     apply.href = `${target.pathname}${target.search}`;
-    const analyticsWindow = window as Window & { dataLayer?: Record<string, unknown>[] };
-    analyticsWindow.dataLayer?.push({ event: 'assessment_complete', plan: currentLevel, source_section: 'homepage_scope' });
+    window.estanciaTrack?.('assessment_complete', {
+      locale: document.documentElement.lang,
+      plan: currentLevel,
+      source_section: 'homepage_scope',
+    });
   });
   render();
 });

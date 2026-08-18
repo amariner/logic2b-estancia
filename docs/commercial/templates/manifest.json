@@ -1,0 +1,68 @@
+{
+  "kit": "logic-estancia-commercial",
+  "version": "1.0.0",
+  "locale": "es",
+  "status": "internal-draft",
+  "effectiveDate": "2026-08-18",
+  "templates": [
+    {
+      "id": "diagnostic-summary",
+      "file": "diagnostic-summary.md",
+      "purpose": "Devolver el diagnóstico confirmado sin convertir una recomendación en una promesa de alcance.",
+      "requiredTokens": [
+        "recipient_name",
+        "business_name",
+        "document_date",
+        "owner_name",
+        "confirmed_context",
+        "recommended_plan",
+        "recommendation_reasons",
+        "reviewed_evidence",
+        "open_questions",
+        "next_step",
+        "next_step_date"
+      ]
+    },
+    {
+      "id": "follow-up",
+      "file": "follow-up.md",
+      "purpose": "Dar continuidad a una conversación solicitada con un único siguiente paso verificable.",
+      "requiredTokens": [
+        "recipient_name",
+        "business_name",
+        "document_date",
+        "owner_name",
+        "confirmed_context",
+        "recommended_plan",
+        "reviewed_evidence",
+        "pending_validation",
+        "next_step",
+        "next_step_date"
+      ]
+    },
+    {
+      "id": "proposal",
+      "file": "proposal.md",
+      "purpose": "Preparar una propuesta de alcance trazable, sin precio ni capacidades no validadas.",
+      "requiredTokens": [
+        "recipient_name",
+        "business_name",
+        "document_date",
+        "owner_name",
+        "proposal_reference",
+        "recommended_plan",
+        "business_outcome",
+        "confirmed_context",
+        "included_scope",
+        "observable_evidence",
+        "acceptance_criteria",
+        "excluded_scope",
+        "dependencies",
+        "delivery_phases",
+        "open_questions",
+        "next_step",
+        "next_step_date"
+      ]
+    }
+  ]
+}

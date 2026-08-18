@@ -251,6 +251,29 @@ test('cookie preferences remain consent-gated, revocable and shared with demos',
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('logic-estancia-consent') ?? 'null'))).toMatchObject({ analytics: false });
 });
 
+test('consented analytics keeps only contract events and parameters', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Configurar preferencias' }).click();
+  await page.getByRole('checkbox', { name: 'Cookies de analítica' }).check();
+  await page.getByRole('button', { name: 'Guardar preferencias' }).click();
+  const before = await page.evaluate(() => window.dataLayer?.length ?? 0);
+  await page.evaluate(() => {
+    window.estanciaTrack?.('lead_submit', {
+      locale: 'es',
+      plan: 'gestion',
+      source_section: 'homepage_contact',
+      email: 'pii@example.test',
+      message: 'No debe salir',
+    });
+    window.estanciaTrack?.('invented_event', { locale: 'es' });
+  });
+  const observed = await page.evaluate(() => window.dataLayer?.slice(-1)[0]);
+  expect(observed).toMatchObject({ event: 'lead_submit', locale: 'es', plan: 'gestion', source_section: 'homepage_contact' });
+  expect(observed).not.toHaveProperty('email');
+  expect(observed).not.toHaveProperty('message');
+  await expect.poll(() => page.evaluate(() => window.dataLayer?.length ?? 0)).toBe(before + 1);
+});
+
 test('the cookie choice and complete legal surfaces are localized in English', async ({ page }) => {
   await page.goto('/en/');
   const banner = page.getByRole('dialog', { name: 'Cookie settings' });
