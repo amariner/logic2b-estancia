@@ -166,9 +166,21 @@ test('the lead endpoint exposes a private JSON-only HTTP contract', async ({ req
   expect(invalid.status()).toBe(400);
   expect(await invalid.json()).toEqual({ ok: false, outcome: 'invalid', error: 'invalid' });
 
+  for (const path of ['/api', '/api/unknown']) {
+    const unknown = await request.get(path);
+    expect(unknown.status()).toBe(404);
+    expect(await unknown.json()).toEqual({ error: 'not_found' });
+    expect(unknown.headers()['cache-control']).toBe('no-store');
+    expect(unknown.headers()['cross-origin-resource-policy']).toBe('same-origin');
+  }
+
   const publicPage = await request.get('/');
   expect(publicPage.status()).toBe(200);
   expect(publicPage.headers()['cross-origin-resource-policy']).toBeUndefined();
+  expect(publicPage.headers()['content-security-policy']).toContain("base-uri 'self'");
+  expect(publicPage.headers()['content-security-policy']).toContain("form-action 'self'");
+  expect(publicPage.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
+  expect(publicPage.headers()['content-security-policy']).toContain("object-src 'none'");
 });
 
 test('commercial pages expose bilingual SEO metadata and complete sitemap', async ({ page, request }) => {

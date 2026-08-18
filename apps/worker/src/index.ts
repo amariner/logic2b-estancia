@@ -4,7 +4,10 @@ export { LeadCoordinator } from './lead-coordinator';
 
 interface Env extends LeadEnv { ASSETS: Fetcher; }
 
+const publicContentSecurityPolicy = "base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'";
+const demoContentSecurityPolicy = "base-uri 'self'; form-action 'none'; frame-ancestors 'none'; object-src 'none'";
 const securityHeaders = {
+  'content-security-policy': publicContentSecurityPolicy,
   'x-content-type-options': 'nosniff',
   'x-frame-options': 'DENY',
   'referrer-policy': 'strict-origin-when-cross-origin',
@@ -27,13 +30,13 @@ export default {
       Object.entries(apiSecurityHeaders).forEach(([key, value]) => headers.set(key, value));
       return new Response(response.body, { status: response.status, headers });
     }
-    if (url.pathname.startsWith('/api/')) return apiJson({ error: 'not_found' }, 404);
+    if (url.pathname === '/api' || url.pathname.startsWith('/api/')) return apiJson({ error: 'not_found' }, 404);
     const response = await env.ASSETS.fetch(request);
     const headers = new Headers(response.headers);
     Object.entries(securityHeaders).forEach(([key, value]) => headers.set(key, value));
     if (isDemoPath(url.pathname)) {
       headers.set('x-robots-tag', 'noindex, nofollow');
-      headers.set('content-security-policy', "form-action 'none'");
+      headers.set('content-security-policy', demoContentSecurityPolicy);
     }
     return new Response(response.body, { status: response.status, headers });
   },

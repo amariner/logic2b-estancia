@@ -57,6 +57,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Protección de origen del formulario real: los navegadores cross-site se rechazan con `403` mediante `Origin` y `Sec-Fetch-Site` antes de rate limit, coordinación o Resend; la landing same-origin y el smoke sin cabeceras de navegador conservan su contrato.
 - Respuestas de validación del formulario real reducidas a un contrato estable y mínimo; un `400` no refleja valores recibidos ni detalles internos del esquema.
 - Frontera de contenido de Resend endurecida: campos estructurados y de asunto rechazan separadores de línea, el mensaje conserva texto multilínea y todo valor dinámico del HTML permanece escapado.
+- Namespace y cabeceras endurecidos sin penalizar assets: `/api` y `/api/*` desconocidos devuelven JSON privado/no cacheable; Static Assets aplica CSP base y las demos sustituyen `form-action 'self'` por `none` desde el Worker.
 - Dos recursos SEO iniciales y playbook comercial.
 - Kit comercial español `1.0.0` con plantillas versionadas de resumen de diagnóstico, seguimiento y propuesta, manifiesto, revisión humana obligatoria y CLI offline que recibe JSON por `stdin` sin escribir documentos ni hacer peticiones.
 - Informe reproducible del embudo digital `1.0.0` sobre recuentos agregados consentidos, con contrato único de contenedor/eventos/parámetros, tasas direccionales, desgloses, advertencias de calidad y rechazo de identificadores o dimensiones libres. Estancia comparte explícitamente con Camp el contenedor `GTM-TVDWZ9LC`.
@@ -91,6 +92,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Completado y verificado localmente: un payload inválido recibe únicamente `{ ok: false, outcome: "invalid", error: "invalid" }`; se retiraron los detalles de Zod que la landing no consumía y no se refleja ningún valor enviado. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: nombre, negocio, contacto, contexto y listas estructuradas rechazan CR/LF y separadores Unicode antes de componer correos; el mensaje libre sigue admitiendo varias líneas y el markup adversarial se escapa en ambos HTML. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: la referencia durable y su resultado comparten una única ventana de 24 horas desde el primer intento, también si falla; reintentar no extiende la caducidad, los estados heredados conservan su referencia y tras expirar se crea una nueva. Falta un despliegue de producción autorizado.
+- Completado y verificado localmente: `/api` exacto ya no cae al servidor público de assets; todo el namespace desconocido responde `404` JSON con `no-store`/`same-origin`. Las páginas reciben CSP base mediante `_headers` nativo y las demos mantienen `form-action 'none'` sin ejecutar el Worker para cada asset. Falta un despliegue de producción autorizado.
 
 Siguiente punto exacto de activación: confirmar humanamente en el buzón interno que el mensaje del último smoke con referencia `e27e5bf3-a462-4db6-9f49-80d8486fe23c` está visible. Después, obtener autorización explícita para desplegar este incremento y repetir el smoke con un buzón controlado para verificar la nueva semántica en producción. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
 
@@ -153,24 +155,24 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- Alcance: ciclo de vida durable de referencia/resultado, migración de estado anterior, playbook operativo, tres escenarios unitarios y este checkpoint. No se añadieron proveedores, PII, eventos, cambios visuales ni despliegues.
-- Fiabilidad: un fallo programa caducidad; un éxito posterior conserva referencia y vencimiento originales; tras 24 horas se inicia una referencia nueva en vez de reutilizar claves potencialmente vencidas de Resend.
-- Compatibilidad: una referencia heredada sin metadato de expiración se conserva y recibe su ventana al primer acceso, evitando duplicados durante una futura actualización.
-- Privacidad y retención: los estados fallidos dejan de conservar una referencia indefinidamente; no se persiste el payload y la alarma elimina todo el objeto al vencer.
+- Alcance: routing del namespace API, CSP común de Static Assets/Worker, playbook operativo, ampliación de una prueba HTTP compuesta y este checkpoint. No se añadieron proveedores, PII, eventos, cambios visuales ni despliegues.
+- Seguridad: todas las páginas bloquean `base` externo, formularios a otros orígenes, framing y objetos; las demos elevan el bloqueo a cualquier submit mediante `form-action 'none'`.
+- Privacidad y caché: `/api` y `/api/unknown` ya no pueden heredar una respuesta HTML/cacheable de assets; ambos usan el mismo `404` JSON privado que el resto del namespace.
+- Rendimiento y compatibilidad: `_headers` aplica la política en el servicio nativo de Static Assets; `run_worker_first` sigue limitado a API y demos, y el formulario same-origin continúa operativo.
 - `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 44/44 pruebas del Worker.
-- E2E relevante: 1/1 prueba Chromium correcta para la entrega del único formulario real; la matriz completa anterior permanece en 69/69.
-- QA visual: no aplica — no cambia DOM, estilos, copy ni estado interactivo.
+- E2E relevante: 3/3 pruebas Chromium correctas para CSP de demos, contrato API/portada y entrega del formulario real; la matriz completa anterior permanece en 69/69.
+- QA visual: correcto — no cambia DOM ni estilos; las tres familias cargan e interactúan con la política activa.
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: correcto — no cambia la propuesta ni el seguimiento visible; se reduce el riesgo de duplicar comunicaciones.
-- Diseño de producto: corregido — la promesa de reintento seguro queda delimitada por una ventana real y no extensible.
-- UX: correcto — referencia, recibo, timeout y reintento visible permanecen idénticos durante la ventana operativa.
+- Marketing estratégico: correcto — no cambia la propuesta ni el recorrido comercial.
+- Diseño de producto: correcto — conserva la landing como único canal real y refuerza la separación técnica de demos.
+- UX: correcto — navegación, formulario same-origin y acciones locales siguen funcionando sin mensajes nuevos.
 - UI/dirección visual: no aplica — no hay cambios de interfaz ni contenido visible.
 - SEO: correcto — no cambian contenido indexable, metadata, headings, canonical, `hreflang`, sitemap ni datos estructurados; las cuatro pruebas SEO permanecen verdes.
-- Arquitectura frontend: no aplica — no cambia código cliente.
-- Full stack: corregido — referencia y resultado comparten un único TTL; fallo, reintento, expiración y migración quedan modelados explícitamente.
-- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E relevante cubren las transiciones durables y la entrega visible; la matriz completa anterior es 69/69 y no quedan bloqueantes conocidos.
+- Arquitectura frontend: correcto — la CSP mínima es compatible con scripts/estilos actuales y no fuerza el paso de assets por el Worker.
+- Full stack: corregido — se unifica `/api` con `/api/*` y se separa correctamente la política nativa de assets de la sobrescritura específica de demos.
+- QA/accesibilidad/rendimiento/confianza: corregido — el primer E2E detectó que la portada evitaba el Worker; `_headers` resolvió la causa y `pnpm check` más 3/3 E2E relevantes quedan verdes. La matriz completa anterior es 69/69 y no quedan bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Los timeouts de cliente y proveedor, el contrato de entrega y Lighthouse deben comprobarse en producción tras un despliegue autorizado; el estado específico de timeout no conserva captura visual por la restricción del navegador integrado, aunque su DOM y comportamiento están cubiertos. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -215,3 +217,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se eliminó la exposición de detalles internos de Zod en los `400` de `/api/leads`; la respuesta mínima no refleja valores recibidos y la landing conserva su contrato. Verificado con `pnpm check`, 40/40 pruebas del Worker y 1/1 E2E compuesto. No se desplegó producción.
 - 2026-08-18 — Se endureció la frontera de contenido de Resend: campos estructurados sin separadores de línea, mensaje multilínea intacto y HTML dinámico probado frente a markup adversarial. Verificado con `pnpm check`, 42/42 pruebas del Worker y 2/2 E2E relevantes. No se desplegó producción.
 - 2026-08-18 — Se fijó la idempotencia durable a una única ventana de 24 horas desde el primer intento: fallos con caducidad, reintentos sin extensión, nueva referencia tras vencer y migración conservadora de estados heredados. Verificado con `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E relevante. No se desplegó producción.
+- 2026-08-18 — Se cerró `/api` exacto bajo el contrato JSON privado y se añadió CSP base mediante `_headers` de Static Assets, con `form-action 'none'` específico de demos y sin ejecutar el Worker para todo asset. El QA corrigió la primera implementación al detectar la ruta rápida de assets. Verificado con `pnpm check`, 44/44 pruebas del Worker y 3/3 E2E relevantes. No se desplegó producción.
