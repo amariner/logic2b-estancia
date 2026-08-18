@@ -10,10 +10,12 @@ import { logic2bContact } from '@logic-estancia/config/contact';
 import analyticsContract from '@logic-estancia/config/analytics-contract';
 import CookieBanner from '../components/CookieBanner.astro';
 import { content } from '../content';
+import { getBusinesses } from '../businesses';
 
 interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; translated?: boolean; image?: string; }
 const { locale, title = 'Logic Estancia', description = 'Web, reservas y operación para alojamientos.', route = '', alternateRoute, translated = true, image = '/media/terrava/hero.webp' } = Astro.props;
 const c = content[locale];
+const businessNav = getBusinesses(locale);
 const prefix = locale === 'en' ? '/en' : '';
 const cleanRoute = route.replace(/^\//, '').replace(/\/$/, '');
 const routePath = cleanRoute ? `/${cleanRoute}/` : '/';
@@ -89,8 +91,7 @@ const structuredData = [
           <span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancia</span>
         </a>
         <nav aria-label={locale === 'es' ? 'Principal' : 'Main'}>
-          <a href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}>{c.nav.product}</a>
-          <a href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}>{c.nav.demos}</a>
+          {businessNav.map((business) => <a href={business.href}>{business.label}</a>)}
           <a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a>
         </nav>
         <div class="top-actions">
@@ -100,13 +101,13 @@ const structuredData = [
         <button class="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">{locale === 'es' ? 'Menú' : 'Menu'}</button>
       </div>
       <div id="mobile-nav" class="mobile-nav" hidden>
-        <a href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}>{c.nav.product}</a><a href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}>{c.nav.demos}</a><a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`}>{c.nav.contact}</a>
+        {businessNav.map((business) => <a href={business.href}>{business.label}</a>)}<a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`}>{c.nav.contact}</a>
       </div>
     </header>
     <main id="contenido"><slot /></main>
     <footer class="footer shell">
       <a class="wordmark" href={`${prefix}/`} aria-label={locale === 'es' ? 'Logic Estancia, inicio' : 'Logic Estancia, home'}><span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancia</span></a>
-      <div><a href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}>{c.nav.product}</a><a href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}>{c.nav.demos}</a><a href={`${prefix}/docs/`}>{c.nav.docs}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
+      <div>{businessNav.map((business) => <a href={business.href}>{business.label}</a>)}<a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/docs/`}>{c.nav.docs}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
       <p>© 2026 Logic2B · Castelló</p>
     </footer>
     <a class="whatsapp" href={wa.href} target="_blank" rel="noopener noreferrer" aria-label={`${wa.label} · WhatsApp`} data-whatsapp hidden>{wa.label}<span aria-hidden="true">↗</span></a>

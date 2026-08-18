@@ -8,6 +8,9 @@ const execFileAsync = promisify(execFile);
 const lighthouseCli = fileURLToPath(import.meta.resolve('lighthouse/cli/index.js'));
 const routes = [
   { path: '/', indexable: true },
+  { path: '/soluciones/casas-rurales/', indexable: true },
+  { path: '/soluciones/apartamentos/', indexable: true },
+  { path: '/soluciones/hoteles/', indexable: true },
   { path: '/planes/', indexable: true },
   { path: '/diagnostico/', indexable: true },
   { path: '/demos/terrava/', indexable: false },

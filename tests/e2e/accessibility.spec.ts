@@ -3,7 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 
 const commercialRoutes = [
   '/', '/en/',
-  '/soluciones/gestores/', '/en/solutions/managers/',
+  '/soluciones/casas-rurales/', '/en/solutions/rural-stays/',
+  '/soluciones/apartamentos/', '/en/solutions/apartments/',
   '/soluciones/hoteles/', '/en/solutions/hotels/',
   '/planes/', '/en/plans/',
   '/diagnostico/', '/en/assessment/',
@@ -109,7 +110,7 @@ test('representative families tolerate text resized to 200 percent', async ({ pa
 test('diagnostic step and result changes move focus to the new context', async ({ page }) => {
   await gotoStable(page, '/diagnostico/');
   await page.getByRole('button', { name: 'Rechazar' }).click();
-  await page.getByText('Apartamentos', { exact: true }).click();
+  await page.locator('[data-step="1"]').getByText('Apartamentos', { exact: true }).click();
   const next = page.locator('[data-next]');
   await next.click();
   await expect(page.locator('fieldset[data-step="2"] legend')).toBeFocused();

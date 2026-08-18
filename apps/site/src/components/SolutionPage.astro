@@ -1,37 +1,138 @@
 ---
-import { CAPABILITIES } from '@logic-estancia/domain';
 import type { Locale } from '@logic-estancia/config';
+import { CAPABILITIES, type PlanLevel } from '@logic-estancia/domain';
 import { capabilityEvidenceHref, capabilityEvidenceLabel } from '../capability-evidence';
-const { locale, segment } = Astro.props as { locale: Locale; segment: 'managers' | 'hotels' };
+import { getBusiness, type BusinessSegment } from '../businesses';
+
+const { locale, segment } = Astro.props as { locale: Locale; segment: BusinessSegment };
 const en = locale === 'en';
 const prefix = en ? '/en' : '';
-const copy = segment === 'managers' ? {
-  eyebrow: en ? 'For managers and rural stays' : 'Para gestores y alojamientos rurales',
-  title: en ? 'Grow your portfolio without making every new stay another layer of work.' : 'Haz crecer tu cartera sin que cada nueva estancia añada otra capa de trabajo.',
-  body: en ? 'Win more direct conversations under your own brand and give every enquiry continuity across availability, bookings and guests—without erasing what makes each property different.' : 'Gana más conversaciones directas bajo tu propia marca y da continuidad a cada consulta entre disponibilidad, reservas y huéspedes, sin borrar lo que hace distinta a cada propiedad.',
-  problems: en ? ['A guest finds you on a platform but cannot recognise your brand', 'Answering “is it available?” means opening several calendars', 'Growing the portfolio multiplies repeated tasks and scattered context'] : ['El huésped te descubre en una plataforma, pero no reconoce tu marca', 'Responder “¿está disponible?” obliga a abrir varios calendarios', 'Crecer multiplica tareas repetidas y contexto disperso'],
-  demo: 'terrava', plan: 'gestion', brand: 'Terrava Collection',
-} : {
-  eyebrow: en ? 'For hotels and operations teams' : 'Para hoteles y equipos operativos',
-  title: en ? 'Get ahead of the shift before the guest notices what went wrong.' : 'Anticípate al turno antes de que el huésped note lo que ha fallado.',
-  body: en ? 'Bring arrival risks, room readiness, incidents and owners into one daily view so the team knows what deserves attention before urgency takes over.' : 'Reúne riesgos de llegada, habitaciones, incidencias y responsables en una vista diaria para que el equipo sepa qué merece atención antes de que mande la urgencia.',
-  problems: en ? ['Arrival risks appear when the guest is already at reception', 'Each department reaches the shift with a different version of the day', 'A decision is made, but its owner and context disappear'] : ['Los riesgos aparecen cuando el huésped ya está en recepción', 'Cada departamento llega al turno con una versión distinta del día', 'Se toma una decisión, pero se pierden su responsable y su contexto'],
-  demo: 'aurem', plan: 'inteligente', brand: 'Aurem Hotel',
-};
-const visible = CAPABILITIES.filter(({ minimumPlan }) => segment === 'managers' ? minimumPlan !== 'inteligente' : minimumPlan !== 'basico');
+const business = getBusiness(segment, locale);
+
+const spanishCopy = {
+  rural: {
+    eyebrow: 'Para casas rurales y alojamientos con identidad propia',
+    title: 'Haz que elijan tu casa por lo que se vive allí. No solo por la fecha y el precio.',
+    body: 'Cuenta mejor lo que te hace diferente, abre una conversación directa con el huésped y organiza cada solicitud sin perder el trato cercano que sostiene tu reputación.',
+    painTitle: 'El problema no es aparecer. Es conseguir que te recuerden y vuelvan a buscarte.',
+    painBody: 'Cuando la plataforma se queda con la relación, tu historia compite en una ficha y cada consulta vuelve a empezar desde cero.',
+    problems: ['Tu casa tiene carácter, pero en el listado termina pareciéndose a las demás.', 'Responder fechas y alternativas exige revisar calendarios, mensajes y notas.', 'Cada temporada obliga a reconstruir contenido, disponibilidad y seguimiento.'],
+    outcomeTitle: 'Una presencia propia para vender mejor sin perder cercanía.',
+    outcomeBody: 'Empieza por una web capaz de explicar la estancia y recibir consultas. Añade gestión solo cuando coordinar alojamientos, huéspedes o equipo ya te esté quitando tiempo.',
+    outcomes: [['Que entiendan por qué ir', 'Relato, imágenes y contexto pensados para convertir una búsqueda genérica en deseo por tu estancia.'], ['Que puedan hablar contigo', 'Una consulta directa con fechas y necesidades claras, sin fingir una reserva o un pago que aún no existe.'], ['Que cada respuesta conserve el contexto', 'Cuando el volumen lo pide, consultas, alternativas y reservas dejan de vivir en conversaciones separadas.']],
+    capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'website-editor', 'basic-reports'],
+    demoTitle: 'Terrava Collection',
+    demoCopy: 'Recorre un caso ficticio de ocho casas: una consulta, una alternativa y una reserva que conserva su contexto.',
+    plan: 'gestion' as PlanLevel,
+    journey: 'Consulta → alternativa → reserva → preparación de la estancia.',
+    faq: [['¿Necesito un motor de reservas para empezar?', 'No necesariamente. Si hoy necesitas explicar mejor la estancia y recibir consultas directas, Básico puede ser suficiente. Un motor o una gestión conectada solo se plantean cuando el alcance real lo justifica.'], ['¿Puedo mantener los portales que ya utilizo?', 'Sí. El proyecto no presupone que debas abandonar un canal que funciona. Revisamos qué papel conserva cada plataforma y qué relación quieres recuperar bajo tu propia marca.'], ['¿Sirve para una sola casa rural?', 'Sí. El tamaño ayuda a dimensionar la implantación, pero el plan se decide por capacidades. Una casa puede empezar con web y consultas; una colección puede necesitar planning y gestión.']],
+  },
+  apartments: {
+    eyebrow: 'Para apartamentos turísticos y pequeños gestores',
+    title: 'Haz crecer tus apartamentos sin multiplicar calendarios, mensajes y tareas.',
+    body: 'Construye una marca que no dependa por completo de los portales y da continuidad a cada consulta, reserva y huésped desde un recorrido común.',
+    painTitle: 'Cada nuevo apartamento suma ingresos. También puede sumar otra capa de trabajo invisible.',
+    painBody: 'El crecimiento se vuelve frágil cuando la información está repartida y responder depende de recordar dónde quedó cada conversación.',
+    problems: ['El huésped reconoce la plataforma, pero no recuerda quién gestiona la estancia.', 'Confirmar una fecha obliga a cruzar más de un calendario o conversación.', 'El mismo dato se copia entre mensajes, hojas y tareas antes de cada llegada.'],
+    outcomeTitle: 'Una marca común por fuera. Un contexto común por dentro.',
+    outcomeBody: 'Puedes empezar con una web para un apartamento y evolucionar hacia Gestión cuando el portfolio necesite compartir solicitudes, planning y huéspedes.',
+    outcomes: [['Una razón para buscarte directamente', 'La web presenta tu forma de alojar y abre una relación que puede continuar más allá de una plataforma.'], ['Una respuesta con menos comprobaciones', 'Fechas, necesidades y alternativas conservan su contexto en lugar de rehacerse en cada canal.'], ['Una cartera que no borra cada propiedad', 'La operación se comparte sin convertir todos los apartamentos en una experiencia indiferenciada.']],
+    capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'website-editor', 'basic-reports'],
+    demoTitle: 'Nivora One',
+    demoCopy: 'Explora el punto de partida ficticio de un apartamento: una web propia y una consulta directa sin inventar disponibilidad ni pagos.',
+    plan: 'gestion' as PlanLevel,
+    journey: 'Descubrimiento → consulta directa → contexto → evolución a Gestión.',
+    faq: [['¿Puedo empezar con un solo apartamento?', 'Sí. Básico está pensado para una presencia de marca, SEO y consultas por email sin dashboard. Si después necesitas coordinar reservas o más unidades, el alcance puede evolucionar.'], ['¿Logic Estancia publica disponibilidad en Airbnb o Booking?', 'No por defecto. Cualquier conexión con canales requiere validación técnica y comercial específica. Las demos no publican inventario, precios ni mensajes reales.'], ['¿El número de apartamentos decide el plan?', 'No. El volumen dimensiona implantación y soporte; las capacidades deciden entre Básico, Gestión e Inteligente.']],
+  },
+  hotels: {
+    eyebrow: 'Para hoteles y equipos operativos',
+    title: 'Que cada turno empiece con prioridades claras. No con la primera urgencia.',
+    body: 'Reúne riesgos de llegada, habitaciones, incidencias y responsables en una vista compartida para actuar antes de que el huésped note el problema.',
+    painTitle: 'La experiencia del huésped se decide muchas veces en trabajos que nunca llega a ver.',
+    painBody: 'Cuando cada departamento trae una versión distinta del día, la coordinación empieza tarde y la urgencia elige las prioridades.',
+    problems: ['Un riesgo de llegada aparece cuando el huésped ya está en recepción.', 'Recepción, limpieza y dirección empiezan el turno con contextos distintos.', 'Una incidencia cambia de manos, pero pierde responsable, impacto o seguimiento.'],
+    outcomeTitle: 'Menos reacción. Más contexto para decidir antes.',
+    outcomeBody: 'Logic Estancia plantea un centro operativo supervisado: hace visible lo que necesita atención, pero no automatiza decisiones sensibles ni conecta proveedores sin validación.',
+    outcomes: [['El turno empieza con foco', 'Llegadas y habitaciones que requieren atención aparecen antes de convertirse en una cola de urgencias.'], ['Cada incidencia conserva un responsable', 'El equipo comparte estado, impacto y siguiente paso sobre el mismo contexto.'], ['Automatizar no significa perder el control', 'Canales, mensajes, precios e IA mantienen revisión humana y límites visibles.']],
+    capabilityIds: ['operations-centre', 'cleaning', 'maintenance', 'roles', 'channels', 'automation', 'revenue'],
+    demoTitle: 'Aurem Hotel',
+    demoCopy: 'Recorre un hotel ficticio donde una llegada en riesgo conecta recepción, limpieza y dirección sin ejecutar ninguna acción real.',
+    plan: 'inteligente' as PlanLevel,
+    journey: 'Riesgo de llegada → coordinación → decisión supervisada → seguimiento.',
+    faq: [['¿Sustituye a nuestro PMS?', 'No de forma automática. Primero se identifica qué sistema conserva la fuente de verdad y qué integración sería necesaria. La demo no está conectada a ningún PMS.'], ['¿La IA toma decisiones o envía mensajes?', 'No. El escenario muestra borradores y recomendaciones supervisadas. No hay modelo, proveedor o mensajería conectados y el envío permanece bloqueado.'], ['¿Puede usarse solo para una parte de la operación?', 'Sí. El alcance debe empezar por el cuello de botella que tenga impacto y pueda validarse, sin obligar a sustituir de golpe las herramientas que ya funcionan.']],
+  },
+} as const;
+
+const englishCopy = {
+  rural: {
+    eyebrow: 'For rural stays with an identity of their own',
+    title: 'Be chosen for what guests experience there. Not only for the date and price.',
+    body: 'Tell your difference better, open a direct conversation with guests and organise every enquiry without losing the personal touch behind your reputation.',
+    painTitle: 'The challenge is not appearing. It is being remembered and searched for again.',
+    painBody: 'When the platform owns the relationship, your story competes inside a listing and every enquiry starts again from scratch.',
+    problems: ['Your stay has character, but looks interchangeable in a listing.', 'Answering dates and alternatives means checking calendars, messages and notes.', 'Every season rebuilds content, availability and follow-up.'],
+    outcomeTitle: 'An owned presence that sells better without losing the personal touch.',
+    outcomeBody: 'Start with a website that explains the stay and receives enquiries. Add management only when coordinating properties, guests or teams already costs time.',
+    outcomes: [['Help guests understand why they should go', 'Story, imagery and context turn a generic search into desire for your particular stay.'], ['Let them speak directly with you', 'A direct enquiry with dates and needs, without pretending a live booking or payment exists.'], ['Keep the context behind every reply', 'When volume calls for it, enquiries, alternatives and bookings stop living in separate conversations.']],
+    capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'website-editor', 'basic-reports'],
+    demoTitle: 'Terrava Collection', demoCopy: 'Explore a fictional eight-home case: one enquiry, one alternative and a booking that keeps its context.', plan: 'gestion' as PlanLevel,
+    journey: 'Enquiry → alternative → booking → stay preparation.',
+    faq: [['Do I need a booking engine to start?', 'Not necessarily. If you need to explain the stay better and receive direct enquiries, Basic may be enough. A booking engine or connected management is considered only when the real scope justifies it.'], ['Can I keep the platforms I already use?', 'Yes. The project does not assume you should abandon a channel that works. We review the role of each platform and the relationship you want to regain under your brand.'], ['Does it work for one rural stay?', 'Yes. Size helps scope implementation, while capabilities determine the plan. One stay may start with a website and enquiries; a collection may need planning and management.']],
+  },
+  apartments: {
+    eyebrow: 'For holiday apartments and small managers',
+    title: 'Grow your apartments without multiplying calendars, messages and tasks.',
+    body: 'Build a brand that does not depend entirely on platforms and give every enquiry, booking and guest continuity through one shared journey.',
+    painTitle: 'Every new apartment adds revenue. It can also add another layer of invisible work.',
+    painBody: 'Growth becomes fragile when information is scattered and every reply depends on remembering where the conversation ended.',
+    problems: ['Guests recognise the platform but do not remember who manages the stay.', 'Confirming a date means cross-checking more than one calendar or conversation.', 'The same detail is copied across messages, sheets and tasks before every arrival.'],
+    outcomeTitle: 'One shared brand outside. One shared context inside.',
+    outcomeBody: 'Start with a website for one apartment and evolve to Management when the portfolio needs shared enquiries, planning and guest context.',
+    outcomes: [['A reason to search for you directly', 'Your website presents the way you host and opens a relationship that can continue beyond a platform.'], ['A reply with fewer checks', 'Dates, needs and alternatives keep their context instead of being rebuilt in every channel.'], ['A portfolio that preserves each property', 'Operations are shared without turning every apartment into an interchangeable experience.']],
+    capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'website-editor', 'basic-reports'],
+    demoTitle: 'Nivora One', demoCopy: 'Explore the fictional starting point for one apartment: an owned website and a direct enquiry without invented availability or payments.', plan: 'gestion' as PlanLevel,
+    journey: 'Discovery → direct enquiry → context → evolution to Management.',
+    faq: [['Can I start with one apartment?', 'Yes. Basic provides a brand website, SEO and email enquiries without a workspace. If you later coordinate bookings or more units, the scope can evolve.'], ['Does Logic Estancia publish availability to Airbnb or Booking?', 'Not by default. Every channel connection requires specific technical and commercial validation. The demos publish no live inventory, rates or messages.'], ['Does apartment count determine the plan?', 'No. Volume sizes implementation and support; capabilities determine Basic, Management or Intelligent.']],
+  },
+  hotels: {
+    eyebrow: 'For hotels and operations teams',
+    title: 'Start every shift with clear priorities. Not with the first emergency.',
+    body: 'Bring arrival risks, rooms, incidents and owners into one shared view so the team can act before the guest notices the problem.',
+    painTitle: 'The guest experience is often decided by work the guest never sees.',
+    painBody: 'When every department arrives with a different version of the day, coordination starts late and urgency chooses the priorities.',
+    problems: ['An arrival risk appears when the guest is already at reception.', 'Reception, housekeeping and management start the shift with different context.', 'An incident changes hands but loses its owner, impact or follow-up.'],
+    outcomeTitle: 'Less reaction. More context to decide earlier.',
+    outcomeBody: 'Logic Estancia proposes a supervised operations centre: it makes attention visible without automating sensitive decisions or connecting providers before validation.',
+    outcomes: [['Start the shift with focus', 'Arrivals and rooms requiring attention surface before they become a queue of emergencies.'], ['Keep an owner behind every incident', 'The team shares status, impact and next action over the same context.'], ['Automate without losing control', 'Channels, messaging, pricing and AI retain human review and visible boundaries.']],
+    capabilityIds: ['operations-centre', 'cleaning', 'maintenance', 'roles', 'channels', 'automation', 'revenue'],
+    demoTitle: 'Aurem Hotel', demoCopy: 'Explore a fictional hotel where one at-risk arrival connects reception, housekeeping and management without executing any live action.', plan: 'inteligente' as PlanLevel,
+    journey: 'At-risk arrival → coordination → supervised decision → follow-up.',
+    faq: [['Does it replace our PMS?', 'Not automatically. We first identify which system keeps the source of truth and which integration would be required. The demo is not connected to a PMS.'], ['Does AI make decisions or send messages?', 'No. The scenario shows supervised drafts and recommendations. No model, provider or messaging service is connected and delivery remains blocked.'], ['Can we use it for only one part of operations?', 'Yes. Scope should begin with a bottleneck that has impact and can be validated, without forcing you to replace tools that already work.']],
+  },
+} as const;
+
+const copy = (en ? englishCopy : spanishCopy)[segment];
+const visible = CAPABILITIES.filter(({ id }) => (copy.capabilityIds as readonly string[]).includes(id));
 const maturity = en ? { demo: 'Demo', simulated: 'Simulated', 'to-validate': 'To validate', future: 'Future' } : { demo: 'Demo', simulated: 'Simulada', 'to-validate': 'A validar', future: 'Futura' };
-const planNames = en ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' } : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
+const planNames: Record<PlanLevel, string> = en ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' } : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
+const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: copy.faq.map(([question, answer]) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })) };
 ---
-<section class="commercial-hero shell">
-  <p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p>{copy.body}</p>
-  <div class="hero-actions"><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} data-track="cta_click" data-segment={segment} data-section="solution_hero">{en ? 'Find my starting point' : 'Ver mi punto de partida'}</a><a class="pill ghost" href={`${prefix}/demos/${copy.demo}/`}>{en ? `See the ${copy.brand} case` : `Ver el caso ${copy.brand}`}</a></div>
+<section class="solution-hero">
+  <div class="shell solution-hero-layout">
+    <div><p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p>{copy.body}</p><div class="hero-actions"><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} data-track="cta_click" data-segment={segment} data-section="solution_hero">{en ? 'See my starting point' : 'Ver mi punto de partida'}</a><a class="pill ghost" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the fictional case' : 'Explorar el caso ficticio'}</a></div></div>
+    <a class="solution-hero-media" href={`${prefix}/demos/${business.demo}/`} aria-label={en ? `Explore the fictional ${copy.demoTitle} case` : `Explorar el caso ficticio ${copy.demoTitle}`}><picture><source type="image/avif" srcset={`/media/${business.demo}/hero-640.avif 640w, /media/${business.demo}/hero-960.avif 960w`} sizes="(max-width: 900px) 100vw, 45vw" /><img src={business.image} alt="" width="2016" height="1344" /></picture><span><small>{en ? 'Fictional interactive case' : 'Caso interactivo ficticio'}</small><strong>{copy.demoTitle}</strong></span><b aria-hidden="true">↗</b></a>
+  </div>
 </section>
-<section class="section soft"><div class="shell commercial-columns"><div><p class="eyebrow">{en ? 'Where margin and time disappear' : 'Dónde se escapan margen y tiempo'}</p><h2 class="heading">{en ? 'The problem lives in the handoffs.' : 'El problema vive en los saltos entre tareas.'}</h2></div><ol class="problem-list">{copy.problems.map((problem, index) => <li><span>0{index + 1}</span><p>{problem}</p></li>)}</ol></div></section>
-<section class="section shell"><div class="section-head"><p class="eyebrow">{en ? 'A path you can verify' : 'Un camino que puedes comprobar'}</p><h2 class="heading">{en ? 'Start at the bottleneck. Add only what earns its place.' : 'Empieza por el cuello de botella. Añade solo lo que se gane su sitio.'}</h2><p>{en ? 'Every capability shows its minimum plan, what the fictional demo proves and what a real implementation would still need to validate.' : 'Cada capacidad muestra su plan mínimo, lo que prueba la demo ficticia y lo que una implantación real todavía tendría que validar.'}</p></div><div class="capability-grid">{visible.map((capability) => <article class="card" data-capability={capability.id}><div class="capability-meta"><span>{en ? 'From' : 'Desde'} {planNames[capability.minimumPlan]}</span><span class={`maturity ${capability.maturity}`}>{maturity[capability.maturity]}</span></div><h3>{capability.label[locale]}</h3><p class="capability-description">{capability.description[locale]}</p><div class="capability-proof"><strong>{en ? 'What you can verify' : 'Qué puedes comprobar'}</strong><p>{capability.evidence.proof[locale]}</p><p class="capability-boundary"><b>{en ? 'Boundary' : 'Límite'}:</b> {capability.evidence.boundary[locale]}</p><a href={capabilityEvidenceHref(capability, locale)} data-capability-evidence={capability.id}>{capabilityEvidenceLabel(capability, locale)} <span aria-hidden="true">→</span></a></div></article>)}</div></section>
-<section class="section proof-band"><div class="shell commercial-columns"><div><p class="eyebrow">{en ? 'See the work before the meeting' : 'Comprueba el trabajo antes de la reunión'}</p><h2 class="heading">{copy.brand}</h2><p>{en ? 'Choose the guided journey or explore freely. Every data point and action is fictional, stays in your browser and carries its boundary with it.' : 'Elige la visita guiada o explora libremente. Cada dato y acción es ficticio, permanece en tu navegador y muestra su límite.'}</p></div><div class="solution-proof card"><strong>{copy.plan === 'gestion' ? (en ? 'Management' : 'Gestión') : (en ? 'Intelligent' : 'Inteligente')}</strong><p>{segment === 'managers' ? (en ? 'Enquiry → alternative → booking → stay operation.' : 'Solicitud → alternativa → reserva → operación de estancia.') : (en ? 'At-risk arrival → team coordination → supervised resolution.' : 'Llegada en riesgo → coordinación → resolución supervisada.')}</p><a class="pill" href={`${prefix}/demos/${copy.demo}/`}>{en ? 'Open the fictional case' : 'Abrir el caso ficticio'} →</a></div></div></section>
-<section class="section shell final-cta"><p class="eyebrow">{en ? 'A useful next step' : 'Un siguiente paso útil'}</p><h2 class="heading">{en ? 'See which starting point fits the way you operate today.' : 'Descubre qué punto de partida encaja con tu forma de operar hoy.'}</h2><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} data-track="cta_click" data-segment={segment} data-section="solution_footer">{en ? 'Get my recommendation' : 'Obtener mi recomendación'} →</a></section>
-<script is:inline define:vars={{ locale, segment }}>
-  addEventListener('DOMContentLoaded', () => {
-    window.estanciaTrack?.('solution_view', { locale, segment, source_section: 'solution' });
-  }, { once: true });
-</script>
+
+<section class="section soft"><div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{en ? 'Where value slips away' : 'Dónde se escapa el valor'}</p><h2 class="heading">{copy.painTitle}</h2><p>{copy.painBody}</p></div><ol class="problem-list">{copy.problems.map((problem, index) => <li><span>0{index + 1}</span><p>{problem}</p></li>)}</ol></div></section>
+
+<section class="section shell"><div class="section-head"><p class="eyebrow">{en ? 'A result before a feature list' : 'Un resultado antes que una lista de funciones'}</p><h2 class="heading">{copy.outcomeTitle}</h2><p>{copy.outcomeBody}</p></div><div class="outcome-grid">{copy.outcomes.map(([title, text], index) => <article><span>0{index + 1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
+
+<section class="section capability-section"><div class="shell"><div class="section-head"><p class="eyebrow">{en ? 'What you can verify today' : 'Lo que puedes comprobar hoy'}</p><h2 class="heading">{en ? 'Open the evidence. Keep the boundary visible.' : 'Abre la evidencia. Mantén el límite a la vista.'}</h2><p>{en ? 'Each capability shows its minimum plan, what the fictional case demonstrates and what a real implementation still needs.' : 'Cada capacidad muestra su plan mínimo, lo que demuestra el caso ficticio y lo que una implantación real todavía necesita.'}</p></div><div class="capability-grid">{visible.map((capability) => <article class="card" data-capability={capability.id}><div class="capability-meta"><span>{en ? 'From' : 'Desde'} {planNames[capability.minimumPlan]}</span><span class={`maturity ${capability.maturity}`}>{maturity[capability.maturity]}</span></div><h3>{capability.label[locale]}</h3><p>{capability.description[locale]}</p><div class="capability-proof"><strong>{en ? 'What you can verify' : 'Qué puedes comprobar'}</strong><p>{capability.evidence.proof[locale]}</p><p class="capability-boundary"><b>{en ? 'Boundary' : 'Límite'}:</b> {capability.evidence.boundary[locale]}</p><a href={capabilityEvidenceHref(capability, locale)} data-capability-evidence={capability.id}>{capabilityEvidenceLabel(capability, locale)} <span aria-hidden="true">→</span></a></div></article>)}</div></div></section>
+
+<section class="section proof-band"><div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{en ? 'See the work before the meeting' : 'Comprueba el recorrido antes de la reunión'}</p><h2 class="heading">{copy.demoTitle}</h2><p>{copy.demoCopy} {en ? 'Every action stays local and clearly labelled.' : 'Cada acción permanece local y claramente etiquetada.'}</p></div><div class="solution-proof card"><strong>{planNames[copy.plan]}</strong><p>{copy.journey}</p><a class="pill" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Open the fictional case' : 'Abrir el caso ficticio'} →</a></div></div></section>
+
+<section class="section shell faq"><div class="section-head"><p class="eyebrow">{en ? `Questions from ${business.plural.toLowerCase()}` : `Preguntas de ${business.plural.toLowerCase()}`}</p><h2 class="heading">{en ? 'Resolve the boundary before changing tools.' : 'Aclara el alcance antes de cambiar herramientas.'}</h2></div><div class="faq-list">{copy.faq.map(([question, answer], index) => <details open={index === 0}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
+<script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
+
+<section class="section shell final-cta"><p class="eyebrow">{en ? 'A recommendation before a proposal' : 'Una recomendación antes que una propuesta'}</p><h2 class="heading">{en ? `See where ${business.plural.toLowerCase()} should start.` : `Descubre por dónde debería empezar tu ${segment === 'rural' ? 'casa rural' : segment === 'apartments' ? 'negocio de apartamentos' : 'hotel'}.`}</h2><p>{en ? 'The assessment uses capabilities; size only helps scope implementation.' : 'El diagnóstico utiliza capacidades; el tamaño solo ayuda a dimensionar la implantación.'}</p><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} data-track="cta_click" data-segment={segment} data-section="solution_footer">{en ? 'Start the assessment' : 'Empezar diagnóstico'} →</a></section>

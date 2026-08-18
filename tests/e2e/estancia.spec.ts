@@ -2,8 +2,8 @@ import { expect, test, type Page } from '@playwright/test';
 
 const paths = [
   '/', '/en/', '/docs/', '/en/docs/',
-  '/soluciones/gestores/', '/soluciones/hoteles/', '/planes/', '/diagnostico/',
-  '/en/solutions/managers/', '/en/solutions/hotels/', '/en/plans/', '/en/assessment/',
+  '/soluciones/casas-rurales/', '/soluciones/apartamentos/', '/soluciones/hoteles/', '/planes/', '/diagnostico/',
+  '/en/solutions/rural-stays/', '/en/solutions/apartments/', '/en/solutions/hotels/', '/en/plans/', '/en/assessment/',
   '/recursos/gestor-reservas-apartamentos-turisticos/', '/recursos/web-hotel-reservas-directas-operacion/',
   '/legal/', '/privacidad/', '/cookies/',
   '/en/legal/', '/en/privacidad/', '/en/cookies/',
@@ -35,7 +35,7 @@ test('public routes are complete and demos remain isolated', async ({ page }) =>
 });
 
 test('capability maps expose truthful evidence and exact localized targets', async ({ page, request }) => {
-  await page.goto('/soluciones/gestores/');
+  await page.goto('/soluciones/casas-rurales/');
   await expect(page.locator('[data-capability-evidence]')).toHaveCount(6);
   const planning = page.locator('[data-capability="planning"]');
   await expect(planning).toContainText('Desde Gestión');
@@ -44,7 +44,7 @@ test('capability maps expose truthful evidence and exact localized targets', asy
   await expect(planning.locator('[data-capability-evidence]')).toHaveAttribute('href', '/demos/terrava/gestion/?vista=planning');
 
   await page.goto('/soluciones/hoteles/');
-  await expect(page.locator('[data-capability-evidence]')).toHaveCount(12);
+  await expect(page.locator('[data-capability-evidence]')).toHaveCount(7);
   await expect(page.locator('[data-capability="channels"]')).toContainText('A validar');
   await expect(page.locator('[data-capability-evidence="channels"]')).toHaveAttribute('href', '/demos/aurem/gestion/?vista=channels');
 
@@ -155,6 +155,19 @@ test('plan interest carries the selected plan into the assessment', async ({ pag
   await expect(page.locator('[name="bookingNeeds"][value="bookings"]')).toBeChecked();
 });
 
+test('business landing links preserve the prospect segment in the assessment', async ({ page }) => {
+  for (const [path, segment, type] of [
+    ['/soluciones/casas-rurales/', 'rural', 'rural'],
+    ['/soluciones/apartamentos/', 'apartments', 'apartment'],
+    ['/soluciones/hoteles/', 'hotels', 'hotel'],
+  ] as const) {
+    await page.goto(path);
+    await page.locator('.solution-hero').getByRole('link', { name: 'Ver mi punto de partida' }).click();
+    await expect(page).toHaveURL(new RegExp(`/diagnostico/\\?segment=${segment}$`));
+    await expect(page.locator(`[name="accommodationType"][value="${type}"]`)).toBeChecked();
+  }
+});
+
 test('scope configurator recommends progressively and prefills the commercial form', async ({ page }) => {
   await page.goto('/');
   const scope = page.locator('[data-scope-estimator]');
@@ -212,7 +225,7 @@ test('assessment keeps answers local and routes contact to the single sales form
   let leadRequests = 0;
   page.on('request', (request) => { if (request.url().includes('/api/leads')) leadRequests += 1; });
   await page.goto('/diagnostico/');
-  await page.getByText('Apartamentos', { exact: true }).click();
+  await page.locator('[data-step="1"]').getByText('Apartamentos', { exact: true }).click();
   for (let step = 0; step < 5; step += 1) await page.getByRole('button', { name: /Siguiente/ }).click();
   await page.getByRole('button', { name: /Ver recomendación/ }).click();
   await expect(page.locator('[data-diagnostic-lead]')).toHaveCount(0);

@@ -1,11 +1,12 @@
 export const content = {
   es: {
-    nav: { product: 'Gestores', demos: 'Hoteles', levels: 'Planes', docs: 'Guías', contact: 'Ver mi punto de partida' },
+    nav: { levels: 'Planes', docs: 'Guías', contact: 'Ver mi punto de partida' },
     hero: {
-      eyebrow: 'Logic Estancia · para alojamientos que quieren avanzar con criterio',
-      title: 'Que cada reserva deje más margen, y menos trabajo detrás.',
-      body: 'Haz que te encuentren, convierte más interés en consultas directas y coordina cada estancia sin sumar otra herramienta aislada. Empieza por la web; añade gestión cuando el negocio lo pida.',
-      primary: 'Ver por dónde empezar', secondary: 'Comprobarlo en una demo',
+      eyebrow: 'Web y gestión para alojamientos independientes',
+      title: 'Que te elijan por lo que te hace único.',
+      accent: 'No por dónde apareces.',
+      body: 'Convierte tu web en el inicio de una relación directa y da continuidad a cada reserva sin perseguir calendarios, mensajes y tareas. Empieza por tu realidad; amplía cuando lo necesites.',
+      primary: 'Elegir mi tipo de alojamiento', secondary: 'Ver casos interactivos',
     },
     proof: { eyebrow: 'Del clic al check-out', title: 'Lo que empieza en tu web debería llegar con contexto hasta la operación.', body: 'Una consulta no vive aislada: necesita disponibilidad, una respuesta, una reserva y una estancia bien preparada. Logic Estancia ordena ese recorrido sin obligarte a cambiarlo todo de golpe.' },
     modes: {
@@ -61,12 +62,13 @@ export const content = {
     contact: { eyebrow: 'Una conversación útil, no una demo de ventas', title: 'Cuéntanos dónde se atasca hoy una reserva.', body: 'Revisaremos tu contexto y te responderemos con un punto de partida razonado. Sin precios inventados, integraciones dadas por hechas ni una propuesta más grande de lo necesario.', submit: 'Quiero una recomendación', sending: 'Enviando…', ok: 'Solicitud entregada. Te responderemos pronto.', error: 'No hemos podido entregarla. Prueba por WhatsApp o vuelve a intentarlo.' },
   },
   en: {
-    nav: { product: 'Managers', demos: 'Hotels', levels: 'Plans', docs: 'Guides', contact: 'Find my starting point' },
+    nav: { levels: 'Plans', docs: 'Guides', contact: 'Find my starting point' },
     hero: {
-      eyebrow: 'Logic Estancia · for accommodation businesses ready to move forward',
-      title: 'Make every booking leave more margin, and less work behind.',
-      body: 'Help guests find you, turn more interest into direct enquiries and coordinate each stay without adding another isolated tool. Start with the website; add management when the business calls for it.',
-      primary: 'Find my starting point', secondary: 'See it in a demo',
+      eyebrow: 'Web and management for independent accommodation businesses',
+      title: 'Be chosen for what makes you distinctive.',
+      accent: 'Not for where you appear.',
+      body: 'Turn your website into the start of a direct relationship and give every booking continuity without chasing calendars, messages and tasks. Start with your reality; expand when you need to.',
+      primary: 'Choose my business type', secondary: 'Explore interactive cases',
     },
     proof: { eyebrow: 'From click to check-out', title: 'What begins on your website should reach operations with its context intact.', body: 'An enquiry does not live in isolation: it needs availability, a reply, a booking and a well-prepared stay. Logic Estancia organises that journey without making you change everything at once.' },
     modes: {

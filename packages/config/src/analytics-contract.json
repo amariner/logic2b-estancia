@@ -28,7 +28,7 @@
   ],
   "parameterValues": {
     "locale": ["es", "en"],
-    "segment": ["managers", "hotels", "unknown"],
+    "segment": ["rural", "apartments", "hotels", "managers", "unknown"],
     "plan": ["basico", "gestion", "inteligente", "none"],
     "demo": ["nivora", "terrava", "aurem"],
     "flow": ["arrival-risk", "channel-review", "enquiry-booking", "free", "guided", "maintenance", "stay-operation", "supervised-ai", "website-editor"],

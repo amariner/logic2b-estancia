@@ -7,7 +7,8 @@ const translatedPairs = [
   ['/legal/', '/en/legal/'],
   ['/privacidad/', '/en/privacidad/'],
   ['/cookies/', '/en/cookies/'],
-  ['/soluciones/gestores/', '/en/solutions/managers/'],
+  ['/soluciones/casas-rurales/', '/en/solutions/rural-stays/'],
+  ['/soluciones/apartamentos/', '/en/solutions/apartments/'],
   ['/soluciones/hoteles/', '/en/solutions/hotels/'],
   ['/planes/', '/en/plans/'],
   ['/diagnostico/', '/en/assessment/'],
@@ -65,7 +66,8 @@ test('sitemap contains every indexable final URL exactly once and excludes demos
 test('commercial search surfaces use specific, unique metadata and people-first headings', async ({ page }) => {
   const commercialRoutes = [
     '/', '/en/', '/planes/', '/en/plans/',
-    '/soluciones/gestores/', '/en/solutions/managers/',
+    '/soluciones/casas-rurales/', '/en/solutions/rural-stays/',
+    '/soluciones/apartamentos/', '/en/solutions/apartments/',
     '/soluciones/hoteles/', '/en/solutions/hotels/',
     '/diagnostico/', '/en/assessment/',
   ];
@@ -91,6 +93,7 @@ test('commercial search surfaces use specific, unique metadata and people-first 
   await page.goto('/');
   const schemas = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((value) => JSON.parse(value));
   expect(schemas.map((schema) => schema['@type'])).toEqual(expect.arrayContaining(['FAQPage', 'Service']));
-  await expect(page.getByRole('link', { name: 'Gestores', exact: true }).first()).toHaveAttribute('href', '/soluciones/gestores/');
+  await expect(page.getByRole('link', { name: 'Casa rural', exact: true }).first()).toHaveAttribute('href', '/soluciones/casas-rurales/');
+  await expect(page.getByRole('link', { name: 'Apartamentos', exact: true }).first()).toHaveAttribute('href', '/soluciones/apartamentos/');
   await expect(page.getByRole('link', { name: 'Hoteles', exact: true }).first()).toHaveAttribute('href', '/soluciones/hoteles/');
 });

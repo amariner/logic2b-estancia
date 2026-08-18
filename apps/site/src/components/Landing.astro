@@ -2,10 +2,12 @@
 import type { Locale } from '@logic-estancia/config';
 import { logic2bContact } from '@logic-estancia/config/contact';
 import { content } from '../content';
+import { getBusinesses } from '../businesses';
 const { locale } = Astro.props as { locale: Locale };
 const c = content[locale];
 const prefix = locale === 'en' ? '/en' : '';
 const wa = logic2bContact(locale, 'commercial');
+const businesses = getBusinesses(locale);
 const demos = locale === 'es' ? [
   { slug: 'nivora', level: 'Caso ficticio · Básico', name: 'Nivora One', text: 'Cuando una buena estancia necesita una web que esté a su altura y abra una conversación directa.', image: '/media/nivora/hero.webp' },
   { slug: 'terrava', level: 'Caso ficticio · Gestión', name: 'Terrava Collection', text: 'Cuando ocho casas comparten demanda, pero no deberían repetir ocho veces el mismo trabajo.', image: '/media/terrava/hero.webp' },
@@ -41,7 +43,7 @@ const serviceSchema = {
   serviceType: locale === 'es' ? 'Web, gestión de reservas y operación para alojamientos' : 'Website, booking management and operations for accommodation businesses',
   provider: { '@id': 'https://estancia.logic2b.com/#organization' },
   areaServed: { '@type': 'Country', name: 'Spain' },
-  audience: { '@type': 'BusinessAudience', audienceType: locale === 'es' ? 'Alojamientos turísticos, gestores y hoteles' : 'Accommodation businesses, managers and hotels' },
+  audience: { '@type': 'BusinessAudience', audienceType: locale === 'es' ? 'Casas rurales, apartamentos turísticos y hoteles' : 'Rural stays, holiday apartments and hotels' },
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
     name: locale === 'es' ? 'Planes de Logic Estancia' : 'Logic Estancia plans',
@@ -50,25 +52,27 @@ const serviceSchema = {
 };
 ---
 <section class="hero">
-  <div class="hero-copy shell">
-    <p class="eyebrow">{c.hero.eyebrow}</p>
-    <h1 class="display">{c.hero.title.split(', ')[0]}, <em>{c.hero.title.split(', ').slice(1).join(', ')}</em></h1>
-    <p>{c.hero.body}</p>
-    <div class="hero-actions"><a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="hero">{c.hero.primary}</a><a class="pill ghost" href="#demos">{c.hero.secondary}</a></div>
-    <ul class="hero-assurances" aria-label={locale === 'es' ? 'Principios del servicio' : 'Service principles'}><li>{locale === 'es' ? 'Por fases' : 'Phased'}</li><li>{locale === 'es' ? 'Sin dependencia innecesaria' : 'No needless lock-in'}</li><li>{locale === 'es' ? 'Decisiones bajo control humano' : 'Human-controlled decisions'}</li></ul>
+  <div class="hero-layout shell">
+    <div class="hero-copy">
+      <p class="eyebrow">{c.hero.eyebrow}</p>
+      <h1 class="display">{c.hero.title} <em>{c.hero.accent}</em></h1>
+      <p>{c.hero.body}</p>
+      <div class="hero-actions"><a class="pill" href="#negocio" data-track="cta_click" data-section="hero">{c.hero.primary}</a><a class="pill ghost" href="#demos">{c.hero.secondary}</a></div>
+      <ul class="hero-assurances" aria-label={locale === 'es' ? 'Principios del servicio' : 'Service principles'}><li>{locale === 'es' ? 'Empieza por la web' : 'Start with the website'}</li><li>{locale === 'es' ? 'Crece por capacidades' : 'Grow by capabilities'}</li><li>{locale === 'es' ? 'Mantén el control' : 'Stay in control'}</li></ul>
+    </div>
+    <div class="hero-businesses" aria-label={locale === 'es' ? 'Soluciones por tipo de alojamiento' : 'Solutions by accommodation type'}>
+      {businesses.map((business, index) => <a class={`hero-business ${index === 0 ? 'featured' : ''}`} href={business.href}><img src={business.image} alt="" width="2016" height="1344" /><span><small>{locale === 'es' ? 'Solución para' : 'Solution for'}</small><strong>{business.plural}</strong></span><b aria-hidden="true">↗</b></a>)}
+    </div>
   </div>
-  <article class="floating artifact a"><span>{locale === 'es' ? 'Antes de reservar' : 'Before booking'}</span><strong>{locale === 'es' ? 'Que te elijan' : 'Be chosen'}</strong><span class="status">{locale === 'es' ? 'Marca · SEO · consulta directa' : 'Brand · SEO · direct enquiry'}</span></article>
-  <article class="floating artifact b"><span>{locale === 'es' ? 'Después de reservar' : 'After booking'}</span><strong>{locale === 'es' ? 'Llegar preparados' : 'Arrive prepared'}</strong><span class="status">{locale === 'es' ? 'Contexto · equipo · seguimiento' : 'Context · team · follow-through'}</span></article>
-  <article class="floating artifact c"><span>{locale === 'es' ? 'Un recorrido, sin saltos' : 'One journey, without gaps'}</span><ol class="journey-line"><li>{locale === 'es' ? 'Encontrar' : 'Find'}</li><li>{locale === 'es' ? 'Consultar' : 'Enquire'}</li><li>{locale === 'es' ? 'Reservar' : 'Book'}</li><li>{locale === 'es' ? 'Preparar' : 'Prepare'}</li></ol></article>
 </section>
 
 <section class="section tension-section">
   <div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{locale === 'es' ? 'El coste de seguir igual' : 'The cost of standing still'}</p><h2 class="heading">{locale === 'es' ? 'No te falta otra herramienta. Te falta que el recorrido completo tenga sentido.' : 'You do not need another tool. You need the whole journey to make sense.'}</h2><p>{locale === 'es' ? 'La fricción rara vez está en un único lugar. Se acumula entre la búsqueda del huésped, la respuesta, la reserva y el trabajo que nadie ve.' : 'Friction rarely sits in one place. It builds between guest search, response, booking and the work no one sees.'}</p></div><ol class="problem-list"><li><span>01</span><p>{locale === 'es' ? 'Te encuentran, pero tu web no termina de explicar por qué elegirte.' : 'Guests find you, but your website does not quite explain why they should choose you.'}</p></li><li><span>02</span><p>{locale === 'es' ? 'Responder una consulta obliga a comprobar canales, calendarios y conversaciones.' : 'Answering an enquiry means checking channels, calendars and conversations.'}</p></li><li><span>03</span><p>{locale === 'es' ? 'El equipo resuelve hoy lo que podía haber visto ayer.' : 'The team solves today what it could have seen yesterday.'}</p></li></ol></div>
 </section>
 
-<section class="section segment-section shell" aria-labelledby="segment-title">
-  <div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Dos realidades de negocio' : 'Two business realities'}</p><h2 id="segment-title" class="heading">{locale === 'es' ? 'El mismo huésped. Retos muy distintos detrás.' : 'The same guest. Very different challenges behind the scenes.'}</h2></div>
-  <div class="mode-grid segment-grid"><a class="card" href={`${prefix}/${locale === 'es' ? 'soluciones/gestores' : 'solutions/managers'}/`}><span>01</span><h3>{locale === 'es' ? 'Haz crecer tu cartera sin multiplicar el caos.' : 'Grow your portfolio without multiplying the chaos.'}</h3><p>{locale === 'es' ? 'Para gestores, apartamentos y alojamientos rurales que necesitan vender bajo una marca propia y compartir reservas sin borrar el carácter de cada estancia.' : 'For managers, apartments and rural stays that need to sell under their own brand and share bookings without erasing each stay’s character.'}</p><b>{locale === 'es' ? 'Soy gestor o alojamiento rural' : 'I manage apartments or rural stays'} →</b></a><a class="card" href={`${prefix}/${locale === 'es' ? 'soluciones/hoteles' : 'solutions/hotels'}/`}><span>02</span><h3>{locale === 'es' ? 'Anticípate al turno antes de que el huésped note el problema.' : 'Get ahead of the shift before the guest notices the problem.'}</h3><p>{locale === 'es' ? 'Para hoteles donde llegadas, habitaciones, incidencias y decisiones cruzan equipos y necesitan un contexto compartido.' : 'For hotels where arrivals, rooms, incidents and decisions cross teams and need shared context.'}</p><b>{locale === 'es' ? 'Trabajo en un hotel' : 'I work in a hotel'} →</b></a></div>
+<section id="negocio" class="section segment-section shell" aria-labelledby="segment-title">
+  <div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Empieza por tu realidad' : 'Start with your reality'}</p><h2 id="segment-title" class="heading">{locale === 'es' ? 'No todos los alojamientos venden igual. Tampoco deberían gestionarse igual.' : 'Not every stay sells the same way. It should not be managed the same way either.'}</h2><p>{locale === 'es' ? 'Elige el negocio que más se parece al tuyo. Cada recorrido parte de sus fricciones, su ritmo y el tipo de relación que necesita construir con el huésped.' : 'Choose the business closest to yours. Each journey begins with its friction, pace and the kind of guest relationship it needs to build.'}</p></div>
+  <div class="segment-grid">{businesses.map((business, index) => <a class="card" href={business.href}><span>0{index + 1}</span><h3>{business.homeTitle}</h3><p>{business.homeText}</p><b>{locale === 'es' ? `Ver solución para ${business.plural.toLowerCase()}` : `View solution for ${business.plural.toLowerCase()}`} →</b></a>)}</div>
 </section>
 
 <section id="producto" class="section shell">
