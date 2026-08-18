@@ -75,31 +75,23 @@ describe('LeadCoordinator', () => {
     expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
-  it('reuses its durable reference after a failed attempt and avoids a second deal creation', async () => {
-    let dealSearches = 0;
-    let dealCreates = 0;
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-      const url = String(input);
-      if (url.endsWith('/contacts/search')) return new Response(JSON.stringify({ results: [{ id: 'contact-1' }] }), { status: 200 });
-      if (url.endsWith('/contacts/contact-1')) return new Response('{}', { status: 200 });
-      if (url.endsWith('/deals/search')) {
-        dealSearches += 1;
-        return new Response(JSON.stringify({ results: dealSearches >= 3 ? [{ id: 'deal-1' }] : [] }), { status: 200 });
+  it('reuses its durable reference when the mandatory internal email is retried', async () => {
+    let internalAttempts = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+      const payload = JSON.parse(String(init?.body)) as { to: string[] };
+      if (payload.to[0] === 'sales@example.test') {
+        internalAttempts += 1;
+        return new Response('{}', { status: internalAttempts === 1 ? 500 : 200 });
       }
-      if (url.endsWith('/deals')) {
-        dealCreates += 1;
-        return new Response('provider response lost', { status: 500 });
-      }
-      throw new Error(`Unexpected URL ${url}`);
+      return new Response('{}', { status: 200 });
     });
     const storage = new MemoryStorage();
-    const env: LeadEnv = { LEADS_TRANSPORT: 'disabled', HUBSPOT_ACCESS_TOKEN: 'crm' };
-    const first = await deliver(new LeadCoordinator(state(storage), env));
+    const first = await deliver(new LeadCoordinator(state(storage), emailEnv));
     expect(first.status).toBe(502);
     const firstBody = await first.json() as { ref: string };
-    const second = await deliver(new LeadCoordinator(state(storage), env));
+    const second = await deliver(new LeadCoordinator(state(storage), emailEnv));
     expect(second.status).toBe(202);
     expect(await second.json()).toMatchObject({ ref: firstBody.ref });
-    expect(dealCreates).toBe(1);
+    expect(internalAttempts).toBe(2);
   });
 });

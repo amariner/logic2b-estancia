@@ -192,7 +192,7 @@ const serviceSchema = {
     try {
       const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error('delivery');
+      if (!response.ok || !['delivered', 'delivered_degraded'].includes(result.outcome)) throw new Error('delivery');
       const reference = typeof result.ref === 'string' && /^[a-zA-Z0-9-]{1,100}$/.test(result.ref) ? result.ref : null;
       let meetingUrl = null;
       try { const candidate = new URL(result.meetingUrl); if (candidate.protocol === 'https:' && !candidate.username && !candidate.password) meetingUrl = candidate.href; } catch {}

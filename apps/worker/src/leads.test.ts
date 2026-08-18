@@ -110,34 +110,31 @@ describe('leads', () => {
     const response = await submit(env);
     expect(response.status).toBe(502); expect(await response.json()).toMatchObject({ outcome: 'failed' });
   });
-  it('accepts the lead when email succeeds and HubSpot is degraded', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => String(input).includes('hubapi.com') ? new Response('no', { status: 500 }) : new Response('{}', { status: 200 }));
-    const env = { ...emailEnv, HUBSPOT_ACCESS_TOKEN: 'crm' } as const;
-    const response = await submit(env);
-    expect(response.status).toBe(202); expect(await response.json()).toMatchObject({ outcome: 'delivered_degraded' });
-  });
-  it('accepts the lead when HubSpot succeeds and email is degraded', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-      const url = String(input);
-      if (url.includes('resend.com')) return new Response('no', { status: 500 });
-      if (url.endsWith('/contacts/search')) return new Response(JSON.stringify({ results: [] }), { status: 200 });
-      if (url.endsWith('/contacts')) return new Response(JSON.stringify({ id: 'contact-1' }), { status: 201 });
-      return new Response(JSON.stringify({ id: 'deal-1' }), { status: 201 });
+  it('fails instead of losing the lead when only the visitor summary succeeds', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+      const payload = JSON.parse(String(init?.body)) as { to: string[] };
+      return new Response('{}', { status: payload.to[0] === 'sales@example.test' ? 500 : 200 });
     });
-    const env = { ...emailEnv, HUBSPOT_ACCESS_TOKEN: 'crm' } as const;
-    const response = await submit(env);
-    expect(response.status).toBe(202); expect(await response.json()).toMatchObject({ outcome: 'delivered_degraded' });
+    const response = await submit(emailEnv);
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ outcome: 'failed', error: 'lead_delivery_failed' });
   });
-  it('marks delivery as degraded when CRM succeeds but selected email configuration is invalid', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-      const url = String(input);
-      if (url.endsWith('/contacts/search')) return new Response(JSON.stringify({ results: [] }), { status: 200 });
-      if (url.endsWith('/contacts')) return new Response(JSON.stringify({ id: 'contact-1' }), { status: 201 });
-      return new Response(JSON.stringify({ id: 'deal-1' }), { status: 201 });
+  it('keeps the captured lead when only the optional visitor summary fails', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+      const payload = JSON.parse(String(init?.body)) as { to: string[] };
+      return new Response('{}', { status: payload.to[0] === 'sales@example.test' ? 200 : 500 });
     });
-    const response = await submit({ LEADS_TRANSPORT: 'resend', HUBSPOT_ACCESS_TOKEN: 'crm' });
+    const response = await submit(emailEnv);
     expect(response.status).toBe(202);
     expect(await response.json()).toMatchObject({ outcome: 'delivered_degraded' });
+  });
+  it('never invokes a CRM even if a legacy environment value is present', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    const env = { ...emailEnv, HUBSPOT_ACCESS_TOKEN: 'legacy-value' } as LeadEnv & { HUBSPOT_ACCESS_TOKEN: string };
+    const response = await submit(env);
+    expect(response.status).toBe(202);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher.mock.calls.every(([input]) => String(input) === 'https://api.resend.com/emails')).toBe(true);
   });
   it('uses validated addresses and only returns a public HTTPS meeting URL', async () => {
     const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
@@ -147,6 +144,22 @@ describe('leads', () => {
     const payloads = fetcher.mock.calls.map(([, init]) => JSON.parse(String(init?.body)) as Record<string, unknown>);
     expect(payloads[0]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['sales@example.test'], reply_to: 'ada@example.test' });
     expect(payloads[1]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['ada@example.test'], reply_to: 'reply@example.test' });
+  });
+  it('acknowledges a direct enquiry without inventing a Basic recommendation', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    await submit(emailEnv);
+    const visitor = JSON.parse(String(fetcher.mock.calls[1]?.[1]?.body)) as { subject: string; text: string; html: string };
+    expect(visitor.subject).toBe('Hemos recibido tu solicitud de Logic Estancia');
+    expect(visitor.text).toContain('hemos recibido tu solicitud sobre Casa Ada');
+    expect(`${visitor.subject} ${visitor.text} ${visitor.html}`).not.toMatch(/Básico|recomendación inicial|Capacidades solicitadas/);
+  });
+  it('keeps a real assessment recommendation and its requested capabilities in the summary', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    await submit(emailEnv, { ...lead, lang: 'en', plan: 'inteligente', requestedCapabilities: ['automation'] });
+    const visitor = JSON.parse(String(fetcher.mock.calls[1]?.[1]?.body)) as { subject: string; text: string };
+    expect(visitor.subject).toBe('Your Logic Estancia assessment · Intelligent');
+    expect(visitor.text).toContain('your initial recommendation is Intelligent');
+    expect(visitor.text).toContain('Requested capabilities: automation');
   });
   it('omits an unsafe meeting URL while preserving successful delivery', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));

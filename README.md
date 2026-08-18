@@ -26,7 +26,7 @@ El smoke de Resend es seco por defecto y requiere autorización explícita para 
 
 Las integraciones, formularios, reservas, pagos, canales, mensajería, SES.Hospedajes e IA visibles en Nivora, Terrava, Aurem y sus dashboards son demostraciones locales, nunca ejecuciones externas.
 
-La cadencia comercial, la taxonomía de GA4 y el guion de entrevistas están documentados en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md). La referencia histórica de HubSpot permanece diferida y no describe una integración activa.
+La cadencia comercial, la taxonomía de GA4 y el guion de entrevistas están documentados en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md). HubSpot no forma parte del contrato ni del código ejecutable del Worker.
 
 ## Continuidad del desarrollo
 

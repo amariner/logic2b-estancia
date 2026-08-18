@@ -51,41 +51,9 @@ Weekly minimum:
 
 Record exact language, current stack, critical workflow, required integrations, timeline, range, objection and next step. Do not record guest data.
 
-## HubSpot setup · deferred
+## CRM boundary
 
-HubSpot is not part of the current production scope. Do not create an app, token, pipeline or CRM data unless a future explicit decision reactivates this section. The details below are retained only as a reviewed implementation reference.
-
-Create a private app with contact read/write and deal read/write scopes, then configure `HUBSPOT_ACCESS_TOKEN` as a Wrangler secret. Keep pipeline and first stage configurable through `HUBSPOT_PIPELINE` and `HUBSPOT_DEAL_STAGE`.
-
-Pipeline stages:
-
-1. New
-2. Contacted
-3. Assessment completed
-4. Meeting
-5. Proposal
-6. Negotiation
-7. Won
-8. Lost
-
-Create these contact properties to receive structured assessment data. The Worker falls back to standard contact properties plus a complete deal description when they are absent.
-
-- `logic_estancia_accommodation_type`
-- `logic_estancia_business_mode`
-- `logic_estancia_property_count`
-- `logic_estancia_unit_count`
-- `logic_estancia_recommended_plan`
-- `logic_estancia_timeline`
-- `logic_estancia_investment_range`
-- `logic_estancia_requested_capabilities`
-- `logic_estancia_source_path`
-- `logic_estancia_marketing_consent`
-
-Create one additional deal property before enabling HubSpot:
-
-- `logic_estancia_submission_id`: single-line text with unique values. The Worker searches this property before creating a deal and refuses an unsafe fallback when the property is unavailable.
-
-Before production, send one identified test lead and verify contact deduplication, deal association, internal email and visitor summary. Never paste the token into a tracked file.
+HubSpot is not part of the current product or production scope. The Worker has no HubSpot binding, token contract or executable CRM branch: a stale or accidental environment value cannot create contacts or deals. Reintroducing any CRM requires a future explicit product decision, a new privacy and retention review, an idempotent delivery design and dedicated tests before configuration.
 
 ## Lead environment configuration
 
@@ -97,7 +65,7 @@ Configure these values in the Cloudflare Worker environment, never in tracked so
 - `LEADS_REPLY_TO`: monitored address used when the visitor replies to their summary.
 - `LEADS_MEETING_URL`: public HTTPS scheduling URL, without embedded credentials.
 
-In production, `LEADS_INTERNAL_RECIPIENT` is `marinerandreu+logic@gmail.com`. Email delivery is only eligible when the API key and all three addresses pass validation; otherwise the endpoint fails closed. The dormant HubSpot branch must remain unconfigured. A missing or invalid meeting URL is never rendered as a link.
+In production, `LEADS_INTERNAL_RECIPIENT` is `marinerandreu+logic@gmail.com`. Email delivery is only eligible when the API key and all three addresses pass validation; otherwise the endpoint fails closed. A missing or invalid meeting URL is never rendered as a link.
 
 Use `apps/worker/.dev.vars.example` only as a local shape reference. Definitive addresses and the scheduling URL require human validation before deployment.
 
@@ -107,13 +75,13 @@ Cloudflare Durable Objects keep the five-submissions-per-minute IP limit outside
 
 Use the structured Worker log event and its `ref` when a provider is degraded:
 
-1. For `lead_delivery_degraded`, confirm which channel succeeded before doing anything manually.
+1. For `lead_delivery_degraded`, the internal request is already delivered but the visitor summary failed. Use the reference to verify the internal message before deciding whether to acknowledge it manually.
 2. In Resend, inspect both idempotency keys for that reference before resending a message.
 3. For `lead_delivery_failed`, retry the unchanged payload within 24 hours; changing any lead field intentionally creates a different submission identity.
 4. If `lead_coordination_failed` appears, restore the Durable Object binding before retrying. The endpoint fails closed instead of bypassing rate limiting or idempotency.
 5. For `lead_email_configuration_invalid`, repair every named field before relying on Resend. For `lead_meeting_configuration_invalid`, verify the public HTTPS agenda value; no unsafe value is returned to the browser.
 
-Do not create CRM records while HubSpot remains outside the production scope.
+An internal Resend message is the mandatory delivery. A visitor summary without the internal message is a failed submission, returns `502` and remains retryable with the same durable reference; an internal message without the visitor summary returns `202 delivered_degraded`. Do not create CRM records while HubSpot remains outside the production scope.
 
 ### Demo form boundary
 

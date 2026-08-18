@@ -448,6 +448,20 @@ test('the English receipt exposes only a valid optional meeting link', async ({ 
   await expect(receipt.locator('[data-meeting-link]')).toHaveAttribute('rel', 'noopener noreferrer');
 });
 
+test('the sales form does not claim delivery for a non-delivery 202 response', async ({ page }) => {
+  await page.route('**/api/leads', (route) => route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'demo' }) }));
+  await page.goto('/');
+  const form = page.locator('[data-lead]');
+  await form.locator('[name="name"]').fill('Ada Demo');
+  await form.locator('[name="businessName"]').fill('Casa Demo');
+  await form.locator('[name="email"]').fill('ada@example.test');
+  await form.locator('[name="accept"]').check();
+  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
+  await expect(form.locator('[data-lead-receipt]')).toBeHidden();
+  await expect(form.locator('.form-status')).toHaveText('No hemos podido entregarla. Prueba por WhatsApp o vuelve a intentarlo.');
+  await expect(form.getByRole('button', { name: /Quiero una recomendación/ })).toBeEnabled();
+});
+
 test('cookie preferences remain consent-gated, revocable and shared with demos', async ({ page }) => {
   await page.goto('/');
   const banner = page.getByRole('dialog', { name: 'Configuración de cookies' });

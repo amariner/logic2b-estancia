@@ -8,9 +8,6 @@ export interface LeadEnv {
   LEADS_INTERNAL_RECIPIENT?: string;
   LEADS_REPLY_TO?: string;
   LEADS_MEETING_URL?: string;
-  HUBSPOT_ACCESS_TOKEN?: string;
-  HUBSPOT_PIPELINE?: string;
-  HUBSPOT_DEAL_STAGE?: string;
   LEAD_COORDINATOR?: DurableObjectNamespace;
 }
 
@@ -92,12 +89,12 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
   if (lead.sourcePath && isDemoPath(lead.sourcePath)) return json({ ok: false, outcome: 'blocked', error: 'demo_submission_disabled' }, 403);
   const transport = env.LEADS_TRANSPORT ?? (env.LEADS_RESEND_API_KEY ? 'resend' : 'disabled');
   if (transport === 'demo') return json({ ok: true, outcome: 'demo', meetingUrl: parseMeetingUrl(env.LEADS_MEETING_URL) }, 202);
-  const expectedEmail = transport === 'resend';
-  const emailConfiguration = expectedEmail ? parseEmailConfiguration(env) : null;
-  const canEmail = Boolean(emailConfiguration);
-  const canCrm = Boolean(env.HUBSPOT_ACCESS_TOKEN);
-  if (expectedEmail && !emailConfiguration) logInvalidEmailConfiguration(env);
-  if (!canEmail && !canCrm) return json({ ok: false, outcome: 'disabled', error: expectedEmail ? 'lead_email_configuration_invalid' : 'lead_delivery_disabled' }, 503);
+  if (transport !== 'resend') return json({ ok: false, outcome: 'disabled', error: 'lead_delivery_disabled' }, 503);
+  const emailConfiguration = parseEmailConfiguration(env);
+  if (!emailConfiguration) {
+    logInvalidEmailConfiguration(env);
+    return json({ ok: false, outcome: 'disabled', error: 'lead_email_configuration_invalid' }, 503);
+  }
 
   const fingerprint = await sha256(stableJson(lead));
   try {
@@ -122,27 +119,23 @@ function hasDemoReferrer(request: Request): boolean {
 
 export async function deliverLead(lead: Lead, env: LeadEnv, ref: string): Promise<Response> {
   const transport = env.LEADS_TRANSPORT ?? (env.LEADS_RESEND_API_KEY ? 'resend' : 'disabled');
-  const expectedEmail = transport === 'resend';
-  const emailConfiguration = expectedEmail ? parseEmailConfiguration(env) : null;
-  const canEmail = Boolean(emailConfiguration);
-  const canCrm = Boolean(env.HUBSPOT_ACCESS_TOKEN);
-  if (!canEmail && !canCrm) return json({ ok: false, outcome: 'disabled', error: expectedEmail ? 'lead_email_configuration_invalid' : 'lead_delivery_disabled' }, 503);
+  if (transport !== 'resend') return json({ ok: false, outcome: 'disabled', error: 'lead_delivery_disabled' }, 503);
+  const emailConfiguration = parseEmailConfiguration(env);
+  if (!emailConfiguration) return json({ ok: false, outcome: 'disabled', error: 'lead_email_configuration_invalid' }, 503);
 
-  const jobs: Promise<{ channel: string; ok: boolean }>[] = [];
-  if (emailConfiguration) {
-    jobs.push(sendInternalEmail(lead, ref, emailConfiguration).then((ok) => ({ channel: 'internal_email', ok })));
-    jobs.push(sendVisitorSummary(lead, ref, emailConfiguration).then((ok) => ({ channel: 'visitor_email', ok })));
-  } else if (expectedEmail) {
-    jobs.push(Promise.resolve({ channel: 'email_configuration', ok: false }));
-  }
-  if (canCrm) jobs.push(syncHubSpot(lead, ref, env).then((ok) => ({ channel: 'hubspot', ok })));
-  const results = await Promise.all(jobs);
-  const delivered = results.some(({ ok }) => ok);
-  if (!delivered) {
+  const [internalOk, visitorOk] = await Promise.all([
+    sendInternalEmail(lead, ref, emailConfiguration),
+    sendVisitorSummary(lead, ref, emailConfiguration),
+  ]);
+  const results = [
+    { channel: 'internal_email', ok: internalOk },
+    { channel: 'visitor_email', ok: visitorOk },
+  ];
+  if (!internalOk) {
     console.error(JSON.stringify({ event: 'lead_delivery_failed', ref, channels: results }));
     return json({ ok: false, outcome: 'failed', error: 'lead_delivery_failed', ref }, 502);
   }
-  const degraded = results.some(({ ok }) => !ok);
+  const degraded = !visitorOk;
   if (degraded) console.error(JSON.stringify({ event: 'lead_delivery_degraded', ref, channels: results }));
   const meetingUrl = parseMeetingUrl(env.LEADS_MEETING_URL);
   if (!meetingUrl) console.error(JSON.stringify({ event: 'lead_meeting_configuration_invalid', reason: env.LEADS_MEETING_URL ? 'invalid' : 'missing' }));
@@ -243,66 +236,25 @@ async function sendInternalEmail(lead: Lead, ref: string, configuration: EmailCo
 }
 
 async function sendVisitorSummary(lead: Lead, ref: string, configuration: EmailConfiguration): Promise<boolean> {
-  const plan = lead.plan ?? 'basico';
+  const plan = lead.plan;
   const names = lead.lang === 'en' ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' } : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
-  const en = lead.lang === 'en'; const subject = en ? `Your Logic Estancia assessment · ${names[plan]}` : `Tu diagnóstico Logic Estancia · ${names[plan]}`;
-  const intro = en ? `Hello ${lead.name}, your initial recommendation is ${names[plan]}.` : `Hola ${lead.name}, tu recomendación inicial es ${names[plan]}.`;
+  const en = lead.lang === 'en';
+  const subject = plan
+    ? (en ? `Your Logic Estancia assessment · ${names[plan]}` : `Tu diagnóstico Logic Estancia · ${names[plan]}`)
+    : (en ? 'We received your Logic Estancia request' : 'Hemos recibido tu solicitud de Logic Estancia');
+  const intro = plan
+    ? (en ? `Hello ${lead.name}, your initial recommendation is ${names[plan]}.` : `Hola ${lead.name}, tu recomendación inicial es ${names[plan]}.`)
+    : (en ? `Hello ${lead.name}, we received your request about ${lead.businessName}.` : `Hola ${lead.name}, hemos recibido tu solicitud sobre ${lead.businessName}.`);
   const followup = en ? 'We will review your context and reply within one business day.' : 'Revisaremos tu contexto y responderemos en un día laborable.';
-  const text = `${intro}\n\n${followup}\n\n${en ? 'Requested capabilities' : 'Capacidades solicitadas'}: ${lead.requestedCapabilities?.join(', ') || '—'}\n\n${en ? 'Reference' : 'Referencia'}: ${ref}`;
-  const html = `<h2>${escapeHtml(intro)}</h2><p>${escapeHtml(followup)}</p><p><strong>${en ? 'Requested capabilities' : 'Capacidades solicitadas'}</strong><br>${escapeHtml(lead.requestedCapabilities?.join(', ') || '—')}</p><p>${en ? 'Reference' : 'Referencia'}: ${escapeHtml(ref)}</p>`;
+  const capabilities = lead.requestedCapabilities?.length
+    ? `\n\n${en ? 'Requested capabilities' : 'Capacidades solicitadas'}: ${lead.requestedCapabilities.join(', ')}`
+    : '';
+  const capabilitiesHtml = lead.requestedCapabilities?.length
+    ? `<p><strong>${en ? 'Requested capabilities' : 'Capacidades solicitadas'}</strong><br>${escapeHtml(lead.requestedCapabilities.join(', '))}</p>`
+    : '';
+  const text = `${intro}\n\n${followup}${capabilities}\n\n${en ? 'Reference' : 'Referencia'}: ${ref}`;
+  const html = `<h2>${escapeHtml(intro)}</h2><p>${escapeHtml(followup)}</p>${capabilitiesHtml}<p>${en ? 'Reference' : 'Referencia'}: ${escapeHtml(ref)}</p>`;
   return resend(configuration.apiKey, `estancia-lead/${ref}/visitor`, { from: `Logic Estancia <${configuration.fromEmail}>`, to: [lead.email], reply_to: configuration.replyTo, subject, html, text });
-}
-
-async function hubspotRequest(path: string, token: string, init: RequestInit): Promise<Response | null> {
-  try { return await fetch(`https://api.hubapi.com${path}`, { ...init, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...(init.headers || {}) } }); }
-  catch { return null; }
-}
-
-async function syncHubSpot(lead: Lead, ref: string, env: LeadEnv): Promise<boolean> {
-  const token = env.HUBSPOT_ACCESS_TOKEN!;
-  const search = await hubspotRequest('/crm/v3/objects/contacts/search', token, { method: 'POST', body: JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'email', operator: 'EQ', value: lead.email }] }], properties: ['email'], limit: 1 }) });
-  if (!search?.ok) return false;
-  const searchBody = await search.json() as { results?: { id: string }[] };
-  const [firstName, ...surname] = lead.name.trim().split(/\s+/);
-  const properties = { email: lead.email, firstname: firstName, lastname: surname.join(' '), company: lead.businessName, phone: lead.phone || '' };
-  const enrichedProperties = {
-    ...properties,
-    logic_estancia_accommodation_type: lead.accommodationType,
-    logic_estancia_business_mode: lead.businessMode || '',
-    logic_estancia_property_count: String(lead.propertyCount),
-    logic_estancia_unit_count: String(lead.unitCount),
-    logic_estancia_recommended_plan: lead.plan || '',
-    logic_estancia_timeline: lead.timeline || '',
-    logic_estancia_investment_range: lead.investmentRange || '',
-    logic_estancia_requested_capabilities: lead.requestedCapabilities?.join(';') || '',
-    logic_estancia_source_path: lead.sourcePath || '',
-    logic_estancia_marketing_consent: lead.marketingConsent ? 'true' : 'false',
-  };
-  let contactId = searchBody.results?.[0]?.id;
-  const contactPath = contactId ? `/crm/v3/objects/contacts/${contactId}` : '/crm/v3/objects/contacts';
-  const contactMethod = contactId ? 'PATCH' : 'POST';
-  let contact = await hubspotRequest(contactPath, token, { method: contactMethod, body: JSON.stringify({ properties: enrichedProperties }) });
-  if (contact && !contact.ok) contact = await hubspotRequest(contactPath, token, { method: contactMethod, body: JSON.stringify({ properties }) });
-  if (!contact?.ok) return false;
-  if (!contactId) contactId = ((await contact.json()) as { id?: string }).id;
-  if (!contactId) return false;
-  const existingDeal = await hubspotRequest('/crm/v3/objects/deals/search', token, {
-    method: 'POST',
-    body: JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'logic_estancia_submission_id', operator: 'EQ', value: ref }] }], properties: ['logic_estancia_submission_id'], limit: 1 }),
-  });
-  if (!existingDeal?.ok) return false;
-  const existingDealBody = await existingDeal.json() as { results?: { id: string }[] };
-  if (existingDealBody.results?.[0]?.id) return true;
-  const description = leadRows(lead).map(([key, value]) => `${key}: ${value}`).join('\n');
-  const deal = await hubspotRequest('/crm/v3/objects/deals', token, { method: 'POST', body: JSON.stringify({ properties: { dealname: `${lead.businessName} · ${lead.plan || 'diagnóstico'}`, pipeline: env.HUBSPOT_PIPELINE || 'default', dealstage: env.HUBSPOT_DEAL_STAGE || 'appointmentscheduled', description: `${description}\nReferencia: ${ref}`, logic_estancia_submission_id: ref }, associations: [{ to: { id: contactId }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 3 }] }] }) });
-  if (deal?.ok) return true;
-  const retrySearch = await hubspotRequest('/crm/v3/objects/deals/search', token, {
-    method: 'POST',
-    body: JSON.stringify({ filterGroups: [{ filters: [{ propertyName: 'logic_estancia_submission_id', operator: 'EQ', value: ref }] }], properties: ['logic_estancia_submission_id'], limit: 1 }),
-  });
-  if (!retrySearch?.ok) return false;
-  const retryBody = await retrySearch.json() as { results?: { id: string }[] };
-  return Boolean(retryBody.results?.[0]?.id);
 }
 
 function escapeHtml(value: string): string {
