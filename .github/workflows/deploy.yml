@@ -21,12 +21,12 @@ jobs:
   deploy:
     if: >-
       ${{
-        vars.ESTANCIA_DEPLOY_ENABLED == 'true' &&
         (
           (
             github.event_name == 'workflow_dispatch' &&
             inputs.confirm == 'DEPLOY' &&
-            github.ref == 'refs/heads/main'
+            github.ref == 'refs/heads/main' &&
+            vars.ESTANCIA_DEPLOY_ENABLED == 'true'
           ) ||
           (
             github.event_name == 'push' &&
