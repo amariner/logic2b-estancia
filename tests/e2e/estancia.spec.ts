@@ -215,6 +215,10 @@ test('WhatsApp contact follows the Camp pattern without covering the footer', as
     color: 'rgb(19, 122, 59)',
   });
 
+  await page.locator('#contacto').scrollIntoViewIfNeeded();
+  await expect(contact).toHaveAttribute('data-visible', 'false');
+  await expect(contact).toHaveAttribute('tabindex', '-1');
+
   await page.locator('footer').scrollIntoViewIfNeeded();
   await expect(contact).toHaveAttribute('data-visible', 'false');
   await expect(contact).toHaveAttribute('tabindex', '-1');
@@ -307,22 +311,90 @@ test('assessment reveals an operations recommendation before asking for contact 
   await expect(page.locator('[data-demo-link]')).toHaveAttribute('href', '/demos/aurem/');
 });
 
-test('assessment keeps answers local and routes contact to the single sales form', async ({ page }) => {
+test('assessment keeps context local until the single sales form is reviewed and submitted', async ({ page }) => {
   let leadRequests = 0;
-  page.on('request', (request) => { if (request.url().includes('/api/leads')) leadRequests += 1; });
+  let submitted: Record<string, unknown> | null = null;
+  await page.route('**/api/leads', async (route) => {
+    leadRequests += 1;
+    submitted = route.request().postDataJSON() as Record<string, unknown>;
+    await route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'assessment-ref', meetingUrl: null }) });
+  });
   await page.goto('/diagnostico/');
   await page.locator('[data-step="1"]').getByText('Apartamentos', { exact: true }).click();
-  for (let step = 0; step < 5; step += 1) await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByLabel('Modelo de operación').selectOption('multi');
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByLabel('Propiedades').fill('3');
+  await page.getByLabel('Unidades o habitaciones').fill('12');
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByText('Web', { exact: true }).click();
+  await page.getByText('Email y hojas de cálculo', { exact: true }).click();
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByText('Reservas', { exact: true }).click();
+  await page.getByText('Planning', { exact: true }).click();
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByLabel('Plazo').selectOption('3-6');
+  await page.getByLabel('Inversión de implantación').selectOption('8k-20k');
   await page.getByRole('button', { name: /Ver recomendación/ }).click();
   await expect(page.locator('[data-diagnostic-lead]')).toHaveCount(0);
-  await expect(page.getByText('Las respuestas del diagnóstico permanecen en este navegador.')).toBeVisible();
-  const salesLink = page.getByRole('link', { name: /Ir al formulario comercial/ });
-  await expect(salesLink).toHaveAttribute('href', '/#contacto');
+  await expect(page.getByText(/este contexto se conserva temporalmente en esta pestaña/)).toBeVisible();
+  const salesLink = page.getByRole('link', { name: /Continuar con este contexto/ });
+  await expect(salesLink).toHaveAttribute('href', '/?assessment=1#contacto');
+  const localContext = await page.evaluate(() => sessionStorage.getItem('logic-estancia-assessment-v1'));
+  expect(localContext).toContain('"plan":"gestion"');
+  for (const piiField of ['name', 'email', 'phone', 'message']) expect(Object.keys(JSON.parse(localContext ?? '{}'))).not.toContain(piiField);
   expect(leadRequests).toBe(0);
   await salesLink.click();
-  await expect(page).toHaveURL(/\/#contacto$/);
-  await expect(page.locator('[data-lead]')).toBeVisible();
+  await expect(page).toHaveURL(/\/\?assessment=1#contacto$/);
+  const form = page.locator('[data-lead]');
+  const handoff = form.locator('[data-assessment-handoff]');
+  await expect(handoff).toBeVisible();
+  await expect(handoff.getByRole('heading', { name: 'No tienes que empezar de nuevo.' })).toBeVisible();
+  await expect(form.locator('[name="accommodationType"]')).toHaveValue('apartment');
+  await expect(form.locator('[name="plan"]')).toHaveValue('gestion');
+  await expect(form.locator('[name="propertyCount"]')).toHaveValue('3');
+  await expect(form.locator('[name="unitCount"]')).toHaveValue('12');
+  await handoff.getByText('Revisar el contexto que se adjuntará').click();
+  await expect(handoff).toContainText('Email y hojas de cálculo');
+  await expect(handoff).toContainText('Reservas, Planning');
   expect(leadRequests).toBe(0);
+
+  await form.locator('[name="name"]').fill('Ada Demo');
+  await form.locator('[name="businessName"]').fill('Apartamentos Demo');
+  await form.locator('[name="email"]').fill('ada@example.test');
+  await form.locator('[name="accept"]').check();
+  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
+  await expect(form.locator('[data-lead-receipt]')).toBeVisible();
+  expect(leadRequests).toBe(1);
+  expect(submitted).toMatchObject({
+    accommodationType: 'apartment', businessMode: 'multi', propertyCount: 3, unitCount: 12, plan: 'gestion',
+    currentStack: ['website', 'email'], requestedCapabilities: ['bookings', 'planning'], timeline: '3-6', investmentRange: '8k-20k',
+    sourcePath: '/diagnostico/', name: 'Ada Demo', email: 'ada@example.test',
+  });
+  expect(await page.evaluate(() => sessionStorage.getItem('logic-estancia-assessment-v1'))).toBeNull();
+});
+
+test('English assessment context is reviewable and can be discarded before contact', async ({ page }) => {
+  await page.goto('/en/assessment/');
+  await page.evaluate(() => sessionStorage.setItem('logic-estancia-assessment-v1', JSON.stringify({
+    version: '1.0.0', createdAt: Date.now(), locale: 'en', accommodationType: 'hotel', businessMode: 'mono',
+    propertyCount: 1, unitCount: 32, plan: 'inteligente', currentStack: ['pms'], requestedCapabilities: ['maintenance'],
+    timeline: 'exploring', investmentRange: 'unknown',
+  })));
+  await page.goto('/en/?assessment=1#contacto');
+  const form = page.locator('[data-lead]');
+  const handoff = form.locator('[data-assessment-handoff]');
+  await expect(handoff.getByRole('heading', { name: 'You do not have to start again.' })).toBeVisible();
+  await expect(form.locator('[name="accommodationType"]')).toHaveValue('hotel');
+  await expect(form.locator('[name="plan"]')).toHaveValue('inteligente');
+  await handoff.getByText('Review the context that will be attached').click();
+  await expect(handoff).toContainText('Maintenance');
+  await expect(handoff).toContainText('To be defined');
+  await handoff.getByRole('button', { name: 'Do not attach these answers' }).click();
+  await expect(handoff).toBeHidden();
+  await expect(page).toHaveURL(/\/en\/#contacto$/);
+  await expect(form.locator('[name="accommodationType"]')).toBeFocused();
+  expect(await page.evaluate(() => sessionStorage.getItem('logic-estancia-assessment-v1'))).toBeNull();
 });
 
 test('the sales landing is the only form that calls the production lead endpoint', async ({ page }) => {

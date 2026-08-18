@@ -149,6 +149,19 @@
 .contact-promises li { display: grid; grid-template-columns: 16px 1fr; gap: 8px; }
 .contact-promises li::before { color: var(--sienna); content: '✓'; }
 .lead-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.assessment-handoff { display: grid; gap: 18px; border: 1px solid rgb(122 62 45 / .24); border-radius: 22px; padding: 24px; background: var(--peach); }
+.assessment-handoff[hidden] { display: none; }
+.assessment-handoff .eyebrow { margin-bottom: 8px; color: #7a3e2d; }
+.assessment-handoff h3 { margin: 0; font-family: var(--serif); font-size: 1.75rem; font-weight: 400; line-height: 1.05; }
+.assessment-handoff p:not(.eyebrow) { max-width: 620px; margin: 10px 0 0; color: var(--slate); font-size: .8rem; line-height: 1.6; }
+.assessment-handoff details { border-top: 1px solid rgb(122 62 45 / .2); border-bottom: 1px solid rgb(122 62 45 / .2); }
+.assessment-handoff summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; cursor: pointer; font-size: .78rem; font-weight: 700; list-style: none; }
+.assessment-handoff summary::-webkit-details-marker { display: none; }
+.assessment-handoff details[open] summary span { transform: rotate(45deg); }
+.assessment-handoff dl { display: grid; grid-template-columns: minmax(130px, .65fr) 1.35fr; gap: 9px 18px; margin: 0; padding: 4px 0 18px; color: var(--slate); font-size: .75rem; line-height: 1.5; }
+.assessment-handoff dt { color: var(--ink); font-weight: 700; }
+.assessment-handoff dd { margin: 0; overflow-wrap: anywhere; }
+.assessment-handoff .text-link { width: fit-content; min-height: 44px; border: 0; padding: 0; color: var(--sienna); background: transparent; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .form-expectation { margin: 0 0 4px; color: var(--slate); font-size: .78rem; line-height: 1.55; }
 .lead-form label { display: grid; gap: 7px; color: var(--slate); font-size: .75rem; }
 .lead-form input, .lead-form select, .lead-form textarea { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; color: var(--ink); background: var(--fog); }
@@ -476,6 +489,9 @@
   .diagnostic-card { min-height: 580px; padding: 26px; }
   .result-links { align-items: stretch; flex-direction: column; }
   .lead-form .wide { grid-column: auto; }
+  .assessment-handoff { padding: 20px; }
+  .assessment-handoff dl { grid-template-columns: 1fr; gap: 3px; }
+  .assessment-handoff dd + dt { margin-top: 8px; }
   .activation-steps li { grid-template-columns: 40px 1fr; }
   .faq { gap: 42px; }
   .faq-list summary { font-size: 1.18rem; }

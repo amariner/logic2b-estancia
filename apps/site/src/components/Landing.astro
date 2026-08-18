@@ -145,6 +145,12 @@ const serviceSchema = {
 <section id="contacto" class="section shell">
   <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 class="heading">{c.contact.title}</h2><p>{c.contact.body}</p><ul class="contact-promises"><li>{locale === 'es' ? 'Revisamos el cuello de botella, no solo el número de habitaciones.' : 'We review the bottleneck, not only the number of rooms.'}</li><li>{locale === 'es' ? 'Separamos lo que ya puede demostrarse de lo que requiere integración.' : 'We separate what can be demonstrated now from what needs integration.'}</li><li>{locale === 'es' ? 'Tus datos se usan únicamente para responder y, si lo autorizas, hacer seguimiento.' : 'Your details are used only to reply and, if authorised, follow up.'}</li></ul><p><a href={wa.href} target="_blank" rel="noopener noreferrer">WhatsApp · {wa.phone} →</a></p></div>
   <form class="lead-form" data-lead novalidate>
+    <p class="sr-only" role="status" aria-live="polite" data-assessment-context-status></p>
+    <section class="assessment-handoff wide" data-assessment-handoff hidden aria-labelledby="assessment-handoff-title">
+      <div><p class="eyebrow">{locale === 'es' ? 'Diagnóstico recuperado' : 'Assessment recovered'}</p><h3 id="assessment-handoff-title">{locale === 'es' ? 'No tienes que empezar de nuevo.' : 'You do not have to start again.'}</h3><p>{locale === 'es' ? 'Hemos precargado la recomendación y la escala. Puedes corregirlas abajo; las demás respuestas solo se adjuntarán cuando envíes este formulario.' : 'We prefilled the recommendation and scale. You can edit them below; the remaining answers are attached only when you submit this form.'}</p></div>
+      <details><summary>{locale === 'es' ? 'Revisar el contexto que se adjuntará' : 'Review the context that will be attached'}<span aria-hidden="true">+</span></summary><dl data-assessment-summary></dl></details>
+      <button class="text-link" type="button" data-assessment-discard>{locale === 'es' ? 'No adjuntar estas respuestas' : 'Do not attach these answers'}</button>
+    </section>
     <p class="form-expectation wide">{c.contact.expectation}</p>
     <label>{locale === 'es' ? 'Nombre' : 'Name'}<input name="name" required maxlength="120" autocomplete="name" /></label>
     <label>{locale === 'es' ? 'Empresa o alojamiento' : 'Business or stay'}<input name="businessName" required maxlength="160" autocomplete="organization" /></label>
@@ -181,7 +187,8 @@ const serviceSchema = {
     const button = form.querySelector('button[type=submit]'); const label = button?.querySelector('span');
     if (button) button.disabled = true; if (label) label.textContent = sending; if (status) status.textContent = '';
     const d = Object.fromEntries(new FormData(form));
-    const payload = { ...d, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: location.pathname };
+    const assessmentFields = window.estanciaAssessment?.leadFields() || {};
+    const payload = { ...d, ...assessmentFields, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: assessmentFields.sourcePath || location.pathname };
     try {
       const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
       const result = await response.json().catch(() => ({}));
@@ -197,7 +204,7 @@ const serviceSchema = {
       if (referenceValue) referenceValue.textContent = reference || '';
       if (meetingCopy) meetingCopy.textContent = meetingUrl ? meetingAvailable : meetingFallback;
       if (meetingLink) { meetingLink.hidden = !meetingUrl; if (meetingUrl) meetingLink.href = meetingUrl; else meetingLink.removeAttribute('href'); }
-      form.reset();
+      form.reset(); window.estanciaAssessment?.clear();
       form.dataset.submitted = 'true';
       if (status) status.textContent = ok;
       if (receipt) { receipt.hidden = false; receipt.focus(); }
@@ -209,5 +216,6 @@ const serviceSchema = {
 </script>
 
 <script>
+  import '../scripts/assessment-context';
   import '../scripts/scope-estimator';
 </script>

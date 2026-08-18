@@ -64,6 +64,26 @@ test('representative ES/EN routes have no automated WCAG 2.2 AA violations', asy
   expect(violations).toEqual([]);
 });
 
+test('recovered assessment context stays accessible and reflows at 320px', async ({ page }) => {
+  await gotoStable(page, '/');
+  await page.evaluate(() => {
+    localStorage.setItem('logic-estancia-consent', JSON.stringify({ essential: true, analytics: false, timestamp: new Date().toISOString(), version: '1.0.0' }));
+    sessionStorage.setItem('logic-estancia-assessment-v1', JSON.stringify({
+      version: '1.0.0', createdAt: Date.now(), locale: 'es', accommodationType: 'hotel', businessMode: 'multi',
+      propertyCount: 2, unitCount: 48, plan: 'inteligente', currentStack: ['pms', 'channels'],
+      requestedCapabilities: ['maintenance', 'automation', 'metrics'], timeline: '3-6', investmentRange: '8k-20k',
+    }));
+  });
+  await page.setViewportSize({ width: 320, height: 900 });
+  await gotoStable(page, '/?assessment=1#contacto');
+  const handoff = page.locator('[data-assessment-handoff]');
+  await handoff.getByText('Revisar el contexto que se adjuntará').click();
+  const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(formatViolations('assessment handoff', result.violations)).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+  await expect(page.locator('[data-whatsapp]')).toHaveAttribute('data-visible', 'false');
+});
+
 test('every audited route exposes one main landmark and one page heading', async ({ page }) => {
   test.setTimeout(60_000);
   for (const path of [...auditedRoutes, ...deepStateRoutes]) {

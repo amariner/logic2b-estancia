@@ -145,18 +145,24 @@ const structuredData = [
       document.addEventListener('click', (event) => { const target = event.target.closest?.('[data-track]'); if (!target) return; window.estanciaTrack?.(target.dataset.track, { locale: document.documentElement.lang, plan: target.dataset.plan, segment: target.dataset.segment, source_section: target.dataset.section }); });
       const wa = document.querySelector('[data-whatsapp]');
       const footer = document.querySelector('footer');
-      let footerVisible = false;
+      const contactSection = document.querySelector('#contacto');
+      let footerVisible = false; let contactVisible = false;
       const toggleWa = () => {
         if (!(wa instanceof HTMLAnchorElement)) return;
-        const visible = window.scrollY >= 280 && consent?.hasAttribute('hidden') && !footerVisible;
+        const visible = window.scrollY >= 280 && consent?.hasAttribute('hidden') && !footerVisible && !contactVisible;
         wa.dataset.visible = String(visible);
         wa.tabIndex = visible ? 0 : -1;
       };
-      if (footer && 'IntersectionObserver' in window) {
-        new IntersectionObserver((entries) => {
-          footerVisible = entries.some((entry) => entry.isIntersecting);
+      if ('IntersectionObserver' in window) {
+        const obstructionObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.target === footer) footerVisible = entry.isIntersecting;
+            if (entry.target === contactSection) contactVisible = entry.isIntersecting;
+          });
           toggleWa();
-        }).observe(footer);
+        });
+        obstructionObserver.observe(footer);
+        if (contactSection) obstructionObserver.observe(contactSection);
       }
       addEventListener('scroll', toggleWa, { passive: true });
       addEventListener('estancia:consent-visibility', toggleWa);
