@@ -8,6 +8,7 @@ export interface LeadEnv {
   LEADS_INTERNAL_RECIPIENT?: string;
   LEADS_REPLY_TO?: string;
   LEADS_MEETING_URL?: string;
+  LEADS_ALLOW_LOCAL_JURISDICTION_FALLBACK?: 'true';
   LEAD_COORDINATOR?: DurableObjectNamespace;
 }
 
@@ -238,7 +239,13 @@ function cloudflareCoordination(env: LeadEnv): LeadCoordination | null {
   if (!env.LEAD_COORDINATOR) return null;
   let namespace = env.LEAD_COORDINATOR;
   try { namespace = namespace.jurisdiction('eu'); }
-  catch { /* workerd local does not implement jurisdiction restrictions. */ }
+  catch {
+    if (env.LEADS_ALLOW_LOCAL_JURISDICTION_FALLBACK !== 'true') {
+      console.error(JSON.stringify({ event: 'lead_coordination_jurisdiction_failed' }));
+      return null;
+    }
+    // workerd local does not implement jurisdiction restrictions.
+  }
   return {
     async rateLimit(ip) {
       const key = await sha256(ip);

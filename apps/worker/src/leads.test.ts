@@ -55,9 +55,28 @@ describe('leads', () => {
           : new Response(JSON.stringify({ ok: true, outcome: 'delivered', ref: 'local-ref' }), { status: 202 }),
       }),
     } as unknown as DurableObjectNamespace;
-    const response = await handleLead(new Request('https://test/api/leads', { method: 'POST', body: JSON.stringify(lead) }), { ...emailEnv, LEAD_COORDINATOR: namespace });
+    const response = await handleLead(new Request('https://test/api/leads', { method: 'POST', body: JSON.stringify(lead) }), {
+      ...emailEnv, LEAD_COORDINATOR: namespace, LEADS_ALLOW_LOCAL_JURISDICTION_FALLBACK: 'true',
+    });
     expect(response.status).toBe(202);
     expect(await response.json()).toMatchObject({ ref: 'local-ref' });
+  });
+  it('fails closed when EU Durable Object jurisdiction cannot be enforced publicly', async () => {
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const getByName = vi.fn();
+    const namespace = {
+      jurisdiction: () => { throw new Error('unexpected production failure'); },
+      getByName,
+    } as unknown as DurableObjectNamespace;
+    const request = new Request('https://estancia.logic2b.com/api/leads', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(lead),
+    });
+    const response = await handleLead(request, { ...emailEnv, LEAD_COORDINATOR: namespace });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ ok: false, outcome: 'disabled', error: 'lead_coordination_unavailable' });
+    expect(getByName).not.toHaveBeenCalled();
+    expect(logger).toHaveBeenCalledWith(JSON.stringify({ event: 'lead_coordination_jurisdiction_failed' }));
+    expect(logger.mock.calls.flat().join(' ')).not.toContain('unexpected production failure');
   });
   it('fails closed when the persistent rate limiter is unavailable', async () => {
     const coordination: LeadCoordination = { rateLimit: async () => { throw new Error('unavailable'); }, submit: async () => new Response() };

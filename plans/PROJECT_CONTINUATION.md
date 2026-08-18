@@ -58,6 +58,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Respuestas de validación del formulario real reducidas a un contrato estable y mínimo; un `400` no refleja valores recibidos ni detalles internos del esquema.
 - Frontera de contenido de Resend endurecida: campos estructurados y de asunto rechazan separadores de línea, el mensaje conserva texto multilínea y todo valor dinámico del HTML permanece escapado.
 - Lectura de cuerpos robusta: streams abortados o defectuosos se convierten en `400 invalid` mínimo con evento saneado; la cancelación fallida de un cuerpo sobredimensionado no degrada su `413`.
+- Residencia durable fail-closed: producción nunca degrada silenciosamente desde `jurisdiction('eu')` al namespace global; solo desarrollo/E2E habilita un fallback explícito y no desplegable.
 - Namespace y cabeceras endurecidos sin penalizar assets: `/api` y `/api/*` desconocidos devuelven JSON privado/no cacheable; Static Assets aplica CSP base y las demos sustituyen `form-action 'self'` por `none` desde el Worker.
 - Dos recursos SEO iniciales y playbook comercial.
 - Kit comercial español `1.0.0` con plantillas versionadas de resumen de diagnóstico, seguimiento y propuesta, manifiesto, revisión humana obligatoria y CLI offline que recibe JSON por `stdin` sin escribir documentos ni hacer peticiones.
@@ -96,6 +97,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Completado y verificado localmente: `/api` exacto ya no cae al servidor público de assets; todo el namespace desconocido responde `404` JSON con `no-store`/`same-origin`. Las páginas reciben CSP base mediante `_headers` nativo y las demos mantienen `form-action 'none'` sin ejecutar el Worker para cada asset. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: rutas demo codificadas hasta tres capas se normalizan tanto en `Referer` como en `sourcePath`. El referer se rechaza antes del rate limit; el campo del cuerpo consume una cuota y se rechaza después de lectura/validación acotada, siempre antes de entrega durable o Resend. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: un error del stream al leer el JSON ya no escapa como excepción del Worker; devuelve el mismo contrato mínimo de payload inválido, registra solo `lead_body_read_failed` y nunca coordina entrega. Falta un despliegue de producción autorizado.
+- Completado y verificado localmente: si Cloudflare no puede aplicar la jurisdicción UE del Durable Object en producción, el formulario devuelve `503` antes de obtener el objeto y registra solo `lead_coordination_jurisdiction_failed`. El fallback existe únicamente mediante `LEADS_ALLOW_LOCAL_JURISDICTION_FALLBACK=true` en comandos de desarrollo/E2E; no forma parte de `wrangler.jsonc` ni del despliegue. Se retiró la referencia residual a HubSpot de `.dev.vars.example`.
 
 Siguiente punto exacto de activación: confirmar humanamente en el buzón interno que el mensaje del último smoke con referencia `e27e5bf3-a462-4db6-9f49-80d8486fe23c` está visible. Después, obtener autorización explícita para desplegar este incremento y repetir el smoke con un buzón controlado para verificar la nueva semántica en producción. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
 
@@ -158,24 +160,24 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- Alcance: fallo de lectura/cancelación del cuerpo, una prueba unitaria con stream adversarial, un E2E del contrato HTTP y este checkpoint. No se añadieron proveedores, PII, eventos públicos, cambios visuales ni despliegues.
-- Fiabilidad: una excepción del stream deja de depender del `500` del runtime y recibe `400` mínimo; un fallo secundario de `reader.cancel()` no sustituye el `413` ya determinado.
-- Seguridad y privacidad: no se refleja ni registra la excepción o el payload; la prueba usa un detalle sensible y demuestra que solo sale el nombre allowlisted del evento.
-- Compatibilidad: JSON válido, JSON malformado, cuerpo excesivo y todos los outcomes de entrega conservan sus contratos.
-- `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 45/45 pruebas del Worker.
-- E2E: 69/69 pruebas Chromium correctas en la matriz completa sobre el Worker actualizado, incluidas CSP, contrato HTTP, rutas demo codificadas, embudo, accesibilidad y SEO.
+- Alcance: enforcement de jurisdicción UE, binding explícito solo local, retirada de configuración residual de HubSpot, dos escenarios unitarios, dos E2E y este checkpoint. No se añadieron proveedores, PII, eventos públicos, cambios visuales ni despliegues todavía.
+- Privacidad: un fallo de `jurisdiction('eu')` en producción no obtiene un Durable Object sin restricción; responde `503` y el log no incluye la excepción.
+- Compatibilidad: workerd local conserva su fallback mediante un binding explícito de los comandos `dev` y Playwright; producción no contiene ese binding.
+- Veracidad: `.dev.vars.example` ya no sugiere un token de HubSpot, que sigue fuera del contrato y del código ejecutable.
+- `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 46/46 pruebas del Worker.
+- E2E relevante: 2/2 pruebas Chromium correctas para contrato API y entrega del único formulario real; la matriz completa inmediatamente anterior permanece en 69/69.
 - QA visual: no aplica — no cambia DOM, estilos, copy ni estado interactivo.
 
 ## Revisión multidisciplinar del checkpoint actual
 
 - Marketing estratégico: correcto — no cambia la propuesta ni el recorrido comercial.
-- Diseño de producto: correcto — el único canal real mantiene estados honestos y no confirma una entrega ante entrada incompleta.
-- UX: correcto — el error genérico reintentable del formulario permanece sin cambios.
+- Diseño de producto: corregido — la residencia europea deja de ser una preferencia degradable y pasa a ser condición de funcionamiento.
+- UX: correcto — ante indisponibilidad de jurisdicción se conserva el error honesto/reintentable sin recibo falso.
 - UI/dirección visual: no aplica — no hay cambios de interfaz ni contenido visible.
 - SEO: correcto — no cambian contenido indexable, metadata, headings, canonical, `hreflang`, sitemap ni datos estructurados; las cuatro pruebas SEO permanecen verdes.
-- Arquitectura frontend: correcto — no cambia el cliente ni el paso rápido de assets.
-- Full stack: corregido — toda salida de la lectura acotada vuelve al contrato API; la coordinación sigue ocurriendo solo tras un cuerpo utilizable.
-- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check`, 45/45 pruebas del Worker y 69/69 E2E cubren stream fallido, log saneado y toda la regresión; no quedan bloqueantes conocidos.
+- Arquitectura frontend: correcto — el binding local vive en tooling y no entra en el bundle ni en el entorno productivo.
+- Full stack: corregido — fallback local explícito y producción fail-closed sustituyen la heurística insegura; HubSpot permanece ausente.
+- QA/accesibilidad/rendimiento/confianza: corregido — el primer E2E detectó la reescritura local de host; el binding explícito resolvió la causa y quedan verdes `pnpm check`, 46/46 pruebas del Worker y 2/2 E2E relevantes. La matriz completa anterior es 69/69.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Los timeouts de cliente y proveedor, el contrato de entrega y Lighthouse deben comprobarse en producción tras un despliegue autorizado; el estado específico de timeout no conserva captura visual por la restricción del navegador integrado, aunque su DOM y comportamiento están cubiertos. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -223,3 +225,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se cerró `/api` exacto bajo el contrato JSON privado y se añadió CSP base mediante `_headers` de Static Assets, con `form-action 'none'` específico de demos y sin ejecutar el Worker para todo asset. El QA corrigió la primera implementación al detectar la ruta rápida de assets. Verificado con `pnpm check`, 44/44 pruebas del Worker y 3/3 E2E relevantes. No se desplegó producción.
 - 2026-08-18 — Se normalizaron hasta tres capas de codificación en rutas demo y se corrigió la evidencia del orden real: referer antes de rate limit, `sourcePath` después de una cuota y siempre antes de entrega. Verificado con `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E adversarial. No se desplegó producción.
 - 2026-08-18 — Se contuvieron los fallos de lectura del body en un `400` mínimo y observable sin causa/payload, manteniendo `413` aunque falle la cancelación del stream. Verificado con `pnpm check`, 45/45 pruebas del Worker y la matriz completa de 69/69 E2E. No se desplegó producción.
+- 2026-08-18 — Se hizo fail-closed la jurisdicción UE de Durable Objects en producción y se limitó el fallback a un binding explícito de desarrollo/E2E. El QA corrigió la primera heurística al detectar que Wrangler reescribe el host local. Se eliminó el último ejemplo residual de HubSpot. Verificado con `pnpm check`, 46/46 pruebas del Worker y 2/2 E2E relevantes. Pendiente desplegar por autorización del usuario.
