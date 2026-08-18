@@ -104,6 +104,34 @@ describe('leads', () => {
     expect(coordination.rateLimit).not.toHaveBeenCalled();
     expect(coordination.submit).not.toHaveBeenCalled();
   });
+  it('blocks a cross-site browser submission before rate limiting', async () => {
+    const coordination: LeadCoordination = { rateLimit: vi.fn(async () => null), submit: vi.fn(async () => new Response()) };
+    const request = new Request('https://test/api/leads', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'https://attacker.example', 'sec-fetch-site': 'cross-site' },
+      body: JSON.stringify(lead),
+    });
+    const response = await handleLead(request, emailEnv, coordination);
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'cross_site_submission_disabled' });
+    expect(coordination.rateLimit).not.toHaveBeenCalled();
+    expect(coordination.submit).not.toHaveBeenCalled();
+  });
+  it('accepts an explicit same-origin browser submission', async () => {
+    const coordination: LeadCoordination = {
+      rateLimit: vi.fn(async () => null),
+      submit: vi.fn(async () => new Response(JSON.stringify({ ok: true, outcome: 'delivered' }), { status: 202 })),
+    };
+    const request = new Request('https://test/api/leads', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'https://test', 'sec-fetch-site': 'same-origin' },
+      body: JSON.stringify(lead),
+    });
+    const response = await handleLead(request, emailEnv, coordination);
+    expect(response.status).toBe(202);
+    expect(coordination.rateLimit).toHaveBeenCalledOnce();
+    expect(coordination.submit).toHaveBeenCalledOnce();
+  });
   it('reports provider failure instead of claiming delivery', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('no', { status: 500 }));
     const env = emailEnv;

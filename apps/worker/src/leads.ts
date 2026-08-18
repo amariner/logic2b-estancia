@@ -72,6 +72,9 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
   // Demo forms are deliberately local fixtures. This server-side guard keeps a
   // future accidental fetch from turning them into Resend or CRM submissions.
   if (hasDemoReferrer(request)) return json({ ok: false, outcome: 'blocked', error: 'demo_submission_disabled' }, 403);
+  // Browsers expose enough context to reject cross-site form abuse before it
+  // consumes rate-limit capacity. Server-side smoke checks omit these headers.
+  if (isCrossSiteBrowserRequest(request)) return json({ ok: false, outcome: 'blocked', error: 'cross_site_submission_disabled' }, 403);
   if (!coordination) return json({ ok: false, outcome: 'disabled', error: 'lead_coordination_unavailable' }, 503);
   const ip = request.headers.get('cf-connecting-ip') ?? 'local';
   let retryAfter: number | null;
@@ -116,6 +119,14 @@ function hasDemoReferrer(request: Request): boolean {
   } catch {
     return false;
   }
+}
+
+function isCrossSiteBrowserRequest(request: Request): boolean {
+  if (request.headers.get('sec-fetch-site') === 'cross-site') return true;
+  const origin = request.headers.get('origin');
+  if (!origin) return false;
+  try { return new URL(origin).origin !== new URL(request.url).origin; }
+  catch { return true; }
 }
 
 export async function deliverLead(lead: Lead, env: LeadEnv, ref: string): Promise<Response> {

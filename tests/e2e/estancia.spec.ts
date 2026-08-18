@@ -125,6 +125,17 @@ test('the lead endpoint rejects demo sources before Resend eligibility', async (
   expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'demo_submission_disabled' });
 });
 
+test('the lead endpoint rejects cross-site browser submissions before coordination', async ({ request }) => {
+  const response = await request.post('/api/leads', {
+    headers: { origin: 'https://attacker.example', 'sec-fetch-site': 'cross-site' },
+    data: {
+      name: 'Cross-site test', businessName: 'Casa ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/', accept: true,
+    },
+  });
+  expect(response.status()).toBe(403);
+  expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'cross_site_submission_disabled' });
+});
+
 test('commercial pages expose bilingual SEO metadata and complete sitemap', async ({ page, request }) => {
   await page.goto('/');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://estancia.logic2b.com/');
