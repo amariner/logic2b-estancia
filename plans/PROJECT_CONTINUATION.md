@@ -55,6 +55,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Formularios, dashboards y acciones de las demos limitados a interacción visual/local; no envían correo, ni escriben en CRM, inventario, reservas, pagos, mensajes o proveedores externos.
 - Límite de formularios demo reforzado en profundidad: Nivora, Terrava y Aurem explican que no usan Resend; sus seis variantes ES/EN realizan cero escrituras HTTP; las páginas llevan `form-action 'none'` y `/api/leads` rechaza ruta o referer de demo con `403` antes de rate limit o proveedores.
 - Protección de origen del formulario real: los navegadores cross-site se rechazan con `403` mediante `Origin` y `Sec-Fetch-Site` antes de rate limit, coordinación o Resend; la landing same-origin y el smoke sin cabeceras de navegador conservan su contrato.
+- Respuestas de validación del formulario real reducidas a un contrato estable y mínimo; un `400` no refleja valores recibidos ni detalles internos del esquema.
 - Dos recursos SEO iniciales y playbook comercial.
 - Kit comercial español `1.0.0` con plantillas versionadas de resumen de diagnóstico, seguimiento y propuesta, manifiesto, revisión humana obligatoria y CLI offline que recibe JSON por `stdin` sin escribir documentos ni hacer peticiones.
 - Informe reproducible del embudo digital `1.0.0` sobre recuentos agregados consentidos, con contrato único de contenedor/eventos/parámetros, tasas direccionales, desgloses, advertencias de calidad y rechazo de identificadores o dimensiones libres. Estancia comparte explícitamente con Camp el contenedor `GTM-TVDWZ9LC`.
@@ -86,6 +87,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Completado y verificado localmente: `/api/leads` solo admite `POST application/json`, devuelve `415` o `405` antes de coordinación y marca todas sus respuestas como `no-store` y `same-origin`; los assets públicos no heredan estas cabeceras privadas. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: la landing interpreta `429` y `retryAfter`, conserva los datos, oculta el recibo, explica la espera ES/EN y reactiva el botón al terminar una cuenta atrás validada entre 1 y 60 segundos. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: la ausencia de `LEADS_MEETING_URL` ya no emite un error operativo porque la agenda es opcional; una URL presente pero inválida continúa omitiéndose del recibo y genera una única alerta sin registrar el valor. Falta un despliegue de producción autorizado.
+- Completado y verificado localmente: un payload inválido recibe únicamente `{ ok: false, outcome: "invalid", error: "invalid" }`; se retiraron los detalles de Zod que la landing no consumía y no se refleja ningún valor enviado. Falta un despliegue de producción autorizado.
 
 Siguiente punto exacto de activación: confirmar humanamente en el buzón interno que el mensaje del último smoke con referencia `e27e5bf3-a462-4db6-9f49-80d8486fe23c` está visible. Después, obtener autorización explícita para desplegar este incremento y repetir el smoke con un buzón controlado para verificar la nueva semántica en producción. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
 
@@ -148,24 +150,24 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- Alcance: semántica de observabilidad de la agenda opcional, dos aserciones unitarias explícitas y este checkpoint. No se añadieron dependencias, proveedores, PII, eventos públicos, cambios visuales ni despliegues.
-- Fiabilidad operativa: cada lead correcto sin agenda deja de emitir un falso `lead_meeting_configuration_invalid`; un valor presente pero inseguro sigue devolviendo `meetingUrl: null` y emite una única alerta con razón `invalid`.
-- Compatibilidad: el contrato HTTP, el recibo ES/EN, la entrega obligatoria interna, la degradación del resumen y la validación HTTPS permanecen sin cambios.
-- Seguridad y privacidad: la alerta nunca incluye el valor de la variable; una URL insegura no se devuelve ni se renderiza.
-- `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 39/39 pruebas del Worker.
-- E2E relevante: 2/2 pruebas Chromium correctas para el único formulario real y el recibo inglés con agenda opcional; la matriz completa inmediatamente anterior permanece en 69/69.
+- Alcance: respuesta `400` de validación, una prueba unitaria, una ampliación E2E del contrato HTTP y este checkpoint. No se añadieron dependencias, proveedores, PII, eventos, cambios visuales ni despliegues.
+- Privacidad y confianza: la API deja de devolver `ZodIssue[]`; el cuerpo inválido es mínimo, estable y no contiene el marcador privado enviado por la prueba.
+- Compatibilidad: la landing nunca consumía `issues`; conserva su error ES/EN y todos los contratos de éxito, degradación, rate limit y timeout.
+- Seguridad: se reduce la información útil para enumerar el esquema sin perder el código HTTP ni el estado operacional necesarios para clientes legítimos.
+- `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 40/40 pruebas del Worker.
+- E2E relevante: 1/1 prueba Chromium compuesta correcta para método, media type, cabeceras privadas, validación no reflectiva y aislamiento de assets; la matriz completa anterior permanece en 69/69.
 - QA visual: no aplica — no cambia DOM, estilos, copy ni estado interactivo.
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: correcto — no cambia la promesa comercial ni se presenta la agenda como una capacidad obligatoria.
-- Diseño de producto: corregido — la telemetría interna refleja ahora la decisión de producto de que la agenda es opcional.
-- UX: correcto — el fallback honesto y el recibo accesible permanecen idénticos.
+- Marketing estratégico: correcto — no cambia la propuesta ni el recorrido comercial.
+- Diseño de producto: correcto — el único formulario real conserva estados y resultados visibles; solo se reduce detalle interno no utilizado.
+- UX: correcto — la respuesta genérica ES/EN ante error permanece idéntica y no se elimina ninguna recuperación accionable.
 - UI/dirección visual: no aplica — no hay cambios de interfaz ni contenido visible.
 - SEO: correcto — no cambian contenido indexable, metadata, headings, canonical, `hreflang`, sitemap ni datos estructurados; las cuatro pruebas SEO permanecen verdes.
 - Arquitectura frontend: no aplica — no cambia código cliente.
-- Full stack: corregido — se separan los estados `ausente` e `inválido` sin debilitar la validación ni exponer configuración.
-- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check`, 39/39 pruebas del Worker y 2/2 E2E relevantes cubren la señal y su contrato visible; la matriz completa anterior es 69/69 y no quedan bloqueantes conocidos.
+- Full stack: corregido — la validación permanece estricta, pero su representación interna queda encapsulada tras un contrato API mínimo.
+- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check`, 40/40 pruebas del Worker y 1/1 E2E compuesto prueban ausencia de reflexión y compatibilidad; la matriz completa anterior es 69/69 y no quedan bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Los timeouts de cliente y proveedor, el contrato de entrega y Lighthouse deben comprobarse en producción tras un despliegue autorizado; el estado específico de timeout no conserva captura visual por la restricción del navegador integrado, aunque su DOM y comportamiento están cubiertos. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -207,3 +209,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se cerró el contrato HTTP de `/api/leads` a JSON POST y se hicieron privadas/no cacheables todas las respuestas API sin afectar assets. Verificado con `pnpm check` y 1/1 E2E compuesto relevante. No se desplegó producción.
 - 2026-08-18 — Se añadió recuperación bilingüe del `429`: campos conservados, recibo oculto, espera explícita y botón reactivado tras cuenta atrás acotada. Verificado con `pnpm check` y la matriz completa de 69/69 E2E. No se desplegó producción.
 - 2026-08-18 — Se alineó la observabilidad de `LEADS_MEETING_URL` con su carácter opcional: ausencia silenciosa y saludable; alerta saneada solo ante un valor presente pero inválido. Verificado con `pnpm check`, 39/39 pruebas del Worker y 2/2 E2E relevantes. No se desplegó producción.
+- 2026-08-18 — Se eliminó la exposición de detalles internos de Zod en los `400` de `/api/leads`; la respuesta mínima no refleja valores recibidos y la landing conserva su contrato. Verificado con `pnpm check`, 40/40 pruebas del Worker y 1/1 E2E compuesto. No se desplegó producción.

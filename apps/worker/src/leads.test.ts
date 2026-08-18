@@ -132,6 +132,13 @@ describe('leads', () => {
     expect(coordination.rateLimit).toHaveBeenCalledOnce();
     expect(coordination.submit).toHaveBeenCalledOnce();
   });
+  it('does not reflect invalid lead values or schema details', async () => {
+    const coordination: LeadCoordination = { rateLimit: vi.fn(async () => null), submit: vi.fn(async () => new Response()) };
+    const response = await submit(emailEnv, { ...lead, email: 'private-invalid-value' }, 'invalid-lead', coordination);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ ok: false, outcome: 'invalid', error: 'invalid' });
+    expect(coordination.submit).not.toHaveBeenCalled();
+  });
   it('rejects a declared oversized body before rate limiting', async () => {
     const coordination: LeadCoordination = { rateLimit: vi.fn(async () => null), submit: vi.fn(async () => new Response()) };
     const request = new Request('https://test/api/leads', {

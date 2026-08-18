@@ -160,6 +160,12 @@ test('the lead endpoint exposes a private JSON-only HTTP contract', async ({ req
   expect(wrongMethod.headers().allow).toBe('POST');
   expect(wrongMethod.headers()['cache-control']).toBe('no-store');
 
+  const invalid = await request.post('/api/leads', { data: {
+    name: 'Invalid contract test', businessName: 'Casa ficticia', email: 'private-invalid-value', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/', accept: true,
+  } });
+  expect(invalid.status()).toBe(400);
+  expect(await invalid.json()).toEqual({ ok: false, outcome: 'invalid', error: 'invalid' });
+
   const publicPage = await request.get('/');
   expect(publicPage.status()).toBe(200);
   expect(publicPage.headers()['cross-origin-resource-policy']).toBeUndefined();

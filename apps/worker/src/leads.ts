@@ -92,7 +92,7 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
   const bot = z.object({ website: z.string().optional() }).passthrough().safeParse(raw);
   if (bot.success && bot.data.website?.trim()) return json({ ok: true, outcome: 'received' }, 202);
   const parsed = leadSchema.safeParse(raw);
-  if (!parsed.success) return json({ ok: false, outcome: 'invalid', error: 'invalid', issues: parsed.error.issues }, 400);
+  if (!parsed.success) return json({ ok: false, outcome: 'invalid', error: 'invalid' }, 400);
   const lead = parsed.data;
   if (lead.sourcePath && isDemoPath(lead.sourcePath)) return json({ ok: false, outcome: 'blocked', error: 'demo_submission_disabled' }, 403);
   const transport = env.LEADS_TRANSPORT ?? (env.LEADS_RESEND_API_KEY ? 'resend' : 'disabled');
