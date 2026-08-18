@@ -130,6 +130,9 @@ importers:
       '@logic-estancia/dashboard':
         specifier: workspace:*
         version: link:../dashboard
+      '@logic-estancia/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@logic-estancia/ui':
         specifier: workspace:*
         version: link:../../packages/ui

@@ -1,20 +1,22 @@
-export type DemoSlug = 'nivora' | 'terrava' | 'aurem';
+import { DEMO_PLANS, type DemoSlug } from '@logic-estancia/domain';
+
+export type { DemoSlug } from '@logic-estancia/domain';
 export type DemoLocale = 'es' | 'en';
 
 export const demos = {
   nivora: {
-    brand: 'Nivora One', kind: 'City apartment', level: 'Básico', theme: 'nivora',
+    brand: 'Nivora One', kind: 'City apartment', plan: DEMO_PLANS.nivora, theme: 'nivora',
     es: { nav: ['El espacio','Guía local','Disponibilidad'], eyebrow: 'Un lugar, una estancia', title: ['Vive la ciudad', 'desde dentro.'], intro: 'Un apartamento sereno para cuatro personas, pensado para caminar, cocinar despacio y volver sin prisa.', cta: 'Consultar fechas', section: 'Todo lo que necesitas. Nada que estorbe.', body: 'Luz natural, materiales honestos y una guía local que empieza al salir por la puerta.', detail: ['4 huéspedes','2 dormitorios','1 propiedad'], formTitle: 'Cuéntanos tus fechas', formBody: 'En una implantación Básico, la solicitud llega por email. Esta demo solo responde en este navegador: no usa Resend, no envía emails, no bloquea inventario ni confirma reservas.' },
     en: { nav: ['The space','Local guide','Availability'], eyebrow: 'One place, one stay', title: ['Live the city', 'from within.'], intro: 'A calm apartment for four, made for walking, slow cooking and returning without a rush.', cta: 'Enquire about dates', section: 'Everything you need. Nothing in the way.', body: 'Natural light, honest materials and a guide that starts at your doorstep.', detail: ['4 guests','2 bedrooms','1 property'], formTitle: 'Tell us your dates', formBody: 'In a Basic implementation, the enquiry arrives by email. This demo only responds in this browser: it does not use Resend, send email, hold inventory or confirm bookings.' },
   },
   terrava: {
-    brand: 'Terrava Collection', kind: 'Rural homes', level: 'Gestión', theme: 'terrava',
+    brand: 'Terrava Collection', kind: 'Rural homes', plan: DEMO_PLANS.terrava, theme: 'terrava',
     es: { nav: ['Las casas','Experiencias','Disponibilidad'], eyebrow: 'Ocho casas · un paisaje', title: ['El tiempo cambia', 'cuando llegas.'], intro: 'Casas independientes reunidas por una misma manera de cuidar el territorio, el silencio y cada llegada.', cta: 'Encontrar una casa', section: 'Ocho refugios. Una colección con criterio.', body: 'Cada casa conserva su carácter; el gestor reúne disponibilidad, solicitudes y preparación.', detail: ['8 propiedades','2–8 huéspedes','Planning común'], formTitle: 'Busca tu casa', formBody: 'Interacción ficticia y local: propone una alternativa en este navegador, pero no usa Resend, no envía emails y no crea reservas reales.' },
     en: { nav: ['The homes','Experiences','Availability'], eyebrow: 'Eight homes · one landscape', title: ['Time changes', 'when you arrive.'], intro: 'Independent homes brought together by one way of caring for land, quiet and every arrival.', cta: 'Find a home', section: 'Eight retreats. One considered collection.', body: 'Every home keeps its character; the workspace unifies availability, enquiries and preparation.', detail: ['8 properties','2–8 guests','Shared planning'], formTitle: 'Find your home', formBody: 'Fictitious local interaction: it suggests an alternative in this browser, but does not use Resend, send email or create live bookings.' },
   },
   aurem: {
-    brand: 'Aurem Hotel', kind: 'Independent hotel', level: 'Inteligente', theme: 'aurem',
+    brand: 'Aurem Hotel', kind: 'Independent hotel', plan: DEMO_PLANS.aurem, theme: 'aurem',
     es: { nav: ['Habitaciones','Servicios','Reservar'], eyebrow: '96 habitaciones · una atención precisa', title: ['Todo dispuesto', 'antes de llegar.'], intro: 'Un hotel contemporáneo donde la calma del huésped empieza con una operación que sabe qué toca ahora.', cta: 'Comprobar disponibilidad', section: 'La precisión también se siente.', body: 'Habitaciones silenciosas, servicio atento y un equipo que comparte el estado real de cada entrada.', detail: ['96 habitaciones','4 categorías','Operación multirrol'], formTitle: 'Reserva directa', formBody: 'Disponibilidad, reserva y pago son simulaciones locales: no usan Resend, no envían emails, no crean reservas reales y no realizan cobros.' },
     en: { nav: ['Rooms','Services','Book'], eyebrow: '96 rooms · precise attention', title: ['Everything ready', 'before you arrive.'], intro: 'A contemporary hotel where guest calm starts with an operation that knows what needs attention now.', cta: 'Check availability', section: 'Precision can be felt.', body: 'Quiet rooms, attentive service and a team that shares the real state of every arrival.', detail: ['96 rooms','4 categories','Multi-role operations'], formTitle: 'Book direct', formBody: 'Availability, booking and payment are local simulations: they do not use Resend, send email, create live bookings or make charges.' },
   },
-} as const;
+} as const satisfies Record<DemoSlug, object>;

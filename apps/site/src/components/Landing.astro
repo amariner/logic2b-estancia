@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { logic2bContact } from '@logic-estancia/config/contact';
+import { DEMO_PLANS, type DemoSlug, type PlanLevel } from '@logic-estancia/domain';
 import { content } from '../content';
 import { getBusinesses } from '../businesses';
 import HumanService from './HumanService.astro';
@@ -9,14 +10,17 @@ const c = content[locale];
 const prefix = locale === 'en' ? '/en' : '';
 const wa = logic2bContact(locale, 'commercial');
 const businesses = getBusinesses(locale);
-const demos = locale === 'es' ? [
-  { slug: 'nivora', level: 'Caso ficticio · Básico', name: 'Nivora One', text: 'Cuando una buena estancia necesita una web que esté a su altura y abra una conversación directa.', image: '/media/nivora/hero.webp' },
-  { slug: 'terrava', level: 'Caso ficticio · Gestión', name: 'Terrava Collection', text: 'Cuando ocho casas comparten demanda, pero no deberían repetir ocho veces el mismo trabajo.', image: '/media/terrava/hero.webp' },
-  { slug: 'aurem', level: 'Caso ficticio · Inteligente', name: 'Aurem Hotel', text: 'Cuando el huésped aún no ve el problema, pero el equipo necesita detectarlo y coordinarse.', image: '/media/aurem/hero.webp' },
+const demoPlanNames: Record<PlanLevel, string> = locale === 'es'
+  ? { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' }
+  : { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' };
+const demos: readonly { slug: DemoSlug; name: string; text: string; image: string }[] = locale === 'es' ? [
+  { slug: 'nivora', name: 'Nivora One', text: 'Cuando una buena estancia necesita una web que esté a su altura y abra una conversación directa.', image: '/media/nivora/hero.webp' },
+  { slug: 'terrava', name: 'Terrava Collection', text: 'Cuando ocho casas comparten demanda, pero no deberían repetir ocho veces el mismo trabajo.', image: '/media/terrava/hero.webp' },
+  { slug: 'aurem', name: 'Aurem Hotel', text: 'Cuando el huésped aún no ve el problema, pero el equipo necesita detectarlo y coordinarse.', image: '/media/aurem/hero.webp' },
 ] : [
-  { slug: 'nivora', level: 'Fictional case · Basic', name: 'Nivora One', text: 'When a distinctive stay needs a website that does it justice and starts a direct conversation.', image: '/media/nivora/hero.webp' },
-  { slug: 'terrava', level: 'Fictional case · Management', name: 'Terrava Collection', text: 'When eight homes share demand but should not repeat the same work eight times.', image: '/media/terrava/hero.webp' },
-  { slug: 'aurem', level: 'Fictional case · Intelligent', name: 'Aurem Hotel', text: 'When the guest cannot see the problem yet, but the team needs to spot it and coordinate.', image: '/media/aurem/hero.webp' },
+  { slug: 'nivora', name: 'Nivora One', text: 'When a distinctive stay needs a website that does it justice and starts a direct conversation.', image: '/media/nivora/hero.webp' },
+  { slug: 'terrava', name: 'Terrava Collection', text: 'When eight homes share demand but should not repeat the same work eight times.', image: '/media/terrava/hero.webp' },
+  { slug: 'aurem', name: 'Aurem Hotel', text: 'When the guest cannot see the problem yet, but the team needs to spot it and coordinate.', image: '/media/aurem/hero.webp' },
 ];
 const levels = locale === 'es' ? [
   ['00', 'Básico', 'Deja de parecer uno más cuando te comparan y convierte el interés en consultas por email.', 'basico'],
@@ -98,7 +102,7 @@ const serviceSchema = {
 
 <section id="demos" class="section shell">
   <div class="section-head"><p class="eyebrow">{c.demos.eyebrow}</p><h2 class="heading">{c.demos.title}</h2><p>{locale === 'es' ? 'Puedes recorrer cada caso sin registrarte. Todo lo que ocurre dentro es local, ficticio y está etiquetado para que la evidencia no se confunda con una promesa.' : 'Explore every case without registering. Everything inside is local, fictional and labelled so evidence is never confused with a promise.'}</p></div>
-  <div class="demo-grid">{demos.map((demo) => <a class="demo-card card" href={`${prefix}/demos/${demo.slug}/`}><picture><source type="image/avif" srcset={`/media/${demo.slug}/hero-640.avif 640w, /media/${demo.slug}/hero-960.avif 960w`} sizes="(max-width: 760px) 100vw, 33vw" /><img src={demo.image} alt="" loading="lazy" width="2016" height="1344" /></picture><div><span class="eyebrow">{demo.level}</span><h3>{demo.name}</h3><p>{demo.text}</p><span>{c.demos.open} →</span></div></a>)}</div>
+  <div class="demo-grid">{demos.map((demo) => <a class="demo-card card" href={`${prefix}/demos/${demo.slug}/`} data-demo-card={demo.slug}><picture><source type="image/avif" srcset={`/media/${demo.slug}/hero-640.avif 640w, /media/${demo.slug}/hero-960.avif 960w`} sizes="(max-width: 760px) 100vw, 33vw" /><img src={demo.image} alt="" loading="lazy" width="2016" height="1344" /></picture><div><span class="eyebrow">{locale === 'es' ? 'Caso ficticio' : 'Fictional case'} · {demoPlanNames[DEMO_PLANS[demo.slug]]}</span><h3>{demo.name}</h3><p>{demo.text}</p><span>{c.demos.open} →</span></div></a>)}</div>
 </section>
 
 <section id="niveles" class="section levels">

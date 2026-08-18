@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit && node scripts/compose.mjs",
-    "dev": "pnpm build && wrangler dev --config wrangler.jsonc --var LEADS_ALLOW_LOCAL_JURISDICTION_FALLBACK:true",
-    "deploy": "pnpm build && wrangler deploy --config wrangler.jsonc",
+    "dev": "pnpm --workspace-root build && wrangler dev --config wrangler.jsonc --var LEADS_ALLOW_LOCAL_JURISDICTION_FALLBACK:true",
+    "deploy": "pnpm --workspace-root build && wrangler deploy --config wrangler.jsonc",
     "smoke:resend": "node scripts/smoke-resend.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src scripts --no-error-on-unmatched-pattern",

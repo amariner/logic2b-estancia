@@ -7,8 +7,16 @@ export type Maturity = 'demo' | 'simulated' | 'to-validate' | 'future';
 export type CapabilityCategory = 'web' | 'reservations' | 'operations' | 'team' | 'revenue' | 'channels' | 'automation' | 'ai';
 export type EvidenceView = 'home' | 'enquiries' | 'planning' | 'bookings' | 'guests' | 'cleaning' | 'maintenance' | 'website' | 'channels' | 'automation' | 'control' | 'reports' | 'settings';
 
+export const DEMO_PLANS = {
+  nivora: 'basico',
+  terrava: 'gestion',
+  aurem: 'inteligente',
+} as const satisfies Record<string, PlanLevel>;
+
+export type DemoSlug = keyof typeof DEMO_PLANS;
+
 interface CapabilityEvidenceBase {
-  demo: 'nivora' | 'terrava' | 'aurem';
+  demo: DemoSlug;
   proof: { es: string; en: string };
   boundary: { es: string; en: string };
 }

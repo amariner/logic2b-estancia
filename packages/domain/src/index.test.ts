@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAPABILITIES, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
+import { CAPABILITIES, DEMO_PLANS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
 
 const mono: StayOrganization = {
   id: 'org-nivora', name: 'Nivora One', vertical: 'apartment', mode: 'mono', currency: 'EUR',
@@ -16,6 +16,10 @@ describe('domain', () => {
   it('normalizes legacy public values', () => {
     expect(normalizePlanLevel('inicio')).toBe('basico');
     expect(normalizePlanLevel('automatiza')).toBe('inteligente');
+  });
+  it('keeps one canonical plan for every fictional demo', () => {
+    expect(DEMO_PLANS).toEqual({ nivora: 'basico', terrava: 'gestion', aurem: 'inteligente' });
+    expect(CAPABILITIES.every(({ evidence, minimumPlan }) => DEMO_PLANS[evidence.demo] === minimumPlan)).toBe(true);
   });
   it('keeps the capability map internally valid', () => {
     expect(new Set(CAPABILITIES.map(({ id }) => id)).size).toBe(CAPABILITIES.length);

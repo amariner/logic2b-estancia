@@ -16,6 +16,7 @@
     "@fontsource-variable/source-serif-4": "^5.2.8",
     "@logic-estancia/config": "workspace:*",
     "@logic-estancia/dashboard": "workspace:*",
+    "@logic-estancia/domain": "workspace:*",
     "@logic-estancia/ui": "workspace:*",
     "astro": "^5.12.0",
     "react": "^19.1.0",

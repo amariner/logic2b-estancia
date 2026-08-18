@@ -61,6 +61,37 @@ test('capability maps expose truthful evidence and exact localized targets', asy
   }
 });
 
+test('fictional cases keep their canonical plans truthful and localized', async ({ page }) => {
+  const cases = [
+    { slug: 'nivora', plan: 'basico', es: 'Básico', en: 'Basic', solutionEs: '/soluciones/apartamentos/', solutionEn: '/en/solutions/apartments/' },
+    { slug: 'terrava', plan: 'gestion', es: 'Gestión', en: 'Management', solutionEs: '/soluciones/casas-rurales/', solutionEn: '/en/solutions/rural-stays/' },
+    { slug: 'aurem', plan: 'inteligente', es: 'Inteligente', en: 'Intelligent', solutionEs: '/soluciones/hoteles/', solutionEn: '/en/solutions/hotels/' },
+  ] as const;
+
+  for (const locale of ['es', 'en'] as const) {
+    const prefix = locale === 'en' ? '/en' : '';
+    await page.goto(`${prefix}/`);
+    for (const demo of cases) {
+      const card = page.locator(`[data-demo-card="${demo.slug}"]`);
+      await expect(card).toContainText(`${locale === 'es' ? 'Caso ficticio' : 'Fictional case'} · ${demo[locale]}`);
+      await expect(card).toHaveAttribute('href', `${prefix}/demos/${demo.slug}/`);
+    }
+
+    for (const demo of cases) {
+      await page.goto(locale === 'es' ? demo.solutionEs : demo.solutionEn);
+      const proof = page.locator(`[data-demo-proof="${demo.slug}"]`);
+      await expect(proof.locator('[data-demo-plan]')).toHaveAttribute('data-demo-plan', demo.plan);
+      await expect(proof.locator('[data-demo-plan]')).toHaveText(demo[locale]);
+      await expect(proof.locator('a')).toHaveAttribute('href', `${prefix}/demos/${demo.slug}/`);
+
+      await page.goto(`${prefix}/demos/${demo.slug}/`);
+      const demoPlan = page.locator('[data-demo-plan]');
+      await expect(demoPlan).toHaveAttribute('data-demo-plan', demo.plan);
+      await expect(demoPlan).toContainText(`${demo[locale]} · Logic Estancia`);
+    }
+  }
+});
+
 test('capability evidence opens the exact fictitious flow without external writes', async ({ page }) => {
   const externalWrites: string[] = [];
   page.on('request', (request) => {

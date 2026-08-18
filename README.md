@@ -12,6 +12,8 @@ pnpm dev
 
 El Worker local compone el sitio comercial, las tres webs ficticias y los gestores. Las demos guardan sus cambios exclusivamente en el navegador. En Terrava y Aurem, los datos introducidos en la web demo continúan en el gestor local para completar el recorrido sin enviar información a servicios externos. El sitio comercial recomienda Básico, Gestión o Inteligente por capacidades y ofrece el resultado antes de solicitar datos de contacto.
 
+`pnpm dev` reconstruye primero la landing y las demos desde sus fuentes y después sirve una composición local en el Worker. Es una vista integrada por snapshot: reinicia el comando después de editar una superficie Astro para recomponerla.
+
 ## Producción
 
 La publicación es manual. Requiere `wrangler login` y configurar en el Worker `logic-estancia` `LEADS_RESEND_API_KEY`, `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT` y `LEADS_REPLY_TO`. El destinatario interno de producción es `marinerandreu+logic@gmail.com`. Solo el formulario comercial de la landing llama a `/api/leads`; el diagnóstico enlaza a ese formulario y las demos nunca lo invocan. El Worker no activa el canal de email con configuración parcial. HubSpot permanece intencionadamente fuera de alcance. La configuración versionada crea el Durable Object que mantiene el rate limit y la idempotencia durante el despliegue.
@@ -21,6 +23,8 @@ Para desarrollo local, copia `apps/worker/.dev.vars.example` a `apps/worker/.dev
 ```bash
 pnpm deploy
 ```
+
+El despliegue ejecuta siempre el build completo del workspace antes de invocar Wrangler; no reutiliza carpetas `dist` de una ejecución anterior.
 
 El smoke de Resend es seco por defecto y requiere autorización explícita para enviar dos correos inequívocamente marcados como prueba. El procedimiento seguro, la repetición idempotente y la comprobación manual en Resend están en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md#smoke-reproducible-de-resend).
 

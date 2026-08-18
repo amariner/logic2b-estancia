@@ -1,4 +1,5 @@
 import type { Locale } from '@logic-estancia/config';
+import { DEMO_PLANS } from '@logic-estancia/domain';
 
 export type BusinessSegment = 'rural' | 'apartments' | 'hotels';
 
@@ -63,7 +64,7 @@ export const BUSINESS_SEGMENTS = ['rural', 'apartments', 'hotels'] as const;
 
 export function getBusiness(segment: BusinessSegment, locale: Locale) {
   const business = businesses[segment];
-  return { id: segment, image: business.image, demo: business.demo, ...business[locale] };
+  return { id: segment, image: business.image, demo: business.demo, plan: DEMO_PLANS[business.demo], ...business[locale] };
 }
 
 export function getBusinesses(locale: Locale) {
