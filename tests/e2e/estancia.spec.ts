@@ -185,6 +185,37 @@ test('managed human service is explicit across the commercial journey', async ({
   await expect(service).toContainText('everything agreed in scope');
 });
 
+test('each accommodation landing explains its own detailed workflow', async ({ page }) => {
+  for (const [path, heading, result] of [
+    ['/soluciones/casas-rurales/', 'De descubrir tu historia a preparar la llegada.', 'Relación directa · contexto hasta la estancia'],
+    ['/soluciones/apartamentos/', 'Una consulta entra una vez. El contexto acompaña todo el camino.', 'Una marca · un contexto · varias unidades'],
+    ['/soluciones/hoteles/', 'De una señal dispersa a una incidencia cerrada y trazable.', 'Prioridad visible · responsable · seguimiento'],
+  ] as const) {
+    await page.goto(path);
+    const workflow = page.locator('.workflow-section');
+    await expect(workflow.getByRole('heading', { name: heading })).toBeVisible();
+    await expect(workflow.locator('.workflow-step')).toHaveCount(5);
+    await expect(workflow.locator('.workflow-step.human')).toHaveCount(1);
+    await expect(workflow.locator('.workflow-branch')).toBeVisible();
+    await expect(workflow.locator('.workflow-result')).toContainText(result);
+  }
+
+  await page.goto('/en/solutions/hotels/');
+  const workflow = page.locator('.workflow-section');
+  await expect(workflow.getByRole('heading', { name: 'From a scattered signal to a closed, traceable incident.' })).toBeVisible();
+  await expect(workflow.locator('.workflow-step')).toHaveCount(5);
+});
+
+test('capability evidence stays concise until its boundary is requested', async ({ page }) => {
+  await page.goto('/soluciones/hoteles/');
+  const capability = page.locator('[data-capability="operations-centre"]');
+  await expect(capability.getByRole('link', { name: /Ver evidencia en Aurem/ })).toBeVisible();
+  await expect(capability.locator('.capability-details')).not.toHaveAttribute('open', '');
+  await capability.locator('.capability-details summary').click();
+  await expect(capability.locator('.capability-details')).toHaveAttribute('open', '');
+  await expect(capability).toContainText('No toma decisiones ni ejecuta acciones de forma autónoma');
+});
+
 test('scope configurator recommends progressively and prefills the commercial form', async ({ page }) => {
   await page.goto('/');
   const scope = page.locator('[data-scope-estimator]');

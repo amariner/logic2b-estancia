@@ -1,0 +1,155 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import type { BusinessSegment } from '../businesses';
+
+const { locale, segment } = Astro.props as { locale: Locale; segment: BusinessSegment };
+const en = locale === 'en';
+
+const spanishWorkflows = {
+  rural: {
+    eyebrow: 'El recorrido de una reserva rural',
+    title: 'De descubrir tu historia a preparar la llegada.',
+    intro: 'Un flujo común, con decisiones humanas y contexto que no se pierde.',
+    plan: 'Gestión',
+    result: 'Relación directa · contexto hasta la estancia',
+    stages: [
+      { phase: 'Atracción', title: 'Te descubre', text: 'La historia, las imágenes y el SEO despiertan interés.', input: 'Búsqueda o recomendación', output: 'Visita con intención' },
+      { phase: 'Consulta', title: 'Pregunta por su estancia', text: 'Fechas, grupo y necesidades llegan juntas.', input: 'Formulario directo', output: 'Solicitud ordenada' },
+      { phase: 'Decisión humana', title: 'Revisas y propones', text: 'Compruebas el caso y planteas una alternativa si hace falta.', input: 'Contexto y calendario', output: 'Propuesta clara', branch: 'Si no encaja → otra casa o fecha', human: true },
+      { phase: 'Seguimiento', title: 'Confirmas el siguiente paso', text: 'La conversación conserva decisiones y responsable.', input: 'Respuesta aceptada', output: 'Reserva simulada' },
+      { phase: 'Operación', title: 'Preparas la llegada', text: 'Huésped, casa y tareas parten del mismo contexto.', input: 'Datos acordados', output: 'Estancia preparada' },
+    ],
+    controls: [
+      ['Logic2B configura', 'Marca, contenidos, permisos y flujo acordado.'],
+      ['Tú mantienes el control', 'Disponibilidad, alternativa y confirmación requieren criterio humano.'],
+      ['Límite de la demo', 'Sin pagos, inventario ni canales conectados.'],
+    ],
+  },
+  apartments: {
+    eyebrow: 'El recorrido de una cartera de apartamentos',
+    title: 'Una consulta entra una vez. El contexto acompaña todo el camino.',
+    intro: 'Un flujo compartido para crecer sin multiplicar hojas y conversaciones.',
+    plan: 'Gestión',
+    result: 'Una marca · un contexto · varias unidades',
+    stages: [
+      { phase: 'Marca propia', title: 'Te encuentran', text: 'La web presenta el conjunto y diferencia cada apartamento.', input: 'SEO, campaña o retorno', output: 'Visita cualificada' },
+      { phase: 'Consulta', title: 'Entra la solicitud', text: 'Unidad, fechas y necesidades quedan estructuradas.', input: 'Formulario directo', output: 'Ficha con contexto' },
+      { phase: 'Decisión humana', title: 'Compruebas la mejor opción', text: 'Validas el caso y propones otra unidad cuando conviene.', input: 'Fechas y preferencias', output: 'Opción propuesta', branch: 'Sin encaje → unidad alternativa', human: true },
+      { phase: 'Planning', title: 'Coordinas la cartera', text: 'La decisión pasa a una vista común sin copiar datos.', input: 'Opción aceptada', output: 'Reserva simulada' },
+      { phase: 'Llegada', title: 'Activas las tareas', text: 'Huésped, apartamento y preparación comparten referencia.', input: 'Reserva y contexto', output: 'Llegada preparada' },
+    ],
+    controls: [
+      ['Logic2B configura', 'Estructura de cartera, contenidos, permisos y flujo.'],
+      ['Tú eliges la opción', 'La plataforma ordena; el equipo valida disponibilidad y respuesta.'],
+      ['Límite de la demo', 'Sin channel manager, cobros ni disponibilidad real.'],
+    ],
+  },
+  hotels: {
+    eyebrow: 'El workflow de un turno hotelero',
+    title: 'De una señal dispersa a una incidencia cerrada y trazable.',
+    intro: 'Recepción, limpieza y dirección trabajan sobre la misma prioridad.',
+    plan: 'Inteligente',
+    result: 'Prioridad visible · responsable · seguimiento',
+    stages: [
+      { phase: 'Señales', title: 'Reúne el estado del día', text: 'Llegadas, habitaciones e incidencias aparecen en contexto.', input: 'Operación y equipo', output: 'Vista compartida' },
+      { phase: 'Priorización', title: 'Detecta el riesgo', text: 'Impacto, urgencia y huésped ayudan a ordenar la atención.', input: 'Señales del turno', output: 'Prioridad visible' },
+      { phase: 'Responsable', title: 'Asigna el siguiente paso', text: 'Cada caso conserva área, responsable y plazo.', input: 'Prioridad validada', output: 'Acción asignada', branch: 'Sin resolver → escalar con contexto', human: true },
+      { phase: 'Supervisión', title: 'Revisa antes de actuar', text: 'Mensajes, canales, precios e IA mantienen aprobación humana.', input: 'Propuesta o borrador', output: 'Decisión supervisada' },
+      { phase: 'Cierre', title: 'Resuelve y deja rastro', text: 'El resultado vuelve al turno y alimenta el seguimiento.', input: 'Acción completada', output: 'Caso trazable' },
+    ],
+    controls: [
+      ['Logic2B configura', 'Roles, vistas, prioridades y flujo acordado con el equipo.'],
+      ['El equipo decide', 'La plataforma propone contexto; las acciones sensibles se supervisan.'],
+      ['Límite de la demo', 'Sin PMS, canales, mensajería ni IA conectados.'],
+    ],
+  },
+} as const;
+
+const englishWorkflows = {
+  rural: {
+    eyebrow: 'The journey of a rural stay booking',
+    title: 'From discovering your story to preparing the arrival.',
+    intro: 'One flow, with human decisions and context that stays intact.',
+    plan: 'Management',
+    result: 'Direct relationship · context through the stay',
+    stages: [
+      { phase: 'Attraction', title: 'They discover you', text: 'Story, imagery and SEO turn interest into intent.', input: 'Search or referral', output: 'Qualified visit' },
+      { phase: 'Enquiry', title: 'They ask about a stay', text: 'Dates, group and needs arrive together.', input: 'Direct form', output: 'Structured request' },
+      { phase: 'Human decision', title: 'You review and propose', text: 'Check the case and offer an alternative when needed.', input: 'Context and calendar', output: 'Clear proposal', branch: 'No fit → another stay or date', human: true },
+      { phase: 'Follow-up', title: 'You confirm the next step', text: 'The conversation keeps decisions and ownership.', input: 'Accepted reply', output: 'Simulated booking' },
+      { phase: 'Operations', title: 'You prepare the arrival', text: 'Guest, property and tasks share the same context.', input: 'Agreed details', output: 'Stay prepared' },
+    ],
+    controls: [['Logic2B configures', 'Brand, content, permissions and agreed flow.'], ['You stay in control', 'Availability, alternatives and confirmation need human judgement.'], ['Demo boundary', 'No live payments, inventory or channels.']],
+  },
+  apartments: {
+    eyebrow: 'The journey across an apartment portfolio',
+    title: 'An enquiry enters once. Its context follows the whole journey.',
+    intro: 'One shared flow for growth without multiplying sheets and conversations.',
+    plan: 'Management',
+    result: 'One brand · one context · multiple units',
+    stages: [
+      { phase: 'Owned brand', title: 'They find you', text: 'The website presents the portfolio and each apartment.', input: 'SEO, campaign or return', output: 'Qualified visit' },
+      { phase: 'Enquiry', title: 'The request arrives', text: 'Unit, dates and needs stay structured.', input: 'Direct form', output: 'Context card' },
+      { phase: 'Human decision', title: 'You check the best option', text: 'Validate the case and offer another unit when useful.', input: 'Dates and preferences', output: 'Proposed option', branch: 'No fit → alternative unit', human: true },
+      { phase: 'Planning', title: 'You coordinate the portfolio', text: 'The decision reaches one shared view without retyping.', input: 'Accepted option', output: 'Simulated booking' },
+      { phase: 'Arrival', title: 'You activate the tasks', text: 'Guest, apartment and preparation share one reference.', input: 'Booking and context', output: 'Arrival prepared' },
+    ],
+    controls: [['Logic2B configures', 'Portfolio structure, content, permissions and flow.'], ['You choose the option', 'The platform organises; the team validates availability and reply.'], ['Demo boundary', 'No live channel manager, payments or availability.']],
+  },
+  hotels: {
+    eyebrow: 'The workflow behind a hotel shift',
+    title: 'From a scattered signal to a closed, traceable incident.',
+    intro: 'Reception, housekeeping and management work from the same priority.',
+    plan: 'Intelligent',
+    result: 'Visible priority · owner · follow-up',
+    stages: [
+      { phase: 'Signals', title: 'Bring the day together', text: 'Arrivals, rooms and incidents appear in context.', input: 'Operations and team', output: 'Shared view' },
+      { phase: 'Prioritisation', title: 'Detect the risk', text: 'Impact, urgency and guest context shape attention.', input: 'Shift signals', output: 'Visible priority' },
+      { phase: 'Ownership', title: 'Assign the next step', text: 'Every case keeps its area, owner and deadline.', input: 'Validated priority', output: 'Assigned action', branch: 'Unresolved → escalate with context', human: true },
+      { phase: 'Supervision', title: 'Review before acting', text: 'Messaging, channels, rates and AI retain human approval.', input: 'Proposal or draft', output: 'Supervised decision' },
+      { phase: 'Closure', title: 'Resolve and leave a trail', text: 'The outcome returns to the shift and supports follow-up.', input: 'Completed action', output: 'Traceable case' },
+    ],
+    controls: [['Logic2B configures', 'Roles, views, priorities and the agreed team flow.'], ['The team decides', 'The platform provides context; sensitive actions stay supervised.'], ['Demo boundary', 'No live PMS, channels, messaging or AI.']],
+  },
+} as const;
+
+const workflow = (en ? englishWorkflows : spanishWorkflows)[segment];
+---
+
+<section class="section workflow-section" data-segment={segment} aria-labelledby={`workflow-${segment}`}>
+  <div class="shell">
+    <div class="workflow-heading">
+      <div><p class="eyebrow">{workflow.eyebrow}</p><h2 class="heading" id={`workflow-${segment}`}>{workflow.title}</h2></div>
+      <p>{workflow.intro}</p>
+    </div>
+    <div class="workflow-board">
+      <div class="workflow-board-top">
+        <span class="workflow-live"><i aria-hidden="true"></i>{en ? 'Workflow configured to your operation' : 'Workflow configurado a tu operación'}</span>
+        <div><span>{en ? 'Starting plan' : 'Plan de partida'} · {workflow.plan}</span><span>{en ? 'Human supervision' : 'Supervisión humana'}</span></div>
+      </div>
+      <ol class="workflow-path">
+        {workflow.stages.map((stage, index) => (
+          <li class:list={['workflow-step', { human: 'human' in stage && stage.human }]}>
+            <div class="workflow-step-top"><span>0{index + 1}</span><i>{stage.phase}</i></div>
+            <h3>{stage.title}</h3>
+            <p>{stage.text}</p>
+            {'branch' in stage && stage.branch && <div class="workflow-branch"><span aria-hidden="true">↳</span>{stage.branch}</div>}
+            <dl>
+              <div><dt>{en ? 'Input' : 'Entrada'}</dt><dd>{stage.input}</dd></div>
+              <div><dt>{en ? 'Output' : 'Salida'}</dt><dd>{stage.output}</dd></div>
+            </dl>
+          </li>
+        ))}
+      </ol>
+      <div class="workflow-result"><span>{en ? 'Operational result' : 'Resultado operativo'}</span><strong>{workflow.result}</strong></div>
+      <div class="workflow-controls">
+        {workflow.controls.map(([title, text], index) => <div><span>0{index + 1}</span><p><strong>{title}</strong>{text}</p></div>)}
+      </div>
+      <div class="workflow-legend" aria-label={en ? 'Workflow legend' : 'Leyenda del workflow'}>
+        <span><i class="flow-line" aria-hidden="true"></i>{en ? 'Main flow' : 'Flujo principal'}</span>
+        <span><i class="flow-human" aria-hidden="true"></i>{en ? 'Human decision' : 'Decisión humana'}</span>
+        <span><i class="flow-boundary" aria-hidden="true"></i>{en ? 'Requires real integration' : 'Requiere integración real'}</span>
+      </div>
+    </div>
+  </div>
+</section>
