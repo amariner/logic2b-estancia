@@ -10,18 +10,24 @@ const securityHeaders = {
   'referrer-policy': 'strict-origin-when-cross-origin',
   'permissions-policy': 'camera=(), microphone=(), geolocation=()',
 };
+const apiSecurityHeaders = {
+  ...securityHeaders,
+  'cache-control': 'no-store',
+  'cross-origin-resource-policy': 'same-origin',
+};
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === '/api/leads') {
-      if (request.method !== 'POST') return new Response(JSON.stringify({ error: 'method_not_allowed' }), { status: 405, headers: { 'content-type': 'application/json', allow: 'POST', ...securityHeaders } });
+      if (request.method !== 'POST') return apiJson({ error: 'method_not_allowed' }, 405, { allow: 'POST' });
+      if (!isJsonRequest(request)) return apiJson({ error: 'unsupported_media_type' }, 415);
       const response = await handleLead(request, env);
       const headers = new Headers(response.headers);
-      Object.entries(securityHeaders).forEach(([key, value]) => headers.set(key, value));
+      Object.entries(apiSecurityHeaders).forEach(([key, value]) => headers.set(key, value));
       return new Response(response.body, { status: response.status, headers });
     }
-    if (url.pathname.startsWith('/api/')) return new Response(JSON.stringify({ error: 'not_found' }), { status: 404, headers: { 'content-type': 'application/json', ...securityHeaders } });
+    if (url.pathname.startsWith('/api/')) return apiJson({ error: 'not_found' }, 404);
     const response = await env.ASSETS.fetch(request);
     const headers = new Headers(response.headers);
     Object.entries(securityHeaders).forEach(([key, value]) => headers.set(key, value));
@@ -32,3 +38,14 @@ export default {
     return new Response(response.body, { status: response.status, headers });
   },
 };
+
+function isJsonRequest(request: Request): boolean {
+  return request.headers.get('content-type')?.split(';', 1)[0]?.trim().toLowerCase() === 'application/json';
+}
+
+function apiJson(body: unknown, status: number, headers: Record<string, string> = {}): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json; charset=utf-8', ...apiSecurityHeaders, ...headers },
+  });
+}

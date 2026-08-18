@@ -144,6 +144,27 @@ test('the lead endpoint rejects oversized payloads before delivery', async ({ re
   expect(await response.json()).toMatchObject({ outcome: 'invalid', error: 'payload_too_large' });
 });
 
+test('the lead endpoint exposes a private JSON-only HTTP contract', async ({ request }) => {
+  const unsupported = await request.post('/api/leads', {
+    headers: { 'content-type': 'text/plain' },
+    data: '{}',
+  });
+  expect(unsupported.status()).toBe(415);
+  expect(await unsupported.json()).toEqual({ error: 'unsupported_media_type' });
+  expect(unsupported.headers()['cache-control']).toBe('no-store');
+  expect(unsupported.headers()['cross-origin-resource-policy']).toBe('same-origin');
+  expect(unsupported.headers()['x-content-type-options']).toBe('nosniff');
+
+  const wrongMethod = await request.get('/api/leads');
+  expect(wrongMethod.status()).toBe(405);
+  expect(wrongMethod.headers().allow).toBe('POST');
+  expect(wrongMethod.headers()['cache-control']).toBe('no-store');
+
+  const publicPage = await request.get('/');
+  expect(publicPage.status()).toBe(200);
+  expect(publicPage.headers()['cross-origin-resource-policy']).toBeUndefined();
+});
+
 test('commercial pages expose bilingual SEO metadata and complete sitemap', async ({ page, request }) => {
   await page.goto('/');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://estancia.logic2b.com/');

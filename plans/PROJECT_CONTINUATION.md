@@ -82,6 +82,7 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Completado y verificado localmente: la landing aborta a los 15 segundos una espera completa del Worker bloqueada. No abre recibo ni limpia los datos, recupera el botón, comunica que la entrega no está confirmada y permite repetir el mismo payload bajo la idempotencia durable existente. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: `/api/leads` rechaza navegadores cross-site mediante `Origin` o `Sec-Fetch-Site` antes de consumir rate limit, coordinación o proveedores. Los envíos same-origin y el smoke servidor-a-servidor sin esas cabeceras siguen admitidos. Falta un despliegue de producción autorizado.
 - Completado y verificado localmente: `/api/leads` limita el cuerpo JSON a 32 KiB. Un `Content-Length` excesivo se rechaza antes del rate limit y un cuerpo sin tamaño declarado se lee de forma acotada y se cancela con `413` antes de validación o entrega. Falta un despliegue de producción autorizado.
+- Completado y verificado localmente: `/api/leads` solo admite `POST application/json`, devuelve `415` o `405` antes de coordinación y marca todas sus respuestas como `no-store` y `same-origin`; los assets públicos no heredan estas cabeceras privadas. Falta un despliegue de producción autorizado.
 
 Siguiente punto exacto de activación: confirmar humanamente en el buzón interno que el mensaje del último smoke con referencia `e27e5bf3-a462-4db6-9f49-80d8486fe23c` está visible. Después, obtener autorización explícita para desplegar este incremento y repetir el smoke con un buzón controlado para verificar la nueva semántica en producción. `LEADS_MEETING_URL` sigue siendo opcional. HubSpot queda expresamente fuera de alcance hasta nueva decisión.
 
@@ -144,24 +145,24 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 
 ## Evidencia del último incremento
 
-- Alcance: lectura del cuerpo del único endpoint comercial, dos pruebas unitarias, una prueba E2E relevante y este checkpoint. No se añadieron dependencias, contenido, estados visibles, proveedores, PII, eventos ni despliegues.
-- Conversión y resiliencia: solicitudes sobredimensionadas ya no pueden materializar JSON arbitrariamente grande ni alcanzar entrega; los payloads válidos actuales quedan muy por debajo de 32 KiB.
-- Compatibilidad: la landing, el traspaso completo del diagnóstico y la CLI de smoke conservan el contrato; solo cambia el borde inválido con `413 payload_too_large`.
-- Seguridad y privacidad: el tamaño declarado excesivo se corta antes del rate limit; sin declaración, el stream se cancela al superar 32 KiB antes de Zod, Durable Objects o Resend. No se registra cuerpo, PII ni secretos.
+- Alcance: semántica HTTP del único endpoint comercial, una prueba E2E del Worker compuesto y este checkpoint. No se añadieron dependencias, contenido, estados visibles, proveedores, PII, eventos ni despliegues.
+- Conversión y resiliencia: peticiones accidentales con método o medio incorrecto ya no consumen coordinación; el cliente válido conserva exactamente su contrato JSON.
+- Compatibilidad: landing y CLI usan `POST application/json`; se admite el parámetro `charset` y `Allow: POST` documenta la recuperación del método inválido.
+- Seguridad y privacidad: todas las respuestas `/api/*` declaran `Cache-Control: no-store` y `Cross-Origin-Resource-Policy: same-origin`; estas políticas no se aplican a la portada ni a assets públicos.
 - `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 38/38 pruebas del Worker.
-- E2E relevante: 3/3 pruebas Chromium correctas para rechazo demo, cross-site y payload sobredimensionado sobre el Worker compuesto; la regresión completa anterior permanece en 66/66.
+- E2E relevante: 1/1 prueba Chromium correcta para `415`, `405`, `Allow`, `no-store`, aislamiento same-origin y separación de la portada; la regresión completa anterior permanece en 66/66.
 - QA visual: no aplica una captura nueva porque no cambian DOM, estilos, copy ni geometría; la regresión visual, responsive y accesible completa permanece verde.
 
 ## Revisión multidisciplinar del checkpoint actual
 
-- Marketing estratégico: corregido — se protege la disponibilidad del único embudo real frente a cuerpos abusivos sin añadir promesas ni fricción visible.
+- Marketing estratégico: corregido — se protege la disponibilidad del embudo frente a clientes mal configurados sin añadir promesas ni fricción visible.
 - Diseño de producto: correcto — la landing sigue siendo el único canal real y el smoke técnico sigue siendo reproducible; no se introduce un flujo nuevo.
 - UX: correcto — una solicitud legítima same-origin mantiene exactamente sus estados, errores, timeout, recibo y recuperación.
 - UI/dirección visual: no aplica — no cambian DOM, componentes, copy, estilos ni geometría.
 - SEO: correcto — no cambian contenido indexable, metadata, headings, canonical, `hreflang`, sitemap ni datos estructurados; las cuatro pruebas SEO permanecen verdes.
 - Arquitectura frontend: correcto — el contrato de la landing no cambia y no se añade lógica o dependencia al cliente.
-- Full stack: corregido — la lectura queda acotada a 32 KiB, cancela streams excesivos y evita coordinación o proveedores; el límite declarado se rechaza aún antes del rate limit.
-- QA/accesibilidad/rendimiento/confianza: corregido — 38/38 pruebas del Worker y 3/3 E2E relevantes cubren ambos caminos de exceso y compatibilidad; la regresión completa anterior es 66/66 y no quedan bloqueantes conocidos.
+- Full stack: corregido — método y medio se validan antes de coordinación; API y assets reciben políticas de caché/origen deliberadamente distintas.
+- QA/accesibilidad/rendimiento/confianza: corregido — `pnpm check` y el E2E compuesto cubren contrato y cabeceras sin regresión visible; la regresión completa anterior es 66/66 y no quedan bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Los timeouts de cliente y proveedor, el contrato de entrega y Lighthouse deben comprobarse en producción tras un despliegue autorizado; el estado específico de timeout no conserva captura visual por la restricción del navegador integrado, aunque su DOM y comportamiento están cubiertos. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -200,3 +201,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se acotó a 15 segundos la espera completa de la landing al Worker. Un bloqueo recupera el botón y los datos, no abre recibo, comunica la incertidumbre ES/EN y permite reintento bajo la misma idempotencia durable. Verificado con `pnpm check`, 34/34 pruebas del Worker y 65/65 E2E. No se desplegó producción.
 - 2026-08-18 — Se rechazaron los envíos cross-site identificables de navegador antes de rate limit, coordinación y Resend, conservando compatibilidad same-origin y servidor-a-servidor. Verificado con `pnpm check`, 36/36 pruebas del Worker y 66/66 E2E. No se desplegó producción.
 - 2026-08-18 — Se limitó a 32 KiB el cuerpo de `/api/leads`, con rechazo temprano por tamaño declarado y lectura/cancelación acotada para streams sin tamaño. Verificado con `pnpm check`, 38/38 pruebas del Worker y 3/3 E2E relevantes. No se desplegó producción.
+- 2026-08-18 — Se cerró el contrato HTTP de `/api/leads` a JSON POST y se hicieron privadas/no cacheables todas las respuestas API sin afectar assets. Verificado con `pnpm check` y 1/1 E2E compuesto relevante. No se desplegó producción.
