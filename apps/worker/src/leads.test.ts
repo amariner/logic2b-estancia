@@ -132,6 +132,28 @@ describe('leads', () => {
     expect(coordination.rateLimit).toHaveBeenCalledOnce();
     expect(coordination.submit).toHaveBeenCalledOnce();
   });
+  it('rejects a declared oversized body before rate limiting', async () => {
+    const coordination: LeadCoordination = { rateLimit: vi.fn(async () => null), submit: vi.fn(async () => new Response()) };
+    const request = new Request('https://test/api/leads', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'content-length': '32769' }, body: JSON.stringify(lead),
+    });
+    const response = await handleLead(request, emailEnv, coordination);
+    expect(response.status).toBe(413);
+    expect(await response.json()).toMatchObject({ outcome: 'invalid', error: 'payload_too_large' });
+    expect(coordination.rateLimit).not.toHaveBeenCalled();
+    expect(coordination.submit).not.toHaveBeenCalled();
+  });
+  it('stops an undeclared oversized body before validation or delivery', async () => {
+    const coordination: LeadCoordination = { rateLimit: vi.fn(async () => null), submit: vi.fn(async () => new Response()) };
+    const request = new Request('https://test/api/leads', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...lead, padding: 'x'.repeat(33_000) }),
+    });
+    const response = await handleLead(request, emailEnv, coordination);
+    expect(response.status).toBe(413);
+    expect(await response.json()).toMatchObject({ outcome: 'invalid', error: 'payload_too_large' });
+    expect(coordination.rateLimit).toHaveBeenCalledOnce();
+    expect(coordination.submit).not.toHaveBeenCalled();
+  });
   it('reports provider failure instead of claiming delivery', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('no', { status: 500 }));
     const env = emailEnv;

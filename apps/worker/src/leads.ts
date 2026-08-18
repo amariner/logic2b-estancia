@@ -13,6 +13,7 @@ export interface LeadEnv {
 
 const planInput = z.enum(['basico', 'gestion', 'inteligente', 'inicio', 'automatiza']);
 const RESEND_TIMEOUT_MS = 10_000;
+const MAX_LEAD_BODY_BYTES = 32 * 1_024;
 
 const emailConfigurationSchema = z.object({
   apiKey: z.string().trim().min(1),
@@ -75,6 +76,7 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
   // Browsers expose enough context to reject cross-site form abuse before it
   // consumes rate-limit capacity. Server-side smoke checks omit these headers.
   if (isCrossSiteBrowserRequest(request)) return json({ ok: false, outcome: 'blocked', error: 'cross_site_submission_disabled' }, 403);
+  if (declaredBodyTooLarge(request)) return json({ ok: false, outcome: 'invalid', error: 'payload_too_large' }, 413);
   if (!coordination) return json({ ok: false, outcome: 'disabled', error: 'lead_coordination_unavailable' }, 503);
   const ip = request.headers.get('cf-connecting-ip') ?? 'local';
   let retryAfter: number | null;
@@ -84,7 +86,9 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
     return json({ ok: false, outcome: 'failed', error: 'lead_coordination_failed' }, 503);
   }
   if (retryAfter) return json({ ok: false, outcome: 'limited', error: 'rate_limited', retryAfter }, 429, { 'retry-after': String(retryAfter) });
-  const raw: unknown = await request.json().catch(() => null);
+  const parsedBody = await readBoundedJson(request);
+  if (parsedBody.tooLarge) return json({ ok: false, outcome: 'invalid', error: 'payload_too_large' }, 413);
+  const raw = parsedBody.value;
   const bot = z.object({ website: z.string().optional() }).passthrough().safeParse(raw);
   if (bot.success && bot.data.website?.trim()) return json({ ok: true, outcome: 'received' }, 202);
   const parsed = leadSchema.safeParse(raw);
@@ -127,6 +131,33 @@ function isCrossSiteBrowserRequest(request: Request): boolean {
   if (!origin) return false;
   try { return new URL(origin).origin !== new URL(request.url).origin; }
   catch { return true; }
+}
+
+function declaredBodyTooLarge(request: Request): boolean {
+  const value = request.headers.get('content-length');
+  if (!value) return false;
+  return /^\d+$/.test(value) && Number(value) > MAX_LEAD_BODY_BYTES;
+}
+
+async function readBoundedJson(request: Request): Promise<{ value: unknown; tooLarge: boolean }> {
+  if (!request.body) return { value: null, tooLarge: false };
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let total = 0;
+  let text = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > MAX_LEAD_BODY_BYTES) {
+      await reader.cancel();
+      return { value: null, tooLarge: true };
+    }
+    text += decoder.decode(value, { stream: true });
+  }
+  text += decoder.decode();
+  try { return { value: JSON.parse(text), tooLarge: false }; }
+  catch { return { value: null, tooLarge: false }; }
 }
 
 export async function deliverLead(lead: Lead, env: LeadEnv, ref: string): Promise<Response> {

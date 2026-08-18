@@ -136,6 +136,14 @@ test('the lead endpoint rejects cross-site browser submissions before coordinati
   expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'cross_site_submission_disabled' });
 });
 
+test('the lead endpoint rejects oversized payloads before delivery', async ({ request }) => {
+  const response = await request.post('/api/leads', { data: {
+    name: 'Oversized test', businessName: 'Casa ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/', accept: true, padding: 'x'.repeat(33_000),
+  } });
+  expect(response.status()).toBe(413);
+  expect(await response.json()).toMatchObject({ outcome: 'invalid', error: 'payload_too_large' });
+});
+
 test('commercial pages expose bilingual SEO metadata and complete sitemap', async ({ page, request }) => {
   await page.goto('/');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://estancia.logic2b.com/');
