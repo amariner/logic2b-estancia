@@ -151,7 +151,7 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 - Compatibilidad: éxito, degradación, timeout y error genérico conservan su comportamiento; solo `429` con plazo válido usa el nuevo estado y cualquier plazo queda acotado entre 1 y 60 segundos.
 - Seguridad y privacidad: la espera vive solo en memoria, no persiste ni registra payload o PII y no emite `lead_submit`; el rate limit durable del Worker permanece como autoridad.
 - `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 38/38 pruebas del Worker.
-- E2E relevante: 1/1 prueba Chromium correcta sobre ES y EN para mensaje, recibo oculto, botón bloqueado, cuenta atrás y reactivación; la regresión completa anterior permanece en 66/66.
+- E2E: 69/69 pruebas Chromium correctas en la matriz completa, incluida la recuperación bilingüe del `429`, accesibilidad, SEO, recorridos comerciales y límites locales de las demos.
 - QA visual: el nuevo estado reutiliza la geometría y estilos existentes; el DOM renderizado bilingüe y su transición completa quedan verificados sin cambio de layout.
 
 ## Revisión multidisciplinar del checkpoint actual
@@ -163,7 +163,7 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 - SEO: correcto — no cambian contenido indexable, metadata, headings, canonical, `hreflang`, sitemap ni datos estructurados; las cuatro pruebas SEO permanecen verdes.
 - Arquitectura frontend: correcto — el estado se encapsula en el listener existente, valida el plazo y limpia su intervalo al reactivar sin dependencias.
 - Full stack: correcto — consume `retryAfter` y `Retry-After` existentes sin cambiar el contrato ni debilitar el Durable Object.
-- QA/accesibilidad/rendimiento/confianza: corregido — `pnpm check` y el E2E bilingüe con reloj simulado cubren todo el estado; la regresión completa anterior es 66/66 y no quedan bloqueantes conocidos.
+- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check` y 69/69 E2E cubren el estado bilingüe con reloj simulado y la regresión completa; no quedan bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Los timeouts de cliente y proveedor, el contrato de entrega y Lighthouse deben comprobarse en producción tras un despliegue autorizado; el estado específico de timeout no conserva captura visual por la restricción del navegador integrado, aunque su DOM y comportamiento están cubiertos. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -203,4 +203,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se rechazaron los envíos cross-site identificables de navegador antes de rate limit, coordinación y Resend, conservando compatibilidad same-origin y servidor-a-servidor. Verificado con `pnpm check`, 36/36 pruebas del Worker y 66/66 E2E. No se desplegó producción.
 - 2026-08-18 — Se limitó a 32 KiB el cuerpo de `/api/leads`, con rechazo temprano por tamaño declarado y lectura/cancelación acotada para streams sin tamaño. Verificado con `pnpm check`, 38/38 pruebas del Worker y 3/3 E2E relevantes. No se desplegó producción.
 - 2026-08-18 — Se cerró el contrato HTTP de `/api/leads` a JSON POST y se hicieron privadas/no cacheables todas las respuestas API sin afectar assets. Verificado con `pnpm check` y 1/1 E2E compuesto relevante. No se desplegó producción.
-- 2026-08-18 — Se añadió recuperación bilingüe del `429`: campos conservados, recibo oculto, espera explícita y botón reactivado tras cuenta atrás acotada. Verificado con `pnpm check` y 1/1 E2E bilingüe relevante. No se desplegó producción.
+- 2026-08-18 — Se añadió recuperación bilingüe del `429`: campos conservados, recibo oculto, espera explícita y botón reactivado tras cuenta atrás acotada. Verificado con `pnpm check` y la matriz completa de 69/69 E2E. No se desplegó producción.
