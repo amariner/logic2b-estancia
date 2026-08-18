@@ -14,6 +14,8 @@ export interface LeadEnv {
 const planInput = z.enum(['basico', 'gestion', 'inteligente', 'inicio', 'automatiza']);
 const RESEND_TIMEOUT_MS = 10_000;
 const MAX_LEAD_BODY_BYTES = 32 * 1_024;
+const requiredSingleLine = (max: number) => z.string().trim().min(1).max(max).regex(/^[^\r\n\u2028\u2029]*$/);
+const optionalSingleLine = (max: number) => z.string().trim().max(max).regex(/^[^\r\n\u2028\u2029]*$/);
 
 const emailConfigurationSchema = z.object({
   apiKey: z.string().trim().min(1),
@@ -36,21 +38,21 @@ const emailEnvironmentNames = {
 } as const;
 
 export const leadSchema = z.object({
-  name: z.string().trim().min(1).max(120),
-  businessName: z.string().trim().min(1).max(160),
-  email: z.string().trim().email().max(200),
-  phone: z.string().trim().max(60).optional(),
+  name: requiredSingleLine(120),
+  businessName: requiredSingleLine(160),
+  email: optionalSingleLine(200).email(),
+  phone: optionalSingleLine(60).optional(),
   accommodationType: z.enum(['apartment', 'rural', 'hotel']),
   businessMode: z.enum(['mono', 'multi']).optional(),
   propertyCount: z.number().int().min(1).max(10_000),
   unitCount: z.number().int().min(1).max(100_000),
   plan: planInput.or(z.literal('')).optional(),
-  currentStack: z.array(z.string().trim().min(1).max(60)).max(20).optional(),
-  requestedCapabilities: z.array(z.string().trim().min(1).max(60)).max(30).optional(),
+  currentStack: z.array(requiredSingleLine(60)).max(20).optional(),
+  requestedCapabilities: z.array(requiredSingleLine(60)).max(30).optional(),
   timeline: z.enum(['0-3', '3-6', '6-12', 'exploring']).optional(),
   investmentRange: z.enum(['under-3k', '3k-8k', '8k-20k', '20k-plus', 'unknown']).optional(),
-  sourcePath: z.string().trim().max(300).optional(),
-  sourceCampaign: z.string().trim().max(160).optional(),
+  sourcePath: optionalSingleLine(300).optional(),
+  sourceCampaign: optionalSingleLine(160).optional(),
   marketingConsent: z.boolean().optional().default(false),
   message: z.string().trim().max(2_000).optional(),
   lang: z.enum(['es', 'en']).optional(),

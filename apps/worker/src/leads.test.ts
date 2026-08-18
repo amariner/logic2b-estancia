@@ -26,6 +26,10 @@ describe('leads', () => {
   it('requires explicit consent', () => expect(leadSchema.safeParse({ ...lead, accept: false }).success).toBe(false));
   it('normalizes legacy plan values at the API edge', () => expect(leadSchema.parse({ ...lead, plan: 'automatiza' }).plan).toBe('inteligente'));
   it('normalizes email casing for a stable submission identity', () => expect(leadSchema.parse({ ...lead, email: 'ADA@Example.Test' }).email).toBe('ada@example.test'));
+  it('rejects line breaks in fields that reach email headers and structured rows', () => {
+    expect(leadSchema.safeParse({ ...lead, businessName: 'Casa Ada\r\nBcc: attacker@example.test' }).success).toBe(false);
+    expect(leadSchema.safeParse({ ...lead, requestedCapabilities: ['automation\u2028Injected row'] }).success).toBe(false);
+  });
   it('derives the same submission identity from equivalent email casing', async () => {
     const fingerprints: string[] = [];
     const coordination: LeadCoordination = {
@@ -217,6 +221,22 @@ describe('leads', () => {
     const payloads = fetcher.mock.calls.map(([, init]) => JSON.parse(String(init?.body)) as Record<string, unknown>);
     expect(payloads[0]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['sales@example.test'], reply_to: 'ada@example.test' });
     expect(payloads[1]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['ada@example.test'], reply_to: 'reply@example.test' });
+  });
+  it('escapes adversarial lead markup in both HTML emails', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    const response = await submit(emailEnv, {
+      ...lead,
+      name: '<img src=x onerror=alert(1)>',
+      businessName: '<svg onload=alert(1)>',
+      requestedCapabilities: ['<script>alert(1)</script>'],
+      message: '<a href="https://attacker.example">open</a>',
+    });
+    expect(response.status).toBe(202);
+    const payloads = fetcher.mock.calls.map(([, init]) => JSON.parse(String(init?.body)) as { html: string });
+    expect(payloads[0]?.html).not.toMatch(/<(?:svg|script|a)\b/i);
+    expect(payloads[1]?.html).not.toMatch(/<(?:img|script)\b/i);
+    expect(payloads[0]?.html).toContain('&lt;svg onload=alert(1)&gt;');
+    expect(payloads[1]?.html).toContain('&lt;img src=x onerror=alert(1)&gt;');
   });
   it('treats the absent optional meeting URL as healthy configuration', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
