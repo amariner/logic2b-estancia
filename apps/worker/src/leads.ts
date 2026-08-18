@@ -181,7 +181,9 @@ export async function deliverLead(lead: Lead, env: LeadEnv, ref: string): Promis
   const degraded = !visitorOk;
   if (degraded) console.error(JSON.stringify({ event: 'lead_delivery_degraded', ref, channels: results }));
   const meetingUrl = parseMeetingUrl(env.LEADS_MEETING_URL);
-  if (!meetingUrl) console.error(JSON.stringify({ event: 'lead_meeting_configuration_invalid', reason: env.LEADS_MEETING_URL ? 'invalid' : 'missing' }));
+  if (env.LEADS_MEETING_URL && !meetingUrl) {
+    console.error(JSON.stringify({ event: 'lead_meeting_configuration_invalid', reason: 'invalid' }));
+  }
   return json({ ok: true, outcome: degraded ? 'delivered_degraded' : 'delivered', ref, meetingUrl }, 202);
 }
 

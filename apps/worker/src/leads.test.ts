@@ -211,6 +211,14 @@ describe('leads', () => {
     expect(payloads[0]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['sales@example.test'], reply_to: 'ada@example.test' });
     expect(payloads[1]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['ada@example.test'], reply_to: 'reply@example.test' });
   });
+  it('treats the absent optional meeting URL as healthy configuration', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const response = await submit(emailEnv);
+    expect(response.status).toBe(202);
+    expect(await response.json()).toMatchObject({ meetingUrl: null });
+    expect(logger).not.toHaveBeenCalled();
+  });
   it('acknowledges a direct enquiry without inventing a Basic recommendation', async () => {
     const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
     await submit(emailEnv);
@@ -229,8 +237,12 @@ describe('leads', () => {
   });
   it('omits an unsafe meeting URL while preserving successful delivery', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const response = await submit({ ...emailEnv, LEADS_MEETING_URL: 'javascript:alert(1)' });
     expect(response.status).toBe(202);
     expect(await response.json()).toMatchObject({ meetingUrl: null });
+    expect(logger).toHaveBeenCalledOnce();
+    expect(logger.mock.calls.flat().join(' ')).toContain('lead_meeting_configuration_invalid');
+    expect(logger.mock.calls.flat().join(' ')).toContain('invalid');
   });
 });
