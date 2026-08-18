@@ -145,6 +145,7 @@ const serviceSchema = {
 <section id="contacto" class="section shell">
   <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 class="heading">{c.contact.title}</h2><p>{c.contact.body}</p><ul class="contact-promises"><li>{locale === 'es' ? 'Revisamos el cuello de botella, no solo el número de habitaciones.' : 'We review the bottleneck, not only the number of rooms.'}</li><li>{locale === 'es' ? 'Separamos lo que ya puede demostrarse de lo que requiere integración.' : 'We separate what can be demonstrated now from what needs integration.'}</li><li>{locale === 'es' ? 'Tus datos se usan únicamente para responder y, si lo autorizas, hacer seguimiento.' : 'Your details are used only to reply and, if authorised, follow up.'}</li></ul><p><a href={wa.href} target="_blank" rel="noopener noreferrer">WhatsApp · {wa.phone} →</a></p></div>
   <form class="lead-form" data-lead novalidate>
+    <p class="form-expectation wide">{c.contact.expectation}</p>
     <label>{locale === 'es' ? 'Nombre' : 'Name'}<input name="name" required maxlength="120" autocomplete="name" /></label>
     <label>{locale === 'es' ? 'Empresa o alojamiento' : 'Business or stay'}<input name="businessName" required maxlength="160" autocomplete="organization" /></label>
     <label>Email<input name="email" required type="email" maxlength="200" autocomplete="email" /></label>
@@ -154,17 +155,22 @@ const serviceSchema = {
     <label>{locale === 'es' ? 'Propiedades' : 'Properties'}<input name="propertyCount" type="number" min="1" max="10000" value="1" required /></label>
     <label>{locale === 'es' ? 'Unidades' : 'Units'}<input name="unitCount" type="number" min="1" max="100000" value="1" required /></label>
     <label class="wide">{locale === 'es' ? 'Qué quieres poner en marcha' : 'What do you want to launch'}<textarea name="message" rows="5" maxlength="2000" placeholder={locale === 'es' ? 'Cuéntanos qué gestionas hoy, qué te frena y qué te gustaría conectar.' : 'Tell us what you manage today, what gets in the way and what you would like to connect.'}></textarea></label>
-    <label><span class="sr-only">Website</span><input name="website" tabindex="-1" autocomplete="off" /></label>
-    <label class="check wide"><input name="accept" type="checkbox" required /><span>{locale === 'es' ? 'He leído la política de privacidad y acepto que Logic2B use estos datos para responder.' : 'I have read the privacy policy and accept that Logic2B uses these details to reply.'}</span></label>
+    <label class="honeypot" inert aria-hidden="true"><span>Website</span><input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" /></label>
+    <label class="check wide"><input name="accept" type="checkbox" required /><span>{locale === 'es' ? <>He leído la <a href="/privacidad/" target="_blank" rel="noopener noreferrer">política de privacidad</a> y acepto que Logic2B use estos datos para responder.</> : <>I have read the <a href="/en/privacidad/" target="_blank" rel="noopener noreferrer">privacy policy</a> and accept that Logic2B uses these details to reply.</>}</span></label>
     <label class="check wide"><input name="marketingConsent" type="checkbox" /><span>{locale === 'es' ? 'También quiero recibir seguimiento comercial relevante (opcional).' : 'I would also like to receive relevant commercial follow-up (optional).'}</span></label>
     <div class="wide"><button class="pill" type="submit"><span>{c.contact.submit}</span><span aria-hidden="true">→</span></button></div>
     <p class="form-status wide" role="status" aria-live="polite"></p>
+    <section class="lead-receipt wide" data-lead-receipt hidden tabindex="-1" role="status" aria-live="polite" aria-atomic="true" aria-labelledby="lead-receipt-title">
+      <span class="receipt-mark" aria-hidden="true">✓</span>
+      <div><p class="eyebrow">{locale === 'es' ? 'Solicitud recibida' : 'Request received'}</p><h3 id="lead-receipt-title">{c.contact.receiptTitle}</h3><p>{c.contact.receiptBody}</p><p class="receipt-reference" data-lead-reference hidden><span>{c.contact.reference}</span><code data-lead-reference-value></code></p><p data-meeting-copy>{c.contact.meetingFallback}</p><a class="text-link" data-meeting-link hidden target="_blank" rel="noopener noreferrer" data-track="meeting_click" data-section="homepage_contact">{c.contact.meetingCta} <span aria-hidden="true">→</span></a></div>
+    </section>
   </form></div>
 </section>
 
-<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, submit: c.contact.submit }}>
+<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback }}>
   const form = document.querySelector('[data-lead]');
   const status = form?.querySelector('.form-status');
+  const receipt = form?.querySelector('[data-lead-receipt]');
   document.querySelectorAll('[data-plan]').forEach((link) => link.addEventListener('click', () => {
     const plan = form?.querySelector('[name=plan]');
     if (plan && link.dataset.plan) plan.value = link.dataset.plan;
@@ -176,9 +182,29 @@ const serviceSchema = {
     if (button) button.disabled = true; if (label) label.textContent = sending; if (status) status.textContent = '';
     const d = Object.fromEntries(new FormData(form));
     const payload = { ...d, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: location.pathname };
-    try { const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) throw new Error('delivery'); form.reset(); if (status) status.textContent = ok; window.estanciaTrack?.('lead_submit', { locale, plan: payload.plan || 'none', source_section: 'homepage_contact' }); }
+    try {
+      const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error('delivery');
+      const reference = typeof result.ref === 'string' && /^[a-zA-Z0-9-]{1,100}$/.test(result.ref) ? result.ref : null;
+      let meetingUrl = null;
+      try { const candidate = new URL(result.meetingUrl); if (candidate.protocol === 'https:' && !candidate.username && !candidate.password) meetingUrl = candidate.href; } catch {}
+      const referenceRow = receipt?.querySelector('[data-lead-reference]');
+      const referenceValue = receipt?.querySelector('[data-lead-reference-value]');
+      const meetingCopy = receipt?.querySelector('[data-meeting-copy]');
+      const meetingLink = receipt?.querySelector('[data-meeting-link]');
+      if (referenceRow) referenceRow.hidden = !reference;
+      if (referenceValue) referenceValue.textContent = reference || '';
+      if (meetingCopy) meetingCopy.textContent = meetingUrl ? meetingAvailable : meetingFallback;
+      if (meetingLink) { meetingLink.hidden = !meetingUrl; if (meetingUrl) meetingLink.href = meetingUrl; else meetingLink.removeAttribute('href'); }
+      form.reset();
+      form.dataset.submitted = 'true';
+      if (status) status.textContent = ok;
+      if (receipt) { receipt.hidden = false; receipt.focus(); }
+      window.estanciaTrack?.('lead_submit', { locale, plan: payload.plan || 'none', source_section: 'homepage_contact' });
+    }
     catch { if (status) status.textContent = error; }
-    finally { if (button) button.disabled = false; if (label) label.textContent = submit; }
+    finally { if (button && !form.dataset.submitted) button.disabled = false; if (label) label.textContent = submit; }
   });
 </script>
 

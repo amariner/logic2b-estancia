@@ -333,19 +333,47 @@ test('the sales landing is the only form that calls the production lead endpoint
   });
   await page.goto('/');
   const form = page.locator('[data-lead]');
+  await expect(form.getByText('Revisaremos el contexto y responderemos en un día laborable.')).toBeVisible();
+  await expect(form.getByRole('link', { name: 'política de privacidad' })).toHaveAttribute('href', '/privacidad/');
+  await expect(form.locator('label.honeypot')).toHaveCSS('position', 'absolute');
+  await expect(form.locator('label.honeypot')).toHaveAttribute('inert', '');
   await form.locator('[name="name"]').fill('Ada Demo');
   await form.locator('[name="businessName"]').fill('Casa Demo');
   await form.locator('[name="email"]').fill('ada@example.test');
   await form.locator('[name="message"]').fill('Solicitud comercial de prueba.');
   await form.locator('[name="accept"]').check();
   await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
-  await expect(form.getByRole('status')).toHaveText('Solicitud entregada. Te responderemos pronto.');
+  const receipt = form.locator('[data-lead-receipt]');
+  await expect(receipt).toBeVisible();
+  await expect(receipt).toBeFocused();
+  await expect(receipt).toHaveAttribute('role', 'status');
+  await expect(receipt).toContainText('La conversación ya está en marcha.');
+  await expect(receipt.locator('[data-lead-reference]')).toContainText('test-ref');
+  await expect(receipt.locator('[data-meeting-copy]')).toHaveText('No necesitas hacer nada más: te responderemos por email.');
+  await expect(receipt.locator('[data-meeting-link]')).toBeHidden();
   expect(leadRequests).toBe(1);
 
   await page.goto('/demos/terrava/');
   await page.locator('[data-demo-form] button[type="submit"]').click();
   await expect(page.locator('.demo-result')).toContainText('Solicitud demo creada');
   expect(leadRequests).toBe(1);
+});
+
+test('the English receipt exposes only a valid optional meeting link', async ({ page }) => {
+  await page.route('**/api/leads', (route) => route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'safe-ref-01', meetingUrl: 'https://meet.example.test/logic-estancia' }) }));
+  await page.goto('/en/');
+  const form = page.locator('[data-lead]');
+  await expect(form.getByRole('link', { name: 'privacy policy' })).toHaveAttribute('href', '/en/privacidad/');
+  await form.locator('[name="name"]').fill('Ada Demo');
+  await form.locator('[name="businessName"]').fill('Demo Stay');
+  await form.locator('[name="email"]').fill('ada@example.test');
+  await form.locator('[name="accept"]').check();
+  await form.getByRole('button', { name: /Get my recommendation/ }).click();
+  const receipt = form.locator('[data-lead-receipt]');
+  await expect(receipt).toContainText('The conversation is now under way.');
+  await expect(receipt.locator('[data-meeting-copy]')).toHaveText('If useful, you can also choose a time.');
+  await expect(receipt.locator('[data-meeting-link]')).toHaveAttribute('href', 'https://meet.example.test/logic-estancia');
+  await expect(receipt.locator('[data-meeting-link]')).toHaveAttribute('rel', 'noopener noreferrer');
 });
 
 test('cookie preferences remain consent-gated, revocable and shared with demos', async ({ page }) => {
