@@ -163,7 +163,7 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 - Seguridad y privacidad: no se refleja ni registra la excepción o el payload; la prueba usa un detalle sensible y demuestra que solo sale el nombre allowlisted del evento.
 - Compatibilidad: JSON válido, JSON malformado, cuerpo excesivo y todos los outcomes de entrega conservan sus contratos.
 - `pnpm check`: 7 tareas de lint, 21 tareas de typecheck/test/build y 14 pruebas operativas correctas; 45/45 pruebas del Worker.
-- E2E relevante: 1/1 prueba Chromium compuesta correcta para el contrato HTTP privado; la matriz completa anterior permanece en 69/69.
+- E2E: 69/69 pruebas Chromium correctas en la matriz completa sobre el Worker actualizado, incluidas CSP, contrato HTTP, rutas demo codificadas, embudo, accesibilidad y SEO.
 - QA visual: no aplica — no cambia DOM, estilos, copy ni estado interactivo.
 
 ## Revisión multidisciplinar del checkpoint actual
@@ -175,7 +175,7 @@ Además: `git diff --check`, ausencia de secretos, ausencia de planes antiguos e
 - SEO: correcto — no cambian contenido indexable, metadata, headings, canonical, `hreflang`, sitemap ni datos estructurados; las cuatro pruebas SEO permanecen verdes.
 - Arquitectura frontend: correcto — no cambia el cliente ni el paso rápido de assets.
 - Full stack: corregido — toda salida de la lectura acotada vuelve al contrato API; la coordinación sigue ocurriendo solo tras un cuerpo utilizable.
-- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check`, 45/45 pruebas del Worker y 1/1 E2E compuesto cubren stream fallido, log saneado y compatibilidad HTTP; la matriz completa anterior es 69/69 y no quedan bloqueantes conocidos.
+- QA/accesibilidad/rendimiento/confianza: correcto — `pnpm check`, 45/45 pruebas del Worker y 69/69 E2E cubren stream fallido, log saneado y toda la regresión; no quedan bloqueantes conocidos.
 
 Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de alto contraste y validación de comprensión. Los timeouts de cliente y proveedor, el contrato de entrega y Lighthouse deben comprobarse en producción tras un despliegue autorizado; el estado específico de timeout no conserva captura visual por la restricción del navegador integrado, aunque su DOM y comportamiento están cubiertos. También queda confirmar el smoke anterior; los textos legales requieren revisión jurídica española; la agenda es opcional y HubSpot continúa fuera de alcance. Las etiquetas/activadores de Estancia dentro del GTM compartido y un periodo agregado posterior a esta nueva línea base bloquean la selección del primer experimento; no se ha inventado variante ni resultado.
 
@@ -222,4 +222,4 @@ Deuda aceptada: faltan recorridos humanos con VoiceOver y otro lector, modos de 
 - 2026-08-18 — Se fijó la idempotencia durable a una única ventana de 24 horas desde el primer intento: fallos con caducidad, reintentos sin extensión, nueva referencia tras vencer y migración conservadora de estados heredados. Verificado con `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E relevante. No se desplegó producción.
 - 2026-08-18 — Se cerró `/api` exacto bajo el contrato JSON privado y se añadió CSP base mediante `_headers` de Static Assets, con `form-action 'none'` específico de demos y sin ejecutar el Worker para todo asset. El QA corrigió la primera implementación al detectar la ruta rápida de assets. Verificado con `pnpm check`, 44/44 pruebas del Worker y 3/3 E2E relevantes. No se desplegó producción.
 - 2026-08-18 — Se normalizaron hasta tres capas de codificación en rutas demo y se corrigió la evidencia del orden real: referer antes de rate limit, `sourcePath` después de una cuota y siempre antes de entrega. Verificado con `pnpm check`, 44/44 pruebas del Worker y 1/1 E2E adversarial. No se desplegó producción.
-- 2026-08-18 — Se contuvieron los fallos de lectura del body en un `400` mínimo y observable sin causa/payload, manteniendo `413` aunque falle la cancelación del stream. Verificado con `pnpm check`, 45/45 pruebas del Worker y 1/1 E2E compuesto. No se desplegó producción.
+- 2026-08-18 — Se contuvieron los fallos de lectura del body en un `400` mínimo y observable sin causa/payload, manteniendo `413` aunque falle la cancelación del stream. Verificado con `pnpm check`, 45/45 pruebas del Worker y la matriz completa de 69/69 E2E. No se desplegó producción.
