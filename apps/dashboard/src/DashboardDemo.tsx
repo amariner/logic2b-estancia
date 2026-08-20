@@ -16,7 +16,6 @@ import {
   Menu,
   MessageSquareText,
   PanelsTopLeft,
-  RefreshCw,
   Search,
   Settings,
   Sparkles,
@@ -28,7 +27,6 @@ import type { DemoRole } from "@logic-estancia/domain";
 import {
   canOperate,
   initialState,
-  parseStored,
   TOUR_STEP_COUNTS,
   type DemoState,
   type Scenario,
@@ -140,9 +138,7 @@ const viewsFor = (scenario: Scenario): View[] =>
         "planning",
         "bookings",
         "guests",
-        "website",
         "reports",
-        "settings",
       ]
     : [
         "home",
@@ -151,12 +147,9 @@ const viewsFor = (scenario: Scenario): View[] =>
         "guests",
         "cleaning",
         "maintenance",
-        "website",
         "channels",
-        "automation",
         "control",
         "reports",
-        "settings",
       ];
 
 const track = (event: string, parameters: Record<string, string | number>) =>
@@ -211,8 +204,8 @@ const noticesFor = (
           : {
               title:
                 locale === "es"
-                  ? "Reserva TER-104 creada"
-                  : "Booking TER-104 created",
+                  ? "Reserva ficticia TER-104 visible"
+                  : "Fictitious booking TER-104 shown",
               detail: `${state.stay.name} · Casa Bruma`,
               view: "bookings",
             },
@@ -270,28 +263,13 @@ const noticesFor = (
 };
 
 function useDemoState(scenario: Scenario) {
-  const key = `logic-estancia-demo-${scenario}-v2`;
-  const legacyKey = `logic-estancia-demo-${scenario}-v1`;
-  const [state, setState] = useState<DemoState>(() =>
-    typeof localStorage === "undefined"
-      ? initialState(scenario)
-      : parseStored(
-          localStorage.getItem(key) ?? localStorage.getItem(legacyKey),
-          scenario,
-        ),
-  );
-  useEffect(
-    () => localStorage.setItem(key, JSON.stringify(state)),
-    [key, state],
-  );
+  const [state, setState] = useState<DemoState>(() => ({
+    ...initialState(scenario),
+    tourMode: "free",
+  }));
   const patch = (next: Partial<DemoState>) =>
     setState((current) => ({ ...current, ...next }));
-  const reset = () => {
-    const fresh = initialState(scenario);
-    localStorage.setItem(key, JSON.stringify(fresh));
-    setState(fresh);
-  };
-  return { state, patch, reset };
+  return { state, patch };
 }
 
 export function DashboardDemo({
@@ -301,7 +279,7 @@ export function DashboardDemo({
   scenario: Scenario;
   locale?: Locale;
 }) {
-  const { state, patch, reset } = useDemoState(scenario);
+  const { state, patch } = useDemoState(scenario);
   const [view, setView] = useState<View>("home");
   const [mobile, setMobile] = useState(false);
   const [tour, setTour] = useState<number | null>(state.tourStep);
@@ -411,12 +389,12 @@ export function DashboardDemo({
             phase: locale === "es" ? "03 · Resultado" : "03 · Outcome",
             title:
               locale === "es"
-                ? "Convierte la alternativa"
-                : "Convert the alternative",
+                ? "Observa la alternativa"
+                : "Review the alternative",
             description:
               locale === "es"
-                ? "La reserva de muestra cierra el relato de Gestión y permanece únicamente en este navegador."
-                : "The sample booking closes the Management story and remains only in this browser.",
+                ? "La reserva ficticia cierra el relato visual de Gestión sin crear ni confirmar nada."
+                : "The fictitious booking closes the visual Management story without creating or confirming anything.",
             evidence:
               locale === "es"
                 ? "Sin cobro ni confirmación externa"
@@ -449,8 +427,8 @@ export function DashboardDemo({
                 : "Cleaning prepares room 408",
             description:
               locale === "es"
-                ? "Los roles ordenan la preparación y la revisión; cada cambio es visible, reversible y local."
-                : "Roles structure preparation and review; every change is visible, reversible and local.",
+                ? "La vista representa cómo los roles ordenarían la preparación y la revisión, sin ejecutar tareas."
+                : "The view represents how roles would structure preparation and review without executing tasks.",
             evidence:
               locale === "es"
                 ? "Permisos de muestra · sin avisos enviados"
@@ -461,8 +439,8 @@ export function DashboardDemo({
             phase: locale === "es" ? "03 · Control" : "03 · Control",
             title:
               locale === "es"
-                ? "Recepción valida la entrada"
-                : "Reception validates the arrival",
+                ? "Recepción revisa la entrada"
+                : "Reception reviews the arrival",
             description:
               locale === "es"
                 ? "El planning reúne estancia y estado de habitación para que una persona tome la decisión final."
@@ -504,32 +482,15 @@ export function DashboardDemo({
             view: "channels",
           },
           {
-            phase:
-              locale === "es" ? "06 · IA supervisada" : "06 · Supervised AI",
-            title:
-              locale === "es"
-                ? "Edita, revisa y conserva el control"
-                : "Edit, review and keep control",
-            description:
-              locale === "es"
-                ? "El copiloto parte de fuentes visibles, guarda versiones locales y exige revisión humana; el envío permanece deshabilitado."
-                : "The copilot starts from visible sources, saves local versions and requires human review; sending remains disabled.",
-            evidence:
-              locale === "es"
-                ? "Sin modelo ni proveedor · sin envío"
-                : "No model or provider · no delivery",
-            view: "automation",
-          },
-          {
-            phase: locale === "es" ? "07 · Tu encaje" : "07 · Your fit",
+            phase: locale === "es" ? "06 · Tu encaje" : "06 · Your fit",
             title:
               locale === "es"
                 ? "Convierte la evidencia en alcance"
                 : "Turn evidence into scope",
             description:
               locale === "es"
-                ? "Ya has visto operación, ingresos, canales e IA con sus límites. El diagnóstico traduce tus necesidades en un punto de partida Básico, Gestión o Inteligente."
-                : "You have seen operations, revenue, channels and AI with their boundaries. The assessment turns your needs into a Basic, Management or Intelligent starting point.",
+                ? "Ya has visto operación, ingresos y canales como paneles ficticios. El diagnóstico traduce tus necesidades en un punto de partida Básico, Gestión o Inteligente."
+                : "You have seen operations, revenue and channels as fictitious panels. The assessment turns your needs into a Basic, Management or Intelligent starting point.",
             evidence:
               locale === "es"
                 ? "Resultado visible antes de pedir datos"
@@ -633,8 +594,8 @@ export function DashboardDemo({
             {locale === "es" ? "Volver a la web demo" : "Back to demo website"}{" "}
             ←
           </a>
-          <a href="https://wa.me/34626432316" target="_blank" rel="noreferrer">
-            {locale === "es" ? "Ayuda Logic2B" : "Logic2B help"} ↗
+          <a href={`${locale === "en" ? "/en/" : "/"}#contacto`}>
+            {locale === "es" ? "Contacto comercial" : "Commercial contact"} ↗
           </a>
           <span>
             {locale === "es"
@@ -711,25 +672,17 @@ export function DashboardDemo({
                 ? "Ver recorrido"
                 : "Start tour"}
           </button>
-          <button
-            className="reset"
-            onClick={reset}
-            title={locale === "es" ? "Restablecer datos" : "Reset data"}
-          >
-            <RefreshCw size={16} />
-            <span>{locale === "es" ? "Restablecer" : "Reset"}</span>
-          </button>
         </header>
         <div className="demo-banner">
           <strong>
             {locale === "es"
-              ? "Demostración ficticia"
-              : "Fictitious demonstration"}
+              ? "MODO DEMO SEGURO"
+              : "SAFE DEMO MODE"}
           </strong>
           <span>
             {locale === "es"
-              ? "Negocios, huéspedes e importes son ficticios. Los cambios solo viven en este navegador; no se realizan cobros, reservas, mensajes ni sincronizaciones reales."
-              : "Businesses, guests and amounts are fictitious. Changes only live in this browser; no live payments, bookings, messages or synchronisations occur."}
+              ? "Panel de solo lectura con datos ficticios. No da de alta alojamientos ni ejecuta cobros, reservas, mensajes, publicaciones o sincronizaciones."
+              : "Read-only panel with fictitious data. It does not register stays or perform payments, bookings, messages, publishing or synchronisation."}
           </span>
         </div>
         <section className="dash-content">
@@ -801,10 +754,10 @@ export function DashboardDemo({
           <p>
             {locale === "es"
               ? scenario === "aurem"
-                ? "Siete hitos conectan una llegada en riesgo con ingresos, canales e IA supervisada. Puedes pausar y reanudar; la exploración libre mantiene todas las secciones disponibles."
+                ? "Seis hitos conectan una llegada en riesgo con ingresos y canales. Puedes pausar y reanudar durante esta visita; la exploración libre mantiene disponibles las superficies visuales del escenario."
                 : "Tres hitos recorren una solicitud hasta su reserva ficticia. Puedes pausar y reanudar; la exploración libre mantiene todas las secciones disponibles."
               : scenario === "aurem"
-                ? "Seven milestones connect an at-risk arrival with revenue, channels and supervised AI. Pause and resume at any time; free exploration keeps every area available."
+                ? "Six milestones connect an at-risk arrival with revenue and channels. Pause and resume during this visit; free exploration keeps the scenario’s visual surfaces available."
                 : "Three milestones take an enquiry to its fictitious booking. Pause and resume at any time; free exploration keeps every area available."}
           </p>
 
@@ -859,8 +812,8 @@ export function DashboardDemo({
           <strong className="tour-evidence">{tourSteps[tour]!.evidence}</strong>
           <p className="tour-memory">
             {locale === "es"
-              ? "El progreso queda en este navegador."
-              : "Progress stays in this browser."}
+              ? "El progreso solo vive durante esta visita y se restablece al recargar."
+              : "Progress only lasts for this visit and resets on reload."}
           </p>
           <div className="tour-actions">
             {tour === tourSteps.length - 1 ? (
@@ -903,7 +856,7 @@ export function DashboardDemo({
           })
         }
       >
-        {locale === "es" ? "Aplicarlo a mi alojamiento" : "Apply it to my stay"}{" "}
+        {locale === "es" ? "Abrir diagnóstico" : "Open assessment"}{" "}
         →
       </a>
       {utility && (
@@ -1045,14 +998,13 @@ function ViewContent({
   if (view === "home")
     return <Home scenario={scenario} locale={locale} state={state} go={go} />;
   if (view === "enquiries")
-    return <Enquiries locale={locale} state={state} patch={patch} go={go} />;
+    return <Enquiries locale={locale} state={state} />;
   if (view === "planning")
     return (
       <Planning
         scenario={scenario}
         locale={locale}
         state={state}
-        patch={patch}
       />
     );
   if (view === "bookings")
@@ -1065,11 +1017,10 @@ function ViewContent({
         scenario={scenario}
         locale={locale}
         state={state}
-        patch={patch}
       />
     );
   if (view === "maintenance")
-    return <Maintenance locale={locale} state={state} patch={patch} />;
+    return <Maintenance locale={locale} state={state} />;
   if (view === "website")
     return (
       <WebsiteEditor
@@ -1080,7 +1031,7 @@ function ViewContent({
       />
     );
   if (view === "channels")
-    return <Channels locale={locale} state={state} patch={patch} />;
+    return <Channels locale={locale} />;
   if (view === "automation")
     return <Automation locale={locale} state={state} patch={patch} />;
   if (view === "control")
@@ -1138,9 +1089,9 @@ function Home({
             "bookings",
           ],
           [
-            locale === "es" ? "Cambios web" : "Website changes",
-            state.website.status === "draft" ? "1" : "0",
-            "website",
+            locale === "es" ? "Huéspedes de ejemplo" : "Sample guests",
+            "12",
+            "guests",
           ],
         ];
   const stayDetail = `${state.stay.guests} ${locale === "es" ? "huéspedes" : "guests"} · ${stayRange(state, locale)}`;
@@ -1182,13 +1133,13 @@ function Home({
           <Task
             title={
               locale === "es"
-                ? "Cobro preparado, no enviado"
-                : "Payment prepared, not sent"
+                ? "Contexto ficticio de llegada"
+                : "Fictitious arrival context"
             }
             detail={
               locale === "es"
-                ? "Requiere confirmación de Recepción"
-                : "Requires Reception confirmation"
+                ? "Sin pago ni confirmación externa"
+                : "No payment or external confirmation"
             }
           />
         </article>
@@ -1221,20 +1172,11 @@ function Home({
 function Enquiries({
   locale,
   state,
-  patch,
-  go,
 }: {
   locale: Locale;
   state: DemoState;
-  patch: (n: Partial<DemoState>) => void;
-  go: (v: View) => void;
 }) {
-  const status = {
-    new: locale === "es" ? "Nueva" : "New",
-    alternative:
-      locale === "es" ? "Alternativa preparada" : "Alternative prepared",
-    booked: locale === "es" ? "Convertida" : "Converted",
-  }[state.enquiry];
+  const status = locale === "es" ? "Caso ficticio" : "Fictitious case";
   return (
     <div className="dash-grid">
       <article className="panel wide">
@@ -1282,51 +1224,19 @@ function Enquiries({
           </div>
         </div>
         <div className="actions">
-          {state.enquiry === "new" && (
-            <button
-              className="primary"
-              onClick={() => patch({ enquiry: "alternative" })}
-            >
-              {locale === "es" ? "Preparar alternativa" : "Prepare alternative"}
-            </button>
-          )}
-          {state.enquiry === "alternative" && (
-            <button
-              className="primary"
-              onClick={() => {
-                patch({
-                  enquiry: "booked",
-                  completedFlows: [
-                    ...new Set([...state.completedFlows, "enquiry-booking"]),
-                  ],
-                });
-                track("demo_flow_complete", {
-                  locale,
-                  demo: "terrava",
-                  flow: "enquiry-booking",
-                });
-                go("bookings");
-              }}
-            >
-              {locale === "es" ? "Convertir en reserva" : "Convert to booking"}
-            </button>
-          )}
-          {state.enquiry === "booked" && (
-            <span className="done">
-              <Check size={16} />
-              {locale === "es"
-                ? "Reserva TER-104 creada"
-                : "Booking TER-104 created"}
-            </span>
-          )}
+          <span className="permission-note">
+            {locale === "es"
+              ? "Vista de solo lectura: compara el caso y la alternativa sin crear ni convertir reservas."
+              : "Read-only view: compare the case and alternative without creating or converting bookings."}
+          </span>
         </div>
       </article>
       <article className="panel">
         <h2>{locale === "es" ? "Contexto conservado" : "Context preserved"}</h2>
         <p className="body-copy">
           {locale === "es"
-            ? "Fechas, huéspedes, preferencias y conversación viajan a la reserva. No hay que copiar datos entre pantallas."
-            : "Dates, guests, preferences and conversation move into the booking. No copy and paste between screens."}
+            ? "El panel representa fechas, huéspedes y preferencias con un fixture precargado; no mueve ni guarda datos de visitantes."
+            : "The panel represents dates, guests and preferences with a preloaded fixture; it does not move or store visitor data."}
         </p>
       </article>
     </div>
@@ -1337,12 +1247,10 @@ function Planning({
   scenario,
   locale,
   state,
-  patch,
 }: {
   scenario: Scenario;
   locale: Locale;
   state: DemoState;
-  patch: (n: Partial<DemoState>) => void;
 }) {
   const rows =
     scenario === "aurem"
@@ -1357,19 +1265,6 @@ function Planning({
           "408 · Terrace",
         ]
       : properties.terrava;
-  const finishStayFlow = (next: DemoState["stayOperation"]) => {
-    const completed =
-      next === "rate_updated"
-        ? [...new Set([...state.completedFlows, "stay-operation"])]
-        : state.completedFlows;
-    patch({ stayOperation: next, completedFlows: completed });
-    if (next === "rate_updated")
-      track("demo_flow_complete", {
-        locale,
-        demo: "terrava",
-        flow: "stay-operation",
-      });
-  };
   return (
     <div className="panel planning">
       <div className="planning-head">
@@ -1385,22 +1280,23 @@ function Planning({
         </div>
         <span className="status-line">
           {locale === "es"
-            ? "Salida exclusiva · EUR"
-            : "Exclusive checkout · EUR"}
+            ? "Calendario ficticio · EUR"
+            : "Fictitious calendar · EUR"}
         </span>
       </div>
-      <div className="tape" role="table">
-        <div className="tape-days">
-          <span></span>
+      <div className="tape" role="table" aria-label={locale === "es" ? "Ocupación ficticia de 14 días" : "Fictitious 14-day occupancy"}>
+        <div className="tape-days" role="row">
+          <span role="columnheader" aria-label={locale === "es" ? "Alojamiento" : "Property"}></span>
           {Array.from({ length: 14 }, (_, i) => (
-            <b key={i}>{18 + i}</b>
+            <b role="columnheader" key={i}>{18 + i}</b>
           ))}
         </div>
         {rows.map((row, r) => (
-          <div className="tape-row" key={row}>
-            <span>{row}</span>
+          <div className="tape-row" role="row" key={row}>
+            <span role="rowheader">{row}</span>
             {Array.from({ length: 14 }, (_, d) => (
               <i
+                role="cell"
                 key={d}
                 className={
                   d >= r % 5 && d < (r % 5) + 4
@@ -1427,44 +1323,18 @@ function Planning({
                 : "Demo · stay operation"}
             </span>
             <strong>
-              {state.stay.name} ·{" "}
-              {state.stayOperation === "original" ? "Casa Aira" : "Casa Bruma"}
+              {state.stay.name} · Casa Bruma
             </strong>
             <span>
-              {state.stayOperation === "rate_updated"
-                ? `€ ${state.stay.amount + 48} · ${locale === "es" ? "tarifa ajustada" : "adjusted rate"}`
-                : `€ ${state.stay.amount}`}
+              {locale === "es" ? "Alternativa ficticia visible" : "Fictitious alternative shown"}
             </span>
           </div>
           <div className="actions">
-            {state.stayOperation === "original" && (
-              <button
-                className="primary"
-                onClick={() => finishStayFlow("reassigned")}
-              >
-                {locale === "es"
-                  ? "Reasignar a Casa Bruma"
-                  : "Reassign to Casa Bruma"}
-              </button>
-            )}
-            {state.stayOperation === "reassigned" && (
-              <button
-                className="primary"
-                onClick={() => finishStayFlow("rate_updated")}
-              >
-                {locale === "es"
-                  ? "Aplicar tarifa flexible +48 €"
-                  : "Apply flexible rate +€48"}
-              </button>
-            )}
-            {state.stayOperation === "rate_updated" && (
-              <span className="done">
-                <Check size={16} />
-                {locale === "es"
-                  ? "Planning y perfil actualizados"
-                  : "Planning and profile updated"}
-              </span>
-            )}
+            <span className="permission-note">
+              {locale === "es"
+                ? "Solo visualización · sin cambios de inventario o tarifa"
+                : "View only · no inventory or rate changes"}
+            </span>
           </div>
         </div>
       )}
@@ -1487,22 +1357,11 @@ function Planning({
                 : "Expected arrival 15:00"}
             </span>
           </div>
-          {state.cleaning === "review" && canOperate(state.role, "review") && (
-            <button
-              className="primary"
-              onClick={() =>
-                patch({
-                  cleaning: "ready",
-                  arrivalRisk: "resolved",
-                  completedFlows: [
-                    ...new Set([...state.completedFlows, "arrival-risk"]),
-                  ],
-                })
-              }
-            >
-              {locale === "es" ? "Validar habitación" : "Validate room"}
-            </button>
-          )}
+          <span className="permission-note">
+            {locale === "es"
+              ? "Estado ficticio · no valida habitaciones"
+              : "Fictitious status · does not validate rooms"}
+          </span>
         </div>
       )}
     </div>
@@ -1648,12 +1507,10 @@ function Cleaning({
   scenario,
   locale,
   state,
-  patch,
 }: {
   scenario: Scenario;
   locale: Locale;
   state: DemoState;
-  patch: (n: Partial<DemoState>) => void;
 }) {
   if (scenario === "terrava")
     return (
@@ -1683,7 +1540,6 @@ function Cleaning({
         />
       </div>
     );
-  const role = state.role;
   const title = {
     pending: locale === "es" ? "Pendiente" : "Pending",
     in_progress: locale === "es" ? "En curso" : "In progress",
@@ -1726,66 +1582,11 @@ function Cleaning({
           </li>
         </ul>
         <div className="actions">
-          {state.cleaning === "pending" && canOperate(role, "cleaning") && (
-            <button
-              className="primary"
-              onClick={() =>
-                patch({ cleaning: "in_progress", arrivalRisk: "coordinating" })
-              }
-            >
-              {locale === "es" ? "Empezar preparación" : "Start preparation"}
-            </button>
-          )}
-          {state.cleaning === "in_progress" && canOperate(role, "cleaning") && (
-            <button
-              className="primary"
-              onClick={() => patch({ cleaning: "review" })}
-            >
-              {locale === "es"
-                ? "Marcar lista para revisar"
-                : "Mark ready for review"}
-            </button>
-          )}
-          {state.cleaning === "review" && canOperate(role, "review") && (
-            <button
-              className="primary"
-              onClick={() => {
-                patch({
-                  cleaning: "ready",
-                  arrivalRisk: "resolved",
-                  completedFlows: [
-                    ...new Set([...state.completedFlows, "arrival-risk"]),
-                  ],
-                });
-                track("demo_flow_complete", {
-                  locale,
-                  demo: "aurem",
-                  flow: "arrival-risk",
-                });
-              }}
-            >
-              {locale === "es" ? "Validar habitación" : "Validate room"}
-            </button>
-          )}
-          {!canOperate(
-            role,
-            state.cleaning === "review" ? "review" : "cleaning",
-          ) &&
-            state.cleaning !== "ready" && (
-              <span className="permission-note">
-                {locale === "es"
-                  ? `El rol ${role} puede ver este estado, pero no ejecutar el siguiente paso.`
-                  : `The ${role} role can see this state but cannot perform the next step.`}
-              </span>
-            )}
-          {state.cleaning === "ready" && (
-            <span className="done">
-              <Check size={16} />
-              {locale === "es"
-                ? "Habitación disponible para la entrada"
-                : "Room available for arrival"}
-            </span>
-          )}
+          <span className="permission-note">
+            {locale === "es"
+              ? "Checklist de ejemplo · no asigna, valida ni actualiza habitaciones"
+              : "Sample checklist · does not assign, validate or update rooms"}
+          </span>
         </div>
       </article>
       <article className="panel">
@@ -1796,8 +1597,8 @@ function Cleaning({
         </h2>
         <p className="body-copy">
           {locale === "es"
-            ? "Limpieza ejecuta; Recepción valida. Dirección puede intervenir, pero el historial conserva quién hizo cada paso."
-            : "Cleaning performs; Reception validates. Direction may intervene, while history keeps who completed each step."}
+            ? "La vista ilustra responsabilidades y estados con datos ficticios; no registra quién ejecuta tareas."
+            : "The view illustrates responsibilities and statuses with fictitious data; it records no task execution."}
         </p>
       </article>
     </div>
@@ -1807,30 +1608,14 @@ function Cleaning({
 function Maintenance({
   locale,
   state,
-  patch,
 }: {
   locale: Locale;
   state: DemoState;
-  patch: (n: Partial<DemoState>) => void;
 }) {
   const labels = {
     new: locale === "es" ? "Nueva" : "New",
     assigned: locale === "es" ? "Asignada" : "Assigned",
     resolved: locale === "es" ? "Resuelta" : "Resolved",
-  };
-  const advance = () => {
-    if (state.maintenance === "new") patch({ maintenance: "assigned" });
-    else if (state.maintenance === "assigned") {
-      patch({
-        maintenance: "resolved",
-        completedFlows: [...new Set([...state.completedFlows, "maintenance"])],
-      });
-      track("demo_flow_complete", {
-        locale,
-        demo: "aurem",
-        flow: "maintenance",
-      });
-    }
   };
   return (
     <div className="dash-grid">
@@ -1872,24 +1657,11 @@ function Maintenance({
           </span>
         </div>
         <div className="actions">
-          {state.maintenance !== "resolved" ? (
-            <button className="primary" onClick={advance}>
-              {state.maintenance === "new"
-                ? locale === "es"
-                  ? "Asignar a mantenimiento"
-                  : "Assign maintenance"
-                : locale === "es"
-                  ? "Resolver y liberar"
-                  : "Resolve and release"}
-            </button>
-          ) : (
-            <span className="done">
-              <Check size={16} />
-              {locale === "es"
-                ? "Sin impacto en la llegada"
-                : "No impact on arrival"}
-            </span>
-          )}
+          <span className="permission-note">
+            {locale === "es"
+              ? "Timeline ficticio · no asigna ni resuelve incidencias"
+              : "Fictitious timeline · does not assign or resolve incidents"}
+          </span>
         </div>
       </article>
       <article className="panel">
@@ -1897,8 +1669,8 @@ function Maintenance({
         <h2>{locale === "es" ? "Impacto visible" : "Visible impact"}</h2>
         <p className="body-copy">
           {locale === "es"
-            ? "La incidencia conserva prioridad, responsable y efecto sobre inventario. No comunica con un proveedor externo."
-            : "The incident keeps priority, ownership and inventory impact. It does not communicate with an external provider."}
+            ? "La incidencia muestra prioridad, responsable y efecto hipotético. No modifica inventario ni comunica con proveedores."
+            : "The incident shows priority, ownership and hypothetical impact. It changes no inventory and contacts no provider."}
         </p>
       </article>
     </div>
@@ -2001,8 +1773,8 @@ function WebsiteEditor({
         </div>
         <p className="permission-note">
           {locale === "es"
-            ? "La publicación solo modifica localStorage y se puede restablecer. No existe CMS ni despliegue conectado."
-            : "Publishing only changes localStorage and can be reset. No CMS or deployment is connected."}
+            ? "La publicación solo cambiaría la memoria temporal de esta visita. No existe CMS ni despliegue conectado."
+            : "Publishing would only change this visit’s temporary in-memory state. No CMS or deployment is connected."}
         </p>
       </article>
       <article className={`website-preview ${scenario}`}>
@@ -2023,17 +1795,8 @@ function WebsiteEditor({
   );
 }
 
-function Channels({
-  locale,
-  state,
-  patch,
-}: {
-  locale: Locale;
-  state: DemoState;
-  patch: (next: Partial<DemoState>) => void;
-}) {
+function Channels({ locale }: { locale: Locale }) {
   const [selected, setSelected] = useState<ChannelId>("expedia");
-  const allowedToReview = canOperate(state.role, "review");
   const channels: Record<ChannelId, {
     name: string;
     status: string;
@@ -2054,7 +1817,7 @@ function Channels({
     },
     expedia: {
       name: "Expedia",
-      status: state.channelReview === "reviewed" ? "Revisado localmente" : "Revisión pendiente",
+      status: "Fixture por revisar",
       detail: "El fixture marca una diferencia de tarifa. Debe revisarla una persona; no existe canal al que publicarla.",
       coverage: ["Escenario", "Por revisar", "Sin entrada", "Fuera de demo"],
     },
@@ -2079,7 +1842,7 @@ function Channels({
     },
     expedia: {
       name: "Expedia",
-      status: state.channelReview === "reviewed" ? "Locally reviewed" : "Review pending",
+      status: "Fixture to review",
       detail: "The fixture flags a rate difference. A person must review it; there is no channel to publish to.",
       coverage: ["Scenario", "Review", "No intake", "Out of demo"],
     },
@@ -2091,18 +1854,6 @@ function Channels({
     },
   };
   const active = channels[selected];
-  const markReviewed = () => {
-    if (!allowedToReview) return;
-    patch({
-      channelReview: "reviewed",
-      completedFlows: [...new Set([...state.completedFlows, "channel-review"])],
-    });
-    track("demo_flow_complete", {
-      locale,
-      demo: "aurem",
-      flow: "channel-review",
-    });
-  };
   const requirements = locale === "es"
     ? [
         ["01", "Acuerdo y credenciales", "Contrato con el canal y secretos guardados fuera del navegador."],
@@ -2131,7 +1882,7 @@ function Channels({
       <div className="channel-metrics" aria-label={locale === "es" ? "Resumen de canales ficticios" : "Fictitious channel summary"}>
         <div><span>{locale === "es" ? "Conectados" : "Connected"}</span><strong>0</strong></div>
         <div><span>{locale === "es" ? "Fixtures" : "Fixtures"}</span><strong>4</strong></div>
-        <div><span>{locale === "es" ? "Revisiones pendientes" : "Pending reviews"}</span><strong>{state.channelReview === "reviewed" ? 0 : 1}</strong></div>
+        <div><span>{locale === "es" ? "Fixtures por revisar" : "Fixtures to review"}</span><strong>1</strong></div>
         <div><span>{locale === "es" ? "Publicaciones" : "Publications"}</span><strong>0</strong></div>
       </div>
       <div className="channel-workspace">
@@ -2166,20 +1917,11 @@ function Channels({
           <h2>{active.name}</h2>
           <strong>{active.status}</strong>
           <p>{active.detail}</p>
-          {selected === "expedia" ? (
-            state.channelReview === "reviewed" ? (
-              <div className="channel-reviewed" role="status"><Check size={17} /><span>{locale === "es" ? "Revisado en este navegador · sin publicación" : "Reviewed in this browser · not published"}</span></div>
-            ) : (
-              <button type="button" className="primary" onClick={markReviewed} disabled={!allowedToReview}>
-                {allowedToReview
-                  ? locale === "es" ? "Marcar revisión local" : "Mark local review"
-                  : locale === "es" ? "Requiere Dirección o Recepción" : "Requires Direction or Reception"}
-              </button>
-            )
-          ) : <small>{locale === "es" ? "Este fixture no ofrece una acción local." : "This fixture has no local action."}</small>}
-          <button type="button" disabled className="channel-publish">
-            {locale === "es" ? "Publicar deshabilitado · sin conexión" : "Publish disabled · no connection"}
-          </button>
+          <small>
+            {locale === "es"
+              ? "Inspección de solo lectura · no revisa ni publica nada"
+              : "Read-only inspection · reviews and publishes nothing"}
+          </small>
         </aside>
       </div>
       <section className="panel channel-requirements" aria-labelledby="channel-requirements-title">

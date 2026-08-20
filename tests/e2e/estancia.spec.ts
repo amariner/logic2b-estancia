@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+const appOrigin = 'http://127.0.0.1:8790';
+
 const paths = [
   '/', '/en/', '/docs/', '/en/docs/',
   '/soluciones/casas-rurales/', '/soluciones/apartamentos/', '/soluciones/hoteles/', '/planes/', '/diagnostico/',
@@ -13,12 +15,43 @@ const paths = [
   '/en/demos/terrava/gestion/', '/en/demos/aurem/gestion/',
 ];
 
+const demoLandingCases = [
+  { path: '/demos/nivora/', managerHref: null, panelName: 'Panel visual ficticio de Nivora One' },
+  { path: '/demos/terrava/', managerHref: '/demos/terrava/gestion/?vista=home', panelName: 'Panel visual ficticio de Terrava Collection' },
+  { path: '/demos/aurem/', managerHref: '/demos/aurem/gestion/?vista=home', panelName: 'Panel visual ficticio de Aurem Hotel' },
+  { path: '/en/demos/nivora/', managerHref: null, panelName: 'Nivora One fictitious visual panel' },
+  { path: '/en/demos/terrava/', managerHref: '/en/demos/terrava/gestion/?vista=home', panelName: 'Terrava Collection fictitious visual panel' },
+  { path: '/en/demos/aurem/', managerHref: '/en/demos/aurem/gestion/?vista=home', panelName: 'Aurem Hotel fictitious visual panel' },
+] as const;
+
+const demoDashboardPaths = [
+  '/demos/terrava/gestion/', '/demos/aurem/gestion/',
+  '/en/demos/terrava/gestion/', '/en/demos/aurem/gestion/',
+] as const;
+
+const operationalMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+const commercialLeadManifest = {
+  schemaVersion: '1.0.0', mode: 'demo', demoMode: true, commercialLeadsEnabled: true,
+  sideEffects: true, durableWrites: true, jobs: false,
+  providers: { analytics: 'disabled', email: 'live', payments: 'disabled', webhooks: 'disabled', externalStorage: 'disabled' },
+  operations: { commercialLead: 'active', payments: 'unavailable', webhooks: 'unavailable', automations: 'unavailable' },
+};
+
+async function enableCommercialLead(page: Page) {
+  await page.route('**/api/capabilities', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(commercialLeadManifest) }));
+}
+
 async function expectCleanPage(page: Page, path: string) {
   const errors: string[] = [];
   page.on('console', (message) => message.type() === 'error' && errors.push(message.text()));
   page.on('pageerror', (error) => errors.push(error.message));
-  const response = await page.goto(path, { waitUntil: 'networkidle' });
+  const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
   expect(response?.status(), path).toBe(200);
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${path} has horizontal overflow`).toBe(true);
   expect(errors, `${path} emitted browser errors`).toEqual([]);
 }
@@ -36,25 +69,25 @@ test('public routes are complete and demos remain isolated', async ({ page }) =>
 
 test('capability maps expose truthful evidence and exact localized targets', async ({ page, request }) => {
   await page.goto('/soluciones/casas-rurales/');
-  await expect(page.locator('[data-capability-evidence]')).toHaveCount(6);
+  await expect(page.locator('[data-capability-evidence]')).toHaveCount(4);
   const planning = page.locator('[data-capability="planning"]');
   await expect(planning).toContainText('Desde Gestión');
-  await expect(planning).toContainText('Reasignación de unidad y ajuste de tarifa reversibles');
-  await expect(planning).toContainText('Sin PMS, disponibilidad, pagos ni tarifas conectadas');
+  await expect(planning).toContainText('Calendario ficticio de solo lectura');
+  await expect(planning).toContainText('No cambia inventario o tarifas ni conecta PMS, disponibilidad o pagos');
   await expect(planning.locator('[data-capability-evidence]')).toHaveAttribute('href', '/demos/terrava/gestion/?vista=planning');
 
   await page.goto('/soluciones/hoteles/');
-  await expect(page.locator('[data-capability-evidence]')).toHaveCount(7);
-  await expect(page.locator('[data-capability="channels"]')).toContainText('A validar');
+  await expect(page.locator('[data-capability-evidence]')).toHaveCount(5);
+  await expect(page.locator('[data-capability="channels"]')).toContainText('Activable por proyecto');
   await expect(page.locator('[data-capability-evidence="channels"]')).toHaveAttribute('href', '/demos/aurem/gestion/?vista=channels');
 
   await page.goto('/en/plans/');
   const evidenceLinks = page.locator('[data-capability-evidence]');
-  await expect(evidenceLinks).toHaveCount(14);
-  await expect(page.locator('[data-capability="revenue"]')).toContainText('Minimum plan: Intelligent');
-  await expect(page.locator('[data-capability="revenue"]')).toContainText('Future');
-  await expect(page.locator('[data-capability-evidence="revenue"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=reports');
-  await expect(page.locator('[data-capability-evidence="email-enquiries"]')).toHaveAttribute('href', '/en/demos/nivora/#reserva');
+  await expect(evidenceLinks).toHaveCount(9);
+  await expect(page.locator('[data-capability="revenue"]')).toContainText('Starting plan: Intelligent');
+  await expect(page.locator('[data-capability="revenue"]')).toContainText('On the roadmap');
+  await expect(page.locator('[data-capability-evidence-unavailable="revenue"]')).toBeVisible();
+  await expect(page.locator('[data-capability-evidence-unavailable="email-enquiries"]')).toBeVisible();
 
   for (const href of await evidenceLinks.evaluateAll((links) => links.map((link) => link.getAttribute('href')).filter(Boolean) as string[])) {
     expect((await request.get(href)).status(), href).toBe(200);
@@ -101,15 +134,11 @@ test('capability evidence opens the exact fictitious flow without external write
   await page.goto('/soluciones/hoteles/');
   await page.locator('[data-capability-evidence="channels"]').click();
   await expect(page).toHaveURL(/\/demos\/aurem\/gestion\/\?vista=channels$/);
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Canales' })).toBeVisible();
   await expect(page.getByRole('note')).toContainText('0 canales conectados');
 
   await page.goto('/planes/');
-  await page.locator('[data-capability-evidence="email-enquiries"]').click();
-  await expect(page).toHaveURL(/\/demos\/nivora\/#reserva$/);
-  await expect(page.locator('#reserva [data-demo-form]')).toBeVisible();
-  await expect(page.locator('#reserva')).toContainText('no bloquea inventario');
+  await expect(page.locator('[data-capability-evidence-unavailable="email-enquiries"]')).toContainText('Sin demo visual pública');
   expect(externalWrites).toEqual([]);
 });
 
@@ -120,59 +149,57 @@ for (const width of [320, 375, 430, 1366]) {
   });
 }
 
-test('all demo forms stay local and cannot use Resend', async ({ page }) => {
+test('all ten demo routes are non-operational and the landing panels collect no visitor data', async ({ page, request }) => {
   const externalWrites: string[] = [];
+  const externalOrigins = new Set<string>();
+  await page.addInitScript(() => {
+    localStorage.setItem('logic-estancia-consent', JSON.stringify({ essential: true, analytics: false, version: '1.0.0' }));
+  });
   page.on('request', (request) => {
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method())) externalWrites.push(request.url());
+    if (operationalMethods.has(request.method())) externalWrites.push(request.url());
+    const origin = new URL(request.url()).origin;
+    if (origin !== appOrigin) externalOrigins.add(origin);
   });
-  for (const [path, expected] of [
-    ['/demos/nivora/', 'No se ha bloqueado inventario'],
-    ['/demos/terrava/', 'Solicitud demo creada'],
-    ['/en/demos/nivora/', 'No inventory was blocked'],
-    ['/en/demos/terrava/', 'Demo enquiry created'],
-  ] as const) {
+
+  for (const demo of demoLandingCases) {
+    const response = await page.goto(demo.path);
+    expect(response?.headers()['content-security-policy']).toContain("form-action 'none'");
+    await expect(page.locator('[data-demo-panel]')).toBeVisible();
+    await expect(page.getByRole('article', { name: demo.panelName })).toBeVisible();
+    await expect(page.locator('form, dialog, input, textarea, select')).toHaveCount(0);
+    await expect(page.locator('[name="name"], [name="email"], [type="email"], [type="tel"]')).toHaveCount(0);
+
+    const managerLink = page.locator('.demo-manager-next');
+    if (demo.managerHref) await expect(managerLink).toHaveAttribute('href', demo.managerHref);
+    else {
+      await expect(managerLink).toHaveCount(0);
+      await expect(page.locator('a[href*="/demos/nivora/gestion/"]')).toHaveCount(0);
+    }
+  }
+
+  for (const path of demoDashboardPaths) {
     const response = await page.goto(path);
     expect(response?.headers()['content-security-policy']).toContain("form-action 'none'");
-    await expect(page.locator('#reserva')).toContainText(/Resend/);
-    await page.locator('[data-demo-form] button[type="submit"]').click();
-    await expect(page.locator('.demo-result')).toContainText(expected);
+    await expect(page.locator('.demo-banner')).toContainText(/solo lectura|read-only/i);
+    await expect(page.locator('form, dialog')).toHaveCount(0);
+    await expect(page.locator('[name="name"], [name="email"], [type="email"], [type="tel"], textarea')).toHaveCount(0);
   }
-  for (const path of ['/demos/aurem/', '/en/demos/aurem/']) {
-    const response = await page.goto(path);
-    expect(response?.headers()['content-security-policy']).toContain("form-action 'none'");
-    await expect(page.locator('#reserva')).toContainText(/Resend/);
-    await page.locator('[data-demo-form] button[type="submit"]').click();
-    await expect(page.locator('[data-payment]')).toBeVisible();
-    await page.locator('[data-close]').click();
-  }
+
+  expect((await request.get('/demos/nivora/gestion/')).status()).toBe(404);
+  expect((await request.get('/en/demos/nivora/gestion/')).status()).toBe(404);
   expect(externalWrites).toEqual([]);
+  expect([...externalOrigins]).toEqual([]);
 });
 
-test('the lead endpoint rejects demo sources before Resend eligibility', async ({ request }) => {
-  const response = await request.post('/api/leads', { data: {
-    name: 'Demo local', businessName: 'Terrava ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/%2564emos/terrava/', accept: true,
-  } });
-  expect(response.status()).toBe(403);
-  expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'demo_submission_disabled' });
-});
-
-test('the lead endpoint rejects cross-site browser submissions before coordination', async ({ request }) => {
-  const response = await request.post('/api/leads', {
-    headers: { origin: 'https://attacker.example', 'sec-fetch-site': 'cross-site' },
-    data: {
-      name: 'Cross-site test', businessName: 'Casa ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/', accept: true,
-    },
-  });
-  expect(response.status()).toBe(403);
-  expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'cross_site_submission_disabled' });
-});
-
-test('the lead endpoint rejects oversized payloads before delivery', async ({ request }) => {
-  const response = await request.post('/api/leads', { data: {
-    name: 'Oversized test', businessName: 'Casa ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/', accept: true, padding: 'x'.repeat(33_000),
-  } });
-  expect(response.status()).toBe(413);
-  expect(await response.json()).toMatchObject({ outcome: 'invalid', error: 'payload_too_large' });
+test('the lead endpoint rejects every commercial payload before parsing when its allowlist is absent', async ({ request }) => {
+  for (const payload of [
+    { name: 'Demo local', businessName: 'Terrava ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/%2564emos/terrava/', accept: true },
+    { name: 'Oversized', businessName: 'Casa ficticia', email: 'demo@example.test', accommodationType: 'rural', propertyCount: 1, unitCount: 1, accept: true, padding: 'x'.repeat(33_000) },
+  ]) {
+    const response = await request.post('/api/leads', { data: payload });
+    expect(response.status()).toBe(403);
+    expect(await response.json()).toEqual({ ok: false, outcome: 'blocked', error: 'commercial_leads_disabled' });
+  }
 });
 
 test('the lead endpoint exposes a private JSON-only HTTP contract', async ({ request }) => {
@@ -180,8 +207,8 @@ test('the lead endpoint exposes a private JSON-only HTTP contract', async ({ req
     headers: { 'content-type': 'text/plain' },
     data: '{}',
   });
-  expect(unsupported.status()).toBe(415);
-  expect(await unsupported.json()).toEqual({ error: 'unsupported_media_type' });
+  expect(unsupported.status()).toBe(403);
+  expect(await unsupported.json()).toEqual({ ok: false, outcome: 'blocked', error: 'commercial_leads_disabled' });
   expect(unsupported.headers()['cache-control']).toBe('no-store');
   expect(unsupported.headers()['cross-origin-resource-policy']).toBe('same-origin');
   expect(unsupported.headers()['x-content-type-options']).toBe('nosniff');
@@ -194,8 +221,8 @@ test('the lead endpoint exposes a private JSON-only HTTP contract', async ({ req
   const invalid = await request.post('/api/leads', { data: {
     name: 'Invalid contract test', businessName: 'Casa ficticia', email: 'private-invalid-value', accommodationType: 'rural', propertyCount: 1, unitCount: 1, sourcePath: '/', accept: true,
   } });
-  expect(invalid.status()).toBe(400);
-  expect(await invalid.json()).toEqual({ ok: false, outcome: 'invalid', error: 'invalid' });
+  expect(invalid.status()).toBe(403);
+  expect(await invalid.json()).toEqual({ ok: false, outcome: 'blocked', error: 'commercial_leads_disabled' });
 
   for (const path of ['/api', '/api/unknown']) {
     const unknown = await request.get(path);
@@ -209,25 +236,41 @@ test('the lead endpoint exposes a private JSON-only HTTP contract', async ({ req
   expect(publicPage.status()).toBe(200);
   expect(publicPage.headers()['cross-origin-resource-policy']).toBeUndefined();
   expect(publicPage.headers()['content-security-policy']).toContain("base-uri 'self'");
-  expect(publicPage.headers()['content-security-policy']).toContain("form-action 'self'");
+  expect(publicPage.headers()['content-security-policy']).toContain("form-action 'none'");
   expect(publicPage.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
   expect(publicPage.headers()['content-security-policy']).toContain("object-src 'none'");
 });
 
 test('commercial pages expose bilingual SEO metadata and complete sitemap', async ({ page, request }) => {
-  await page.goto('/');
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://estancia.logic2b.com/');
-  await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute('href', 'https://estancia.logic2b.com/en/');
-  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Logic Estancia/);
-  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
-  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://estancia.logic2b.com/media/terrava/hero.webp');
+  for (const [path, canonical, alternate] of [
+    ['/', 'https://estancia.logic2b.com/', 'https://estancia.logic2b.com/en/'],
+    ['/en/', 'https://estancia.logic2b.com/en/', 'https://estancia.logic2b.com/'],
+  ] as const) {
+    await page.goto(path);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', canonical);
+    await expect(page.locator(`link[rel="alternate"][hreflang="${path === '/' ? 'en' : 'es'}"]`)).toHaveAttribute('href', alternate);
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Logic2B Estancias/);
+    await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute('content', 'Logic2B Estancias');
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', canonical);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://estancia.logic2b.com/og-estancias.jpg');
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', 'https://estancia.logic2b.com/og-estancias.jpg');
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute('content', /Logic2B Estancias/);
+    await expect(page.locator('meta[name="twitter:image:alt"]')).toHaveAttribute('content', /Logic2B Estancias/);
 
-  const schemas = await page.locator('script[type="application/ld+json"]').allTextContents();
-  const schemaTypes = schemas.flatMap((schema) => {
-    const parsed = JSON.parse(schema) as { '@type'?: string } | { '@type'?: string }[];
-    return (Array.isArray(parsed) ? parsed : [parsed]).map((item) => item['@type']);
-  });
-  expect(schemaTypes).toEqual(expect.arrayContaining(['Organization', 'WebSite', 'FAQPage']));
+    const schemas = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const parsedSchemas = schemas.flatMap((schema) => {
+      const parsed = JSON.parse(schema) as { '@type'?: string; name?: string } | { '@type'?: string; name?: string }[];
+      return Array.isArray(parsed) ? parsed : [parsed];
+    });
+    expect(parsedSchemas.map((item) => item['@type'])).toEqual(expect.arrayContaining(['Organization', 'WebSite', 'FAQPage']));
+    expect(parsedSchemas.find((item) => item['@type'] === 'WebSite')?.name).toBe('Logic2B Estancias');
+    expect(parsedSchemas.find((item) => item['@type'] === 'Service')?.name).toBe('Logic2B Estancias');
+  }
+
+  const socialCard = await request.get('/og-estancias.jpg');
+  expect(socialCard.status()).toBe(200);
+  expect(socialCard.headers()['content-type']).toContain('image/jpeg');
 
   const sitemap = await request.get('/sitemap.xml');
   expect(sitemap.status()).toBe(200);
@@ -235,6 +278,63 @@ test('commercial pages expose bilingual SEO metadata and complete sitemap', asyn
   expect(xml).toContain('https://estancia.logic2b.com/en/privacidad/');
   expect(xml).toContain('https://estancia.logic2b.com/en/cookies/');
   expect(xml).not.toContain('/demos/');
+});
+
+test('Logic2B and Estancias keep distinct brand destinations in both languages', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 860 });
+  for (const [path, home, parentLabel, productLabel] of [
+    ['/', '/', 'Logic2B — ir a logic2b.com', 'Logic2B Estancias — ir al inicio'],
+    ['/en/', '/en/', 'Logic2B — visit logic2b.com', 'Logic2B Estancias — home'],
+  ] as const) {
+    await page.goto(path);
+    const header = page.locator('.site-header');
+    const footer = page.locator('footer');
+
+    const parentLink = header.getByRole('link', { name: parentLabel, exact: true });
+    const productLink = header.getByRole('link', { name: productLabel, exact: true });
+    await expect(parentLink).toBeVisible();
+    await expect(productLink).toBeVisible();
+    await expect(parentLink).toHaveAttribute('href', 'https://logic2b.com/');
+    await expect(productLink).toHaveAttribute('href', home);
+    await expect(footer.getByRole('link', { name: parentLabel, exact: true })).toHaveAttribute('href', 'https://logic2b.com/');
+    await expect(footer.getByRole('link', { name: productLabel, exact: true })).toHaveAttribute('href', home);
+  }
+});
+
+test('mobile navigation manages focus, Escape and reflow', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 860 });
+  await page.goto('/');
+  const menu = page.getByRole('button', { name: 'Menú' });
+  const mobileNav = page.getByRole('navigation', { name: 'Principal móvil' });
+
+  await menu.click();
+  await expect(menu).toHaveAttribute('aria-expanded', 'true');
+  await expect(mobileNav).toBeVisible();
+  await expect(mobileNav.locator('a').first()).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+
+  await page.keyboard.press('Escape');
+  await expect(mobileNav).toBeHidden();
+  await expect(menu).toHaveAttribute('aria-expanded', 'false');
+  await expect(menu).toBeFocused();
+});
+
+test('hero exposes direct routes and serves responsive visual evidence', async ({ page }) => {
+  await page.goto('/');
+  const hero = page.locator('.hero');
+  await expect(hero.getByRole('heading', { level: 1 })).toContainText('Web, reservas y operación');
+  await expect(hero.getByRole('link', { name: 'Ver mi punto de partida' })).toHaveAttribute('href', '/diagnostico/');
+  await expect(hero.getByRole('link', { name: 'Explorar cómo funciona' })).toHaveAttribute('href', '#producto');
+  await expect(hero.getByText('Concepto ficticio · vista local')).toBeVisible();
+  const image = hero.locator('img');
+  await expect(image).toHaveAttribute('width', '2016');
+  await expect(image).toHaveAttribute('height', '1344');
+  await expect(image).toHaveAttribute('fetchpriority', 'high');
+  const imageState = await image.evaluate((element: HTMLImageElement) => ({ complete: element.complete, naturalWidth: element.naturalWidth, currentSrc: element.currentSrc }));
+  expect(imageState.complete).toBe(true);
+  expect(imageState.naturalWidth).toBeGreaterThan(0);
+  expect(imageState.currentSrc).toMatch(/\/media\/aurem\/hero-(640|960)\.avif$/);
+  expect(await image.getAttribute('src')).toBe('/media/aurem/hero.webp');
 });
 
 test('plan interest carries the selected plan into the assessment', async ({ page }) => {
@@ -251,7 +351,8 @@ test('business landing links preserve the prospect segment in the assessment', a
     ['/soluciones/hoteles/', 'hotels', 'hotel'],
   ] as const) {
     await page.goto(path);
-    await page.locator('.solution-hero').getByRole('link', { name: 'Ver mi punto de partida' }).click();
+    await expect(page.locator('.solution-hero').getByRole('link', { name: 'Pedir una conversación' })).toHaveAttribute('href', '#contacto');
+    await page.locator('.human-service').getByRole('link', { name: 'Cuéntanos cómo trabajas' }).click();
     await expect(page).toHaveURL(new RegExp(`/diagnostico/\\?segment=${segment}$`));
     await expect(page.locator(`[name="accommodationType"][value="${type}"]`)).toBeChecked();
   }
@@ -337,14 +438,12 @@ test('each accommodation landing explains its own detailed workflow', async ({ p
   await expect(workflow.locator('.workflow-step')).toHaveCount(5);
 });
 
-test('capability evidence stays concise until its boundary is requested', async ({ page }) => {
+test('capability evidence and its boundary are visible without a hidden disclosure', async ({ page }) => {
   await page.goto('/soluciones/hoteles/');
   const capability = page.locator('[data-capability="operations-centre"]');
-  await expect(capability.getByRole('link', { name: /Ver evidencia en Aurem/ })).toBeVisible();
-  await expect(capability.locator('.capability-details')).not.toHaveAttribute('open', '');
-  await capability.locator('.capability-details summary').click();
-  await expect(capability.locator('.capability-details')).toHaveAttribute('open', '');
+  await expect(capability.getByRole('link', { name: /Ver evidencia visual en Aurem/ })).toBeVisible();
   await expect(capability).toContainText('No toma decisiones ni ejecuta acciones de forma autónoma');
+  await expect(capability.locator('.capability-boundary')).toBeVisible();
 });
 
 test('scope configurator recommends progressively and prefills the commercial form', async ({ page }) => {
@@ -408,6 +507,7 @@ test('assessment keeps context local until the single sales form is reviewed and
     submitted = route.request().postDataJSON() as Record<string, unknown>;
     await route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'assessment-ref', meetingUrl: null }) });
   });
+  await enableCommercialLead(page);
   await page.goto('/diagnostico/');
   await page.locator('[data-step="1"]').getByText('Apartamentos', { exact: true }).click();
   await page.getByLabel('Modelo de operación').selectOption('multi');
@@ -486,12 +586,15 @@ test('English assessment context is reviewable and can be discarded before conta
   expect(await page.evaluate(() => sessionStorage.getItem('logic-estancia-assessment-v1'))).toBeNull();
 });
 
-test('the sales landing is the only form that calls the production lead endpoint', async ({ page }) => {
+test('the commercial landing and segment landings can submit their own lead forms when allowlisted', async ({ page }) => {
   let leadRequests = 0;
+  let submitted: Record<string, unknown> | null = null;
   await page.route('**/api/leads', (route) => {
     leadRequests += 1;
+    submitted = route.request().postDataJSON() as Record<string, unknown>;
     return route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'test-ref', meetingUrl: null }) });
   });
+  await enableCommercialLead(page);
   await page.goto('/');
   const form = page.locator('[data-lead]');
   await expect(form.getByText('Revisaremos el contexto y responderemos en un día laborable.')).toBeVisible();
@@ -514,14 +617,33 @@ test('the sales landing is the only form that calls the production lead endpoint
   await expect(receipt.locator('[data-meeting-link]')).toBeHidden();
   expect(leadRequests).toBe(1);
 
+  for (const [path, type, plan] of [
+    ['/soluciones/casas-rurales/', 'rural', 'gestion'],
+    ['/soluciones/apartamentos/', 'apartment', 'basico'],
+    ['/soluciones/hoteles/', 'hotel', 'inteligente'],
+  ] as const) {
+    await page.goto(path);
+    const segmentForm = page.locator('[data-commercial-lead]');
+    await expect(segmentForm).toBeVisible();
+    await expect(segmentForm.locator('[data-runtime-lead-note]')).toContainText('Entrega comercial activa');
+    await segmentForm.locator('[name="name"]').fill('Ada Segmento');
+    await segmentForm.locator('[name="businessName"]').fill('Alojamiento Segmento');
+    await segmentForm.locator('[name="email"]').fill('ada@example.test');
+    await segmentForm.locator('[name="accept"]').check();
+    await segmentForm.getByRole('button', { name: 'Pedir una conversación' }).click();
+    await expect(segmentForm.locator('.form-status')).toHaveText('Solicitud entregada. Te responderemos en un día laborable.');
+    expect(submitted).toMatchObject({ accommodationType: type, plan, sourcePath: path });
+  }
+
   await page.goto('/demos/terrava/');
-  await page.locator('[data-demo-form] button[type="submit"]').click();
-  await expect(page.locator('.demo-result')).toContainText('Solicitud demo creada');
-  expect(leadRequests).toBe(1);
+  await expect(page.locator('[data-demo-panel]')).toBeVisible();
+  await expect(page.locator('form')).toHaveCount(0);
+  expect(leadRequests).toBe(4);
 });
 
 test('the English receipt exposes only a valid optional meeting link', async ({ page }) => {
   await page.route('**/api/leads', (route) => route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'safe-ref-01', meetingUrl: 'https://meet.example.test/logic-estancia' }) }));
+  await enableCommercialLead(page);
   await page.goto('/en/');
   const form = page.locator('[data-lead]');
   await expect(form.getByRole('link', { name: 'privacy policy' })).toHaveAttribute('href', '/en/privacidad/');
@@ -539,6 +661,7 @@ test('the English receipt exposes only a valid optional meeting link', async ({ 
 
 test('the sales form does not claim delivery for a non-delivery 202 response', async ({ page }) => {
   await page.route('**/api/leads', (route) => route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'demo' }) }));
+  await enableCommercialLead(page);
   await page.goto('/');
   const form = page.locator('[data-lead]');
   await form.locator('[name="name"]').fill('Ada Demo');
@@ -558,6 +681,7 @@ test('the sales form explains rate limiting and re-enables itself in both locale
     requests += 1;
     return route.fulfill({ status: 429, headers: { 'retry-after': '2' }, contentType: 'application/json', body: JSON.stringify({ ok: false, outcome: 'limited', error: 'rate_limited', retryAfter: 2 }) });
   });
+  await enableCommercialLead(page);
   const cases = [
     { path: '/', submit: 'Quiero una recomendación', waiting: 'Reintentar en 2 s', status: 'Has hecho varios intentos. Conservamos tus datos en el formulario; podrás volver a enviarlo en 2 s.' },
     { path: '/en/', submit: 'Get my recommendation', waiting: 'Try again in 2s', status: 'You have made several attempts. Your details remain in the form; you can send it again in 2s.' },
@@ -583,6 +707,7 @@ test('the sales form bounds a stalled request and can retry without claiming del
   await page.clock.install();
   let requests = 0;
   await page.route('**/api/leads', () => { requests += 1; });
+  await enableCommercialLead(page);
   await page.goto('/');
   const form = page.locator('[data-lead]');
   await form.locator('[name="name"]').fill('Ada Demo');
@@ -616,8 +741,7 @@ test('cookie preferences remain consent-gated, revocable and shared with demos',
   await page.getByRole('checkbox', { name: 'Cookies de analítica' }).check();
   await page.getByRole('button', { name: 'Guardar preferencias' }).click();
   await expect(banner).toBeHidden();
-  await expect(page.locator('script[data-gtm]')).toHaveCount(1);
-  await expect(page.locator('script[data-gtm]')).toHaveAttribute('src', 'https://www.googletagmanager.com/gtm.js?id=GTM-TVDWZ9LC');
+  await expect(page.locator('script[data-gtm]')).toHaveCount(0);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('logic-estancia-consent') ?? 'null'))).toMatchObject({
     essential: true,
     analytics: true,
@@ -625,8 +749,7 @@ test('cookie preferences remain consent-gated, revocable and shared with demos',
   });
 
   await page.goto('/demos/terrava/');
-  await expect(page.locator('script[data-gtm]')).toHaveCount(1);
-  await expect(page.locator('script[data-gtm]')).toHaveAttribute('src', 'https://www.googletagmanager.com/gtm.js?id=GTM-TVDWZ9LC');
+  await expect(page.locator('script[data-gtm]')).toHaveCount(0);
 
   await page.goto('/cookies/');
   await expect(page.getByRole('heading', { name: 'Almacenamiento y cookies' })).toBeVisible();
@@ -640,7 +763,7 @@ test('cookie preferences remain consent-gated, revocable and shared with demos',
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('logic-estancia-consent') ?? 'null'))).toMatchObject({ analytics: false });
 });
 
-test('consented analytics keeps only contract events and parameters', async ({ page }) => {
+test('consented analytics remains inert in the default demo deployment', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Configurar preferencias' }).click();
   await page.getByRole('checkbox', { name: 'Cookies de analítica' }).check();
@@ -656,11 +779,8 @@ test('consented analytics keeps only contract events and parameters', async ({ p
     });
     window.estanciaTrack?.('invented_event', { locale: 'es' });
   });
-  const observed = await page.evaluate(() => window.dataLayer?.slice(-1)[0]);
-  expect(observed).toMatchObject({ event: 'lead_submit', locale: 'es', plan: 'gestion', source_section: 'homepage_contact' });
-  expect(observed).not.toHaveProperty('email');
-  expect(observed).not.toHaveProperty('message');
-  await expect.poll(() => page.evaluate(() => window.dataLayer?.length ?? 0)).toBe(before + 1);
+  await expect.poll(() => page.evaluate(() => window.dataLayer?.length ?? 0)).toBe(before);
+  await expect(page.locator('script[data-gtm]')).toHaveCount(0);
 });
 
 test('the cookie choice and complete legal surfaces are localized in English', async ({ page }) => {
@@ -684,347 +804,213 @@ test('the cookie choice and complete legal surfaces are localized in English', a
   await expect(page.getByRole('button', { name: 'Change my cookie choice' })).toBeVisible();
 });
 
-test('Terrava carries a website enquiry into the workspace, converts it and resets', async ({ page }) => {
-  await page.goto('/demos/terrava/');
-  await page.getByLabel('Nombre').fill('Lucía Prado');
-  await page.getByLabel('Huéspedes').fill('3');
-  await page.getByLabel('Entrada').fill('2026-08-22');
-  await page.getByLabel('Salida').fill('2026-08-26');
-  await page.locator('[data-demo-form] button[type="submit"]').click();
-  await page.getByRole('link', { name: 'Abrir la solicitud en el gestor' }).click();
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
-  await expect(page).toHaveURL(/vista=enquiries/);
-  await expect(page.getByText('Lucía Prado · 3 huéspedes')).toBeVisible();
-  await expect(page.getByText('Desde la web demo')).toBeVisible();
-  await expect(page.getByText('€ 816')).toBeVisible();
-  await page.getByRole('button', { name: 'Preparar alternativa' }).click();
-  await page.getByRole('button', { name: 'Convertir en reserva' }).click();
-  await expect(page.getByText('TER-104')).toBeVisible();
-  await expect(page.getByText('Lucía Prado', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: /Restablecer/ }).click();
-  await page.getByRole('button', { name: 'Solicitudes', exact: true }).click();
+test('Terrava workspace keeps enquiries, planning and bookings read-only', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) externalWrites.push(request.url());
+  });
+
+  await page.goto('/demos/terrava/gestion/?vista=enquiries');
+  await expect(page.getByRole('heading', { level: 1, name: 'Solicitudes' })).toBeVisible();
   await expect(page.getByText('Marina Costa · 4 huéspedes')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Preparar alternativa' })).toBeVisible();
-});
+  await expect(page.getByText('Vista de solo lectura: compara el caso y la alternativa sin crear ni convertir reservas.')).toBeVisible();
+  await expect(page.locator('.dash-content .actions button')).toHaveCount(0);
 
-test('the shared Terrava journey remains localized in English', async ({ page }) => {
-  await page.goto('/en/demos/terrava/');
-  await page.getByLabel('Name').fill('Jamie Demo');
-  await page.locator('[data-demo-form] button[type="submit"]').click();
-  await page.getByRole('link', { name: 'Open the enquiry in the workspace' }).click();
-  await page.getByRole('button', { name: 'Explore freely' }).click();
-  await expect(page.getByRole('heading', { name: 'Enquiries' })).toBeVisible();
-  await expect(page.getByText('Jamie Demo · 2 guests')).toBeVisible();
-  await expect(page.getByText('From demo website')).toBeVisible();
-});
-
-test('Terrava operates a stay and publishes a reversible website draft', async ({ page }) => {
-  await page.goto('/demos/terrava/gestion/');
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
   await page.getByRole('button', { name: 'Planning', exact: true }).click();
-  await page.getByRole('button', { name: 'Reasignar a Casa Bruma' }).click();
-  await page.getByRole('button', { name: 'Aplicar tarifa flexible +48 €' }).click();
-  await expect(page.getByText('Planning y perfil actualizados')).toBeVisible();
-  await page.getByRole('button', { name: 'Mi web', exact: true }).click();
-  await page.getByLabel('Texto del hero').fill('Ocho casas. Una forma distinta de volver.');
-  await page.getByRole('button', { name: 'Publicar cambio simulado' }).click();
-  await expect(page.getByText('Publicada en esta demo')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Ocho casas. Una forma distinta de volver.' })).toBeVisible();
-});
-
-test('workspace search opens from the keyboard and navigates to a matching area', async ({ page }) => {
-  await page.goto('/demos/aurem/gestion/');
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
-  await page.getByRole('button', { name: 'Buscar en el gestor' }).click();
-  const search = page.getByRole('dialog', { name: 'Búsqueda rápida' });
-  await expect(search).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(search).toBeHidden();
-  await page.keyboard.press('/');
-  await expect(search).toBeVisible();
-  await search.getByPlaceholder('Reservas, limpieza, informes…').fill('limpieza');
-  await search.getByRole('button', { name: 'Limpieza', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Limpieza', exact: true })).toBeVisible();
-  await expect(page).toHaveURL(/vista=cleaning/);
-
-  await page.getByRole('button', { name: 'Buscar en el gestor' }).click();
-  await expect(page.getByRole('dialog', { name: 'Búsqueda rápida' })).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog', { name: 'Búsqueda rápida' })).toBeHidden();
-});
-
-test("Aurem guided journey connects operational evidence to the assessment and resumes exactly", async ({
-  page,
-}) => {
-  const externalWrites: string[] = [];
-  page.on("request", (request) => {
-    if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method()))
-      externalWrites.push(request.url());
-  });
-  await page.goto("/demos/aurem/gestion/");
-  await page.getByRole("button", { name: "Visita guiada" }).click();
-
-  await expect(
-    page.getByRole("dialog", { name: "Detecta la habitación en riesgo" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("progressbar", { name: "Progreso del recorrido" }),
-  ).toHaveAttribute("aria-valuenow", "1");
-  await page.getByRole("button", { name: "Siguiente hito" }).click();
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Limpieza" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Siguiente hito" }).click();
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Planning" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Siguiente hito" }).click();
-  await expect(
-    page.getByRole("dialog", { name: "Explica cada métrica" }),
-  ).toContainText("96 habitaciones ficticias · sin predicción ni contabilidad");
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Ingresos" }),
-  ).toBeVisible();
-
-  await page.getByRole("button", { name: "Pausar" }).click();
-  await expect(
-    page.getByRole("button", { name: "Reanudar recorrido" }),
-  ).toBeVisible();
-  await page.goto("/demos/aurem/gestion/");
-  await expect(
-    page.getByRole("dialog", { name: "Explica cada métrica" }),
-  ).toBeVisible();
-  await expect(page).toHaveURL(/vista=reports/);
-
-  await page.getByRole("button", { name: "Siguiente hito" }).click();
-  await expect(
-    page.getByRole("dialog", { name: "Revisa antes de conectar" }),
-  ).toContainText("0 canales conectados · publicación bloqueada");
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Canales" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Siguiente hito" }).click();
-  await expect(
-    page.getByRole("dialog", { name: "Edita, revisa y conserva el control" }),
-  ).toContainText("Sin modelo ni proveedor · sin envío");
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Automatización" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Siguiente hito" }).click();
-
-  const finalStep = page.getByRole("dialog", {
-    name: "Convierte la evidencia en alcance",
-  });
-  await expect(finalStep).toContainText(
-    "Resultado visible antes de pedir datos",
-  );
-  await expect(
-    finalStep.getByRole("link", { name: "Abrir diagnóstico" }),
-  ).toHaveAttribute(
-    "href",
-    "/diagnostico/?segment=hotels&plan=inteligente&demo=aurem",
-  );
-  await finalStep.getByRole("link", { name: "Abrir diagnóstico" }).click();
-  await expect(page).toHaveURL(
-    /\/diagnostico\/\?segment=hotels&plan=inteligente&demo=aurem$/,
-  );
-  await expect(page.getByLabel("Hotel")).toBeChecked();
-  await expect(page.getByLabel("Automatización")).toBeChecked();
-  expect(externalWrites).toEqual([]);
-});
-
-test("Aurem guided journey keeps its evidence and exit localized in English", async ({
-  page,
-}) => {
-  await page.goto("/en/demos/aurem/gestion/");
-  await page.getByRole("button", { name: "Guided tour" }).click();
-  for (let step = 0; step < 5; step += 1)
-    await page.getByRole("button", { name: "Next milestone" }).click();
-  await expect(
-    page.getByRole("dialog", { name: "Edit, review and keep control" }),
-  ).toContainText("No model or provider · no delivery");
-  await page.getByRole("button", { name: "Next milestone" }).click();
-  const finalStep = page.getByRole("dialog", {
-    name: "Turn evidence into scope",
-  });
-  await expect(
-    finalStep.getByRole("link", { name: "Open assessment" }),
-  ).toHaveAttribute(
-    "href",
-    "/en/assessment/?segment=hotels&plan=inteligente&demo=aurem",
-  );
-});
-
-test('Aurem revenue explains every fictitious metric and links to demo evidence', async ({ page }) => {
-  await page.goto('/demos/aurem/gestion/?vista=reports');
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Ingresos' })).toBeVisible();
-  await expect(page.getByRole('note')).toContainText('96 habitaciones ficticias durante 28 días');
-  await expect(page.locator('.revenue-metrics button')).toHaveCount(4);
-
-  await page.getByRole('button', { name: /Tarifa media diaria/ }).click();
-  await expect(page.locator('.revenue-explanation')).toContainText('€296.608 de ingresos ÷ 2.392 noches ocupadas');
-  await page.getByRole('button', { name: 'Abrir reservas ficticias' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Reservas' })).toBeVisible();
-  await expect(page).toHaveURL(/vista=bookings/);
-});
-
-test('Aurem revenue remains explainable and navigable in English', async ({ page }) => {
-  await page.goto('/en/demos/aurem/gestion/?vista=reports');
-  await page.getByRole('button', { name: 'Explore freely' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Revenue' })).toBeVisible();
-  await expect(page.getByRole('note')).toContainText('96 fictitious rooms over 28 days');
-  await expect(page.locator('.revenue-ledger tbody tr')).toHaveCount(4);
-
-  await page.getByRole('button', { name: /Revenue per available room/ }).click();
-  await expect(page.locator('.revenue-explanation')).toContainText('€296,608 revenue ÷ 2,688 available room nights');
-  await page.getByRole('button', { name: 'Open fictitious planning' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Planning' })).toBeVisible();
   await expect(page).toHaveURL(/vista=planning/);
-});
+  await expect(page.getByText('Calendario ficticio · EUR')).toBeVisible();
+  await expect(page.getByText('Solo visualización · sin cambios de inventario o tarifa')).toBeVisible();
 
-test('Aurem channel review stays local, supervised and persistent', async ({ page }) => {
-  const externalWrites: string[] = [];
-  page.on('request', (request) => {
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method())) externalWrites.push(request.url());
-  });
-  await page.goto('/demos/aurem/gestion/?vista=channels');
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Canales' })).toBeVisible();
-  await expect(page.getByRole('note')).toContainText('0 canales conectados');
-  await expect(page.locator('.channel-matrix tbody tr')).toHaveCount(4);
-  await expect(page.getByText('Última sincronización de muestra')).toHaveCount(0);
-
-  await page.getByRole('button', { name: 'Marcar revisión local' }).click();
-  await expect(page.getByRole('status')).toHaveText('Revisado en este navegador · sin publicación');
-  await expect(page.getByRole('button', { name: 'Publicar deshabilitado · sin conexión' })).toBeDisabled();
-  await expect(page.locator('.channel-metrics > div').filter({ hasText: 'Revisiones pendientes' }).locator('strong')).toHaveText('0');
-  expect(externalWrites).toEqual([]);
-
-  await page.reload();
-  await expect(page.getByRole('status')).toHaveText('Revisado en este navegador · sin publicación');
-});
-
-test('Aurem channel review enforces roles and explains live requirements in English', async ({ page }) => {
-  await page.goto('/en/demos/aurem/gestion/?vista=channels');
-  await page.getByRole('button', { name: 'Explore freely' }).click();
-  await page.getByLabel('Role').selectOption('cleaning');
-  await expect(page.getByRole('button', { name: 'Requires Direction or Reception' })).toBeDisabled();
-
-  await page.getByRole('button', { name: /Direct iCal/ }).click();
-  await expect(page.locator('.channel-review')).toContainText('timezone, deduplication and error handling');
-  await expect(page.getByRole('heading', { name: 'What a live connection would require' })).toBeVisible();
-  await expect(page.getByText('Agreement and credentials')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Publish disabled · no connection' })).toBeDisabled();
-});
-
-test('Aurem supervised AI draft stays local, reviewable and persistent', async ({ page }) => {
-  const externalWrites: string[] = [];
-  page.on('request', (request) => {
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method())) externalWrites.push(request.url());
-  });
-  await page.goto('/demos/aurem/gestion/?vista=automation');
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Automatización' })).toBeVisible();
-  await expect(page.getByRole('note')).toContainText('sin modelo ni proveedor');
-
-  const message = 'Hola Elena, la habitación estará lista a las 16:00. Confirma tu hora de llegada.';
-  await page.getByLabel('Mensaje preparado').fill(message);
-  await page.getByRole('button', { name: 'Guardar borrador local' }).click();
-  await expect(page.getByText('Versión 2 · edición local')).toBeVisible();
-  await expect(page.getByText('Guardada como versión 2')).toBeVisible();
-  await page.getByRole('button', { name: 'Marcar como revisado' }).click();
-  await expect(page.getByText('Revisado', { exact: true })).toBeVisible();
-  await expect(page.getByText('Aprobada solo en local')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Enviar deshabilitado · proveedor no conectado' })).toBeDisabled();
-  expect(externalWrites).toEqual([]);
-
-  await page.reload();
-  await expect(page.getByLabel('Mensaje preparado')).toHaveValue(message);
-  await expect(page.getByText('Revisado', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Reservas', exact: true }).click();
+  await expect(page).toHaveURL(/vista=bookings/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Reservas' })).toBeVisible();
+  await expect(page.getByText('TER-101')).toBeVisible();
   expect(externalWrites).toEqual([]);
 });
 
-test('Aurem supervised AI explains fixtures and enforces review roles in English', async ({ page }) => {
-  await page.goto('/en/demos/aurem/gestion/?vista=automation');
-  await page.getByRole('button', { name: 'Explore freely' }).click();
-  await page.getByLabel('Role').selectOption('cleaning');
+test('Terrava read-only boundaries remain localized in English', async ({ page }) => {
+  await page.goto('/en/demos/terrava/gestion/?vista=enquiries');
+  await expect(page.getByRole('heading', { level: 1, name: 'Enquiries' })).toBeVisible();
+  await expect(page.getByText('Read-only view: compare the case and alternative without creating or converting bookings.')).toBeVisible();
+  await expect(page.getByText('The panel represents dates, guests and preferences with a preloaded fixture; it does not move or store visitor data.')).toBeVisible();
 
-  await expect(page.getByRole('note')).toContainText('no model or provider');
-  await expect(page.getByLabel('Draft sources')).toContainText('Fixture sources');
-  await expect(page.getByText('No external model call')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Requires Direction or Reception' })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Send disabled · provider not connected' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Planning', exact: true }).click();
+  await expect(page.getByText('Fictitious calendar · EUR')).toBeVisible();
+  await expect(page.getByText('View only · no inventory or rate changes')).toBeVisible();
 });
 
-test('operational notifications expose context and open the related area', async ({ page }) => {
+test('dashboard filters are ephemeral and reload restores the fixture', async ({ page }) => {
   await page.goto('/demos/aurem/gestion/');
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
+  const role = page.getByLabel('Rol');
+  await role.selectOption('cleaning');
+  await expect(role).toHaveValue('cleaning');
+  expect(await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('logic-estancia-demo-')))).toEqual([]);
+
+  await page.reload();
+
+  await expect(page.getByLabel('Rol')).toHaveValue('direction');
+  await expect(page.locator('.dash-content')).toContainText('Elena Rossi');
+  await expect(page.locator('.demo-banner')).toContainText('Panel de solo lectura con datos ficticios');
+});
+
+test('Aurem guided journey connects read-only evidence to the assessment', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) externalWrites.push(request.url());
+  });
+
+  await page.goto('/demos/aurem/gestion/');
+  await page.getByRole('button', { name: 'Ver recorrido' }).click();
+
+  await expect(page.getByRole('dialog', { name: 'Detecta la habitación en riesgo' })).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Progreso del recorrido' })).toHaveAttribute('aria-valuemax', '6');
+
+  await page.getByRole('button', { name: 'Siguiente hito' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Limpieza' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Limpieza prepara la 408' })).toContainText('sin avisos enviados');
+
+  await page.getByRole('button', { name: 'Siguiente hito' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Planning' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Recepción revisa la entrada' })).toContainText('sin reserva real');
+
+  await page.getByRole('button', { name: 'Siguiente hito' }).click();
+  await expect(page.getByRole('dialog', { name: 'Explica cada métrica' })).toContainText('96 habitaciones ficticias · sin predicción ni contabilidad');
+
+  await page.getByRole('button', { name: 'Siguiente hito' }).click();
+  await expect(page.getByRole('dialog', { name: 'Revisa antes de conectar' })).toContainText('0 canales conectados · publicación bloqueada');
+
+  await page.getByRole('button', { name: 'Siguiente hito' }).click();
+  const finalStep = page.getByRole('dialog', { name: 'Convierte la evidencia en alcance' });
+  await expect(finalStep).toContainText('Resultado visible antes de pedir datos');
+  await expect(finalStep.getByRole('link', { name: 'Abrir diagnóstico' })).toHaveAttribute(
+    'href',
+    '/diagnostico/?segment=hotels&plan=inteligente&demo=aurem',
+  );
+  expect(externalWrites).toEqual([]);
+});
+
+test('Aurem guided journey and assessment exit remain localized in English', async ({ page }) => {
+  await page.goto('/en/demos/aurem/gestion/');
+  await page.getByRole('button', { name: 'Start tour' }).click();
+  await expect(page.getByRole('dialog', { name: 'Find the room at risk' })).toContainText('no connected PMS');
+
+  for (let step = 0; step < 5; step += 1) {
+    await page.getByRole('button', { name: 'Next milestone' }).click();
+  }
+
+  const finalStep = page.getByRole('dialog', { name: 'Turn evidence into scope' });
+  await expect(finalStep).toContainText('Result shown before any data is requested');
+  await expect(finalStep.getByRole('link', { name: 'Open assessment' })).toHaveAttribute(
+    'href',
+    '/en/assessment/?segment=hotels&plan=inteligente&demo=aurem',
+  );
+});
+
+test('Aurem revenue remains explainable and navigable in both locales', async ({ page }) => {
+  for (const item of [
+    {
+      path: '/demos/aurem/gestion/?vista=reports',
+      heading: 'Ingresos',
+      boundary: '96 habitaciones ficticias durante 28 días',
+      metric: /Tarifa media diaria/,
+      formula: '€296.608 de ingresos ÷ 2.392 noches ocupadas',
+      evidence: 'Abrir reservas ficticias',
+      target: 'Reservas',
+    },
+    {
+      path: '/en/demos/aurem/gestion/?vista=reports',
+      heading: 'Revenue',
+      boundary: '96 fictitious rooms over 28 days',
+      metric: /Revenue per available room/,
+      formula: '€296,608 revenue ÷ 2,688 available room nights',
+      evidence: 'Open fictitious planning',
+      target: 'Planning',
+    },
+  ]) {
+    await page.goto(item.path);
+    await expect(page.getByRole('heading', { level: 1, name: item.heading })).toBeVisible();
+    await expect(page.getByRole('note')).toContainText(item.boundary);
+    await expect(page.locator('.revenue-metrics button')).toHaveCount(4);
+    await expect(page.locator('.revenue-ledger tbody tr')).toHaveCount(4);
+
+    await page.getByRole('button', { name: item.metric }).click();
+    await expect(page.locator('.revenue-explanation')).toContainText(item.formula);
+    await page.getByRole('button', { name: item.evidence }).click();
+    await expect(page.getByRole('heading', { level: 1, name: item.target })).toBeVisible();
+  }
+});
+
+test('Aurem channel matrix is an inspectable fixture with no publish action', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) externalWrites.push(request.url());
+  });
+
+  for (const item of [
+    {
+      path: '/demos/aurem/gestion/?vista=channels',
+      heading: 'Canales',
+      boundary: '0 canales conectados',
+      channel: /iCal directo/,
+      detail: 'zona horaria, deduplicación y gestión de errores',
+      requirements: 'Qué exigiría conectar de verdad',
+      readOnly: 'Inspección de solo lectura · no revisa ni publica nada',
+    },
+    {
+      path: '/en/demos/aurem/gestion/?vista=channels',
+      heading: 'Channels',
+      boundary: '0 connected channels',
+      channel: /Direct iCal/,
+      detail: 'timezone, deduplication and error handling',
+      requirements: 'What a live connection would require',
+      readOnly: 'Read-only inspection · reviews and publishes nothing',
+    },
+  ]) {
+    await page.goto(item.path);
+    await expect(page.getByRole('heading', { level: 1, name: item.heading })).toBeVisible();
+    await expect(page.getByRole('note')).toContainText(item.boundary);
+    await expect(page.locator('.channel-matrix tbody tr')).toHaveCount(4);
+    await page.getByRole('button', { name: item.channel }).click();
+    await expect(page.locator('.channel-review')).toContainText(item.detail);
+    await expect(page.locator('.channel-review')).toContainText(item.readOnly);
+    await expect(page.getByRole('heading', { name: item.requirements })).toBeVisible();
+    await expect(page.locator('.dash-content form, .dash-content textarea')).toHaveCount(0);
+  }
+
+  expect(externalWrites).toEqual([]);
+});
+
+test('Aurem cleaning and maintenance expose fixed states without operational controls', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) externalWrites.push(request.url());
+  });
+
+  await page.goto('/demos/aurem/gestion/?vista=cleaning');
+  await expect(page.getByRole('heading', { level: 1, name: 'Limpieza' })).toBeVisible();
+  await expect(page.getByText('Checklist de ejemplo · no asigna, valida ni actualiza habitaciones')).toBeVisible();
+  await expect(page.locator('.dash-content .actions button')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Mantenimiento', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Mantenimiento' })).toBeVisible();
+  await expect(page.getByText('Timeline ficticio · no asigna ni resuelve incidencias')).toBeVisible();
+  await expect(page.getByText('No modifica inventario ni comunica con proveedores.')).toBeVisible();
+  await expect(page.locator('.dash-content .actions button')).toHaveCount(0);
+  expect(externalWrites).toEqual([]);
+});
+
+test('operational notifications only navigate to the related fixture', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) externalWrites.push(request.url());
+  });
+
+  await page.goto('/demos/aurem/gestion/');
   await page.getByRole('button', { name: 'Abrir avisos' }).click();
   const notifications = page.getByRole('dialog', { name: 'Avisos operativos' });
   await expect(notifications.getByText('Habitación 408 requiere atención')).toBeVisible();
   await notifications.getByRole('button', { name: /Habitación 408 requiere atención/ }).click();
   await expect(page.getByRole('heading', { name: 'Limpieza', exact: true })).toBeVisible();
   await expect(page).toHaveURL(/vista=cleaning/);
-});
-
-test('Aurem completes checkout-cleaning-arrival handoff and resets', async ({ page }) => {
-  await page.goto('/demos/aurem/gestion/');
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
-  await page.locator('.role-select select').selectOption('cleaning');
-  await page.getByRole('button', { name: 'Limpieza', exact: true }).click();
-  await page.getByRole('button', { name: 'Empezar preparación' }).click();
-  await page.getByRole('button', { name: 'Marcar lista para revisar' }).click();
-  await page.locator('.role-select select').selectOption('reception');
-  await page.getByRole('button', { name: 'Validar habitación' }).click();
-  await expect(page.getByText('Habitación disponible para la entrada')).toBeVisible();
-  await page.getByRole('button', { name: 'Abrir avisos' }).click();
-  await expect(page.getByRole('dialog', { name: 'Avisos operativos' }).getByText('Habitación 408 validada')).toBeVisible();
-  await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
-  await page.getByRole('button', { name: /Restablecer/ }).click();
-  await expect(page.getByText('Pendiente', { exact: true })).toBeVisible();
-});
-
-test('Aurem assigns and resolves a maintenance incident locally', async ({ page }) => {
-  await page.goto('/demos/aurem/gestion/');
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
-  await page.getByRole('button', { name: 'Mantenimiento', exact: true }).click();
-  await page.getByRole('button', { name: 'Asignar a mantenimiento' }).click();
-  await page.getByRole('button', { name: 'Resolver y liberar' }).click();
-  await expect(page.getByText('Sin impacto en la llegada')).toBeVisible();
-  await expect(page.getByText('Resuelta', { exact: true })).toBeVisible();
-});
-
-test('Aurem rejects an impossible stay before opening demo payment', async ({ page }) => {
-  await page.goto('/demos/aurem/');
-  await page.getByLabel('Entrada').fill('2026-08-18');
-  await page.getByLabel('Salida').fill('2026-08-17');
-  await page.locator('[data-demo-form] button[type="submit"]').click();
-  await expect(page.locator('.demo-result')).toHaveText('La salida debe ser posterior a la entrada.');
-  await expect(page.getByRole('dialog')).toBeHidden();
-  await expect(page.getByRole('link', { name: 'Ver la reserva en el gestor' })).toBeHidden();
-
-  await page.getByLabel('Salida').fill('2026-08-19');
-  await page.locator('[data-demo-form] button[type="submit"]').click();
-  await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByText('Terrace · 1 noche')).toBeVisible();
-  await expect(page.getByText('€ 228')).toBeVisible();
-});
-
-test('Aurem neutral payment carries the simulated booking into the workspace', async ({ page }) => {
-  await page.goto('/demos/aurem/');
-  await page.getByLabel('Nombre').fill('Álex Moreno');
-  await page.getByLabel('Huéspedes').fill('3');
-  await page.getByLabel('Salida').fill('2026-08-18');
-  await page.locator('[data-demo-form] button[type="submit"]').click();
-  await expect(page.getByText('No se realizará ningún cobro.')).toBeVisible();
-  await expect(page.getByText('Terrace · 4 noches')).toBeVisible();
-  await expect(page.getByText('€ 912')).toBeVisible();
-  await page.getByRole('button', { name: 'Confirmar reserva simulada' }).click();
-  await expect(page.locator('.demo-result')).toContainText('No se ha realizado ningún cobro');
-  await page.getByRole('link', { name: 'Ver la reserva en el gestor' }).click();
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
-  await expect(page).toHaveURL(/vista=bookings/);
-  await expect(page.getByText('Álex Moreno llega desde la reserva simulada de la web.')).toBeVisible();
-  await expect(page.getByText('Álex Moreno', { exact: true })).toBeVisible();
+  expect(externalWrites).toEqual([]);
 });

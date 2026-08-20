@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="18" fill="#17191c"/><text x="32" y="41" fill="#fff" text-anchor="middle" font-family="Georgia,serif" font-size="30">E</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="16" fill="#17191c"/>
+  <path d="M12 12h40v5H12z" fill="#527458"/>
+  <text x="32" y="44" fill="#fff" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" font-weight="800" letter-spacing="-2">2B</text>
+</svg>

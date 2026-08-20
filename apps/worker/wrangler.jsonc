@@ -7,7 +7,12 @@
   "workers_dev": false,
   "preview_urls": false,
   "vars": {
-    "LEADS_TRANSPORT": "resend"
+    "DEMO_MODE": "true",
+    "REAL_OPERATIONS_ENABLED": "false",
+    "COMMERCIAL_LEADS_ENABLED": "false",
+    "EMAIL_PROVIDER_MODE": "disabled",
+    "ANALYTICS_PROVIDER_MODE": "disabled",
+    "LEADS_TRANSPORT": "disabled"
   },
   "durable_objects": {
     "bindings": [
@@ -25,6 +30,6 @@
     "directory": "./dist/assets",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/demos/*", "/en/demos/*"]
+    "run_worker_first": true
   }
 }

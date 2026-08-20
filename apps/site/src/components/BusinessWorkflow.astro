@@ -124,7 +124,7 @@ const workflow = (en ? englishWorkflows : spanishWorkflows)[segment];
     </div>
     <div class="workflow-board">
       <div class="workflow-board-top">
-        <span class="workflow-live"><i aria-hidden="true"></i>{en ? 'Workflow configured to your operation' : 'Workflow configurado a tu operación'}</span>
+        <span class="workflow-live"><i aria-hidden="true"></i>{en ? 'Illustrative workflow for your operation' : 'Workflow ilustrativo para tu operación'}</span>
         <div><span>{en ? 'Starting plan' : 'Plan de partida'} · {workflow.plan}</span><span>{en ? 'Human supervision' : 'Supervisión humana'}</span></div>
       </div>
       <ol class="workflow-path">
@@ -141,7 +141,7 @@ const workflow = (en ? englishWorkflows : spanishWorkflows)[segment];
           </li>
         ))}
       </ol>
-      <div class="workflow-result"><span>{en ? 'Operational result' : 'Resultado operativo'}</span><strong>{workflow.result}</strong></div>
+      <div class="workflow-result"><span>{en ? 'Illustrative result' : 'Resultado ilustrativo'}</span><strong>{workflow.result}</strong></div>
       <div class="workflow-controls">
         {workflow.controls.map(([title, text], index) => <div><span>0{index + 1}</span><p><strong>{title}</strong>{text}</p></div>)}
       </div>

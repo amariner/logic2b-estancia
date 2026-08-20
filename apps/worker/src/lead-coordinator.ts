@@ -1,4 +1,5 @@
 import { deliverLead, leadSchema, type Lead, type LeadEnv } from './leads';
+import { commercialLeadIsActive, resolveRuntimeCapabilities } from './runtime-mode';
 
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 60_000;
@@ -22,12 +23,19 @@ export class LeadCoordinator {
 
   async fetch(request: Request): Promise<Response> {
     const path = new URL(request.url).pathname;
+    if ((path === '/rate-limit' || path === '/deliver') && !commercialLeadIsActive(this.env)) {
+      return json({ ok: false, outcome: 'blocked', error: 'commercial_leads_disabled' }, 403);
+    }
     if (path === '/rate-limit' && request.method === 'POST') return this.rateLimit();
     if (path === '/deliver' && request.method === 'POST') return this.deliver(request);
     return json({ error: 'not_found' }, 404);
   }
 
   async alarm(): Promise<void> {
+    // A public demo is absolutely read-only, including lifecycle cleanup. Real
+    // deployments use a separate namespace and may finish deleting their own
+    // transient metadata while operations are locked during rollback.
+    if (resolveRuntimeCapabilities(this.env).demoMode) return;
     await this.state.storage.deleteAll();
   }
 

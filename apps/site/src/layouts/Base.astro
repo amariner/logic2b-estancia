@@ -9,11 +9,13 @@ import { CONSENT, PRODUCT, type Locale } from '@logic-estancia/config';
 import { logic2bContact } from '@logic-estancia/config/contact';
 import analyticsContract from '@logic-estancia/config/analytics-contract';
 import CookieBanner from '../components/CookieBanner.astro';
+import BrandLockup from '../components/BrandLockup.astro';
 import { content } from '../content';
 import { getBusinesses } from '../businesses';
+import { ANALYTICS_SAFE_PATHS } from '../public-routes';
 
-interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; translated?: boolean; image?: string; }
-const { locale, title = 'Logic Estancia', description = 'Web, reservas y operación para alojamientos.', route = '', alternateRoute, translated = true, image = '/media/terrava/hero.webp' } = Astro.props;
+interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; translated?: boolean; image?: string; imageAlt?: string; }
+const { locale, title = 'Logic2B Estancias', description = 'Web, reservas y operación para alojamientos.', route = '', alternateRoute, translated = true, image = '/og-estancias.jpg', imageAlt } = Astro.props;
 const c = content[locale];
 const businessNav = getBusinesses(locale);
 const prefix = locale === 'en' ? '/en' : '';
@@ -28,6 +30,9 @@ const localeHref = locale === 'es' ? `/en${alternatePath}` : alternatePath;
 const socialLocale = locale === 'es' ? 'es_ES' : 'en_GB';
 const alternateSocialLocale = locale === 'es' ? 'en_GB' : 'es_ES';
 const socialImage = new URL(image, PRODUCT.url).toString();
+const socialImageAlt = imageAlt ?? (image === '/og-estancias.jpg'
+  ? (locale === 'es' ? 'Logic2B Estancias — una forma más clara de dirigir tus estancias' : 'Logic2B Estancias — a clearer way to run your stays')
+  : (locale === 'es' ? 'Escenario visual ficticio de un alojamiento' : 'Fictional visual scenario for an accommodation business'));
 const wa = logic2bContact(locale, route.startsWith('docs') ? 'docs' : 'commercial');
 const structuredData = [
   {
@@ -44,7 +49,7 @@ const structuredData = [
     '@type': 'WebSite',
     '@id': `${PRODUCT.url}/#website`,
     url: PRODUCT.url,
-    name: PRODUCT.name,
+    name: PRODUCT.publicName,
     inLanguage: ['es', 'en'],
     publisher: { '@id': `${PRODUCT.url}/#organization` },
   },
@@ -68,28 +73,54 @@ const structuredData = [
     <link rel="preload" href="/fonts/poppins-600-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     <link rel="preload" href="/fonts/poppins-800-logo.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={PRODUCT.name} />
+    <meta property="og:site_name" content={PRODUCT.publicName} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={socialImage} />
-    <meta property="og:image:alt" content={locale === 'es' ? 'Alojamiento rural del caso ficticio Terrava Collection' : 'Rural stay from the fictional Terrava Collection case'} />
+    <meta property="og:image:alt" content={socialImageAlt} />
     <meta property="og:locale" content={socialLocale} />
     <meta property="og:locale:alternate" content={alternateSocialLocale} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content={socialImageAlt} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+    <script is:inline>
+      const safeRuntimeCapabilities = Object.freeze({ schemaVersion: '1.0.0', mode: 'demo', demoMode: true, commercialLeadsEnabled: false, sideEffects: false, durableWrites: false, jobs: false, providers: { analytics: 'disabled', email: 'disabled', payments: 'disabled', webhooks: 'disabled', externalStorage: 'disabled' }, operations: { commercialLead: 'blocked', payments: 'unavailable', webhooks: 'unavailable', automations: 'unavailable' } });
+      const normalizeRuntimeCapabilities = (candidate) => {
+        if (!candidate || candidate.schemaVersion !== '1.0.0' || !['demo', 'real_locked', 'real'].includes(candidate.mode) || candidate.jobs !== false) return safeRuntimeCapabilities;
+        const emailLive = candidate.commercialLeadsEnabled === true && candidate.durableWrites === true && candidate.providers?.email === 'live' && candidate.operations?.commercialLead === 'active';
+        const analyticsLive = candidate.mode === 'real' && candidate.demoMode === false && candidate.providers?.analytics === 'live';
+        if (candidate.demoMode !== (candidate.mode === 'demo') || (!emailLive && !analyticsLive && candidate.sideEffects !== false)) return safeRuntimeCapabilities;
+        return {
+          ...safeRuntimeCapabilities,
+          mode: candidate.mode, demoMode: candidate.demoMode === true, commercialLeadsEnabled: emailLive, sideEffects: emailLive || analyticsLive,
+          durableWrites: emailLive,
+          providers: {
+            ...safeRuntimeCapabilities.providers,
+            analytics: analyticsLive ? 'live' : 'disabled',
+            email: emailLive ? 'live' : 'disabled',
+          },
+          operations: {
+            ...safeRuntimeCapabilities.operations,
+            commercialLead: emailLive ? 'active' : 'blocked',
+          },
+        };
+      };
+      window.estanciaRuntimeReady = fetch('/api/capabilities', { method: 'GET', headers: { accept: 'application/json' }, credentials: 'same-origin' })
+        .then((response) => response.ok ? response.json() : safeRuntimeCapabilities)
+        .then(normalizeRuntimeCapabilities)
+        .catch(() => safeRuntimeCapabilities);
+    </script>
     <title>{title}</title>
   </head>
   <body>
     <a class="skip" href="#contenido">{locale === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
     <header class="site-header">
       <div class="topbar shell">
-        <a class="wordmark" href={`${prefix}/`} aria-label={locale === 'es' ? 'Logic Estancia, inicio' : 'Logic Estancia, home'}>
-          <span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancia</span>
-        </a>
+        <BrandLockup locale={locale} />
         <nav aria-label={locale === 'es' ? 'Principal' : 'Main'}>
           {businessNav.map((business) => <a href={business.href}>{business.label}</a>)}
           <a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a>
@@ -100,13 +131,13 @@ const structuredData = [
         </div>
         <button class="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">{locale === 'es' ? 'Menú' : 'Menu'}</button>
       </div>
-      <div id="mobile-nav" class="mobile-nav" hidden>
+      <nav id="mobile-nav" class="mobile-nav" aria-label={locale === 'es' ? 'Principal móvil' : 'Mobile main'} hidden>
         {businessNav.map((business) => <a href={business.href}>{business.label}</a>)}<a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`}>{c.nav.contact}</a>
-      </div>
+      </nav>
     </header>
     <main id="contenido"><slot /></main>
     <footer class="footer shell">
-      <a class="wordmark" href={`${prefix}/`} aria-label={locale === 'es' ? 'Logic Estancia, inicio' : 'Logic Estancia, home'}><span class="wordmark-core">Logic<strong>2B</strong></span><span class="wordmark-product">Estancia</span></a>
+      <BrandLockup locale={locale} />
       <div>{businessNav.map((business) => <a href={business.href}>{business.label}</a>)}<a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/docs/`}>{c.nav.docs}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
       <p>© 2026 Logic2B · Castelló</p>
     </footer>
@@ -115,10 +146,19 @@ const structuredData = [
       <span>{wa.label}</span>
     </a>
     <CookieBanner locale={locale} />
-    <script is:inline define:vars={{ consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, gtmContainerId: analyticsContract.containerId, allowedAnalyticsEvents: analyticsContract.surfaces.site, allowedAnalyticsParameters: analyticsContract.parameters }}>
+    <script is:inline define:vars={{ consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, gtmContainerId: analyticsContract.containerId, allowedAnalyticsEvents: analyticsContract.surfaces.site, allowedAnalyticsParameters: analyticsContract.parameters, allowedAnalyticsParameterValues: analyticsContract.parameterValues, analyticsSafePaths: ANALYTICS_SAFE_PATHS }}>
       const menu = document.querySelector('.menu');
       const mobile = document.querySelector('#mobile-nav');
-      menu?.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') === 'true'; menu.setAttribute('aria-expanded', String(!open)); if (mobile) mobile.hidden = open; });
+      function setMobileMenu(open, moveFocus = false) {
+        if (!(menu instanceof HTMLButtonElement) || !(mobile instanceof HTMLElement)) return;
+        menu.setAttribute('aria-expanded', String(open));
+        mobile.hidden = !open;
+        const focusTarget = open ? mobile.querySelector('a') : menu;
+        if (moveFocus && focusTarget instanceof HTMLElement) focusTarget.focus();
+      }
+      menu?.addEventListener('click', () => setMobileMenu(menu.getAttribute('aria-expanded') !== 'true', true));
+      mobile?.addEventListener('click', (event) => { if (event.target instanceof HTMLAnchorElement) setMobileMenu(false); });
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') setMobileMenu(false, true); });
       const consent = document.querySelector('[data-consent-banner]');
       function hasAnalyticsConsent() {
         try {
@@ -128,19 +168,55 @@ const structuredData = [
           return localStorage.getItem(legacyConsentKey) === 'analytics';
         } catch { return false; }
       }
+      function isAnalyticsSafeLocation() {
+        if (!analyticsSafePaths.includes(location.pathname)) return false;
+        const entries = [...new URLSearchParams(location.search).entries()];
+        if (new Set(entries.map(([key]) => key)).size !== entries.length) return false;
+        const values = Object.fromEntries(entries);
+        const landing = location.pathname === '/' || location.pathname === '/en/';
+        const assessment = location.pathname === '/diagnostico/' || location.pathname === '/en/assessment/';
+        if (landing) {
+          if (entries.some(([key]) => key !== 'assessment') || ('assessment' in values && values.assessment !== '1')) return false;
+          return ['', '#contacto', '#negocio', '#producto', '#demos', '#niveles', '#alcance'].includes(location.hash);
+        }
+        if (assessment) {
+          const allowedKeys = new Set(['segment', 'plan', 'properties', 'units', 'demo']);
+          if (entries.some(([key]) => !allowedKeys.has(key)) || location.hash) return false;
+          if ('segment' in values && !['rural', 'apartments', 'hotels', 'managers'].includes(values.segment)) return false;
+          if ('plan' in values && !['basico', 'gestion', 'inteligente'].includes(values.plan)) return false;
+          if ('demo' in values && !['nivora', 'terrava', 'aurem'].includes(values.demo)) return false;
+          for (const [key, maximum] of [['properties', 10_000], ['units', 100_000]]) {
+            if (!(key in values)) continue;
+            const numeric = Number(values[key]);
+            if (!Number.isInteger(numeric) || numeric < 1 || numeric > maximum || String(numeric) !== values[key]) return false;
+          }
+          return true;
+        }
+        return entries.length === 0 && location.hash === '';
+      }
       function loadGtm() {
-        if (document.querySelector('script[data-gtm]')) return;
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
-        const script = document.createElement('script'); script.dataset.gtm = 'true'; script.async = true; script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmContainerId)}`; document.head.append(script);
+        window.estanciaRuntimeReady.then((runtime) => {
+          if (!hasAnalyticsConsent() || !isAnalyticsSafeLocation() || runtime.providers.analytics !== 'live' || document.querySelector('script[data-gtm]')) return;
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+          const script = document.createElement('script'); script.dataset.gtm = 'true'; script.async = true; script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmContainerId)}`; document.head.append(script);
+        });
       }
       window.estanciaLoadGtm = loadGtm;
       if (hasAnalyticsConsent()) loadGtm();
       const allowedEvents = new Set(allowedAnalyticsEvents);
       window.estanciaTrack = (event, parameters = {}) => {
-        if (!hasAnalyticsConsent() || !allowedEvents.has(event)) return;
-        const safe = Object.fromEntries(Object.entries(parameters).filter(([key, value]) => allowedAnalyticsParameters.includes(key) && (typeof value === 'string' || typeof value === 'number')));
-        window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event, ...safe });
+        if (!hasAnalyticsConsent() || !isAnalyticsSafeLocation() || !allowedEvents.has(event)) return;
+        const safe = Object.fromEntries(Object.entries(parameters).filter(([key, value]) => {
+          if (!allowedAnalyticsParameters.includes(key)) return false;
+          if (key === 'step_index') return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 20;
+          const allowed = allowedAnalyticsParameterValues[key];
+          return typeof value === 'string' && Array.isArray(allowed) && allowed.includes(value);
+        }));
+        window.estanciaRuntimeReady.then((runtime) => {
+          if (!isAnalyticsSafeLocation() || runtime.providers.analytics !== 'live') return;
+          window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event, ...safe });
+        });
       };
       document.addEventListener('click', (event) => { const target = event.target.closest?.('[data-track]'); if (!target) return; window.estanciaTrack?.(target.dataset.track, { locale: document.documentElement.lang, plan: target.dataset.plan, segment: target.dataset.segment, source_section: target.dataset.section }); });
       const wa = document.querySelector('[data-whatsapp]');

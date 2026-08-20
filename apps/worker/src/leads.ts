@@ -1,12 +1,13 @@
 import { normalizePlanLevel, type PlanLevel } from '@logic-estancia/domain';
 import { z } from 'zod';
+import {
+  commercialLeadIsActive,
+  runtimeEmailConfigurationSchema,
+  type RuntimeEmailConfiguration,
+  type RuntimeModeEnv,
+} from './runtime-mode';
 
-export interface LeadEnv {
-  LEADS_TRANSPORT?: 'resend' | 'disabled' | 'demo';
-  LEADS_RESEND_API_KEY?: string;
-  LEADS_FROM_EMAIL?: string;
-  LEADS_INTERNAL_RECIPIENT?: string;
-  LEADS_REPLY_TO?: string;
+export interface LeadEnv extends RuntimeModeEnv {
   LEADS_MEETING_URL?: string;
   LEADS_ALLOW_LOCAL_JURISDICTION_FALLBACK?: 'true';
   LEAD_COORDINATOR?: DurableObjectNamespace;
@@ -18,19 +19,11 @@ const MAX_LEAD_BODY_BYTES = 32 * 1_024;
 const requiredSingleLine = (max: number) => z.string().trim().min(1).max(max).regex(/^[^\r\n\u2028\u2029]*$/);
 const optionalSingleLine = (max: number) => z.string().trim().max(max).regex(/^[^\r\n\u2028\u2029]*$/);
 
-const emailConfigurationSchema = z.object({
-  apiKey: z.string().trim().min(1),
-  fromEmail: z.string().trim().email().max(254),
-  internalRecipient: z.string().trim().email().max(254),
-  replyTo: z.string().trim().email().max(254),
-});
-
 const meetingUrlSchema = z.string().trim().max(500).url().refine((value) => {
   const url = new URL(value);
   return url.protocol === 'https:' && !url.username && !url.password;
 }, 'meeting_url_must_be_public_https');
 
-type EmailConfiguration = z.output<typeof emailConfigurationSchema>;
 const emailEnvironmentNames = {
   apiKey: 'LEADS_RESEND_API_KEY',
   fromEmail: 'LEADS_FROM_EMAIL',
@@ -80,7 +73,10 @@ export function isDemoPath(pathname: string): boolean {
   return /^\/(?:en\/)?demos(?:\/|$)/.test(normalized);
 }
 
-export async function handleLead(request: Request, env: LeadEnv, coordination = cloudflareCoordination(env)): Promise<Response> {
+export async function handleLead(request: Request, env: LeadEnv, coordination?: LeadCoordination | null): Promise<Response> {
+  // This is the primary server-side boundary. It runs before body access,
+  // Durable Object coordination or provider selection.
+  if (!commercialLeadIsActive(env)) return json({ ok: false, outcome: 'blocked', error: 'commercial_leads_disabled' }, 403);
   // Demo forms are deliberately local fixtures. This server-side guard keeps a
   // future accidental fetch from turning them into Resend or CRM submissions.
   if (hasDemoReferrer(request)) return json({ ok: false, outcome: 'blocked', error: 'demo_submission_disabled' }, 403);
@@ -88,10 +84,11 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
   // consumes rate-limit capacity. Server-side smoke checks omit these headers.
   if (isCrossSiteBrowserRequest(request)) return json({ ok: false, outcome: 'blocked', error: 'cross_site_submission_disabled' }, 403);
   if (declaredBodyTooLarge(request)) return json({ ok: false, outcome: 'invalid', error: 'payload_too_large' }, 413);
-  if (!coordination) return json({ ok: false, outcome: 'disabled', error: 'lead_coordination_unavailable' }, 503);
+  const activeCoordination = coordination === undefined ? cloudflareCoordination(env) : coordination;
+  if (!activeCoordination) return json({ ok: false, outcome: 'disabled', error: 'lead_coordination_unavailable' }, 503);
   const ip = request.headers.get('cf-connecting-ip') ?? 'local';
   let retryAfter: number | null;
-  try { retryAfter = await coordination.rateLimit(ip); }
+  try { retryAfter = await activeCoordination.rateLimit(ip); }
   catch {
     console.error(JSON.stringify({ event: 'lead_rate_limit_failed' }));
     return json({ ok: false, outcome: 'failed', error: 'lead_coordination_failed' }, 503);
@@ -111,8 +108,7 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
   if (!parsed.success) return json({ ok: false, outcome: 'invalid', error: 'invalid' }, 400);
   const lead = parsed.data;
   if (lead.sourcePath && isDemoPath(lead.sourcePath)) return json({ ok: false, outcome: 'blocked', error: 'demo_submission_disabled' }, 403);
-  const transport = env.LEADS_TRANSPORT ?? (env.LEADS_RESEND_API_KEY ? 'resend' : 'disabled');
-  if (transport === 'demo') return json({ ok: true, outcome: 'demo', meetingUrl: parseMeetingUrl(env.LEADS_MEETING_URL) }, 202);
+  const transport = env.LEADS_TRANSPORT ?? 'disabled';
   if (transport !== 'resend') return json({ ok: false, outcome: 'disabled', error: 'lead_delivery_disabled' }, 503);
   const emailConfiguration = parseEmailConfiguration(env);
   if (!emailConfiguration) {
@@ -122,7 +118,7 @@ export async function handleLead(request: Request, env: LeadEnv, coordination = 
 
   const fingerprint = await sha256(stableJson(lead));
   try {
-    return await coordination.submit(fingerprint, lead);
+    return await activeCoordination.submit(fingerprint, lead);
   } catch {
     console.error(JSON.stringify({ event: 'lead_coordination_failed' }));
     return json({ ok: false, outcome: 'failed', error: 'lead_coordination_failed' }, 503);
@@ -177,7 +173,8 @@ async function readBoundedJson(request: Request): Promise<{ value: unknown; tooL
 }
 
 export async function deliverLead(lead: Lead, env: LeadEnv, ref: string): Promise<Response> {
-  const transport = env.LEADS_TRANSPORT ?? (env.LEADS_RESEND_API_KEY ? 'resend' : 'disabled');
+  if (!commercialLeadIsActive(env)) return json({ ok: false, outcome: 'blocked', error: 'commercial_leads_disabled' }, 403);
+  const transport = env.LEADS_TRANSPORT ?? 'disabled';
   if (transport !== 'resend') return json({ ok: false, outcome: 'disabled', error: 'lead_delivery_disabled' }, 503);
   const emailConfiguration = parseEmailConfiguration(env);
   if (!emailConfiguration) return json({ ok: false, outcome: 'disabled', error: 'lead_email_configuration_invalid' }, 503);
@@ -203,8 +200,8 @@ export async function deliverLead(lead: Lead, env: LeadEnv, ref: string): Promis
   return json({ ok: true, outcome: degraded ? 'delivered_degraded' : 'delivered', ref, meetingUrl }, 202);
 }
 
-function parseEmailConfiguration(env: LeadEnv): EmailConfiguration | null {
-  const parsed = emailConfigurationSchema.safeParse({
+function parseEmailConfiguration(env: LeadEnv): RuntimeEmailConfiguration | null {
+  const parsed = runtimeEmailConfigurationSchema.safeParse({
     apiKey: env.LEADS_RESEND_API_KEY,
     fromEmail: env.LEADS_FROM_EMAIL,
     internalRecipient: env.LEADS_INTERNAL_RECIPIENT,
@@ -214,7 +211,7 @@ function parseEmailConfiguration(env: LeadEnv): EmailConfiguration | null {
 }
 
 function logInvalidEmailConfiguration(env: LeadEnv): void {
-  const parsed = emailConfigurationSchema.safeParse({
+  const parsed = runtimeEmailConfigurationSchema.safeParse({
     apiKey: env.LEADS_RESEND_API_KEY,
     fromEmail: env.LEADS_FROM_EMAIL,
     internalRecipient: env.LEADS_INTERNAL_RECIPIENT,
@@ -298,14 +295,14 @@ async function resend(apiKey: string, idempotencyKey: string, payload: Record<st
   finally { clearTimeout(timeout); }
 }
 
-async function sendInternalEmail(lead: Lead, ref: string, configuration: EmailConfiguration): Promise<boolean> {
+async function sendInternalEmail(lead: Lead, ref: string, configuration: RuntimeEmailConfiguration): Promise<boolean> {
   const rows = leadRows(lead); const subject = `${lead.plan ? `Plan ${lead.plan}` : 'Proyecto'} · ${lead.businessName}`;
   const text = `Nueva solicitud — Logic Estancia\n\n${rows.map(([key, value]) => `${key}: ${value}`).join('\n')}\n\nMensaje:\n${lead.message || '—'}\n\nReferencia: ${ref}`;
   const html = `<h2>Nueva solicitud — Logic Estancia</h2><table>${rows.map(([key, value]) => `<tr><td><strong>${escapeHtml(key)}</strong></td><td>${escapeHtml(value)}</td></tr>`).join('')}</table><p><strong>Mensaje</strong><br>${escapeHtml(lead.message || '—')}</p><p>Referencia: ${escapeHtml(ref)}</p>`;
   return resend(configuration.apiKey, `estancia-lead/${ref}/internal`, { from: `Logic Estancia <${configuration.fromEmail}>`, to: [configuration.internalRecipient], reply_to: lead.email, subject, html, text });
 }
 
-async function sendVisitorSummary(lead: Lead, ref: string, configuration: EmailConfiguration): Promise<boolean> {
+async function sendVisitorSummary(lead: Lead, ref: string, configuration: RuntimeEmailConfiguration): Promise<boolean> {
   const plan = lead.plan;
   const names = lead.lang === 'en' ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' } : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
   const en = lead.lang === 'en';

@@ -92,6 +92,16 @@ declare global {
   interface Window {
     estanciaLoadGtm?: () => void;
     estanciaTrack?: (event: string, parameters?: Record<string, string | number | undefined>) => void;
+    estanciaRuntimeReady?: Promise<{
+      mode: 'demo' | 'real_locked' | 'real';
+      demoMode: boolean;
+      commercialLeadsEnabled: boolean;
+      sideEffects: boolean;
+      durableWrites: boolean;
+      jobs: boolean;
+      providers: { analytics: 'disabled' | 'live'; email: 'disabled' | 'live' };
+      operations: { commercialLead: 'blocked' | 'active' };
+    }>;
     dataLayer?: Record<string, unknown>[];
   }
 }

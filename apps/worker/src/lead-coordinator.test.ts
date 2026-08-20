@@ -4,12 +4,17 @@ import type { LeadEnv } from './leads';
 
 const lead = { name: 'Ada', businessName: 'Casa Ada', email: 'ada@example.test', accommodationType: 'rural', propertyCount: 2, unitCount: 4, accept: true, website: '', lang: 'es' };
 const emailEnv = {
+  DEMO_MODE: 'false',
+  REAL_OPERATIONS_ENABLED: 'true',
+  COMMERCIAL_LEADS_ENABLED: 'true',
+  EMAIL_PROVIDER_MODE: 'resend',
   LEADS_TRANSPORT: 'resend',
   LEADS_RESEND_API_KEY: 'secret',
   LEADS_FROM_EMAIL: 'delivery@example.test',
   LEADS_INTERNAL_RECIPIENT: 'sales@example.test',
   LEADS_REPLY_TO: 'reply@example.test',
 } as const satisfies LeadEnv;
+const demoEnv = { ...emailEnv, DEMO_MODE: 'true', COMMERCIAL_LEADS_ENABLED: 'false' } as const satisfies LeadEnv;
 
 class MemoryStorage {
   readonly values = new Map<string, unknown>();
@@ -33,16 +38,44 @@ function deliver(coordinator: LeadCoordinator) {
 describe('LeadCoordinator', () => {
   afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
 
+  it('blocks direct durable calls and leaves even lifecycle alarms inert in demo mode', async () => {
+    const providerFetch = vi.spyOn(globalThis, 'fetch');
+    const storage = new MemoryStorage();
+    storage.values.set('legacy', 'preserved-for-explicit-recovery');
+    const coordinator = new LeadCoordinator(state(storage), demoEnv);
+    const rateLimit = await coordinator.fetch(new Request('https://coordinator/rate-limit', { method: 'POST' }));
+    const delivery = await deliver(coordinator);
+    expect(rateLimit.status).toBe(403);
+    expect(delivery.status).toBe(403);
+    expect(storage.values).toEqual(new Map([['legacy', 'preserved-for-explicit-recovery']]));
+    await coordinator.alarm();
+    expect(storage.values).toEqual(new Map([['legacy', 'preserved-for-explicit-recovery']]));
+    expect(providerFetch).not.toHaveBeenCalled();
+  });
+
+  it('lets an isolated real namespace expire metadata after operations are locked', async () => {
+    const storage = new MemoryStorage();
+    storage.values.set('legacy', 'transient-real-metadata');
+    const coordinator = new LeadCoordinator(state(storage), {
+      ...emailEnv,
+      REAL_OPERATIONS_ENABLED: 'false',
+      EMAIL_PROVIDER_MODE: 'disabled',
+      LEADS_TRANSPORT: 'disabled',
+    });
+    await coordinator.alarm();
+    expect(storage.values.size).toBe(0);
+  });
+
   it('persists the rate limit across object instances and clears it with its alarm', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-08-17T10:00:00Z'));
     const storage = new MemoryStorage();
-    let coordinator = new LeadCoordinator(state(storage), {});
+    let coordinator = new LeadCoordinator(state(storage), emailEnv);
     for (let count = 0; count < 5; count += 1) {
       const response = await coordinator.fetch(new Request('https://coordinator/rate-limit', { method: 'POST' }));
       expect(await response.json()).toEqual({ retryAfter: null });
     }
-    coordinator = new LeadCoordinator(state(storage), {});
+    coordinator = new LeadCoordinator(state(storage), emailEnv);
     const limited = await coordinator.fetch(new Request('https://coordinator/rate-limit', { method: 'POST' }));
     expect(await limited.json()).toEqual({ retryAfter: 60 });
     await coordinator.alarm();

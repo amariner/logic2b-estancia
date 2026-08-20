@@ -1,0 +1,18 @@
+---
+import type { Locale } from '@logic-estancia/config';
+
+const { locale } = Astro.props as { locale: Locale };
+const homeHref = locale === 'en' ? '/en/' : '/';
+---
+<span class="wordmark" role="group" aria-label="Logic2B Estancias">
+  <a
+    class="wordmark-core"
+    href="https://logic2b.com/"
+    aria-label={locale === 'es' ? 'Logic2B — ir a logic2b.com' : 'Logic2B — visit logic2b.com'}
+  >Logic<strong>2B</strong></a>
+  <a
+    class="wordmark-product"
+    href={homeHref}
+    aria-label={locale === 'es' ? 'Logic2B Estancias — ir al inicio' : 'Logic2B Estancias — home'}
+  >Estancias</a>
+</span>

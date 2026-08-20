@@ -13,7 +13,7 @@ export type TourMode = "unset" | "guided" | "free";
 
 export const TOUR_STEP_COUNTS: Record<Scenario, number> = {
   terrava: 3,
-  aurem: 7,
+  aurem: 6,
 };
 
 export interface DemoStay {

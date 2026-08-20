@@ -23,13 +23,40 @@ const demos: readonly { slug: DemoSlug; name: string; text: string; image: strin
   { slug: 'aurem', name: 'Aurem Hotel', text: 'When the guest cannot see the problem yet, but the team needs to spot it and coordinate.', image: '/media/aurem/hero.webp' },
 ];
 const levels = locale === 'es' ? [
-  ['00', 'Básico', 'Deja de parecer uno más cuando te comparan y convierte el interés en consultas por email.', 'basico'],
+  ['00', 'Básico', 'Deja de parecer uno más cuando te comparan y convierte el interés en una conversación comercial directa.', 'basico'],
   ['01', 'Gestión', 'Da continuidad a cada consulta y reserva sin reconstruir su historia en varias herramientas.', 'gestion'],
   ['02', 'Inteligente', 'Haz visible lo que necesita atención antes de que se convierta en una urgencia para el equipo.', 'inteligente'],
 ] : [
-  ['00', 'Basic', 'Stop looking interchangeable when guests compare and turn interest into email enquiries.', 'basico'],
+  ['00', 'Basic', 'Stop looking interchangeable when guests compare and turn interest into a direct commercial conversation.', 'basico'],
   ['01', 'Management', 'Give every enquiry and booking continuity without rebuilding its story across several tools.', 'gestion'],
   ['02', 'Intelligent', 'Make what needs attention visible before it turns into an urgent problem for the team.', 'inteligente'],
+];
+const heroFlow = locale === 'es' ? [
+  ['01', 'Marca', 'Una presencia que se reconoce.'],
+  ['02', 'Reservas', 'Cada consulta conserva su contexto.'],
+  ['03', 'Operación', 'El equipo distingue qué atender.'],
+] : [
+  ['01', 'Brand', 'A presence guests can recognise.'],
+  ['02', 'Bookings', 'Every enquiry keeps its context.'],
+  ['03', 'Operations', 'The team can see what needs attention.'],
+];
+const directionSignals = locale === 'es' ? [
+  ['01', 'Demanda y marca', 'Qué entiende el huésped, por qué te recuerda y dónde empieza la conversación directa.'],
+  ['02', 'Reservas y continuidad', 'Qué necesita cada solicitud para avanzar sin reconstruir su historia en varias herramientas.'],
+  ['03', 'Equipo y prioridades', 'Qué conviene revisar antes de que una llegada, una habitación o una incidencia marque el día.'],
+] : [
+  ['01', 'Demand and brand', 'What guests understand, why they remember you and where the direct conversation begins.'],
+  ['02', 'Bookings and continuity', 'What every enquiry needs to move forward without rebuilding its story across several tools.'],
+  ['03', 'Team and priorities', 'What is worth reviewing before an arrival, room or incident dictates the day.'],
+];
+const progressModes = locale === 'es' ? [
+  ['01', c.modes.mono[0], c.modes.mono[1]],
+  ['02', c.modes.multi[0], c.modes.multi[1]],
+  ['03', 'Decide con más contexto', 'Señales comprensibles ayudan a priorizar; las decisiones sensibles siguen bajo criterio humano.'],
+] : [
+  ['01', c.modes.mono[0], c.modes.mono[1]],
+  ['02', c.modes.multi[0], c.modes.multi[1]],
+  ['03', 'Decide with more context', 'Clear signals help prioritise; sensitive decisions remain under human judgement.'],
 ];
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -41,18 +68,31 @@ const faqSchema = {
   })),
 };
 const leadRequestTimeoutMs = 15_000;
+const runtimeCopy = locale === 'es' ? {
+  demoLabel: 'Modo demo seguro.',
+  demoNote: 'Puedes completar el recorrido, pero no se enviará ni guardará ningún dato fuera de esta página.',
+  demoOutcome: 'Simulación completada. No se ha enviado, almacenado ni comunicado ningún dato.',
+  liveLabel: 'Solicitud comercial real.',
+  liveNote: 'Al enviarla, Logic2B recibirá estos datos por email únicamente para responderte.',
+} : {
+  demoLabel: 'Safe demo mode.',
+  demoNote: 'You can complete the journey, but no data will be sent or stored outside this page.',
+  demoOutcome: 'Simulation complete. No data was sent, stored or communicated.',
+  liveLabel: 'Live commercial enquiry.',
+  liveNote: 'When submitted, Logic2B will receive these details by email only to reply to you.',
+};
 const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   '@id': 'https://estancia.logic2b.com/#service',
-  name: 'Logic Estancia',
+  name: 'Logic2B Estancias',
   serviceType: locale === 'es' ? 'Web, gestión de reservas y operación para alojamientos' : 'Website, booking management and operations for accommodation businesses',
   provider: { '@id': 'https://estancia.logic2b.com/#organization' },
   areaServed: { '@type': 'Country', name: 'Spain' },
   audience: { '@type': 'BusinessAudience', audienceType: locale === 'es' ? 'Casas rurales, apartamentos turísticos y hoteles' : 'Rural stays, holiday apartments and hotels' },
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: locale === 'es' ? 'Planes de Logic Estancia' : 'Logic Estancia plans',
+    name: locale === 'es' ? 'Planes de Logic2B Estancias' : 'Logic2B Estancias plans',
     itemListElement: levels.map(([, name, description]) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name, description } })),
   },
 };
@@ -63,17 +103,25 @@ const serviceSchema = {
       <p class="eyebrow">{c.hero.eyebrow}</p>
       <h1 class="display">{c.hero.title} <em>{c.hero.accent}</em></h1>
       <p>{c.hero.body}</p>
-      <div class="hero-actions"><a class="pill" href="#negocio" data-track="cta_click" data-section="hero">{c.hero.primary}</a><a class="pill ghost" href="#demos">{c.hero.secondary}</a></div>
-      <ul class="hero-assurances" aria-label={locale === 'es' ? 'Principios del servicio' : 'Service principles'}><li>{locale === 'es' ? 'Adaptado a tu negocio' : 'Adapted to your business'}</li><li>{locale === 'es' ? 'Configurado por Logic2B' : 'Configured by Logic2B'}</li><li>{locale === 'es' ? 'Acompañamiento humano' : 'Human support'}</li></ul>
+      <div class="hero-actions"><a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="hero">{c.hero.primary}</a><a class="pill ghost" href="#producto">{c.hero.secondary}</a></div>
+      <ul class="hero-assurances" aria-label={locale === 'es' ? 'Principios del servicio' : 'Service principles'}><li>{locale === 'es' ? 'Proyecto por capacidades' : 'Capability-led project'}</li><li>{locale === 'es' ? 'Configurado por Logic2B' : 'Configured by Logic2B'}</li><li>{locale === 'es' ? 'Acompañamiento humano' : 'Human support'}</li></ul>
     </div>
-    <div class="hero-businesses" aria-label={locale === 'es' ? 'Soluciones por tipo de alojamiento' : 'Solutions by accommodation type'}>
-      {businesses.map((business, index) => <a class={`hero-business ${index === 0 ? 'featured' : ''}`} href={business.href}><img src={business.image} alt="" width="2016" height="1344" /><span><small>{locale === 'es' ? 'Solución para' : 'Solution for'}</small><strong>{business.plural}</strong></span><b aria-hidden="true">↗</b></a>)}
+    <div class="hero-command artifact" aria-label={locale === 'es' ? 'Concepto ficticio y local del recorrido de una estancia' : 'Fictional local concept of a stay journey'}>
+      <div class="hero-command-bar"><span class="hero-command-brand"><i aria-hidden="true"></i>Logic2B Estancias</span><span>{locale === 'es' ? 'Concepto ficticio · vista local' : 'Fictional concept · local view'}</span></div>
+      <div class="hero-command-media">
+        <picture><source type="image/avif" srcset="/media/aurem/hero-640.avif 640w, /media/aurem/hero-960.avif 960w" sizes="(max-width: 900px) 100vw, 48vw" /><img src="/media/aurem/hero.webp" alt="" width="2016" height="1344" loading="eager" decoding="async" fetchpriority="high" /></picture>
+        <div><span>{locale === 'es' ? 'El recorrido completo' : 'The complete journey'}</span><strong>{locale === 'es' ? 'De la primera búsqueda al trabajo diario.' : 'From the first search to the work of each day.'}</strong></div>
+      </div>
+      <ol class="hero-command-flow">
+        {heroFlow.map(([number, label, text]) => <li><span>{number}</span><div><strong>{label}</strong><small>{text}</small></div></li>)}
+      </ol>
+      <div class="hero-command-footer"><span class="status">{locale === 'es' ? 'Punto de partida adaptable' : 'Adaptable starting point'}</span><span>{locale === 'es' ? 'Implantación acompañada' : 'Supported implementation'}</span></div>
     </div>
   </div>
 </section>
 
 <section class="section tension-section">
-  <div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{locale === 'es' ? 'El coste de seguir igual' : 'The cost of standing still'}</p><h2 class="heading">{locale === 'es' ? 'No te falta otra herramienta. Te falta que el recorrido completo tenga sentido.' : 'You do not need another tool. You need the whole journey to make sense.'}</h2><p>{locale === 'es' ? 'La fricción rara vez está en un único lugar. Se acumula entre la búsqueda del huésped, la respuesta, la reserva y el trabajo que nadie ve.' : 'Friction rarely sits in one place. It builds between guest search, response, booking and the work no one sees.'}</p></div><ol class="problem-list"><li><span>01</span><p>{locale === 'es' ? 'Te encuentran, pero tu web no termina de explicar por qué elegirte.' : 'Guests find you, but your website does not quite explain why they should choose you.'}</p></li><li><span>02</span><p>{locale === 'es' ? 'Responder una consulta obliga a comprobar canales, calendarios y conversaciones.' : 'Answering an enquiry means checking channels, calendars and conversations.'}</p></li><li><span>03</span><p>{locale === 'es' ? 'El equipo resuelve hoy lo que podía haber visto ayer.' : 'The team solves today what it could have seen yesterday.'}</p></li></ol></div>
+  <div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Dirigir con contexto' : 'Run with context'}</p><h2 class="heading">{locale === 'es' ? 'Dirigir no debería significar reconstruir cada historia.' : 'Running the business should not mean rebuilding every story.'}</h2><p>{locale === 'es' ? 'La fricción rara vez vive en una sola herramienta. Aparece cuando la información cambia de sitio y cada decisión empieza de nuevo.' : 'Friction rarely lives in one tool. It appears when information changes place and every decision starts again.'}</p></div><ol class="direction-list">{directionSignals.map(([number, title, text]) => <li><span>{number}</span><div><strong>{title}</strong><p>{text}</p></div></li>)}</ol></div>
 </section>
 
 <section id="negocio" class="section segment-section shell" aria-labelledby="segment-title">
@@ -85,19 +133,23 @@ const serviceSchema = {
   <div class="section-head"><p class="eyebrow">{c.proof.eyebrow}</p><h2 class="heading">{c.proof.title}</h2><p>{c.proof.body}</p></div>
   <div class="product-stage">
     <ul class="feature-list">
-      <li><strong>{locale === 'es' ? 'Más oportunidades bajo tu marca' : 'More opportunities under your brand'}</strong><span class="muted">{locale === 'es' ? 'Una web pensada para ser encontrada, entendida y contactada.' : 'A website designed to be found, understood and contacted.'}</span></li>
-      <li><strong>{locale === 'es' ? 'Menos persecución interna' : 'Less internal chasing'}</strong><span class="muted">{locale === 'es' ? 'La reserva conserva el contexto que necesita el siguiente paso.' : 'The booking keeps the context the next step needs.'}</span></li>
-      <li><strong>{locale === 'es' ? 'Automatizar sin perder el criterio' : 'Automate without losing judgement'}</strong><span class="muted">{locale === 'es' ? 'Precios, cobros, canales y mensajes requieren validación antes de actuar.' : 'Pricing, payments, channels and messages require validation before action.'}</span></li>
+      <li><span>01</span><strong>{locale === 'es' ? 'Una lectura compartida' : 'One shared view'}</strong><span class="muted">{locale === 'es' ? 'La conversación, la reserva y la preparación dejan una historia que el siguiente paso puede entender.' : 'The conversation, booking and preparation leave a story the next step can understand.'}</span></li>
+      <li><span>02</span><strong>{locale === 'es' ? 'Responsabilidad visible' : 'Visible ownership'}</strong><span class="muted">{locale === 'es' ? 'El equipo distingue qué está preparado, qué espera respuesta y qué necesita revisión.' : 'The team can see what is ready, what awaits a reply and what needs review.'}</span></li>
+      <li><span>03</span><strong>{locale === 'es' ? 'Automatización supervisada' : 'Supervised automation'}</strong><span class="muted">{locale === 'es' ? 'Precios, cobros, canales y mensajes solo avanzan con las validaciones acordadas.' : 'Pricing, payments, channels and messages only move forward with the agreed checks.'}</span></li>
     </ul>
     <div class="product-window artifact" aria-label={locale === 'es' ? 'Vista simulada del gestor' : 'Simulated workspace view'}>
-      <div class="window-bar"><span>Aurem Hotel · {locale === 'es' ? 'Escenario ficticio' : 'Fictional scenario'}</span><span>{locale === 'es' ? 'Vista local' : 'Local view'} · Demo</span></div>
-      <div class="window-grid"><article><span>{locale === 'es' ? 'Riesgos para las entradas' : 'Arrival risks'}</span><b>3</b><small class="muted">{locale === 'es' ? 'Limpieza · pago · asignación' : 'Cleaning · payment · assignment'}</small></article><article><span>{locale === 'es' ? 'Ocupación' : 'Occupancy'}</span><b>87%</b></article><article><span>{locale === 'es' ? 'Preparación' : 'Preparation'}</span><b>14/18</b></article><article><span>Canales</span><b>4</b><small class="muted">{locale === 'es' ? 'Demo · no conectados' : 'Demo · not connected'}</small></article></div>
+      <div class="window-bar"><span class="window-brand"><i aria-hidden="true"></i>Aurem Hotel · {locale === 'es' ? 'Dirección' : 'Management'}</span><span>{locale === 'es' ? 'Escenario ficticio · Vista local' : 'Fictional scenario · Local view'}</span></div>
+      <div class="window-shell">
+        <ul class="window-nav" aria-label={locale === 'es' ? 'Áreas de la vista simulada' : 'Areas in the simulated view'}><li class="active">{locale === 'es' ? 'Resumen' : 'Overview'}</li><li>{locale === 'es' ? 'Llegadas' : 'Arrivals'}</li><li>{locale === 'es' ? 'Equipo' : 'Team'}</li><li>{locale === 'es' ? 'Ingresos' : 'Revenue'}</li></ul>
+        <div class="window-content"><div class="window-heading"><span>{locale === 'es' ? 'Prioridad del turno' : 'Shift priority'}</span><strong>{locale === 'es' ? 'Qué necesita revisión antes de las próximas llegadas.' : 'What needs review before the next arrivals.'}</strong></div><div class="window-grid"><article><span>{locale === 'es' ? 'Llegadas a revisar' : 'Arrivals to review'}</span><b>3</b><small class="muted">{locale === 'es' ? 'Limpieza · pago · asignación' : 'Cleaning · payment · assignment'}</small></article><article><span>{locale === 'es' ? 'Ocupación' : 'Occupancy'}</span><b>87%</b></article><article><span>{locale === 'es' ? 'Preparación' : 'Preparation'}</span><b>14/18</b></article><article><span>Canales</span><b>4</b><small class="muted">{locale === 'es' ? 'Demo · no conectados' : 'Demo · not connected'}</small></article></div></div>
+      </div>
+      <div class="window-footer"><span>{locale === 'es' ? 'Datos precargados · Ninguna acción real' : 'Preloaded data · No live actions'}</span><a href={`${prefix}/demos/aurem/gestion/?vista=home`}>{locale === 'es' ? 'Abrir vista ficticia' : 'Open fictional view'} <span aria-hidden="true">→</span></a></div>
     </div>
   </div>
 </section>
 
 <section class="section modes">
-  <div class="shell"><div class="section-head"><p class="eyebrow">{c.modes.eyebrow}</p><h2 class="heading">{c.modes.title}</h2></div><div class="mode-grid"><article class="card"><span>01</span><h3>{c.modes.mono[0]}</h3><p>{c.modes.mono[1]}</p></article><article class="card"><span>02</span><h3>{c.modes.multi[0]}</h3><p>{c.modes.multi[1]}</p></article></div></div>
+  <div class="shell"><div class="section-head"><p class="eyebrow">{c.modes.eyebrow}</p><h2 class="heading">{c.modes.title}</h2></div><div class="mode-grid">{progressModes.map(([number, title, text]) => <article class="card"><span>{number}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div>
 </section>
 
 <section id="demos" class="section shell">
@@ -149,7 +201,7 @@ const serviceSchema = {
 
 <section id="contacto" class="section shell">
   <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 class="heading">{c.contact.title}</h2><p>{c.contact.body}</p><ul class="contact-promises"><li>{locale === 'es' ? 'Revisamos el cuello de botella, no solo el número de habitaciones.' : 'We review the bottleneck, not only the number of rooms.'}</li><li>{locale === 'es' ? 'Separamos lo que ya puede demostrarse de lo que requiere integración.' : 'We separate what can be demonstrated now from what needs integration.'}</li><li>{locale === 'es' ? 'Tus datos se usan únicamente para responder y, si lo autorizas, hacer seguimiento.' : 'Your details are used only to reply and, if authorised, follow up.'}</li></ul><p><a href={wa.href} target="_blank" rel="noopener noreferrer">WhatsApp · {wa.phone} →</a></p></div>
-  <form class="lead-form" data-lead novalidate>
+  <form class="lead-form" data-lead method="dialog" novalidate>
     <p class="sr-only" role="status" aria-live="polite" data-assessment-context-status></p>
     <section class="assessment-handoff wide" data-assessment-handoff hidden aria-labelledby="assessment-handoff-title">
       <div><p class="eyebrow">{locale === 'es' ? 'Diagnóstico recuperado' : 'Assessment recovered'}</p><h3 id="assessment-handoff-title">{locale === 'es' ? 'No tienes que empezar de nuevo.' : 'You do not have to start again.'}</h3><p>{locale === 'es' ? 'Hemos precargado la recomendación y la escala. Puedes corregirlas abajo; las demás respuestas solo se adjuntarán cuando envíes este formulario.' : 'We prefilled the recommendation and scale. You can edit them below; the remaining answers are attached only when you submit this form.'}</p></div>
@@ -157,6 +209,7 @@ const serviceSchema = {
       <button class="text-link" type="button" data-assessment-discard>{locale === 'es' ? 'No adjuntar estas respuestas' : 'Do not attach these answers'}</button>
     </section>
     <p class="form-expectation wide">{c.contact.expectation}</p>
+    <p class="runtime-lead-note wide" data-runtime-lead-note role="note"><strong data-runtime-lead-label>{runtimeCopy.demoLabel}</strong> <span data-runtime-lead-copy>{runtimeCopy.demoNote}</span></p>
     <label>{locale === 'es' ? 'Nombre' : 'Name'}<input name="name" required maxlength="120" autocomplete="name" /></label>
     <label>{locale === 'es' ? 'Empresa o alojamiento' : 'Business or stay'}<input name="businessName" required maxlength="160" autocomplete="organization" /></label>
     <label>Email<input name="email" required type="email" maxlength="200" autocomplete="email" /></label>
@@ -169,28 +222,51 @@ const serviceSchema = {
     <label class="honeypot" inert aria-hidden="true"><span>Website</span><input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" /></label>
     <label class="check wide"><input name="accept" type="checkbox" required /><span>{locale === 'es' ? <>He leído la <a href="/privacidad/" target="_blank" rel="noopener noreferrer">política de privacidad</a> y acepto que Logic2B use estos datos para responder.</> : <>I have read the <a href="/en/privacidad/" target="_blank" rel="noopener noreferrer">privacy policy</a> and accept that Logic2B uses these details to reply.</>}</span></label>
     <label class="check wide"><input name="marketingConsent" type="checkbox" /><span>{locale === 'es' ? 'También quiero recibir seguimiento comercial relevante (opcional).' : 'I would also like to receive relevant commercial follow-up (optional).'}</span></label>
-    <div class="wide"><button class="pill" type="submit"><span>{c.contact.submit}</span><span aria-hidden="true">→</span></button></div>
+    <div class="wide"><button class="pill" type="button" data-lead-submit><span>{c.contact.submit}</span><span aria-hidden="true">→</span></button></div>
     <p class="form-status wide" role="status" aria-live="polite"></p>
     <section class="lead-receipt wide" data-lead-receipt hidden tabindex="-1" role="status" aria-live="polite" aria-atomic="true" aria-labelledby="lead-receipt-title">
       <span class="receipt-mark" aria-hidden="true">✓</span>
-      <div><p class="eyebrow">{locale === 'es' ? 'Solicitud recibida' : 'Request received'}</p><h3 id="lead-receipt-title">{c.contact.receiptTitle}</h3><p>{c.contact.receiptBody}</p><p class="receipt-reference" data-lead-reference hidden><span>{c.contact.reference}</span><code data-lead-reference-value></code></p><p data-meeting-copy>{c.contact.meetingFallback}</p><a class="text-link" data-meeting-link hidden target="_blank" rel="noopener noreferrer" data-track="meeting_click" data-section="homepage_contact">{c.contact.meetingCta} <span aria-hidden="true">→</span></a></div>
+      <div><p class="eyebrow">{locale === 'es' ? 'Solicitud recibida' : 'Request received'}</p><h3 id="lead-receipt-title">{c.contact.receiptTitle}</h3><p>{c.contact.receiptBody}</p><p class="receipt-reference" data-lead-reference hidden><span>{c.contact.reference}</span><code data-lead-reference-value></code></p><p data-meeting-copy>{c.contact.meetingFallback}</p><a class="text-link" href={`${prefix}/#contacto`} data-meeting-link hidden target="_blank" rel="noopener noreferrer" data-track="meeting_click" data-section="homepage_contact">{c.contact.meetingCta} <span aria-hidden="true">→</span></a></div>
     </section>
   </form></div>
 </section>
 
-<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, timeout: c.contact.timeout, rateLimited: c.contact.rateLimited, retrying: c.contact.retrying, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback, leadRequestTimeoutMs }}>
+<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, timeout: c.contact.timeout, rateLimited: c.contact.rateLimited, retrying: c.contact.retrying, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback, leadRequestTimeoutMs, demoLabel: runtimeCopy.demoLabel, demoNote: runtimeCopy.demoNote, demoOutcome: runtimeCopy.demoOutcome, liveLabel: runtimeCopy.liveLabel, liveNote: runtimeCopy.liveNote }}>
   const form = document.querySelector('[data-lead]');
   const status = form?.querySelector('.form-status');
   const receipt = form?.querySelector('[data-lead-receipt]');
+  const runtimeNote = form?.querySelector('[data-runtime-lead-note]');
+  const runtimeLabel = runtimeNote?.querySelector('[data-runtime-lead-label]');
+  const runtimeCopy = runtimeNote?.querySelector('[data-runtime-lead-copy]');
+  const submitButton = form?.querySelector('[data-lead-submit]');
+  window.estanciaRuntimeReady?.then((runtime) => {
+    const live = runtime.operations?.commercialLead === 'active' && runtime.providers?.email === 'live';
+    if (runtimeLabel) runtimeLabel.textContent = live ? liveLabel : demoLabel;
+    if (runtimeCopy) runtimeCopy.textContent = live ? liveNote : demoNote;
+    if (runtimeNote) runtimeNote.dataset.mode = live ? 'real' : 'demo';
+  });
   document.querySelectorAll('[data-plan]').forEach((link) => link.addEventListener('click', () => {
     const plan = form?.querySelector('[name=plan]');
     if (plan && link.dataset.plan) plan.value = link.dataset.plan;
   }));
+  submitButton?.addEventListener('click', () => form?.requestSubmit());
+  form?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLButtonElement) return;
+    event.preventDefault();
+    form.requestSubmit();
+  });
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
-    const button = form.querySelector('button[type=submit]'); const label = button?.querySelector('span');
+    const button = form.querySelector('[data-lead-submit]'); const label = button?.querySelector('span');
     if (button) button.disabled = true; if (label) label.textContent = sending; if (status) status.textContent = '';
+    const runtime = await (window.estanciaRuntimeReady ?? Promise.resolve(null));
+    if (runtime?.operations?.commercialLead !== 'active' || runtime?.providers?.email !== 'live') {
+      if (status) status.textContent = demoOutcome;
+      if (button) button.disabled = false;
+      if (label) label.textContent = submit;
+      return;
+    }
     const d = Object.fromEntries(new FormData(form));
     const assessmentFields = window.estanciaAssessment?.leadFields() || {};
     const payload = { ...d, ...assessmentFields, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: assessmentFields.sourcePath || location.pathname };

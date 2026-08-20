@@ -55,9 +55,33 @@ Record exact language, current stack, critical workflow, required integrations, 
 
 HubSpot is not part of the current product or production scope. The Worker has no HubSpot binding, token contract or executable CRM branch: a stale or accidental environment value cannot create contacts or deals. Reintroducing any CRM requires a future explicit product decision, a new privacy and retention review, an idempotent delivery design and dedicated tests before configuration.
 
+## Runtime safety modes
+
+The normative runtime contract is [`docs/DEMO_MODE.md`](DEMO_MODE.md). The product demo is fail-closed and requires no real secrets. Product operations are eligible only when both conditions are literal and explicit:
+
+```text
+DEMO_MODE=false
+REAL_OPERATIONS_ENABLED=true
+```
+
+The only exception is Logic Estancia's own commercial lead capture: it may coexist with `DEMO_MODE=true`, but only with `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend`, `LEADS_TRANSPORT=resend` and complete validated Resend configuration. Missing, empty or unknown values keep it disabled before the body is read. Provider selection is an additional gate, never a fallback:
+
+- `EMAIL_PROVIDER_MODE=disabled` by default; `capture`/`mock` are reserved for isolated harnesses and currently resolve without output; `resend` is eligible only for the explicit commercial-lead allowlist.
+- `ANALYTICS_PROVIDER_MODE=disabled` in demo; `capture`/`mock` are reserved for isolated harnesses and currently resolve without output; `gtm` is eligible only in real mode and after consent.
+
+The presence of a secret, Durable Object binding, route, table or old environment value does not activate a capability. “Visible in the demo” and “active in production” are separate claims.
+
 ## Lead environment configuration
 
-Configure these values in the Cloudflare Worker environment, never in tracked source:
+Configure the mode gates in the Cloudflare Worker environment, never in tracked source:
+
+- `DEMO_MODE`: only literal `false` permits evaluation of real operations.
+- `REAL_OPERATIONS_ENABLED`: must be literal `true` as a second authorization for product operations.
+- `COMMERCIAL_LEADS_ENABLED`: must be literal `true` before any commercial form may submit, including when product demo mode remains true.
+- `EMAIL_PROVIDER_MODE`: use `disabled` by default; use `resend` only in an approved commercial-lead deployment.
+- `ANALYTICS_PROVIDER_MODE`: use `disabled` by default; use `gtm` only in an approved real deployment with consent handling.
+
+Only an isolated real email deployment may also configure:
 
 - `LEADS_RESEND_API_KEY`: Resend credential.
 - `LEADS_FROM_EMAIL`: verified sender address shown under the Logic Estancia name.
@@ -65,13 +89,15 @@ Configure these values in the Cloudflare Worker environment, never in tracked so
 - `LEADS_REPLY_TO`: monitored address used when the visitor replies to their summary.
 - `LEADS_MEETING_URL`: public HTTPS scheduling URL, without embedded credentials.
 
-In production, `LEADS_INTERNAL_RECIPIENT` is `marinerandreu+logic@gmail.com`. Email delivery is only eligible when the API key and all three addresses pass validation; otherwise the endpoint fails closed. A missing or invalid meeting URL is never rendered as a link.
+In production, `LEADS_INTERNAL_RECIPIENT` is `marinerandreu+logic@gmail.com`. Email delivery is only eligible when `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend`, the API key and all three addresses pass validation; otherwise the endpoint fails closed. A missing or invalid meeting URL is never rendered as a link.
 
 Use `apps/worker/.dev.vars.example` only as a local shape reference. Definitive addresses and the scheduling URL require human validation before deployment.
 
 ## Lead delivery resilience and recovery
 
 Cloudflare Durable Objects keep the five-submissions-per-minute IP limit outside individual Worker isolates. They also retain a submission reference for one fixed 24-hour window from the first delivery attempt in the EU jurisdiction; a completed response is cached only for the remainder of that same window. Failed attempts schedule the same expiry, equivalent retries do not extend it, and Resend receives `estancia-lead/{ref}/internal` and `estancia-lead/{ref}/visitor` idempotency keys.
+
+The expiry alarm is lifecycle cleanup, not a business job. It can delete only transient quota/idempotency metadata in an isolated deployment whose `DEMO_MODE=false`, including `real_locked` while operations and providers are disabled. Under `DEMO_MODE=true` the alarm is a strict no-op. Rollback therefore routes traffic to a separate demo Worker and namespace, leaves the isolated real Worker locked for at most the original 24-hour expiry window, verifies cleanup and only then archives or purges that namespace. Never overwrite a real namespace with demo configuration as a shortcut.
 
 Use the structured Worker log event and its `ref` when a provider is degraded:
 
@@ -85,9 +111,11 @@ An internal Resend message is the mandatory delivery. A visitor summary without 
 
 ### Demo form boundary
 
-Only the commercial form on the Logic Estancia landing may call `/api/leads` and become eligible for Resend. Nivora, Terrava, Aurem and their workspaces are local fixtures: their controls may validate fields, open a simulated checkout or persist fictitious state in the browser, but they must never send email, create a lead, write to CRM or contact an operational provider.
+The commercial form on the Logic Estancia landing and the three commercial segment landings may call `/api/leads`. They become eligible for Resend only with `COMMERCIAL_LEADS_ENABLED=true` and complete email configuration; product demo mode may remain true. Without that allowlist, the endpoint returns `403` before reading the body, rate limiting, durable coordination or provider resolution. The interface must explain that no request was sent rather than showing a real-delivery receipt.
 
-This boundary is enforced in depth. Static Assets attach the common `base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'` policy without routing every asset through the Worker. The Worker still runs first on ES/EN demo pages and replaces only the form boundary with `form-action 'none'`. `/api/leads` rejects a same-origin demo referrer before rate limiting; a demo `sourcePath` inside the bounded JSON body consumes one rate-limit attempt and is then rejected before durable delivery. Both checks normalize encoded demo paths and return `403 demo_submission_disabled`. Keep the Resend implementation active only for the landing and the explicitly authorised smoke tool. Any future demo form must retain the local interaction and the E2E zero-write guarantee.
+Nivora, Terrava, Aurem and their workspaces are fictitious visual fixtures. Their panels collect no visitor data and must never send email, create a lead, write to CRM, mutate inventory, create a booking or payment, publish content, start a job or contact an operational provider.
+
+This boundary is enforced in depth. The global mode guard is authoritative and cannot depend on `Referer`, `sourcePath` or browser controls. Every Static Asset passes through the Worker: demo and locked modes receive an isolated Content Security Policy with `form-action 'none'`, while provider origins are admitted only by the explicitly activated real analytics policy. Demo routes additionally use `connect-src 'none'` in every runtime mode, so their browser code cannot reach even a same-origin API. Encoded demo sources are rejected as a supplementary guard. Any future demo interaction must retain the E2E zero-write guarantee.
 
 ### Smoke reproducible de Resend
 
@@ -103,6 +131,7 @@ La herramienta operativa usa el mismo `/api/leads` que la landing, no conoce sec
 3. Solo desde un entorno autorizado, proporciona el buzón controlado que recibirá el resumen de visitante y la confirmación explícita. No pases el correo como argumento para evitar guardarlo en el historial del shell:
 
    ```bash
+   export DEMO_MODE='false'
    export LOGIC_ESTANCIA_SMOKE_VISITOR_EMAIL='buzon-controlado@example.test'
    export LOGIC_ESTANCIA_SMOKE_AUTHORIZATION='SEND_IDENTIFIED_TEST_EMAIL'
    pnpm smoke:resend -- --execute --run-id release-20260817-a
@@ -110,11 +139,13 @@ La herramienta operativa usa el mismo `/api/leads` que la landing, no conoce sec
 
 4. Guarda la `ref` mostrada. Repite con el mismo entorno, `run-id` y `--expect-ref <ref>`; el resultado debe mantener la referencia y mostrar `replayed: true` sin crear otros correos.
 5. En Resend, busca `estancia-lead/<ref>/internal` y `estancia-lead/<ref>/visitor`. Confirma que ambos aparecen entregados y que el mensaje interno está inequívocamente marcado como prueba. Verifica también la llegada a los dos buzones controlados antes de cerrar el smoke.
-6. Borra las variables del shell al terminar con `unset LOGIC_ESTANCIA_SMOKE_VISITOR_EMAIL LOGIC_ESTANCIA_SMOKE_AUTHORIZATION`. Un `delivered_degraded`, una referencia distinta, un estado diferente de 202 o un `outcome` distinto de `delivered` hacen fallar la herramienta y requieren revisar los canales antes de reintentar.
+6. Borra las variables del shell al terminar con `unset DEMO_MODE LOGIC_ESTANCIA_SMOKE_VISITOR_EMAIL LOGIC_ESTANCIA_SMOKE_AUTHORIZATION`. Un `delivered_degraded`, una referencia distinta, un estado diferente de 202 o un `outcome` distinto de `delivered` hacen fallar la herramienta y requieren revisar los canales antes de reintentar.
 
-No ejecutes esta comprobación contra producción sin autorización humana para generar los dos correos de prueba. No uses direcciones de prospectos, no actives HubSpot y no conviertas el smoke en un registro comercial.
+No ejecutes esta comprobación contra una demo: debe responder de forma cerrada y nunca entregar correo. Tampoco la ejecutes contra producción sin autorización humana para generar los dos correos de prueba. No uses direcciones de prospectos, no actives HubSpot y no conviertas el smoke en un registro comercial.
 
 ## GA4/GTM contract
+
+GTM is disabled unconditionally in demo mode, even when a browser retains prior analytics consent. In a real deployment it also requires `ANALYTICS_PROVIDER_MODE=gtm`; consent alone never activates the provider.
 
 Only configure the allowlisted events emitted by the site:
 

@@ -3,6 +3,10 @@ import { deliverLead, handleLead, leadSchema, type LeadCoordination, type LeadEn
 
 const lead = { name: 'Ada', businessName: 'Casa Ada', email: 'ada@example.test', accommodationType: 'rural', propertyCount: 2, unitCount: 4, accept: true, website: '', lang: 'es' };
 const emailEnv = {
+  DEMO_MODE: 'false',
+  REAL_OPERATIONS_ENABLED: 'true',
+  COMMERCIAL_LEADS_ENABLED: 'true',
+  EMAIL_PROVIDER_MODE: 'resend',
   LEADS_TRANSPORT: 'resend',
   LEADS_RESEND_API_KEY: 'secret',
   LEADS_FROM_EMAIL: 'delivery@example.test',
@@ -23,6 +27,18 @@ function submit(env: LeadEnv, body: unknown = lead, ip: string = crypto.randomUU
 
 describe('leads', () => {
   afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
+  it('blocks direct handlers and adapters when the commercial allowlist is absent', async () => {
+    const providerFetch = vi.spyOn(globalThis, 'fetch');
+    const coordination: LeadCoordination = { rateLimit: vi.fn(async () => null), submit: vi.fn(async () => new Response()) };
+    const env = { ...emailEnv, DEMO_MODE: 'true', COMMERCIAL_LEADS_ENABLED: 'false' } as const;
+    const handled = await submit(env, lead, 'demo-mode', coordination);
+    const delivered = await deliverLead(leadSchema.parse(lead), env, 'must-not-deliver');
+    expect(handled.status).toBe(403);
+    expect(delivered.status).toBe(403);
+    expect(coordination.rateLimit).not.toHaveBeenCalled();
+    expect(coordination.submit).not.toHaveBeenCalled();
+    expect(providerFetch).not.toHaveBeenCalled();
+  });
   it('requires explicit consent', () => expect(leadSchema.safeParse({ ...lead, accept: false }).success).toBe(false));
   it('normalizes legacy plan values at the API edge', () => expect(leadSchema.parse({ ...lead, plan: 'automatiza' }).plan).toBe('inteligente'));
   it('normalizes email casing for a stable submission identity', () => expect(leadSchema.parse({ ...lead, email: 'ADA@Example.Test' }).email).toBe('ada@example.test'));
@@ -84,20 +100,19 @@ describe('leads', () => {
     expect(response.status).toBe(503);
     expect(await response.json()).toMatchObject({ error: 'lead_coordination_failed' });
   });
-  it('fails closed when delivery is disabled', async () => {
-    const env = { LEADS_TRANSPORT: 'disabled' } as const;
+  it('blocks before coordination when delivery is not explicitly activated', async () => {
+    const env = { DEMO_MODE: 'false', REAL_OPERATIONS_ENABLED: 'true', EMAIL_PROVIDER_MODE: 'disabled', LEADS_TRANSPORT: 'disabled' } as const;
     const response = await submit(env);
-    expect(response.status).toBe(503);
-    expect(await response.json()).toMatchObject({ outcome: 'disabled' });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ outcome: 'blocked', error: 'commercial_leads_disabled' });
   });
-  it('fails closed when email delivery is selected with incomplete configuration', async () => {
+  it('does not activate email from flags or a secret when configuration is incomplete', async () => {
     const logger = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const response = await submit({ LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'sensitive-test-value', LEADS_FROM_EMAIL: 'not-an-email' });
-    expect(response.status).toBe(503);
-    expect(await response.json()).toMatchObject({ error: 'lead_email_configuration_invalid' });
+    const response = await submit({ DEMO_MODE: 'false', REAL_OPERATIONS_ENABLED: 'true', COMMERCIAL_LEADS_ENABLED: 'true', EMAIL_PROVIDER_MODE: 'resend', LEADS_TRANSPORT: 'resend', LEADS_RESEND_API_KEY: 'sensitive-test-value', LEADS_FROM_EMAIL: 'not-an-email' });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ error: 'commercial_leads_disabled' });
     const log = logger.mock.calls.flat().join(' ');
-    expect(log).toContain('LEADS_FROM_EMAIL');
-    expect(log).toContain('LEADS_INTERNAL_RECIPIENT');
+    expect(log).toBe('');
     expect(log).not.toContain('sensitive-test-value');
   });
   it('does not send a honeypot submission', async () => {

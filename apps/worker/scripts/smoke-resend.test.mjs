@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { createTestLead, runSmoke, sanitizeResponse, validateOptions } from './smoke-resend.mjs';
 
 const authorization = {
+  DEMO_MODE: 'false',
+  COMMERCIAL_LEADS_ENABLED: 'true',
   LOGIC_ESTANCIA_SMOKE_AUTHORIZATION: 'SEND_IDENTIFIED_TEST_EMAIL',
   LOGIC_ESTANCIA_SMOKE_VISITOR_EMAIL: 'smoke@example.test',
 };
@@ -22,8 +24,21 @@ describe('Resend smoke tool', () => {
   });
 
   it('requires an explicit authorization value before sending', () => {
-    expect(() => validateOptions({ execute: true, runId: 'release-20260817', baseUrl: 'https://estancia.logic2b.com' }, {}))
+    expect(() => validateOptions({ execute: true, runId: 'release-20260817', baseUrl: 'https://estancia.logic2b.com' }, { DEMO_MODE: 'false', COMMERCIAL_LEADS_ENABLED: 'true' }))
       .toThrow(/autorización explícita/);
+  });
+
+  it('rejects execution in demo or ambiguous mode before making a request', async () => {
+    for (const DEMO_MODE of [undefined, 'true', 'FALSE']) {
+      const fetchImplementation = vi.fn();
+      const result = await runSmoke({
+        args: ['--execute', '--run-id', 'release-20260817'],
+        environment: { ...authorization, DEMO_MODE },
+        fetchImplementation,
+      }).catch((error) => ({ exitCode: 1, output: String(error) }));
+      expect(result.output).toContain('DEMO_MODE=false');
+      expect(fetchImplementation).not.toHaveBeenCalled();
+    }
   });
 
   it('rejects short run identifiers and unsafe origins', () => {
@@ -39,13 +54,15 @@ describe('Resend smoke tool', () => {
   });
 
   it('prints only an allowlisted response summary and never the email', async () => {
-    const fetchImplementation = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+    const fetchImplementation = vi.fn()
+      .mockResolvedValueOnce(realRuntimeResponse())
+      .mockResolvedValueOnce(new Response(JSON.stringify({
       ok: true,
       outcome: 'delivered',
       ref: reference,
       meetingUrl: 'https://calendar.example.test/private',
       echoedEmail: 'smoke@example.test',
-    }), { status: 202 }));
+      }), { status: 202 }));
     const result = await runSmoke({
       args: ['--execute', '--run-id', 'release-20260817'],
       environment: authorization,
@@ -58,7 +75,9 @@ describe('Resend smoke tool', () => {
   });
 
   it('fails when replay verification returns a different reference', async () => {
-    const fetchImplementation = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, outcome: 'delivered', ref: reference, replayed: true }), { status: 202 }));
+    const fetchImplementation = vi.fn()
+      .mockResolvedValueOnce(realRuntimeResponse())
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, outcome: 'delivered', ref: reference, replayed: true }), { status: 202 }));
     const result = await runSmoke({
       args: ['--execute', '--run-id', 'release-20260817', '--expect-ref', 'ce74de03-c7db-4cf7-9624-133e09be6972'],
       environment: authorization,
@@ -69,7 +88,9 @@ describe('Resend smoke tool', () => {
   });
 
   it('treats a degraded provider result as a failed smoke', async () => {
-    const fetchImplementation = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, outcome: 'delivered_degraded', ref: reference }), { status: 202 }));
+    const fetchImplementation = vi.fn()
+      .mockResolvedValueOnce(realRuntimeResponse())
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, outcome: 'delivered_degraded', ref: reference }), { status: 202 }));
     const result = await runSmoke({
       args: ['--execute', '--run-id', 'release-20260817'],
       environment: authorization,
@@ -79,8 +100,45 @@ describe('Resend smoke tool', () => {
     expect(result.output).toContain('entrega completa');
   });
 
+  it('refuses a remote demo manifest before posting the lead', async () => {
+    const fetchImplementation = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      mode: 'demo', demoMode: true, sideEffects: false,
+      providers: { email: 'disabled' }, operations: { commercialLead: 'blocked' },
+    }), { status: 200 }));
+    const result = await runSmoke({
+      args: ['--execute', '--run-id', 'release-20260817'],
+      environment: authorization,
+      fetchImplementation,
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('No se enviará ningún correo');
+    expect(fetchImplementation).toHaveBeenCalledOnce();
+  });
+
+  it('refuses an inconsistent real manifest before posting the lead', async () => {
+    const fetchImplementation = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      schemaVersion: '1.0.0', mode: 'real', demoMode: false, sideEffects: true, durableWrites: false, jobs: false,
+      providers: { email: 'live' }, operations: { commercialLead: 'active' },
+    }), { status: 200 }));
+    const result = await runSmoke({
+      args: ['--execute', '--run-id', 'release-20260817'],
+      environment: authorization,
+      fetchImplementation,
+    });
+    expect(result.exitCode).toBe(1);
+    expect(fetchImplementation).toHaveBeenCalledOnce();
+  });
+
   it('drops unexpected provider fields from error output', () => {
     const result = sanitizeResponse(400, { outcome: 'person@example.test', error: 'secret-value', issues: [{ input: 'secret' }], email: 'person@example.test' });
     expect(result).toEqual({ ok: false, httpStatus: 400, outcome: 'unknown', ref: undefined, replayed: false, error: undefined, retryAfter: undefined });
   });
 });
+
+function realRuntimeResponse() {
+  return new Response(JSON.stringify({
+    schemaVersion: '1.0.0', mode: 'real', demoMode: false, sideEffects: true, durableWrites: true, jobs: false,
+    commercialLeadsEnabled: true,
+    providers: { email: 'live' }, operations: { commercialLead: 'active' },
+  }), { status: 200 });
+}

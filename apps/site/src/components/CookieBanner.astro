@@ -6,7 +6,7 @@ const en = locale === 'en';
 const prefix = en ? '/en' : '';
 const copy = en ? {
   aria: 'Cookie settings',
-  text: 'We use essential storage to remember your choice and, if you agree, analytics cookies to understand how Logic Estancia is used and improve it.',
+  text: 'We use essential storage to remember your choice. Analytics can run only in an enabled real deployment and if you also agree.',
   policy: 'Cookie policy',
   reject: 'Reject',
   accept: 'Accept',
@@ -15,14 +15,14 @@ const copy = en ? {
   back: 'Back',
   essentialTitle: 'Essential storage',
   essentialBadge: 'Always active',
-  essentialText: 'Required to remember your choice and preserve local demo state. It is not used to track your browsing.',
+  essentialText: 'Required to remember your choice. Visual demo fixtures reset on reload and are not stored here.',
   analyticsTitle: 'Analytics cookies',
-  analyticsText: 'Google Tag Manager and Google Analytics help us measure the commercial site and anonymous demo milestones in aggregate.',
+  analyticsText: 'If the real deployment enables them, Google Tag Manager and Google Analytics measure allowlisted milestones in aggregate. Demo mode never loads them.',
   rejectAll: 'Reject all',
   save: 'Save preferences',
 } : {
   aria: 'Configuración de cookies',
-  text: 'Usamos almacenamiento esencial para recordar tu elección y, si lo aceptas, cookies de analítica para entender cómo se usa Logic Estancia y mejorarlo.',
+  text: 'Usamos almacenamiento esencial para recordar tu elección. La analítica solo puede funcionar en un despliegue real activado y si además la aceptas.',
   policy: 'Política de cookies',
   reject: 'Rechazar',
   accept: 'Aceptar',
@@ -31,9 +31,9 @@ const copy = en ? {
   back: 'Volver',
   essentialTitle: 'Almacenamiento esencial',
   essentialBadge: 'Siempre activo',
-  essentialText: 'Necesario para recordar tu elección y conservar el estado local de las demos. No se utiliza para seguir tu navegación.',
+  essentialText: 'Necesario para recordar tu elección. Los fixtures visuales de las demos se restablecen al recargar y no se guardan aquí.',
   analyticsTitle: 'Cookies de analítica',
-  analyticsText: 'Google Tag Manager y Google Analytics nos ayudan a medir de forma agregada el sitio comercial y los hitos anónimos de las demos.',
+  analyticsText: 'Si el despliegue real los activa, Google Tag Manager y Google Analytics miden hitos permitidos de forma agregada. El modo demo nunca los carga.',
   rejectAll: 'Rechazar todo',
   save: 'Guardar preferencias',
 };

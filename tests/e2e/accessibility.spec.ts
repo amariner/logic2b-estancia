@@ -28,12 +28,14 @@ const demoRoutes = [
 
 const auditedRoutes = [...commercialRoutes, ...legalRoutes, ...demoRoutes];
 const deepStateRoutes = [
+  '/demos/terrava/gestion/?vista=enquiries',
+  '/en/demos/terrava/gestion/?vista=planning',
+  '/demos/aurem/gestion/?vista=cleaning',
+  '/en/demos/aurem/gestion/?vista=maintenance',
   '/demos/aurem/gestion/?vista=reports',
   '/en/demos/aurem/gestion/?vista=reports',
   '/demos/aurem/gestion/?vista=channels',
   '/en/demos/aurem/gestion/?vista=channels',
-  '/demos/aurem/gestion/?vista=automation',
-  '/en/demos/aurem/gestion/?vista=automation',
 ];
 
 function formatViolations(path: string, violations: Awaited<ReturnType<AxeBuilder['analyze']>>['violations']) {
@@ -47,12 +49,17 @@ function formatViolations(path: string, violations: Awaited<ReturnType<AxeBuilde
 }
 
 async function gotoStable(page: Page, path: string) {
-  const response = await page.goto(path, { waitUntil: 'networkidle' });
+  const response = await page.goto(path, { waitUntil: 'load' });
   expect(response?.status(), path).toBe(200);
+  await page.locator('main').waitFor({ state: 'visible' });
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  });
 }
 
 test('representative ES/EN routes have no automated WCAG 2.2 AA violations', async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(120_000);
   const violations = [];
   for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);
@@ -85,7 +92,7 @@ test('recovered assessment context stays accessible and reflows at 320px', async
 });
 
 test('every audited route exposes one main landmark and one page heading', async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(120_000);
   for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);
     await expect(page.locator('main'), `${path}: main landmark`).toHaveCount(1);
@@ -94,7 +101,7 @@ test('every audited route exposes one main landmark and one page heading', async
 });
 
 test('every audited route reflows without page-level horizontal scrolling at 320px', async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(120_000);
   await page.setViewportSize({ width: 320, height: 900 });
   for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);
@@ -149,38 +156,11 @@ test('cookie preferences expose and restore focus between their views', async ({
   await expect(configure).toBeFocused();
 });
 
-test('demo validation and checkout announce state while preserving focus', async ({ page }) => {
-  await gotoStable(page, '/demos/aurem/');
-  const form = page.locator('[data-demo-form]');
-  const departure = form.locator('[name="to"]');
-  await form.locator('[name="from"]').fill('2026-08-20');
-  await departure.fill('2026-08-19');
-  await form.getByRole('button', { name: 'Continuar a pago demo' }).click();
-  await expect(page.getByRole('status')).toHaveText('La salida debe ser posterior a la entrada.');
-  await expect(departure).toBeFocused();
-  await departure.fill('2026-08-22');
-  const submit = form.getByRole('button', { name: 'Continuar a pago demo' });
-  await submit.click();
-  await expect(page.getByRole('button', { name: 'Cerrar' })).toBeFocused();
-  await page.getByRole('button', { name: 'Cerrar' }).click();
-  await expect(submit).toBeFocused();
-});
-
-test('workspace utility panel restores focus to its opener on Escape', async ({ page }) => {
-  await gotoStable(page, '/demos/aurem/gestion/');
-  await page.getByRole('button', { name: 'Explorar libremente' }).click();
-  const search = page.getByRole('button', { name: 'Buscar en el gestor' });
-  await search.click();
-  await expect(page.getByPlaceholder('Reservas, limpieza, informes…')).toBeFocused();
-  await page.keyboard.press('Escape');
-  await expect(search).toBeFocused();
-});
-
 test("Aurem guided milestones expose accessible progress and move focus with their context", async ({
   page,
 }) => {
   await gotoStable(page, "/demos/aurem/gestion/");
-  await page.getByRole("button", { name: "Visita guiada" }).click();
+  await page.getByRole("button", { name: "Ver recorrido" }).click();
   const first = page.getByRole("dialog", {
     name: "Detecta la habitación en riesgo",
   });

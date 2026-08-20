@@ -1,7 +1,8 @@
 .demo-body { --demo-bg: #f5f0e8; --demo-ink: #1f2524; --demo-accent: #9b543b; --demo-paper: #fcfaf6; margin: 0; color: var(--demo-ink); background: var(--demo-bg); font-family: 'Inter Variable', sans-serif; }
 .demo-body.terrava { --demo-bg: #f1efe6; --demo-ink: #283126; --demo-accent: #555a35; --demo-paper: #f9f8f2; }
 .demo-body.aurem { --demo-bg: #eef0ef; --demo-ink: #131719; --demo-accent: #6c502c; --demo-paper: #f9faf9; }
-.fiction { display: flex; min-height: 34px; align-items: center; justify-content: space-between; padding: 0 4vw; color: #fff; background: #17191c; font-size: .65rem; }
+.fiction { position: sticky; z-index: 60; top: 0; display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 18px; padding: 8px 4vw; color: #fff; background: #17191c; font-size: .75rem; line-height: 1.4; }
+.fiction span { font-weight: 650; letter-spacing: .035em; }
 .fiction a { color: inherit; text-decoration: none; }
 .demo-nav { display: flex; min-height: 86px; align-items: center; gap: 32px; width: min(1280px, calc(100% - 48px)); margin-inline: auto; }
 .demo-wordmark { margin-right: auto; color: inherit; font-family: 'Source Serif 4 Variable', serif; font-size: 1.3rem; text-decoration: none; }
@@ -32,25 +33,23 @@
 .demo-editorial > div { padding: 10vw 8vw; }
 .demo-editorial div > p:not(.demo-eyebrow) { margin-top: 30px; }
 .demo-booking { display: grid; grid-template-columns: .8fr 1.2fr; gap: 8vw; padding: 130px max(5vw, calc((100vw - 1200px) / 2)); }
-.demo-booking form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border: 1px solid color-mix(in srgb, var(--demo-ink) 18%, transparent); padding: 28px; background: var(--demo-paper); }
-.demo-booking label { display: grid; gap: 8px; color: color-mix(in srgb, var(--demo-ink) 75%, transparent); font-size: .67rem; }
-.demo-booking input { min-height: 45px; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--demo-ink) 20%, transparent); color: var(--demo-ink); background: transparent; }
-.demo-booking .full { grid-column: 1 / -1; }
-.demo-booking button, .payment-demo button[data-pay] { display: flex; min-height: 48px; align-items: center; justify-content: space-between; grid-column: 1/-1; border: 0; padding: 0 18px; color: var(--demo-paper); background: var(--demo-ink); }
-.demo-result { min-height: 22px; margin: 0; color: var(--demo-accent); font-size: .7rem; line-height: 1.45; }
-.demo-manager-next { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid currentColor; padding: 12px 0; color: var(--demo-ink); font-size: .74rem; text-decoration: none; }
-.demo-manager-next[hidden] { display: none; }
+.demo-panel-preview { overflow: hidden; border: 1px solid color-mix(in srgb, var(--demo-ink) 18%, transparent); background: var(--demo-paper); }
+.demo-panel-preview > header { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid color-mix(in srgb, var(--demo-ink) 14%, transparent); padding: 18px 22px; }
+.demo-panel-preview > header span { color: color-mix(in srgb, var(--demo-ink) 68%, transparent); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.demo-panel-preview > header strong { font-family: 'Source Serif 4 Variable', serif; font-size: 1.05rem; font-weight: 500; }
+.demo-panel-metrics { display: grid; grid-template-columns: repeat(3, 1fr); }
+.demo-panel-metrics div { display: grid; min-height: 118px; align-content: space-between; gap: 18px; border-right: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 20px; }
+.demo-panel-metrics div:last-child { border-right: 0; }
+.demo-panel-metrics span { color: color-mix(in srgb, var(--demo-ink) 82%, transparent); font-size: .62rem; font-weight: 600; }
+.demo-panel-metrics strong { font-family: 'Source Serif 4 Variable', serif; font-size: 1.2rem; font-weight: 500; line-height: 1.2; }
+.demo-panel-boundary { margin: 0; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 18px 22px; color: color-mix(in srgb, var(--demo-ink) 72%, transparent); font-size: .7rem; line-height: 1.55; }
+.demo-manager-next { display: flex; min-height: 48px; align-items: center; justify-content: space-between; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 0 22px; color: var(--demo-paper); background: var(--demo-ink); font-size: .72rem; text-decoration: none; }
+.demo-basic-note { display: block; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 18px 22px; color: var(--demo-accent); font-size: .7rem; line-height: 1.45; }
 .demo-footer { display: grid; grid-template-columns: 1fr 1fr auto; align-items: center; gap: 30px; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 18%, transparent); padding: 34px 4vw; }
 .demo-footer span { font-family: 'Source Serif 4 Variable', serif; }
 .demo-footer small { color: color-mix(in srgb, var(--demo-ink) 75%, transparent); }
 .demo-footer div { display: flex; gap: 20px; }
 .demo-footer a { color: inherit; font-size: .67rem; text-decoration: none; }
-.payment-demo { width: min(520px, calc(100% - 30px)); border: 0; border-radius: 24px; padding: 34px; color: var(--demo-ink); background: var(--demo-paper); }
-.payment-demo::backdrop { background: rgb(0 0 0 / .45); backdrop-filter: blur(4px); }
-.payment-demo > button:first-child { position: absolute; top: 14px; right: 14px; border: 0; background: transparent; font-size: 1.5rem; }
-.payment-demo h2 { font-size: 2.6rem; }
-.payment-demo div { display: flex; justify-content: space-between; margin: 30px 0; border-block: 1px solid #ddd; padding: 20px 0; }
-.payment-demo button[data-pay] { width: 100%; }
 
 @media (max-width: 850px) {
   .demo-nav nav { display: none; }
@@ -76,7 +75,9 @@
   .demo-editorial figure { min-height: 420px; }
   .demo-editorial > div { padding: 80px 24px; }
   .demo-booking { padding: 90px 14px; }
-  .demo-booking form { grid-template-columns: 1fr; padding: 22px; }
+  .demo-panel-metrics { grid-template-columns: 1fr; }
+  .demo-panel-metrics div { min-height: 92px; border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); }
+  .demo-panel-metrics div:last-child { border-bottom: 0; }
   .demo-booking .full { grid-column: auto; }
   .demo-footer { grid-template-columns: 1fr; }
 }

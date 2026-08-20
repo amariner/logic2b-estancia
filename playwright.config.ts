@@ -7,6 +7,7 @@ const inspectorPort = process.env.PLAYWRIGHT_INSPECTOR_PORT ?? '9231';
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
+  workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',

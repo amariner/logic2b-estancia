@@ -6,8 +6,8 @@ const DEFAULT_BASE_URL = 'https://estancia.logic2b.com';
 const AUTHORIZATION_VALUE = 'SEND_IDENTIFIED_TEST_EMAIL';
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const RUN_ID_PATTERN = /^[a-z0-9][a-z0-9-]{4,62}[a-z0-9]$/;
-const OUTCOMES = new Set(['delivered', 'delivered_degraded', 'failed', 'disabled', 'limited', 'invalid', 'received', 'demo']);
-const ERRORS = new Set(['invalid', 'rate_limited', 'lead_coordination_unavailable', 'lead_coordination_failed', 'lead_email_configuration_invalid', 'lead_delivery_disabled', 'lead_delivery_failed']);
+const OUTCOMES = new Set(['delivered', 'delivered_degraded', 'failed', 'disabled', 'limited', 'invalid', 'received', 'demo', 'blocked']);
+const ERRORS = new Set(['invalid', 'rate_limited', 'lead_coordination_unavailable', 'lead_coordination_failed', 'lead_email_configuration_invalid', 'lead_delivery_disabled', 'lead_delivery_failed', 'commercial_leads_disabled']);
 
 export function usage() {
   return `Logic Estancia · smoke de Resend
@@ -17,6 +17,8 @@ Uso:
   pnpm smoke:resend -- --execute --run-id <id> [--expect-ref <uuid>] [--base-url <url>]
 
 El modo por defecto es seco y no hace ninguna petición. Para ejecutar, define:
+  DEMO_MODE=false
+  COMMERCIAL_LEADS_ENABLED=true
   LOGIC_ESTANCIA_SMOKE_VISITOR_EMAIL=<buzon-de-prueba>
   LOGIC_ESTANCIA_SMOKE_AUTHORIZATION=${AUTHORIZATION_VALUE}
 
@@ -51,6 +53,12 @@ export function validateOptions(options, environment) {
   }
   if (options.expectRef && !UUID_PATTERN.test(options.expectRef)) throw new Error('expect-ref debe ser una referencia UUID válida.');
   if (!options.execute) return { ...options, baseUrl: baseUrl.origin };
+  if (environment.DEMO_MODE !== 'false') {
+    throw new Error('El smoke con red exige DEMO_MODE=false explícito; un modo ausente, ambiguo o demo permanece bloqueado.');
+  }
+  if (environment.COMMERCIAL_LEADS_ENABLED !== 'true') {
+    throw new Error('El smoke con red exige COMMERCIAL_LEADS_ENABLED=true explícito; no se enviará ningún correo.');
+  }
   if (environment.LOGIC_ESTANCIA_SMOKE_AUTHORIZATION !== AUTHORIZATION_VALUE) {
     throw new Error(`Falta la autorización explícita LOGIC_ESTANCIA_SMOKE_AUTHORIZATION=${AUTHORIZATION_VALUE}.`);
   }
@@ -97,6 +105,20 @@ export async function runSmoke({ args, environment, fetchImplementation = fetch 
     });
   }
 
+  let runtimeResponse;
+  try {
+    runtimeResponse = await fetchImplementation(`${options.baseUrl}/api/capabilities`, {
+      method: 'GET',
+      headers: { accept: 'application/json', 'user-agent': 'logic-estancia-resend-smoke/1.0' },
+    });
+  } catch {
+    return failure('No se pudo verificar el modo del despliegue. No se enviará ningún correo.');
+  }
+  const runtime = await runtimeResponse.json().catch(() => null);
+  if (!runtimeResponse.ok || !allowsLiveEmail(runtime)) {
+    return failure('El despliegue no declara un proveedor de email real y activado. No se enviará ningún correo.');
+  }
+
   let response;
   try {
     response = await fetchImplementation(`${options.baseUrl}/api/leads`, {
@@ -124,6 +146,20 @@ export async function runSmoke({ args, environment, fetchImplementation = fetch 
     runId: options.runId,
     expectedReferenceMatched: options.expectRef ? true : undefined,
   });
+}
+
+function allowsLiveEmail(value) {
+  return Boolean(value
+    && typeof value === 'object'
+    && value.schemaVersion === '1.0.0'
+    && value.mode === 'real'
+    && value.demoMode === false
+    && value.commercialLeadsEnabled === true
+    && value.sideEffects === true
+    && value.durableWrites === true
+    && value.jobs === false
+    && value.providers?.email === 'live'
+    && value.operations?.commercialLead === 'active');
 }
 
 export function sanitizeResponse(httpStatus, body) {

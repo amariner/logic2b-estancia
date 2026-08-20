@@ -1,9 +1,15 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { CAPABILITIES, type PlanLevel } from '@logic-estancia/domain';
-import { capabilityEvidenceHref, capabilityEvidenceLabel } from '../capability-evidence';
+import {
+  capabilityEvidenceHref,
+  capabilityEvidenceLabel,
+  capabilityStatusDetail,
+  capabilityStatusLabel,
+} from '../capability-evidence';
 import { getBusiness, type BusinessSegment } from '../businesses';
 import BusinessWorkflow from './BusinessWorkflow.astro';
+import CommercialLeadForm from './CommercialLeadForm.astro';
 import HumanService from './HumanService.astro';
 
 const { locale, segment } = Astro.props as { locale: Locale; segment: BusinessSegment };
@@ -28,9 +34,9 @@ const spanishCopy = {
     body: 'Construye una marca propia y organiza consultas, reservas y huéspedes sin multiplicar herramientas.',
     capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'website-editor', 'basic-reports'],
     demoTitle: 'Nivora One',
-    demoCopy: 'Una web propia y una consulta directa para un apartamento ficticio.',
-    journey: 'Descubrimiento → consulta directa → contexto → evolución a Gestión.',
-    faq: [['¿Puedo empezar con un solo apartamento?', 'Sí. Básico está pensado para una presencia de marca, SEO y consultas por email sin dashboard. Si después necesitas coordinar reservas o más unidades, el alcance puede evolucionar.'], ['¿Logic Estancia publica disponibilidad en Airbnb o Booking?', 'No por defecto. Cualquier conexión con canales requiere validación técnica y comercial específica. Las demos no publican inventario, precios ni mensajes reales.'], ['¿El número de apartamentos decide el plan?', 'No. El volumen dimensiona implantación y soporte; las capacidades deciden entre Básico, Gestión e Inteligente.']],
+    demoCopy: 'Una web propia para un apartamento ficticio.',
+    journey: 'Descubrimiento → historia de marca → conversación comercial → evolución a Gestión.',
+    faq: [['¿Puedo empezar con un solo apartamento?', 'Sí. Básico parte de una presencia de marca y SEO sin dashboard. Si necesitas solicitudes por email, se valida en el alcance comercial; si después coordinas reservas o más unidades, el alcance puede evolucionar.'], ['¿Logic Estancia publica disponibilidad en Airbnb o Booking?', 'No por defecto. Cualquier conexión con canales requiere validación técnica y comercial específica. Las demos no publican inventario, precios ni mensajes reales.'], ['¿El número de apartamentos decide el plan?', 'No. El volumen dimensiona implantación y soporte; las capacidades deciden entre Básico, Gestión e Inteligente.']],
   },
   hotels: {
     eyebrow: 'Para hoteles y equipos operativos',
@@ -40,7 +46,7 @@ const spanishCopy = {
     demoTitle: 'Aurem Hotel',
     demoCopy: 'Una llegada en riesgo conecta recepción, limpieza y dirección.',
     journey: 'Riesgo de llegada → coordinación → decisión supervisada → seguimiento.',
-    faq: [['¿Sustituye a nuestro PMS?', 'No de forma automática. Primero se identifica qué sistema conserva la fuente de verdad y qué integración sería necesaria. La demo no está conectada a ningún PMS.'], ['¿La IA toma decisiones o envía mensajes?', 'No. El escenario muestra borradores y recomendaciones supervisadas. No hay modelo, proveedor o mensajería conectados y el envío permanece bloqueado.'], ['¿Puede usarse solo para una parte de la operación?', 'Sí. El alcance debe empezar por el cuello de botella que tenga impacto y pueda validarse, sin obligar a sustituir de golpe las herramientas que ya funcionan.']],
+    faq: [['¿Sustituye a nuestro PMS?', 'No de forma automática. Primero se identifica qué sistema conserva la fuente de verdad y qué integración sería necesaria. La demo no está conectada a ningún PMS.'], ['¿La IA toma decisiones o envía mensajes?', 'No. La demo pública no expone borradores de IA. No hay modelo, proveedor o mensajería conectados; esa capacidad sigue pendiente de una representación validada.'], ['¿Puede usarse solo para una parte de la operación?', 'Sí. El alcance debe empezar por el cuello de botella que tenga impacto y pueda validarse, sin obligar a sustituir de golpe las herramientas que ya funcionan.']],
   },
 } as const;
 
@@ -59,9 +65,9 @@ const englishCopy = {
     title: 'Grow your apartments without multiplying calendars, messages and tasks.',
     body: 'Build an owned brand and organise enquiries, bookings and guests without multiplying tools.',
     capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'website-editor', 'basic-reports'],
-    demoTitle: 'Nivora One', demoCopy: 'An owned website and a direct enquiry for one fictional apartment.',
-    journey: 'Discovery → direct enquiry → context → evolution to Management.',
-    faq: [['Can I start with one apartment?', 'Yes. Basic provides a brand website, SEO and email enquiries without a workspace. If you later coordinate bookings or more units, the scope can evolve.'], ['Does Logic Estancia publish availability to Airbnb or Booking?', 'Not by default. Every channel connection requires specific technical and commercial validation. The demos publish no live inventory, rates or messages.'], ['Does apartment count determine the plan?', 'No. Volume sizes implementation and support; capabilities determine Basic, Management or Intelligent.']],
+    demoTitle: 'Nivora One', demoCopy: 'An owned website for one fictional apartment.',
+    journey: 'Discovery → brand story → commercial conversation → evolution to Management.',
+    faq: [['Can I start with one apartment?', 'Yes. Basic starts with a brand website and SEO without a workspace. Email enquiries are validated in the commercial scope; if you later coordinate bookings or more units, the scope can evolve.'], ['Does Logic Estancia publish availability to Airbnb or Booking?', 'Not by default. Every channel connection requires specific technical and commercial validation. The demos publish no live inventory, rates or messages.'], ['Does apartment count determine the plan?', 'No. Volume sizes implementation and support; capabilities determine Basic, Management or Intelligent.']],
   },
   hotels: {
     eyebrow: 'For hotels and operations teams',
@@ -70,20 +76,19 @@ const englishCopy = {
     capabilityIds: ['operations-centre', 'cleaning', 'maintenance', 'roles', 'channels', 'automation', 'revenue'],
     demoTitle: 'Aurem Hotel', demoCopy: 'One at-risk arrival connects reception, housekeeping and management.',
     journey: 'At-risk arrival → coordination → supervised decision → follow-up.',
-    faq: [['Does it replace our PMS?', 'Not automatically. We first identify which system keeps the source of truth and which integration would be required. The demo is not connected to a PMS.'], ['Does AI make decisions or send messages?', 'No. The scenario shows supervised drafts and recommendations. No model, provider or messaging service is connected and delivery remains blocked.'], ['Can we use it for only one part of operations?', 'Yes. Scope should begin with a bottleneck that has impact and can be validated, without forcing you to replace tools that already work.']],
+    faq: [['Does it replace our PMS?', 'Not automatically. We first identify which system keeps the source of truth and which integration would be required. The demo is not connected to a PMS.'], ['Does AI make decisions or send messages?', 'No. The public demo exposes no AI drafts. No model, provider or messaging service is connected; the capability remains pending a validated representation.'], ['Can we use it for only one part of operations?', 'Yes. Scope should begin with a bottleneck that has impact and can be validated, without forcing you to replace tools that already work.']],
   },
 } as const;
 
 const copy = (en ? englishCopy : spanishCopy)[segment];
 const visible = CAPABILITIES.filter(({ id }) => (copy.capabilityIds as readonly string[]).includes(id));
-const maturity = en ? { demo: 'Demo', simulated: 'Simulated', 'to-validate': 'To validate', future: 'Future' } : { demo: 'Demo', simulated: 'Simulada', 'to-validate': 'A validar', future: 'Futura' };
 const planNames: Record<PlanLevel, string> = en ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' } : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
 const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: copy.faq.map(([question, answer]) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })) };
 ---
 <section class="solution-hero">
   <div class="shell solution-hero-layout">
-    <div><p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p>{copy.body}</p><div class="hero-actions"><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} data-track="cta_click" data-segment={segment} data-section="solution_hero">{en ? 'See my starting point' : 'Ver mi punto de partida'}</a><a class="pill ghost" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the fictional case' : 'Explorar el caso ficticio'}</a></div></div>
-    <a class="solution-hero-media" href={`${prefix}/demos/${business.demo}/`} aria-label={en ? `Explore the fictional ${copy.demoTitle} case` : `Explorar el caso ficticio ${copy.demoTitle}`}><picture><source type="image/avif" srcset={`/media/${business.demo}/hero-640.avif 640w, /media/${business.demo}/hero-960.avif 960w`} sizes="(max-width: 900px) 100vw, 45vw" /><img src={business.image} alt="" width="2016" height="1344" /></picture><span><small>{en ? 'Fictional interactive case' : 'Caso interactivo ficticio'}</small><strong>{copy.demoTitle}</strong></span><b aria-hidden="true">↗</b></a>
+    <div><p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p>{copy.body}</p><div class="hero-actions"><a class="pill" href="#contacto" data-track="cta_click" data-segment={segment} data-section="solution_hero">{en ? 'Request a conversation' : 'Pedir una conversación'}</a><a class="pill ghost" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the fictional case' : 'Explorar el caso ficticio'}</a></div></div>
+    <a class="solution-hero-media" href={`${prefix}/demos/${business.demo}/`} aria-label={en ? `Explore the fictional ${copy.demoTitle} case` : `Explorar el caso ficticio ${copy.demoTitle}`}><picture><source type="image/avif" srcset={`/media/${business.demo}/hero-640.avif 640w, /media/${business.demo}/hero-960.avif 960w`} sizes="(max-width: 900px) 100vw, 45vw" /><img src={business.image} alt="" width="2016" height="1344" /></picture><span><small>{en ? 'Fictional visual case' : 'Caso visual ficticio'}</small><strong>{copy.demoTitle}</strong></span><b aria-hidden="true">↗</b></a>
   </div>
 </section>
 
@@ -91,9 +96,48 @@ const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEn
 
 <HumanService locale={locale} ctaHref={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} />
 
-<section class="section capability-section"><div class="shell"><div class="section-head compact-head"><p class="eyebrow">{en ? 'Verifiable today' : 'Comprobable hoy'}</p><h2 class="heading">{en ? 'Open the flow. See its real boundary.' : 'Abre el flujo. Comprueba su límite real.'}</h2></div><div class="capability-grid">{visible.map((capability) => <article class="card" data-capability={capability.id}><div class="capability-meta"><span>{en ? 'From' : 'Desde'} {planNames[capability.minimumPlan]}</span><span class={`maturity ${capability.maturity}`}>{maturity[capability.maturity]}</span></div><h3>{capability.label[locale]}</h3><p>{capability.description[locale]}</p><a class="capability-link" href={capabilityEvidenceHref(capability, locale)} data-capability-evidence={capability.id}>{capabilityEvidenceLabel(capability, locale)} <span aria-hidden="true">→</span></a><details class="capability-details"><summary>{en ? 'Proof and boundary' : 'Prueba y límite'}<span aria-hidden="true">+</span></summary><div class="capability-proof"><p>{capability.evidence.proof[locale]}</p><p class="capability-boundary"><b>{en ? 'Boundary' : 'Límite'}:</b> {capability.evidence.boundary[locale]}</p></div></details></article>)}</div></div></section>
+<section class="section capability-section">
+  <div class="shell">
+    <div class="section-head compact-head">
+      <p class="eyebrow">{en ? 'Verifiable status' : 'Estado verificable'}</p>
+      <h2 class="heading">{en ? 'See what is visible today and what still requires activation.' : 'Comprueba qué puedes ver hoy y qué requiere activación.'}</h2>
+      <p>{en ? '“Visible in the demo” never means “active in production”. Every capability keeps its evidence, status and boundary in view.' : '«Visible en la demo» nunca significa «activo en producción». Cada capacidad mantiene a la vista su evidencia, estado y límite.'}</p>
+    </div>
+    <div class="capability-grid">
+      {visible.map((capability) => {
+        const evidenceHref = capabilityEvidenceHref(capability, locale);
+        return (
+          <article class="card" data-capability={capability.id} data-capability-status={capability.status}>
+            <div class="capability-meta">
+              <span>{en ? 'From' : 'Desde'} {planNames[capability.minimumPlan]}</span>
+              <span class={`capability-status ${capability.status}`}>{capabilityStatusLabel(capability.status, locale)}</span>
+            </div>
+            <h3>{capability.label[locale]}</h3>
+            <p>{capability.description[locale]}</p>
+            <p class="capability-status-detail">{capabilityStatusDetail(capability.status, locale)}</p>
+            <div class="capability-proof">
+              <p><b>{en ? 'What is evidenced' : 'Qué se evidencia'}:</b> {capability.evidence.proof[locale]}</p>
+              <p class="capability-boundary"><b>{en ? 'Boundary' : 'Límite'}:</b> {capability.evidence.boundary[locale]}</p>
+            </div>
+            {evidenceHref ? (
+              <a class="capability-link" href={evidenceHref} data-capability-evidence={capability.id}>
+                {capabilityEvidenceLabel(capability, locale)} <span aria-hidden="true">→</span>
+              </a>
+            ) : (
+              <span class="capability-no-evidence" data-capability-evidence-unavailable={capability.id}>
+                {capabilityEvidenceLabel(capability, locale)}
+              </span>
+            )}
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</section>
 
-<section class="section proof-band"><div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{en ? 'Interactive fictional case' : 'Caso ficticio interactivo'}</p><h2 class="heading">{copy.demoTitle}</h2><p>{copy.demoCopy}</p></div><div class="solution-proof card" data-demo-proof={business.demo}><strong data-demo-plan={business.plan}>{planNames[business.plan]}</strong><p>{copy.journey}</p><small>{en ? 'Local demo · no external actions' : 'Demo local · sin acciones externas'}</small><a class="pill" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Open the case' : 'Abrir el caso'} →</a></div></div></section>
+<section class="section proof-band"><div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{en ? 'Fictional visual case' : 'Caso visual ficticio'}</p><h2 class="heading">{copy.demoTitle}</h2><p>{copy.demoCopy}</p></div><div class="solution-proof card" data-demo-proof={business.demo}><strong data-demo-plan={business.plan}>{planNames[business.plan]}</strong><p>{copy.journey}</p><small>{en ? 'Local demo · no external actions' : 'Demo local · sin acciones externas'}</small><a class="pill" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the fictional case' : 'Explorar el caso ficticio'} →</a></div></div></section>
+
+<CommercialLeadForm locale={locale} segment={segment} />
 
 <section class="section shell faq"><div class="section-head"><p class="eyebrow">{en ? `Questions from ${business.plural.toLowerCase()}` : `Preguntas de ${business.plural.toLowerCase()}`}</p><h2 class="heading">{en ? 'Resolve the boundary before changing tools.' : 'Aclara el alcance antes de cambiar herramientas.'}</h2></div><div class="faq-list">{copy.faq.map(([question, answer], index) => <details open={index === 0}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
 <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>

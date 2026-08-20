@@ -1,8 +1,13 @@
-# Local shape only. Copy to .dev.vars and replace values; never commit real credentials.
-LEADS_TRANSPORT=resend
-LEADS_RESEND_API_KEY=replace-with-local-resend-api-key
-LEADS_FROM_EMAIL=verified-sender@example.test
-LEADS_INTERNAL_RECIPIENT=sales@example.test
-LEADS_REPLY_TO=reply@example.test
-LEADS_MEETING_URL=https://calendar.example.test/logic-estancia
+# Safe local demo. It starts and remains navigable without provider secrets.
+DEMO_MODE=true
+REAL_OPERATIONS_ENABLED=false
+COMMERCIAL_LEADS_ENABLED=false
+EMAIL_PROVIDER_MODE=disabled
+ANALYTICS_PROVIDER_MODE=disabled
+LEADS_TRANSPORT=disabled
 LEADS_ALLOW_LOCAL_JURISDICTION_FALLBACK=true
+
+# The commercial-lead exception needs COMMERCIAL_LEADS_ENABLED=true plus a
+# complete Resend configuration. Product demos remain isolated either way.
+# Real email addresses, provider credentials and meeting URLs belong only in an
+# approved environment. Never add them to this tracked example.

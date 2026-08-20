@@ -1,25 +1,84 @@
 ---
 import { CAPABILITIES, hasLevel, type PlanLevel } from '@logic-estancia/domain';
 import type { Locale } from '@logic-estancia/config';
-import { capabilityEvidenceHref, capabilityEvidenceLabel } from '../capability-evidence';
+import {
+  capabilityEvidenceHref,
+  capabilityEvidenceLabel,
+  capabilityPlanStatusLabel,
+  capabilityStatusDetail,
+  capabilityStatusLabel,
+} from '../capability-evidence';
 import HumanService from './HumanService.astro';
 const { locale } = Astro.props as { locale: Locale };
 const en = locale === 'en'; const prefix = en ? '/en' : '';
 const plans: { id: PlanLevel; name: string; summary: string; excludes: string; service: string }[] = en ? [
-  { id: 'basico', name: 'Basic', summary: 'When your priority is being found, being understood and opening more direct conversations.', excludes: 'No workspace, live inventory, booking or payment.', service: 'Managed brand website, SEO foundations, hosting, maintenance and email enquiries.' },
-  { id: 'gestion', name: 'Management', summary: 'When enquiries and bookings need continuity without rebuilding their story across tools.', excludes: 'No advanced operations, teams, channels or AI.', service: 'Enquiries, bookings, planning, guests, rates, reports, website editor, setup and initial training.' },
-  { id: 'inteligente', name: 'Intelligent', summary: 'When the team needs to see what deserves attention before urgency takes over.', excludes: 'No autonomous action or unscoped integrations.', service: 'Operations centre, cleaning, teams, maintenance, automation, supervised AI and periodic review.' },
+  { id: 'basico', name: 'Basic', summary: 'When your priority is being found, understood and opening more direct commercial conversations.', excludes: 'No workspace, live inventory, booking or payment.', service: 'Visible today: managed brand website and SEO foundations. Email enquiries are scoped and validated separately.' },
+  { id: 'gestion', name: 'Management', summary: 'When enquiries and bookings need continuity without rebuilding their story across tools.', excludes: 'No advanced operations, teams, channels or AI.', service: 'Visible today: read-only enquiries, planning and reports. Editing and live booking remain pending project validation.' },
+  { id: 'inteligente', name: 'Intelligent', summary: 'When the team needs to see what deserves attention before urgency takes over.', excludes: 'No autonomous action or unscoped integrations.', service: 'Visible today: operations, cleaning, maintenance and roles. Channels are project-activated; automation and AI are pending.' },
 ] : [
-  { id: 'basico', name: 'Básico', summary: 'Cuando tu prioridad es que te encuentren, te entiendan y abran más conversaciones directas.', excludes: 'Sin dashboard, inventario, reserva o cobro real.', service: 'Web de marca gestionada, SEO inicial, hosting, mantenimiento y solicitudes por email.' },
-  { id: 'gestion', name: 'Gestión', summary: 'Cuando consultas y reservas necesitan continuidad sin reconstruir su historia entre herramientas.', excludes: 'Sin operaciones avanzadas, equipos, canales o IA.', service: 'Solicitudes, reservas, planning, huéspedes, tarifas, informes, editor web, configuración y formación inicial.' },
-  { id: 'inteligente', name: 'Inteligente', summary: 'Cuando el equipo necesita ver qué merece atención antes de que mande la urgencia.', excludes: 'Sin autonomía ni integraciones no presupuestadas.', service: 'Centro operativo, limpieza, equipos, mantenimiento, automatización, IA supervisada y revisión periódica.' },
+  { id: 'basico', name: 'Básico', summary: 'Cuando tu prioridad es que te encuentren, te entiendan y abran más conversaciones comerciales directas.', excludes: 'Sin dashboard, inventario, reserva o cobro real.', service: 'Visible hoy: web de marca gestionada y SEO inicial. Las solicitudes por email se acotan y validan aparte.' },
+  { id: 'gestion', name: 'Gestión', summary: 'Cuando consultas y reservas necesitan continuidad sin reconstruir su historia entre herramientas.', excludes: 'Sin operaciones avanzadas, equipos, canales o IA.', service: 'Visible hoy: solicitudes, planning e informes de solo lectura. Edición y reserva real requieren validación de proyecto.' },
+  { id: 'inteligente', name: 'Inteligente', summary: 'Cuando el equipo necesita ver qué merece atención antes de que mande la urgencia.', excludes: 'Sin autonomía ni integraciones no presupuestadas.', service: 'Visible hoy: operación, limpieza, mantenimiento y roles. Canales se activan por proyecto; automatización e IA están pendientes.' },
 ];
-const maturity = en ? { demo: 'Demo', simulated: 'Simulated', 'to-validate': 'To validate', future: 'Future' } : { demo: 'Demo', simulated: 'Simulada', 'to-validate': 'A validar', future: 'Futura' };
 const planNames = Object.fromEntries(plans.map(({ id, name }) => [id, name])) as Record<PlanLevel, string>;
 ---
 <section class="commercial-hero shell"><p class="eyebrow">{en ? 'Three starting points · one path forward' : 'Tres puntos de partida · un camino para avanzar'}</p><h1 class="display">{en ? 'Pay for the problem you need to solve. Not for the suite you might need one day.' : 'Paga por el problema que necesitas resolver. No por la suite que quizá uses algún día.'}</h1><p>{en ? 'Every plan combines personalised implementation, configuration by the Logic2B team and a subscription. Basic improves attraction, Management gives bookings continuity and Intelligent helps teams anticipate operations.' : 'Cada plan combina implantación personalizada, configuración por el equipo de Logic2B y una suscripción. Básico mejora la captación, Gestión da continuidad a las reservas e Inteligente ayuda a anticipar la operación.'}</p><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-track="cta_click" data-section="plans_hero">{en ? 'Find my starting point' : 'Ver mi punto de partida'} →</a></section>
 <section class="section shell"><div class="plans-grid">{plans.map((plan, index) => <article class={`plan-card card ${index === 1 ? 'featured' : ''}`}><span class="plan-number">0{index}</span><h2>{plan.name}</h2><p>{plan.summary}</p><div><strong>{en ? 'Service' : 'Servicio'}</strong><p>{plan.service}</p></div><div><strong>{en ? 'Boundary' : 'Límite'}</strong><p>{plan.excludes}</p></div><p class="price-status">{en ? 'Scope after assessment' : 'Presupuesto tras diagnóstico'}</p><a href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?plan=${plan.id}`} data-track="plan_select" data-plan={plan.id} data-section="plans_grid">{en ? 'Assess this plan' : 'Evaluar este plan'} →</a></article>)}</div><p class="pricing-note">{en ? 'All plans include hosting, technical maintenance, security and base support. Domain, migrations, integrations, advanced branding and extended support are scoped separately.' : 'Todos incluyen hosting, mantenimiento técnico, seguridad y soporte base. Dominio, migraciones, integraciones, branding avanzado y soporte extendido se presupuestan aparte.'}</p></section>
 <HumanService locale={locale} ctaHref={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} />
-<section class="section soft"><div class="shell"><div class="section-head"><p class="eyebrow">{en ? 'Compare with the boundaries visible' : 'Compara con los límites a la vista'}</p><h2 class="heading">{en ? 'Know what each plan proves—and what still needs real integration.' : 'Descubre qué demuestra cada plan y qué necesita integración real.'}</h2><p>{en ? 'Open the exact fictional flow behind every capability. Maturity and boundaries remain visible before you request a proposal.' : 'Abre el flujo ficticio exacto detrás de cada capacidad. Su madurez y sus límites siguen visibles antes de pedir una propuesta.'}</p></div><p class="table-scroll-hint">{en ? 'Swipe to view evidence, plan coverage and maturity.' : 'Desliza para ver evidencia, cobertura por plan y madurez.'}</p><div class="capability-table" role="table"><div class="capability-row header" role="row"><span role="columnheader">{en ? 'Capability' : 'Capacidad'}</span><span role="columnheader">{en ? 'Evidence and boundary' : 'Evidencia y límite'}</span>{plans.map((plan) => <span role="columnheader">{plan.name}</span>)}<span role="columnheader">{en ? 'Maturity' : 'Madurez'}</span></div>{CAPABILITIES.map((capability) => <div class="capability-row" role="row" data-capability={capability.id}><span role="cell"><strong>{capability.label[locale]}</strong><small>{capability.description[locale]}</small><small class="minimum-plan">{en ? 'Minimum plan' : 'Plan mínimo'}: {planNames[capability.minimumPlan]}</small></span><span role="cell" class="capability-table-evidence"><a href={capabilityEvidenceHref(capability, locale)} data-capability-evidence={capability.id}>{capabilityEvidenceLabel(capability, locale)} <span aria-hidden="true">→</span></a><small>{capability.evidence.boundary[locale]}</small></span>{plans.map((plan) => <span role="cell" aria-label={`${plan.name}: ${hasLevel(plan.id, capability.minimumPlan) ? (en ? 'included' : 'incluida') : (en ? 'not included' : 'no incluida')}`}>{hasLevel(plan.id, capability.minimumPlan) ? '✓' : '—'}</span>)}<span role="cell"><i class={`maturity ${capability.maturity}`}>{maturity[capability.maturity]}</i></span></div>)}</div></div></section>
+<section class="section soft">
+  <div class="shell">
+    <div class="section-head">
+      <p class="eyebrow">{en ? 'Compare with status and boundaries visible' : 'Compara con estado y límites a la vista'}</p>
+      <h2 class="heading">{en ? 'Separate what the demo shows from what a live project must activate.' : 'Separa lo que muestra la demo de lo que debe activar un proyecto real.'}</h2>
+      <p>{en ? 'The plan indicates a possible starting point. Status states what can be evidenced today; every live capability still requires an agreed scope and validation.' : 'El plan indica un posible punto de partida. El estado dice qué puede evidenciarse hoy; toda capacidad real exige alcance acordado y validación.'}</p>
+    </div>
+    <p class="table-scroll-hint">{en ? 'Swipe to view evidence, plan fit, status and boundaries.' : 'Desliza para ver evidencia, encaje por plan, estado y límites.'}</p>
+    <div class="capability-table" role="table">
+      <div class="capability-row header" role="row">
+        <span role="columnheader">{en ? 'Capability' : 'Capacidad'}</span>
+        <span role="columnheader">{en ? 'Evidence and boundary' : 'Evidencia y límite'}</span>
+        {plans.map((plan) => <span role="columnheader">{plan.name}</span>)}
+        <span role="columnheader">{en ? 'Current status' : 'Estado actual'}</span>
+      </div>
+      {CAPABILITIES.map((capability) => {
+        const evidenceHref = capabilityEvidenceHref(capability, locale);
+        return (
+          <div class="capability-row" role="row" data-capability={capability.id} data-capability-status={capability.status}>
+            <span role="cell">
+              <strong>{capability.label[locale]}</strong>
+              <small>{capability.description[locale]}</small>
+              <small class="minimum-plan">{en ? 'Starting plan' : 'Plan de partida'}: {planNames[capability.minimumPlan]}</small>
+            </span>
+            <span role="cell" class="capability-table-evidence">
+              {evidenceHref ? (
+                <a href={evidenceHref} data-capability-evidence={capability.id}>
+                  {capabilityEvidenceLabel(capability, locale)} <span aria-hidden="true">→</span>
+                </a>
+              ) : (
+                <strong class="capability-no-evidence" data-capability-evidence-unavailable={capability.id}>
+                  {capabilityEvidenceLabel(capability, locale)}
+                </strong>
+              )}
+              <small><b>{en ? 'Evidence' : 'Evidencia'}:</b> {capability.evidence.proof[locale]}</small>
+              <small class="capability-boundary"><b>{en ? 'Boundary' : 'Límite'}:</b> {capability.evidence.boundary[locale]}</small>
+            </span>
+            {plans.map((plan) => {
+              const fitsPlan = hasLevel(plan.id, capability.minimumPlan);
+              const statusLabel = fitsPlan ? capabilityPlanStatusLabel(capability.status, locale) : '—';
+              const ariaLabel = fitsPlan
+                ? `${plan.name}: ${capabilityStatusLabel(capability.status, locale)}`
+                : `${plan.name}: ${en ? 'not a starting-plan capability' : 'no corresponde a este plan de partida'}`;
+              return <span role="cell" class="capability-plan-cell" aria-label={ariaLabel}>{statusLabel}</span>;
+            })}
+            <span role="cell" class="capability-status-cell">
+              <i class={`capability-status ${capability.status}`}>{capabilityStatusLabel(capability.status, locale)}</i>
+              <small>{capabilityStatusDetail(capability.status, locale)}</small>
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</section>
 <section class="section shell extras"><div class="section-head"><p class="eyebrow">{en ? 'Scoped additions' : 'Extras con alcance'}</p><h2 class="heading">{en ? 'The core stays clear. Exceptional work stays visible.' : 'El núcleo se mantiene claro. Lo excepcional se presupuesta.'}</h2></div><ul>{(en ? ['Advanced brand identity', 'Content or data migration', 'External integrations', 'Extended training and support', 'Campaigns and new sections'] : ['Identidad de marca avanzada', 'Migración de contenido o datos', 'Integraciones externas', 'Formación y soporte extendidos', 'Campañas y nuevas secciones']).map((item) => <li>{item}</li>)}</ul></section>
 <section class="section shell final-cta"><p class="eyebrow">{en ? 'No gated result' : 'Resultado sin bloqueo'}</p><h2 class="heading">{en ? 'Answer six steps and see your recommendation.' : 'Responde seis pasos y consulta tu recomendación.'}</h2><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`}>{en ? 'Start assessment' : 'Empezar diagnóstico'} →</a></section>
