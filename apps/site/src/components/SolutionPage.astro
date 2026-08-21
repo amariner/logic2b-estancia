@@ -8,14 +8,15 @@ import {
   capabilityStatusLabel,
 } from '../capability-evidence';
 import { getBusiness, type BusinessSegment } from '../businesses';
+import { getSpanishResourceForSegment } from '../resources';
 import BusinessWorkflow from './BusinessWorkflow.astro';
-import CommercialLeadForm from './CommercialLeadForm.astro';
 import HumanService from './HumanService.astro';
 
 const { locale, segment } = Astro.props as { locale: Locale; segment: BusinessSegment };
 const en = locale === 'en';
 const prefix = en ? '/en' : '';
 const business = getBusiness(segment, locale);
+const relatedResource = en ? undefined : getSpanishResourceForSegment(segment);
 
 const spanishCopy = {
   rural: {
@@ -36,7 +37,7 @@ const spanishCopy = {
     demoTitle: 'Nivora One',
     demoCopy: 'Una web propia para un apartamento ficticio.',
     journey: 'Descubrimiento → historia de marca → conversación comercial → evolución a Gestión.',
-    faq: [['¿Puedo empezar con un solo apartamento?', 'Sí. Básico parte de una presencia de marca y SEO sin dashboard. Si necesitas solicitudes por email, se valida en el alcance comercial; si después coordinas reservas o más unidades, el alcance puede evolucionar.'], ['¿Logic Estancia publica disponibilidad en Airbnb o Booking?', 'No por defecto. Cualquier conexión con canales requiere validación técnica y comercial específica. Las demos no publican inventario, precios ni mensajes reales.'], ['¿El número de apartamentos decide el plan?', 'No. El volumen dimensiona implantación y soporte; las capacidades deciden entre Básico, Gestión e Inteligente.']],
+    faq: [['¿Puedo empezar con un solo apartamento?', 'Sí. Básico parte de una presencia de marca y SEO sin dashboard. Si necesitas solicitudes por email, se valida en el alcance comercial; si después coordinas reservas o más unidades, el alcance puede evolucionar.'], ['¿Logic2B Estancias publica disponibilidad en Airbnb o Booking?', 'No por defecto. Cualquier conexión con canales requiere validación técnica y comercial específica. Las demos no publican inventario, precios ni mensajes reales.'], ['¿El número de apartamentos decide el plan?', 'No. El volumen dimensiona implantación y soporte; las capacidades deciden entre Básico, Gestión e Inteligente.']],
   },
   hotels: {
     eyebrow: 'Para hoteles y equipos operativos',
@@ -67,7 +68,7 @@ const englishCopy = {
     capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'website-editor', 'basic-reports'],
     demoTitle: 'Nivora One', demoCopy: 'An owned website for one fictional apartment.',
     journey: 'Discovery → brand story → commercial conversation → evolution to Management.',
-    faq: [['Can I start with one apartment?', 'Yes. Basic starts with a brand website and SEO without a workspace. Email enquiries are validated in the commercial scope; if you later coordinate bookings or more units, the scope can evolve.'], ['Does Logic Estancia publish availability to Airbnb or Booking?', 'Not by default. Every channel connection requires specific technical and commercial validation. The demos publish no live inventory, rates or messages.'], ['Does apartment count determine the plan?', 'No. Volume sizes implementation and support; capabilities determine Basic, Management or Intelligent.']],
+    faq: [['Can I start with one apartment?', 'Yes. Basic starts with a brand website and SEO without a workspace. Email enquiries are validated in the commercial scope; if you later coordinate bookings or more units, the scope can evolve.'], ['Does Logic2B Estancias publish availability to Airbnb or Booking?', 'Not by default. Every channel connection requires specific technical and commercial validation. The demos publish no live inventory, rates or messages.'], ['Does apartment count determine the plan?', 'No. Volume sizes implementation and support; capabilities determine Basic, Management or Intelligent.']],
   },
   hotels: {
     eyebrow: 'For hotels and operations teams',
@@ -87,7 +88,7 @@ const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEn
 ---
 <section class="solution-hero">
   <div class="shell solution-hero-layout">
-    <div><p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p>{copy.body}</p><div class="hero-actions"><a class="pill" href="#contacto" data-track="cta_click" data-segment={segment} data-section="solution_hero">{en ? 'Request a conversation' : 'Pedir una conversación'}</a><a class="pill ghost" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the fictional case' : 'Explorar el caso ficticio'}</a></div></div>
+    <div><p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p>{copy.body}</p><div class="hero-actions"><a class="pill" href={`${prefix}/?contact=${segment}#contacto`} data-contact-trigger data-track="cta_click" data-segment={segment} data-section="solution_hero">{en ? 'Request a conversation' : 'Pedir una conversación'}</a><a class="pill ghost" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the fictional case' : 'Explorar el caso ficticio'}</a></div></div>
     <a class="solution-hero-media" href={`${prefix}/demos/${business.demo}/`} aria-label={en ? `Explore the fictional ${copy.demoTitle} case` : `Explorar el caso ficticio ${copy.demoTitle}`}><picture><source type="image/avif" srcset={`/media/${business.demo}/hero-640.avif 640w, /media/${business.demo}/hero-960.avif 960w`} sizes="(max-width: 900px) 100vw, 45vw" /><img src={business.image} alt="" width="2016" height="1344" /></picture><span><small>{en ? 'Fictional visual case' : 'Caso visual ficticio'}</small><strong>{copy.demoTitle}</strong></span><b aria-hidden="true">↗</b></a>
   </div>
 </section>
@@ -135,9 +136,20 @@ const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEn
   </div>
 </section>
 
-<section class="section proof-band"><div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{en ? 'Fictional visual case' : 'Caso visual ficticio'}</p><h2 class="heading">{copy.demoTitle}</h2><p>{copy.demoCopy}</p></div><div class="solution-proof card" data-demo-proof={business.demo}><strong data-demo-plan={business.plan}>{planNames[business.plan]}</strong><p>{copy.journey}</p><small>{en ? 'Local demo · no external actions' : 'Demo local · sin acciones externas'}</small><a class="pill" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the fictional case' : 'Explorar el caso ficticio'} →</a></div></div></section>
+{relatedResource && (
+  <aside class="related-resource shell" aria-labelledby={`related-resource-${segment}`} data-related-resource={segment}>
+    <div>
+      <p class="eyebrow">{relatedResource.eyebrow}</p>
+      <h2 id={`related-resource-${segment}`}>{relatedResource.related.title}</h2>
+      <p>{relatedResource.related.body}</p>
+    </div>
+    <a class="text-link" href={relatedResource.href} data-resource-link={relatedResource.slug}>
+      {relatedResource.related.cta} <span aria-hidden="true">→</span>
+    </a>
+  </aside>
+)}
 
-<CommercialLeadForm locale={locale} segment={segment} />
+<section class="section proof-band"><div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{en ? 'Fictional visual case' : 'Caso visual ficticio'}</p><h2 class="heading">{copy.demoTitle}</h2><p>{copy.demoCopy}</p></div><div class="solution-proof card" data-demo-proof={business.demo}><strong data-demo-plan={business.plan}>{planNames[business.plan]}</strong><p>{copy.journey}</p><small>{en ? 'Local demo · no external actions' : 'Demo local · sin acciones externas'}</small><a class="pill" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the fictional case' : 'Explorar el caso ficticio'} →</a></div></div></section>
 
 <section class="section shell faq"><div class="section-head"><p class="eyebrow">{en ? `Questions from ${business.plural.toLowerCase()}` : `Preguntas de ${business.plural.toLowerCase()}`}</p><h2 class="heading">{en ? 'Resolve the boundary before changing tools.' : 'Aclara el alcance antes de cambiar herramientas.'}</h2></div><div class="faq-list">{copy.faq.map(([question, answer], index) => <details open={index === 0}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
 <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>

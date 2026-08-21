@@ -14,8 +14,8 @@ import { content } from '../content';
 import { getBusinesses } from '../businesses';
 import { ANALYTICS_SAFE_PATHS } from '../public-routes';
 
-interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; translated?: boolean; image?: string; imageAlt?: string; }
-const { locale, title = 'Logic2B Estancias', description = 'Web, reservas y operación para alojamientos.', route = '', alternateRoute, translated = true, image = '/og-estancias.jpg', imageAlt } = Astro.props;
+interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; translated?: boolean; image?: string; imageAlt?: string; preloadImage?: string; preloadImageSrcset?: string; preloadImageSizes?: string; preloadImageType?: string; }
+const { locale, title = 'Logic2B Estancias', description = 'Web, reservas y operación para alojamientos.', route = '', alternateRoute, translated = true, image = '/og-estancias.jpg', imageAlt, preloadImage, preloadImageSrcset, preloadImageSizes, preloadImageType } = Astro.props;
 const c = content[locale];
 const businessNav = getBusinesses(locale);
 const prefix = locale === 'en' ? '/en' : '';
@@ -72,6 +72,7 @@ const structuredData = [
     <link rel="preload" href={interFontUrl} as="font" type="font/woff2" crossorigin="anonymous" />
     <link rel="preload" href="/fonts/poppins-600-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     <link rel="preload" href="/fonts/poppins-800-logo.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    {preloadImage && <link rel="preload" href={preloadImage} as="image" type={preloadImageType} imagesrcset={preloadImageSrcset} imagesizes={preloadImageSizes} fetchpriority="high" />}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={PRODUCT.publicName} />
     <meta property="og:title" content={title} />
@@ -132,7 +133,9 @@ const structuredData = [
         <button class="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">{locale === 'es' ? 'Menú' : 'Menu'}</button>
       </div>
       <nav id="mobile-nav" class="mobile-nav" aria-label={locale === 'es' ? 'Principal móvil' : 'Mobile main'} hidden>
-        {businessNav.map((business) => <a href={business.href}>{business.label}</a>)}<a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`}>{c.nav.contact}</a>
+        {businessNav.map((business) => <a href={business.href}>{business.label}</a>)}
+        <a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a>
+        <a class="mobile-nav-contact" href={`${prefix}/#contacto`} data-contact-trigger aria-haspopup="dialog">{locale === 'es' ? 'Contactar' : 'Contact us'} <span aria-hidden="true">→</span></a>
       </nav>
     </header>
     <main id="contenido"><slot /></main>
@@ -159,6 +162,48 @@ const structuredData = [
       menu?.addEventListener('click', () => setMobileMenu(menu.getAttribute('aria-expanded') !== 'true', true));
       mobile?.addEventListener('click', (event) => { if (event.target instanceof HTMLAnchorElement) setMobileMenu(false); });
       document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') setMobileMenu(false, true); });
+      const contactSection = document.querySelector('#contacto');
+      const contactOrigin = document.querySelector('[data-contact-origin]');
+      const contactDialog = document.querySelector('[data-contact-dialog]');
+      const contactSlot = contactDialog?.querySelector('[data-contact-dialog-slot]');
+      const contactClose = contactDialog?.querySelector('[data-contact-dialog-close]');
+      let contactReturnTarget = null;
+      function openContactDialog(trigger) {
+        if (!(contactDialog instanceof HTMLDialogElement) || !(contactSlot instanceof HTMLElement) || !(contactSection instanceof HTMLElement) || typeof contactDialog.showModal !== 'function') return false;
+        contactReturnTarget = mobile?.contains(trigger) && menu instanceof HTMLElement ? menu : trigger;
+        if (!contactDialog.open) {
+          contactSlot.append(contactSection);
+          contactSection.classList.add('contact-in-dialog');
+          document.body.classList.add('contact-dialog-open');
+          contactDialog.showModal();
+        }
+        requestAnimationFrame(() => contactSection.querySelector('[data-contact-dialog-title]')?.focus());
+        return true;
+      }
+      document.addEventListener('click', (event) => {
+        const trigger = event.target.closest?.('[data-contact-trigger], a[href="#contacto"]');
+        if (!(trigger instanceof HTMLAnchorElement) || !openContactDialog(trigger)) return;
+        event.preventDefault();
+        setMobileMenu(false);
+      });
+      contactClose?.addEventListener('click', () => { if (contactDialog instanceof HTMLDialogElement) contactDialog.close(); });
+      contactDialog?.addEventListener('click', (event) => { if (event.target === contactDialog) contactDialog.close(); });
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape' || !(contactDialog instanceof HTMLDialogElement) || !contactDialog.open) return;
+        event.preventDefault();
+        contactDialog.close();
+      });
+      contactDialog?.addEventListener('close', () => {
+        if (contactOrigin instanceof HTMLElement && contactSection instanceof HTMLElement) {
+          contactOrigin.append(contactSection);
+          contactSection.classList.remove('contact-in-dialog');
+        }
+        document.body.classList.remove('contact-dialog-open');
+        if (contactReturnTarget instanceof HTMLElement && contactReturnTarget.isConnected) contactReturnTarget.focus();
+        else contactSection?.querySelector('[data-contact-dialog-title]')?.focus();
+        contactReturnTarget = null;
+      });
+      if (location.hash === '#contacto') openContactDialog(null);
       const consent = document.querySelector('[data-consent-banner]');
       function hasAnalyticsConsent() {
         try {
@@ -176,7 +221,11 @@ const structuredData = [
         const landing = location.pathname === '/' || location.pathname === '/en/';
         const assessment = location.pathname === '/diagnostico/' || location.pathname === '/en/assessment/';
         if (landing) {
-          if (entries.some(([key]) => key !== 'assessment') || ('assessment' in values && values.assessment !== '1')) return false;
+          const allowedKeys = new Set(['assessment', 'contact']);
+          if (entries.some(([key]) => !allowedKeys.has(key))) return false;
+          if ('assessment' in values && values.assessment !== '1') return false;
+          if ('contact' in values && !['rural', 'apartments', 'hotels'].includes(values.contact)) return false;
+          if ('assessment' in values && 'contact' in values) return false;
           return ['', '#contacto', '#negocio', '#producto', '#demos', '#niveles', '#alcance'].includes(location.hash);
         }
         if (assessment) {
@@ -221,7 +270,6 @@ const structuredData = [
       document.addEventListener('click', (event) => { const target = event.target.closest?.('[data-track]'); if (!target) return; window.estanciaTrack?.(target.dataset.track, { locale: document.documentElement.lang, plan: target.dataset.plan, segment: target.dataset.segment, source_section: target.dataset.section }); });
       const wa = document.querySelector('[data-whatsapp]');
       const footer = document.querySelector('footer');
-      const contactSection = document.querySelector('#contacto');
       let footerVisible = false; let contactVisible = false;
       const toggleWa = () => {
         if (!(wa instanceof HTMLAnchorElement)) return;

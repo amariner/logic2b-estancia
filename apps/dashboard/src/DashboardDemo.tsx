@@ -565,7 +565,7 @@ export function DashboardDemo({
       <aside className={mobile ? "sidebar open" : "sidebar"}>
         <div className="dash-brand">
           <span>{brand}</span>
-          <small>Logic Estancia · {level}</small>
+          <small>Logic2B Estancias · {level}</small>
         </div>
         <button
           className="sidebar-close"

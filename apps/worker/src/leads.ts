@@ -297,9 +297,9 @@ async function resend(apiKey: string, idempotencyKey: string, payload: Record<st
 
 async function sendInternalEmail(lead: Lead, ref: string, configuration: RuntimeEmailConfiguration): Promise<boolean> {
   const rows = leadRows(lead); const subject = `${lead.plan ? `Plan ${lead.plan}` : 'Proyecto'} · ${lead.businessName}`;
-  const text = `Nueva solicitud — Logic Estancia\n\n${rows.map(([key, value]) => `${key}: ${value}`).join('\n')}\n\nMensaje:\n${lead.message || '—'}\n\nReferencia: ${ref}`;
-  const html = `<h2>Nueva solicitud — Logic Estancia</h2><table>${rows.map(([key, value]) => `<tr><td><strong>${escapeHtml(key)}</strong></td><td>${escapeHtml(value)}</td></tr>`).join('')}</table><p><strong>Mensaje</strong><br>${escapeHtml(lead.message || '—')}</p><p>Referencia: ${escapeHtml(ref)}</p>`;
-  return resend(configuration.apiKey, `estancia-lead/${ref}/internal`, { from: `Logic Estancia <${configuration.fromEmail}>`, to: [configuration.internalRecipient], reply_to: lead.email, subject, html, text });
+  const text = `Nueva solicitud — Logic2B Estancias\n\n${rows.map(([key, value]) => `${key}: ${value}`).join('\n')}\n\nMensaje:\n${lead.message || '—'}\n\nReferencia: ${ref}`;
+  const html = `<h2>Nueva solicitud — Logic2B Estancias</h2><table>${rows.map(([key, value]) => `<tr><td><strong>${escapeHtml(key)}</strong></td><td>${escapeHtml(value)}</td></tr>`).join('')}</table><p><strong>Mensaje</strong><br>${escapeHtml(lead.message || '—')}</p><p>Referencia: ${escapeHtml(ref)}</p>`;
+  return resend(configuration.apiKey, `estancia-lead/${ref}/internal`, { from: `Logic2B Estancias <${configuration.fromEmail}>`, to: [configuration.internalRecipient], reply_to: lead.email, subject, html, text });
 }
 
 async function sendVisitorSummary(lead: Lead, ref: string, configuration: RuntimeEmailConfiguration): Promise<boolean> {
@@ -307,8 +307,8 @@ async function sendVisitorSummary(lead: Lead, ref: string, configuration: Runtim
   const names = lead.lang === 'en' ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' } : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
   const en = lead.lang === 'en';
   const subject = plan
-    ? (en ? `Your Logic Estancia assessment · ${names[plan]}` : `Tu diagnóstico Logic Estancia · ${names[plan]}`)
-    : (en ? 'We received your Logic Estancia request' : 'Hemos recibido tu solicitud de Logic Estancia');
+    ? (en ? `Your Logic2B Estancias assessment · ${names[plan]}` : `Tu diagnóstico Logic2B Estancias · ${names[plan]}`)
+    : (en ? 'We received your Logic2B Estancias request' : 'Hemos recibido tu solicitud de Logic2B Estancias');
   const intro = plan
     ? (en ? `Hello ${lead.name}, your initial recommendation is ${names[plan]}.` : `Hola ${lead.name}, tu recomendación inicial es ${names[plan]}.`)
     : (en ? `Hello ${lead.name}, we received your request about ${lead.businessName}.` : `Hola ${lead.name}, hemos recibido tu solicitud sobre ${lead.businessName}.`);
@@ -321,7 +321,7 @@ async function sendVisitorSummary(lead: Lead, ref: string, configuration: Runtim
     : '';
   const text = `${intro}\n\n${followup}${capabilities}\n\n${en ? 'Reference' : 'Referencia'}: ${ref}`;
   const html = `<h2>${escapeHtml(intro)}</h2><p>${escapeHtml(followup)}</p>${capabilitiesHtml}<p>${en ? 'Reference' : 'Referencia'}: ${escapeHtml(ref)}</p>`;
-  return resend(configuration.apiKey, `estancia-lead/${ref}/visitor`, { from: `Logic Estancia <${configuration.fromEmail}>`, to: [lead.email], reply_to: configuration.replyTo, subject, html, text });
+  return resend(configuration.apiKey, `estancia-lead/${ref}/visitor`, { from: `Logic2B Estancias <${configuration.fromEmail}>`, to: [lead.email], reply_to: configuration.replyTo, subject, html, text });
 }
 
 function escapeHtml(value: string): string {

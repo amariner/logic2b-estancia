@@ -1,5 +1,5 @@
 export const PRODUCT = {
-  name: 'Logic Estancia',
+  name: 'Logic2B Estancias',
   publicName: 'Logic2B Estancias',
   lockup: 'Logic2B Estancias',
   domain: 'estancia.logic2b.com',

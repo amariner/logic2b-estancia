@@ -30,6 +30,12 @@ async function expectTechnicalSeo(page: Page, path: string) {
   expect(schemaTypes, path).toEqual(expect.arrayContaining(['Organization', 'WebSite']));
 }
 
+async function resourceHrefs(page: Page) {
+  return page.locator('a[href]').evaluateAll((links) => links
+    .map((link) => link.getAttribute('href'))
+    .filter((href): href is string => Boolean(href?.startsWith('/recursos/') || href?.startsWith('/en/recursos/'))));
+}
+
 test('canonical and hreflang map every translated route to a real final URL', async ({ page, request }) => {
   for (const [esPath, enPath] of translatedPairs) {
     for (const path of [esPath, enPath]) {
@@ -48,6 +54,66 @@ test('Spanish-only resources do not advertise missing translations', async ({ pa
     await expectTechnicalSeo(page, path);
     await expect(page.locator('link[rel="alternate"]')).toHaveCount(0);
     await expect(page.locator('.locale')).toHaveCount(0);
+  }
+});
+
+test('every indexable title uses the public brand and stays within a useful search length', async ({ page }) => {
+  const resourceTitles = new Map([
+    [spanishOnly[0], 'Gestor de reservas para apartamentos: guía | Logic2B Estancias'],
+    [spanishOnly[1], 'Web de hotel y operación: guía | Logic2B Estancias'],
+  ]);
+
+  for (const path of indexableRoutes) {
+    await page.goto(path);
+    const title = await page.title();
+    expect(title, `${path} public brand`).toMatch(/(?:\||·) Logic2B Estancias$/);
+    expect(title, `${path} legacy brand`).not.toMatch(/(?:\||·) Logic Estancia$/);
+    expect(title.length, `${path} title minimum`).toBeGreaterThanOrEqual(20);
+    expect(title.length, `${path} title maximum`).toBeLessThanOrEqual(spanishOnly.includes(path) ? 65 : 75);
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', title);
+    await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute('content', title);
+    if (resourceTitles.has(path)) expect(title, path).toBe(resourceTitles.get(path));
+  }
+
+  for (const path of ['/docs/', '/en/docs/', '/legal/', '/en/legal/']) {
+    await page.goto(path);
+    await expect(page.locator('main')).toContainText('Logic2B Estancias');
+    await expect(page.locator('main')).not.toContainText(/\bLogic Estancia\b/);
+  }
+});
+
+test('Spanish home exposes exactly the two live resources', async ({ page, request }) => {
+  await page.goto('/');
+  expect(await resourceHrefs(page)).toEqual(spanishOnly);
+
+  for (const href of spanishOnly) {
+    const response = await request.get(href);
+    expect(response.status(), href).toBe(200);
+  }
+});
+
+test('resource links stay contextual on Spanish solutions and absent from English surfaces', async ({ page }) => {
+  const spanishSolutions = [
+    ['/soluciones/apartamentos/', spanishOnly[0]],
+    ['/soluciones/hoteles/', spanishOnly[1]],
+    ['/soluciones/casas-rurales/', null],
+  ] as const;
+
+  for (const [path, expectedHref] of spanishSolutions) {
+    await page.goto(path);
+    expect(await resourceHrefs(page), path).toEqual(expectedHref ? [expectedHref] : []);
+  }
+
+  const englishSurfaces = [
+    '/en/',
+    '/en/solutions/apartments/',
+    '/en/solutions/hotels/',
+    '/en/solutions/rural-stays/',
+  ];
+
+  for (const path of englishSurfaces) {
+    await page.goto(path);
+    expect(await resourceHrefs(page), path).toEqual([]);
   }
 });
 

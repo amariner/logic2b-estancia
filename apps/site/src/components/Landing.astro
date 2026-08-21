@@ -4,6 +4,7 @@ import { logic2bContact } from '@logic-estancia/config/contact';
 import { DEMO_PLANS, type DemoSlug, type PlanLevel } from '@logic-estancia/domain';
 import { content } from '../content';
 import { getBusinesses } from '../businesses';
+import { spanishResources } from '../resources';
 import HumanService from './HumanService.astro';
 const { locale } = Astro.props as { locale: Locale };
 const c = content[locale];
@@ -30,15 +31,6 @@ const levels = locale === 'es' ? [
   ['00', 'Basic', 'Stop looking interchangeable when guests compare and turn interest into a direct commercial conversation.', 'basico'],
   ['01', 'Management', 'Give every enquiry and booking continuity without rebuilding its story across several tools.', 'gestion'],
   ['02', 'Intelligent', 'Make what needs attention visible before it turns into an urgent problem for the team.', 'inteligente'],
-];
-const heroFlow = locale === 'es' ? [
-  ['01', 'Marca', 'Una presencia que se reconoce.'],
-  ['02', 'Reservas', 'Cada consulta conserva su contexto.'],
-  ['03', 'Operación', 'El equipo distingue qué atender.'],
-] : [
-  ['01', 'Brand', 'A presence guests can recognise.'],
-  ['02', 'Bookings', 'Every enquiry keeps its context.'],
-  ['03', 'Operations', 'The team can see what needs attention.'],
 ];
 const directionSignals = locale === 'es' ? [
   ['01', 'Demanda y marca', 'Qué entiende el huésped, por qué te recuerda y dónde empieza la conversación directa.'],
@@ -86,7 +78,7 @@ const serviceSchema = {
   '@type': 'Service',
   '@id': 'https://estancia.logic2b.com/#service',
   name: 'Logic2B Estancias',
-  serviceType: locale === 'es' ? 'Web, gestión de reservas y operación para alojamientos' : 'Website, booking management and operations for accommodation businesses',
+  serviceType: locale === 'es' ? 'Web y gestión de estancias online para alojamientos' : 'Website and online accommodation management for accommodation businesses',
   provider: { '@id': 'https://estancia.logic2b.com/#organization' },
   areaServed: { '@type': 'Country', name: 'Spain' },
   audience: { '@type': 'BusinessAudience', audienceType: locale === 'es' ? 'Casas rurales, apartamentos turísticos y hoteles' : 'Rural stays, holiday apartments and hotels' },
@@ -106,17 +98,22 @@ const serviceSchema = {
       <div class="hero-actions"><a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="hero">{c.hero.primary}</a><a class="pill ghost" href="#producto">{c.hero.secondary}</a></div>
       <ul class="hero-assurances" aria-label={locale === 'es' ? 'Principios del servicio' : 'Service principles'}><li>{locale === 'es' ? 'Proyecto por capacidades' : 'Capability-led project'}</li><li>{locale === 'es' ? 'Configurado por Logic2B' : 'Configured by Logic2B'}</li><li>{locale === 'es' ? 'Acompañamiento humano' : 'Human support'}</li></ul>
     </div>
-    <div class="hero-command artifact" aria-label={locale === 'es' ? 'Concepto ficticio y local del recorrido de una estancia' : 'Fictional local concept of a stay journey'}>
-      <div class="hero-command-bar"><span class="hero-command-brand"><i aria-hidden="true"></i>Logic2B Estancias</span><span>{locale === 'es' ? 'Concepto ficticio · vista local' : 'Fictional concept · local view'}</span></div>
-      <div class="hero-command-media">
-        <picture><source type="image/avif" srcset="/media/aurem/hero-640.avif 640w, /media/aurem/hero-960.avif 960w" sizes="(max-width: 900px) 100vw, 48vw" /><img src="/media/aurem/hero.webp" alt="" width="2016" height="1344" loading="eager" decoding="async" fetchpriority="high" /></picture>
-        <div><span>{locale === 'es' ? 'El recorrido completo' : 'The complete journey'}</span><strong>{locale === 'es' ? 'De la primera búsqueda al trabajo diario.' : 'From the first search to the work of each day.'}</strong></div>
+    <figure class="hero-command artifact">
+      <div class="hero-remanso-scene" data-hero-scene>
+        <picture class="hero-remanso-picture">
+          <source type="image/avif" srcset="/media/remanso/hero-640.avif 640w, /media/remanso/hero-960.avif 960w, /media/remanso/hero-1280.avif 1280w" sizes="(max-width: 640px) calc(100vw - 28px), (max-width: 800px) calc(100vw - 40px), (max-width: 1100px) 760px, 650px" />
+          <img src="/media/remanso/hero.webp" alt="" width="2560" height="1429" loading="eager" decoding="async" fetchpriority="high" data-hero-scene-layer />
+        </picture>
+        <div class="hero-booking-demo" role="group" aria-label={locale === 'es' ? 'Simulación visual; no comprueba disponibilidad ni realiza reservas' : 'Visual simulation; it does not check availability or make bookings'}>
+          <div class="hero-booking-field"><span>{locale === 'es' ? 'Entrada' : 'Check-in'}</span><strong>{locale === 'es' ? 'Elegir fecha' : 'Choose date'}</strong></div>
+          <div class="hero-booking-field"><span>{locale === 'es' ? 'Salida' : 'Check-out'}</span><strong>{locale === 'es' ? 'Elegir fecha' : 'Choose date'}</strong></div>
+          <div class="hero-booking-field"><span>{locale === 'es' ? 'Huéspedes' : 'Guests'}</span><strong>2</strong></div>
+          <span class="hero-booking-action"><strong>{locale === 'es' ? 'Consultar' : 'Check'}</strong><span aria-hidden="true">→</span></span>
+          <small class="hero-booking-disclaimer">{locale === 'es' ? 'Concepto ficticio · sin disponibilidad real' : 'Fictional concept · no live availability'}</small>
+        </div>
       </div>
-      <ol class="hero-command-flow">
-        {heroFlow.map(([number, label, text]) => <li><span>{number}</span><div><strong>{label}</strong><small>{text}</small></div></li>)}
-      </ol>
-      <div class="hero-command-footer"><span class="status">{locale === 'es' ? 'Punto de partida adaptable' : 'Adaptable starting point'}</span><span>{locale === 'es' ? 'Implantación acompañada' : 'Supported implementation'}</span></div>
-    </div>
+      <figcaption class="sr-only">{locale === 'es' ? 'Concepto visual ficticio de una casa rural entre montañas y bruma.' : 'Fictional visual concept of a rural stay among mountains and mist.'}</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -128,6 +125,24 @@ const serviceSchema = {
   <div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Empieza por tu realidad' : 'Start with your reality'}</p><h2 id="segment-title" class="heading">{locale === 'es' ? 'No todos los alojamientos venden igual. Tampoco deberían gestionarse igual.' : 'Not every stay sells the same way. It should not be managed the same way either.'}</h2><p>{locale === 'es' ? 'Elige el negocio que más se parece al tuyo. Cada recorrido parte de sus fricciones, su ritmo y el tipo de relación que necesita construir con el huésped.' : 'Choose the business closest to yours. Each journey begins with its friction, pace and the kind of guest relationship it needs to build.'}</p></div>
   <div class="segment-grid">{businesses.map((business, index) => <a class="card" href={business.href}><span>0{index + 1}</span><h3>{business.homeTitle}</h3><p>{business.homeText}</p><b>{locale === 'es' ? `Ver solución para ${business.plural.toLowerCase()}` : `View solution for ${business.plural.toLowerCase()}`} →</b></a>)}</div>
 </section>
+
+{locale === 'es' && (
+  <section class="resource-strip shell" aria-labelledby="home-resources-title" data-resource-strip>
+    <div class="resource-strip-intro">
+      <p class="eyebrow">Guías para decidir</p>
+      <h2 id="home-resources-title">Aclara qué debe compartir contexto antes de conectar herramientas.</h2>
+    </div>
+    <div class="resource-strip-links">
+      {spanishResources.map((resource, index) => (
+        <a href={resource.href} data-resource-link={resource.slug}>
+          <span>0{index + 1}</span>
+          <div><strong>{resource.title}</strong><p>{resource.homeSummary}</p></div>
+          <b aria-hidden="true">→</b>
+        </a>
+      ))}
+    </div>
+  </section>
+)}
 
 <section id="producto" class="section shell">
   <div class="section-head"><p class="eyebrow">{c.proof.eyebrow}</p><h2 class="heading">{c.proof.title}</h2><p>{c.proof.body}</p></div>
@@ -199,8 +214,9 @@ const serviceSchema = {
 <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
 <script is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)}></script>
 
-<section id="contacto" class="section shell">
-  <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 class="heading">{c.contact.title}</h2><p>{c.contact.body}</p><ul class="contact-promises"><li>{locale === 'es' ? 'Revisamos el cuello de botella, no solo el número de habitaciones.' : 'We review the bottleneck, not only the number of rooms.'}</li><li>{locale === 'es' ? 'Separamos lo que ya puede demostrarse de lo que requiere integración.' : 'We separate what can be demonstrated now from what needs integration.'}</li><li>{locale === 'es' ? 'Tus datos se usan únicamente para responder y, si lo autorizas, hacer seguimiento.' : 'Your details are used only to reply and, if authorised, follow up.'}</li></ul><p><a href={wa.href} target="_blank" rel="noopener noreferrer">WhatsApp · {wa.phone} →</a></p></div>
+<div data-contact-origin>
+<section id="contacto" class="section shell" aria-labelledby="contact-dialog-title">
+  <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 id="contact-dialog-title" class="heading" tabindex="-1" data-contact-dialog-title>{c.contact.title}</h2><p id="contact-dialog-description">{c.contact.body}</p><ul class="contact-promises"><li>{locale === 'es' ? 'Revisamos el cuello de botella, no solo el número de habitaciones.' : 'We review the bottleneck, not only the number of rooms.'}</li><li>{locale === 'es' ? 'Separamos lo que ya puede demostrarse de lo que requiere integración.' : 'We separate what can be demonstrated now from what needs integration.'}</li><li>{locale === 'es' ? 'Tus datos se usan únicamente para responder y, si lo autorizas, hacer seguimiento.' : 'Your details are used only to reply and, if authorised, follow up.'}</li></ul><p><a href={wa.href} target="_blank" rel="noopener noreferrer">WhatsApp · {wa.phone} →</a></p></div>
   <form class="lead-form" data-lead method="dialog" novalidate>
     <p class="sr-only" role="status" aria-live="polite" data-assessment-context-status></p>
     <section class="assessment-handoff wide" data-assessment-handoff hidden aria-labelledby="assessment-handoff-title">
@@ -216,13 +232,14 @@ const serviceSchema = {
     <label>{locale === 'es' ? 'Teléfono (opcional)' : 'Phone (optional)'}<input name="phone" maxlength="60" autocomplete="tel" /></label>
     <label>{locale === 'es' ? 'Tipo' : 'Type'}<select name="accommodationType" required><option value="apartment">{locale === 'es' ? 'Piso turístico' : 'Holiday apartment'}</option><option value="rural">{locale === 'es' ? 'Casas rurales' : 'Rural stays'}</option><option value="hotel">Hotel</option></select></label>
     <label>{locale === 'es' ? 'Plan de interés' : 'Plan of interest'}<select name="plan"><option value="">—</option><option value="basico">{locale === 'es' ? 'Básico' : 'Basic'}</option><option value="gestion">{locale === 'es' ? 'Gestión' : 'Management'}</option><option value="inteligente">{locale === 'es' ? 'Inteligente' : 'Intelligent'}</option></select></label>
+    <label>{locale === 'es' ? 'Cuándo te gustaría empezar' : 'When would you like to start'}<select name="timeline"><option value="exploring">{locale === 'es' ? 'Estoy explorando' : 'I am exploring'}</option><option value="0-3">{locale === 'es' ? 'En los próximos 3 meses' : 'Within 3 months'}</option><option value="3-6">{locale === 'es' ? 'Entre 3 y 6 meses' : 'Within 3 to 6 months'}</option><option value="6-12">{locale === 'es' ? 'Entre 6 y 12 meses' : 'Within 6 to 12 months'}</option></select></label>
     <label>{locale === 'es' ? 'Propiedades' : 'Properties'}<input name="propertyCount" type="number" min="1" max="10000" value="1" required /></label>
     <label>{locale === 'es' ? 'Unidades' : 'Units'}<input name="unitCount" type="number" min="1" max="100000" value="1" required /></label>
     <label class="wide">{locale === 'es' ? 'Qué quieres poner en marcha' : 'What do you want to launch'}<textarea name="message" rows="5" maxlength="2000" placeholder={locale === 'es' ? 'Cuéntanos qué gestionas hoy, qué te frena y qué te gustaría conectar.' : 'Tell us what you manage today, what gets in the way and what you would like to connect.'}></textarea></label>
     <label class="honeypot" inert aria-hidden="true"><span>Website</span><input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" /></label>
     <label class="check wide"><input name="accept" type="checkbox" required /><span>{locale === 'es' ? <>He leído la <a href="/privacidad/" target="_blank" rel="noopener noreferrer">política de privacidad</a> y acepto que Logic2B use estos datos para responder.</> : <>I have read the <a href="/en/privacidad/" target="_blank" rel="noopener noreferrer">privacy policy</a> and accept that Logic2B uses these details to reply.</>}</span></label>
     <label class="check wide"><input name="marketingConsent" type="checkbox" /><span>{locale === 'es' ? 'También quiero recibir seguimiento comercial relevante (opcional).' : 'I would also like to receive relevant commercial follow-up (optional).'}</span></label>
-    <div class="wide"><button class="pill" type="button" data-lead-submit><span>{c.contact.submit}</span><span aria-hidden="true">→</span></button></div>
+    <div class="wide"><button class="pill" type="submit" data-lead-submit><span>{c.contact.submit}</span><span aria-hidden="true">→</span></button></div>
     <p class="form-status wide" role="status" aria-live="polite"></p>
     <section class="lead-receipt wide" data-lead-receipt hidden tabindex="-1" role="status" aria-live="polite" aria-atomic="true" aria-labelledby="lead-receipt-title">
       <span class="receipt-mark" aria-hidden="true">✓</span>
@@ -230,6 +247,14 @@ const serviceSchema = {
     </section>
   </form></div>
 </section>
+</div>
+
+<dialog class="contact-dialog" data-contact-dialog aria-labelledby="contact-dialog-title" aria-describedby="contact-dialog-description">
+  <div class="contact-dialog-panel">
+    <div class="contact-dialog-bar"><span>{locale === 'es' ? 'Empecemos por tu proyecto' : 'Let’s start with your project'}</span><button type="button" data-contact-dialog-close aria-label={locale === 'es' ? 'Cerrar formulario de contacto' : 'Close contact form'}>{locale === 'es' ? 'Cerrar' : 'Close'} <span aria-hidden="true">×</span></button></div>
+    <div data-contact-dialog-slot></div>
+  </div>
+</dialog>
 
 <script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, timeout: c.contact.timeout, rateLimited: c.contact.rateLimited, retrying: c.contact.retrying, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback, leadRequestTimeoutMs, demoLabel: runtimeCopy.demoLabel, demoNote: runtimeCopy.demoNote, demoOutcome: runtimeCopy.demoOutcome, liveLabel: runtimeCopy.liveLabel, liveNote: runtimeCopy.liveNote }}>
   const form = document.querySelector('[data-lead]');
@@ -238,7 +263,19 @@ const serviceSchema = {
   const runtimeNote = form?.querySelector('[data-runtime-lead-note]');
   const runtimeLabel = runtimeNote?.querySelector('[data-runtime-lead-label]');
   const runtimeCopy = runtimeNote?.querySelector('[data-runtime-lead-copy]');
-  const submitButton = form?.querySelector('[data-lead-submit]');
+  const contactSegment = new URLSearchParams(location.search).get('contact');
+  const contactContexts = locale === 'es' ? {
+    rural: { accommodationType: 'rural', sourcePath: '/soluciones/casas-rurales/' },
+    apartments: { accommodationType: 'apartment', sourcePath: '/soluciones/apartamentos/' },
+    hotels: { accommodationType: 'hotel', sourcePath: '/soluciones/hoteles/' },
+  } : {
+    rural: { accommodationType: 'rural', sourcePath: '/en/solutions/rural-stays/' },
+    apartments: { accommodationType: 'apartment', sourcePath: '/en/solutions/apartments/' },
+    hotels: { accommodationType: 'hotel', sourcePath: '/en/solutions/hotels/' },
+  };
+  const contactContext = contactSegment && contactContexts[contactSegment];
+  const contactAccommodationType = form?.querySelector('[name=accommodationType]');
+  if (contactContext && contactAccommodationType instanceof HTMLSelectElement) contactAccommodationType.value = contactContext.accommodationType;
   window.estanciaRuntimeReady?.then((runtime) => {
     const live = runtime.operations?.commercialLead === 'active' && runtime.providers?.email === 'live';
     if (runtimeLabel) runtimeLabel.textContent = live ? liveLabel : demoLabel;
@@ -249,12 +286,6 @@ const serviceSchema = {
     const plan = form?.querySelector('[name=plan]');
     if (plan && link.dataset.plan) plan.value = link.dataset.plan;
   }));
-  submitButton?.addEventListener('click', () => form?.requestSubmit());
-  form?.addEventListener('keydown', (event) => {
-    if (event.key !== 'Enter' || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLButtonElement) return;
-    event.preventDefault();
-    form.requestSubmit();
-  });
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
@@ -269,7 +300,7 @@ const serviceSchema = {
     }
     const d = Object.fromEntries(new FormData(form));
     const assessmentFields = window.estanciaAssessment?.leadFields() || {};
-    const payload = { ...d, ...assessmentFields, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: assessmentFields.sourcePath || location.pathname };
+    const payload = { ...assessmentFields, ...d, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: assessmentFields.sourcePath || contactContext?.sourcePath || location.pathname };
     const controller = new AbortController();
     const requestTimeout = setTimeout(() => controller.abort(), leadRequestTimeoutMs);
     let retryAfter = 0;

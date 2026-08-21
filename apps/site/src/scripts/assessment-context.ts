@@ -152,10 +152,11 @@ function renderLeadContext(context: AssessmentContext): void {
   const formFields = {
     accommodationType: form.elements.namedItem('accommodationType'),
     plan: form.elements.namedItem('plan'),
+    timeline: form.elements.namedItem('timeline'),
     propertyCount: form.elements.namedItem('propertyCount'),
     unitCount: form.elements.namedItem('unitCount'),
   } as Record<string, HTMLInputElement | HTMLSelectElement | null>;
-  for (const [name, value] of Object.entries({ accommodationType: context.accommodationType, plan: context.plan, propertyCount: context.propertyCount, unitCount: context.unitCount })) {
+  for (const [name, value] of Object.entries({ accommodationType: context.accommodationType, plan: context.plan, timeline: context.timeline, propertyCount: context.propertyCount, unitCount: context.unitCount })) {
     if (formFields[name]) formFields[name].value = String(value);
   }
   const c = copy[context.locale];

@@ -10,7 +10,7 @@ const OUTCOMES = new Set(['delivered', 'delivered_degraded', 'failed', 'disabled
 const ERRORS = new Set(['invalid', 'rate_limited', 'lead_coordination_unavailable', 'lead_coordination_failed', 'lead_email_configuration_invalid', 'lead_delivery_disabled', 'lead_delivery_failed', 'commercial_leads_disabled']);
 
 export function usage() {
-  return `Logic Estancia · smoke de Resend
+  return `Logic2B Estancias · smoke de Resend
 
 Uso:
   pnpm smoke:resend -- --run-id <id> [--base-url <url>]

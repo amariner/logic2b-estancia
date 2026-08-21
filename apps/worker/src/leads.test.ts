@@ -269,8 +269,8 @@ describe('leads', () => {
     expect(response.status).toBe(202);
     expect(await response.json()).toMatchObject({ meetingUrl: 'https://meet.example.test/logic-estancia' });
     const payloads = fetcher.mock.calls.map(([, init]) => JSON.parse(String(init?.body)) as Record<string, unknown>);
-    expect(payloads[0]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['sales@example.test'], reply_to: 'ada@example.test' });
-    expect(payloads[1]).toMatchObject({ from: 'Logic Estancia <delivery@example.test>', to: ['ada@example.test'], reply_to: 'reply@example.test' });
+    expect(payloads[0]).toMatchObject({ from: 'Logic2B Estancias <delivery@example.test>', to: ['sales@example.test'], reply_to: 'ada@example.test' });
+    expect(payloads[1]).toMatchObject({ from: 'Logic2B Estancias <delivery@example.test>', to: ['ada@example.test'], reply_to: 'reply@example.test' });
   });
   it('escapes adversarial lead markup in both HTML emails', async () => {
     const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
@@ -300,7 +300,7 @@ describe('leads', () => {
     const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
     await submit(emailEnv);
     const visitor = JSON.parse(String(fetcher.mock.calls[1]?.[1]?.body)) as { subject: string; text: string; html: string };
-    expect(visitor.subject).toBe('Hemos recibido tu solicitud de Logic Estancia');
+    expect(visitor.subject).toBe('Hemos recibido tu solicitud de Logic2B Estancias');
     expect(visitor.text).toContain('hemos recibido tu solicitud sobre Casa Ada');
     expect(`${visitor.subject} ${visitor.text} ${visitor.html}`).not.toMatch(/Básico|recomendación inicial|Capacidades solicitadas/);
   });
@@ -308,7 +308,7 @@ describe('leads', () => {
     const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
     await submit(emailEnv, { ...lead, lang: 'en', plan: 'inteligente', requestedCapabilities: ['automation'] });
     const visitor = JSON.parse(String(fetcher.mock.calls[1]?.[1]?.body)) as { subject: string; text: string };
-    expect(visitor.subject).toBe('Your Logic Estancia assessment · Intelligent');
+    expect(visitor.subject).toBe('Your Logic2B Estancias assessment · Intelligent');
     expect(visitor.text).toContain('your initial recommendation is Intelligent');
     expect(visitor.text).toContain('Requested capabilities: automation');
   });

@@ -120,7 +120,7 @@ test('fictional cases keep their canonical plans truthful and localized', async 
       await page.goto(`${prefix}/demos/${demo.slug}/`);
       const demoPlan = page.locator('[data-demo-plan]');
       await expect(demoPlan).toHaveAttribute('data-demo-plan', demo.plan);
-      await expect(demoPlan).toContainText(`${demo[locale]} · Logic Estancia`);
+      await expect(demoPlan).toContainText(`${demo[locale]} · Logic2B Estancias`);
     }
   }
 });
@@ -301,40 +301,188 @@ test('Logic2B and Estancias keep distinct brand destinations in both languages',
   }
 });
 
-test('mobile navigation manages focus, Escape and reflow', async ({ page }) => {
+test('mobile navigation keeps Contactar visible and opens the accessible project form', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 860 });
   await page.goto('/');
   const menu = page.getByRole('button', { name: 'Menú' });
   const mobileNav = page.getByRole('navigation', { name: 'Principal móvil' });
+  const contact = mobileNav.getByRole('link', { name: 'Contactar', exact: true });
 
   await menu.click();
   await expect(menu).toHaveAttribute('aria-expanded', 'true');
   await expect(mobileNav).toBeVisible();
   await expect(mobileNav.locator('a').first()).toBeFocused();
+  await expect(contact).toBeVisible();
+  await expect(contact).toHaveAttribute('href', '/#contacto');
+  const contactBox = await contact.boundingBox();
+  expect(contactBox).not.toBeNull();
+  expect((contactBox?.y ?? 0) + (contactBox?.height ?? 0)).toBeLessThanOrEqual(860);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
-  await page.keyboard.press('Escape');
+  await contact.focus();
+  await page.keyboard.press('Enter');
+  const dialog = page.getByRole('dialog', { name: 'Cuéntanos dónde se atasca hoy una reserva.' });
   await expect(mobileNav).toBeHidden();
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: 'Cuéntanos dónde se atasca hoy una reserva.' })).toBeFocused();
+  await expect(dialog.locator('[data-lead]')).toHaveCount(1);
+  await expect(page.locator('[data-lead]')).toHaveCount(1);
+  await expect(page.locator('body')).toHaveClass(/contact-dialog-open/);
+
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(page.locator('[data-contact-origin] > #contacto')).toHaveCount(1);
+  await expect(page.locator('body')).not.toHaveClass(/contact-dialog-open/);
   await expect(menu).toBeFocused();
 });
 
-test('hero exposes direct routes and serves responsive visual evidence', async ({ page }) => {
+test('mobile contact always reaches the localized home modal from other marketing routes', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 860 });
+  for (const item of [
+    { path: '/planes/', menu: 'Menú', nav: 'Principal móvil', contact: 'Contactar', href: '/#contacto', url: /\/#contacto$/, dialog: 'Cuéntanos dónde se atasca hoy una reserva.', close: 'Cerrar formulario de contacto' },
+    { path: '/en/plans/', menu: 'Menu', nav: 'Mobile main', contact: 'Contact us', href: '/en/#contacto', url: /\/en\/#contacto$/, dialog: 'Tell us where a booking gets stuck today.', close: 'Close contact form' },
+  ] as const) {
+    await page.goto(item.path);
+    await page.getByRole('button', { name: item.menu }).click();
+    const contact = page.getByRole('navigation', { name: item.nav }).getByRole('link', { name: item.contact, exact: true });
+    await expect(contact).toBeVisible();
+    await expect(contact).toHaveAttribute('href', item.href);
+    await contact.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(item.url);
+    const dialog = page.getByRole('dialog', { name: item.dialog });
+    await expect(dialog).toBeVisible();
+    await expect(page.locator('[data-lead]')).toHaveCount(1);
+    await dialog.getByRole('button', { name: item.close }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.locator('[data-contact-dialog-title]')).toBeFocused();
+  }
+});
+
+test('hero exposes the SEO promise, a clean responsive Remanso scene and a non-interactive booking overlay', async ({ page, request }) => {
+  const previewRequests: string[] = [];
+  page.on('request', (incoming) => {
+    if (/\/media\/remanso\/preview(?:-poster)?\.(?:mp4|webp)$/.test(new URL(incoming.url()).pathname)) previewRequests.push(incoming.url());
+  });
+
   await page.goto('/');
   const hero = page.locator('.hero');
-  await expect(hero.getByRole('heading', { level: 1 })).toContainText('Web, reservas y operación');
+  await expect(hero.getByRole('heading', { level: 1 })).toHaveText('Web y gestor de estancias online, todo en un mismo proyecto.');
   await expect(hero.getByRole('link', { name: 'Ver mi punto de partida' })).toHaveAttribute('href', '/diagnostico/');
   await expect(hero.getByRole('link', { name: 'Explorar cómo funciona' })).toHaveAttribute('href', '#producto');
-  await expect(hero.getByText('Concepto ficticio · vista local')).toBeVisible();
-  const image = hero.locator('img');
-  await expect(image).toHaveAttribute('width', '2016');
-  await expect(image).toHaveAttribute('height', '1344');
+
+  const visual = hero.locator('figure.hero-command');
+  const scene = visual.locator('[data-hero-scene]');
+  const source = scene.locator('source[type="image/avif"]');
+  const image = scene.locator('img[data-hero-scene-layer]');
+  await expect(visual).toBeVisible();
+  await expect(scene).toBeVisible();
+  await expect(source).toHaveAttribute('srcset', '/media/remanso/hero-640.avif 640w, /media/remanso/hero-960.avif 960w, /media/remanso/hero-1280.avif 1280w');
+  await expect(source).toHaveAttribute('sizes', /(?:vw|px)/);
+  await expect(image).toHaveAttribute('src', '/media/remanso/hero.webp');
+  await expect(image).toHaveAttribute('width', '2560');
+  await expect(image).toHaveAttribute('height', '1429');
+  await expect(image).toHaveAttribute('loading', 'eager');
+  await expect(image).toHaveAttribute('decoding', 'async');
   await expect(image).toHaveAttribute('fetchpriority', 'high');
-  const imageState = await image.evaluate((element: HTMLImageElement) => ({ complete: element.complete, naturalWidth: element.naturalWidth, currentSrc: element.currentSrc }));
-  expect(imageState.complete).toBe(true);
-  expect(imageState.naturalWidth).toBeGreaterThan(0);
-  expect(imageState.currentSrc).toMatch(/\/media\/aurem\/hero-(640|960)\.avif$/);
-  expect(await image.getAttribute('src')).toBe('/media/aurem/hero.webp');
+  await expect(image).toHaveAttribute('alt', '');
+  await expect(visual.locator('figcaption')).toHaveText('Concepto visual ficticio de una casa rural entre montañas y bruma.');
+  expect(await image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0)).toBe(true);
+  expect(new URL(await image.evaluate((element: HTMLImageElement) => element.currentSrc)).pathname).toMatch(/^\/media\/remanso\/hero-(?:640|960|1280)\.avif$/);
+  await expect(visual.locator('video, [data-hero-video], [data-hero-video-toggle]')).toHaveCount(0);
+
+  const booking = hero.getByRole('group', { name: /Simulación visual; no comprueba disponibilidad ni realiza reservas/ });
+  await expect(booking).toBeVisible();
+  await expect(booking.getByText('Elegir fecha', { exact: true })).toHaveCount(2);
+  await expect(booking).toContainText('Entrada');
+  await expect(booking).toContainText('Salida');
+  await expect(booking).toContainText('Huéspedes');
+  await expect(booking.getByText('Consultar', { exact: true })).toBeVisible();
+  await expect(booking).toContainText('Concepto ficticio');
+  await expect(booking).toContainText('sin disponibilidad real');
+  await expect(booking.locator('form, a, button, input, select, textarea, [role="button"], [role="link"], [tabindex]')).toHaveCount(0);
+
+  for (const [path, type] of [
+    ['/media/remanso/hero.webp', 'image/webp'],
+    ['/media/remanso/hero-640.avif', 'image/avif'],
+    ['/media/remanso/hero-960.avif', 'image/avif'],
+    ['/media/remanso/hero-1280.avif', 'image/avif'],
+  ] as const) {
+    const response = await request.get(path);
+    expect(response.status(), path).toBe(200);
+    expect(response.headers()['content-type'], path).toContain(type);
+  }
+
+  await page.goto('/en/');
+  const englishHero = page.locator('.hero');
+  await expect(englishHero.getByRole('heading', { level: 1 })).toHaveText('Website and online accommodation management, all in one project.');
+  await expect(englishHero.locator('video, [data-hero-video], [data-hero-video-toggle]')).toHaveCount(0);
+  await expect(englishHero.locator('img[data-hero-scene-layer]')).toHaveAttribute('alt', '');
+  await expect(englishHero.locator('figure.hero-command figcaption')).toHaveText('Fictional visual concept of a rural stay among mountains and mist.');
+  const englishBooking = englishHero.getByRole('group', { name: /Visual simulation; it does not check availability or make bookings/ });
+  await expect(englishBooking.getByText('Choose date', { exact: true })).toHaveCount(2);
+  await expect(englishBooking).toContainText('Check-in');
+  await expect(englishBooking).toContainText('Check-out');
+  await expect(englishBooking).toContainText('Guests');
+  await expect(englishBooking.getByText('Check', { exact: true })).toBeVisible();
+  await expect(englishBooking).toContainText('Fictional concept');
+  await expect(englishBooking).toContainText('no live availability');
+  await expect(englishBooking.locator('form, a, button, input, select, textarea, [role="button"], [role="link"], [tabindex]')).toHaveCount(0);
+  expect(previewRequests).toEqual([]);
+});
+
+test('hero keeps the clean Remanso scene and booking overlay within bounds at every compact breakpoint', async ({ page }) => {
+  for (const width of [320, 640, 901, 1024, 1100]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    await page.locator('img[data-hero-scene-layer]').evaluate(async (element: HTMLImageElement) => {
+      if (element.complete) return;
+      await new Promise<void>((resolve) => element.addEventListener('load', () => resolve(), { once: true }));
+    });
+    const layout = await page.locator('.hero-layout').evaluate((element) => {
+      const copy = element.querySelector('.hero-copy')?.getBoundingClientRect();
+      const card = element.querySelector('.hero-command')?.getBoundingClientRect();
+      const scene = element.querySelector('[data-hero-scene]')?.getBoundingClientRect();
+      const image = element.querySelector('img[data-hero-scene-layer]')?.getBoundingClientRect();
+      const booking = element.querySelector('.hero-booking-demo')?.getBoundingClientRect();
+      const imageElement = element.querySelector<HTMLImageElement>('img[data-hero-scene-layer]');
+      if (!copy || !card || !scene || !image || !booking || !imageElement) throw new Error('Hero visual contract is incomplete');
+      return {
+        columns: getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).length,
+        copy: { left: copy.left, right: copy.right, bottom: copy.bottom },
+        card: { left: card.left, right: card.right, top: card.top },
+        scene: { left: scene.left, right: scene.right, top: scene.top, bottom: scene.bottom, height: scene.height },
+        image: { left: image.left, right: image.right, top: image.top, bottom: image.bottom },
+        booking: { left: booking.left, right: booking.right, top: booking.top, bottom: booking.bottom, width: booking.width, height: booking.height },
+        imageFit: getComputedStyle(imageElement).objectFit,
+        currentSrc: new URL(imageElement.currentSrc).pathname,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        viewportWidth: innerWidth,
+      };
+    });
+    expect(layout.overflow, `${width}px overflow`).toBeLessThanOrEqual(0);
+    expect(layout.columns, `${width}px grid columns`).toBe(1);
+    expect(layout.card.top, `${width}px card position`).toBeGreaterThan(layout.copy.bottom);
+    for (const [name, bounds] of [['copy', layout.copy], ['card', layout.card], ['scene', layout.scene], ['booking', layout.booking]] as const) {
+      expect(bounds.left, `${width}px ${name} left bound`).toBeGreaterThanOrEqual(-0.5);
+      expect(bounds.right, `${width}px ${name} right bound`).toBeLessThanOrEqual(layout.viewportWidth + 0.5);
+    }
+    expect(layout.scene.left, `${width}px scene in card`).toBeGreaterThanOrEqual(layout.card.left - 0.5);
+    expect(layout.scene.right, `${width}px scene in card`).toBeLessThanOrEqual(layout.card.right + 0.5);
+    expect(layout.image.left, `${width}px image covers scene left`).toBeLessThanOrEqual(layout.scene.left + 0.5);
+    expect(layout.image.right, `${width}px image covers scene right`).toBeGreaterThanOrEqual(layout.scene.right - 0.5);
+    expect(layout.image.top, `${width}px image covers scene top`).toBeLessThanOrEqual(layout.scene.top + 0.5);
+    expect(layout.image.bottom, `${width}px image covers scene bottom`).toBeGreaterThanOrEqual(layout.scene.bottom - 0.5);
+    expect(layout.imageFit, `${width}px image fit`).toBe('cover');
+    expect(layout.currentSrc, `${width}px responsive source`).toMatch(/^\/media\/remanso\/hero-(?:640|960|1280)\.avif$/);
+    expect(layout.booking.left, `${width}px booking in scene left`).toBeGreaterThanOrEqual(layout.scene.left - 0.5);
+    expect(layout.booking.right, `${width}px booking in scene right`).toBeLessThanOrEqual(layout.scene.right + 0.5);
+    expect(layout.booking.top, `${width}px booking in scene top`).toBeGreaterThanOrEqual(layout.scene.top - 0.5);
+    expect(layout.booking.bottom, `${width}px booking in scene bottom`).toBeLessThanOrEqual(layout.scene.bottom + 0.5);
+    expect(layout.booking.width, `${width}px booking readable width`).toBeGreaterThan(220);
+    expect(layout.booking.height / layout.scene.height, `${width}px booking preserves the scene`).toBeLessThan(0.55);
+  }
 });
 
 test('plan interest carries the selected plan into the assessment', async ({ page }) => {
@@ -344,17 +492,24 @@ test('plan interest carries the selected plan into the assessment', async ({ pag
   await expect(page.locator('[name="bookingNeeds"][value="bookings"]')).toBeChecked();
 });
 
-test('business landing links preserve the prospect segment in the assessment', async ({ page }) => {
+test('business landing links preserve the prospect segment in the assessment and contact handoff', async ({ page }) => {
   for (const [path, segment, type] of [
     ['/soluciones/casas-rurales/', 'rural', 'rural'],
     ['/soluciones/apartamentos/', 'apartments', 'apartment'],
     ['/soluciones/hoteles/', 'hotels', 'hotel'],
   ] as const) {
     await page.goto(path);
-    await expect(page.locator('.solution-hero').getByRole('link', { name: 'Pedir una conversación' })).toHaveAttribute('href', '#contacto');
+    const contact = page.locator('.solution-hero').getByRole('link', { name: 'Pedir una conversación' });
+    await expect(contact).toHaveAttribute('href', `/?contact=${segment}#contacto`);
     await page.locator('.human-service').getByRole('link', { name: 'Cuéntanos cómo trabajas' }).click();
     await expect(page).toHaveURL(new RegExp(`/diagnostico/\\?segment=${segment}$`));
     await expect(page.locator(`[name="accommodationType"][value="${type}"]`)).toBeChecked();
+    await page.goto(path);
+    await page.locator('.solution-hero').getByRole('link', { name: 'Pedir una conversación' }).click();
+    await expect(page).toHaveURL(new RegExp(`/\\?contact=${segment}#contacto$`));
+    const dialog = page.getByRole('dialog', { name: 'Cuéntanos dónde se atasca hoy una reserva.' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('[name="accommodationType"]')).toHaveValue(type);
   }
 });
 
@@ -541,6 +696,7 @@ test('assessment keeps context local until the single sales form is reviewed and
   await expect(handoff.getByRole('heading', { name: 'No tienes que empezar de nuevo.' })).toBeVisible();
   await expect(form.locator('[name="accommodationType"]')).toHaveValue('apartment');
   await expect(form.locator('[name="plan"]')).toHaveValue('gestion');
+  await expect(form.locator('[name="timeline"]')).toHaveValue('3-6');
   await expect(form.locator('[name="propertyCount"]')).toHaveValue('3');
   await expect(form.locator('[name="unitCount"]')).toHaveValue('12');
   await handoff.getByText('Revisar el contexto que se adjuntará').click();
@@ -551,13 +707,14 @@ test('assessment keeps context local until the single sales form is reviewed and
   await form.locator('[name="name"]').fill('Ada Demo');
   await form.locator('[name="businessName"]').fill('Apartamentos Demo');
   await form.locator('[name="email"]').fill('ada@example.test');
+  await form.locator('[name="timeline"]').selectOption('0-3');
   await form.locator('[name="accept"]').check();
   await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
   await expect(form.locator('[data-lead-receipt]')).toBeVisible();
   expect(leadRequests).toBe(1);
   expect(submitted).toMatchObject({
     accommodationType: 'apartment', businessMode: 'multi', propertyCount: 3, unitCount: 12, plan: 'gestion',
-    currentStack: ['website', 'email'], requestedCapabilities: ['bookings', 'planning'], timeline: '3-6', investmentRange: '8k-20k',
+    currentStack: ['website', 'email'], requestedCapabilities: ['bookings', 'planning'], timeline: '0-3', investmentRange: '8k-20k',
     sourcePath: '/diagnostico/', name: 'Ada Demo', email: 'ada@example.test',
   });
   expect(await page.evaluate(() => sessionStorage.getItem('logic-estancia-assessment-v1'))).toBeNull();
@@ -586,7 +743,7 @@ test('English assessment context is reviewable and can be discarded before conta
   expect(await page.evaluate(() => sessionStorage.getItem('logic-estancia-assessment-v1'))).toBeNull();
 });
 
-test('the commercial landing and segment landings can submit their own lead forms when allowlisted', async ({ page }) => {
+test('only the home landing exposes and submits the real commercial lead form', async ({ page }) => {
   let leadRequests = 0;
   let submitted: Record<string, unknown> | null = null;
   await page.route('**/api/leads', (route) => {
@@ -616,24 +773,43 @@ test('the commercial landing and segment landings can submit their own lead form
   await expect(receipt.locator('[data-meeting-copy]')).toHaveText('No necesitas hacer nada más: te responderemos por email.');
   await expect(receipt.locator('[data-meeting-link]')).toBeHidden();
   expect(leadRequests).toBe(1);
+  expect(submitted).toMatchObject({
+    accommodationType: 'apartment',
+    propertyCount: 1,
+    unitCount: 1,
+    timeline: 'exploring',
+    sourcePath: '/',
+  });
 
-  for (const [path, type, plan] of [
-    ['/soluciones/casas-rurales/', 'rural', 'gestion'],
-    ['/soluciones/apartamentos/', 'apartment', 'basico'],
-    ['/soluciones/hoteles/', 'hotel', 'inteligente'],
+  for (const [path, segment, type] of [
+    ['/soluciones/casas-rurales/', 'rural', 'rural'],
+    ['/soluciones/apartamentos/', 'apartments', 'apartment'],
+    ['/soluciones/hoteles/', 'hotels', 'hotel'],
   ] as const) {
     await page.goto(path);
-    const segmentForm = page.locator('[data-commercial-lead]');
-    await expect(segmentForm).toBeVisible();
-    await expect(segmentForm.locator('[data-runtime-lead-note]')).toContainText('Entrega comercial activa');
-    await segmentForm.locator('[name="name"]').fill('Ada Segmento');
-    await segmentForm.locator('[name="businessName"]').fill('Alojamiento Segmento');
-    await segmentForm.locator('[name="email"]').fill('ada@example.test');
-    await segmentForm.locator('[name="accept"]').check();
-    await segmentForm.getByRole('button', { name: 'Pedir una conversación' }).click();
-    await expect(segmentForm.locator('.form-status')).toHaveText('Solicitud entregada. Te responderemos en un día laborable.');
-    expect(submitted).toMatchObject({ accommodationType: type, plan, sourcePath: path });
+    await expect(page.locator('[data-commercial-lead]')).toHaveCount(0);
+    await expect(page.locator('[data-lead]')).toHaveCount(0);
+    const contact = page.locator('.solution-hero').getByRole('link', { name: 'Pedir una conversación' });
+    await expect(contact).toHaveAttribute('href', `/?contact=${segment}#contacto`);
+    await contact.click();
+    await expect(page).toHaveURL(new RegExp(`/\\?contact=${segment}#contacto$`));
+    const dialog = page.getByRole('dialog', { name: 'Cuéntanos dónde se atasca hoy una reserva.' });
+    await expect(dialog).toBeVisible();
+    const solutionForm = dialog.locator('[data-lead]');
+    await expect(solutionForm).toHaveCount(1);
+    await expect(page.locator('[data-lead]')).toHaveCount(1);
+    await expect(solutionForm.locator('[name="accommodationType"]')).toHaveValue(type);
+    await solutionForm.locator('[name="name"]').fill('Ada Vertical');
+    await solutionForm.locator('[name="businessName"]').fill('Estancia Vertical');
+    await solutionForm.locator('[name="email"]').fill('ada@example.test');
+    await solutionForm.locator('[name="accept"]').check();
+    await solutionForm.getByRole('button', { name: /Quiero una recomendación/ }).click();
+    await expect(solutionForm.locator('[data-lead-receipt]')).toBeVisible();
+    expect(submitted).toMatchObject({ accommodationType: type, sourcePath: path });
+    await dialog.getByRole('button', { name: 'Cerrar formulario de contacto' }).click();
+    await expect(dialog).toBeHidden();
   }
+  expect(leadRequests).toBe(4);
 
   await page.goto('/demos/terrava/');
   await expect(page.locator('[data-demo-panel]')).toBeVisible();
