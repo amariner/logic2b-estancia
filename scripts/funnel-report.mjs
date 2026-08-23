@@ -4,14 +4,15 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const CONTRACT_VERSION = '1.0.0';
+export const CONTRACT_VERSION = '2.0.0';
 const SCRIPT_DIRECTORY = dirname(fileURLToPath(import.meta.url));
 const analyticsContract = JSON.parse(await readFile(resolve(SCRIPT_DIRECTORY, '../packages/config/src/analytics-contract.json'), 'utf8'));
 const FUNNEL = [
-  ['assessment_start', 'Diagnósticos iniciados'],
-  ['assessment_complete', 'Recomendaciones visibles'],
-  ['lead_submit', 'Solicitudes entregadas'],
-  ['meeting_click', 'Clics en agenda'],
+  { event: 'assessment_start', label: 'Diagnósticos iniciados', sourceSection: 'assessment' },
+  { event: 'assessment_submit', label: 'Diagnósticos validados', sourceSection: 'assessment' },
+  { event: 'assessment_complete', label: 'Recomendaciones visibles', sourceSection: 'assessment' },
+  { event: 'lead_submit', label: 'Solicitudes entregadas', sourceSection: 'homepage_contact' },
+  { event: 'meeting_click', label: 'Clics en agenda', sourceSection: 'homepage_contact' },
 ];
 if (analyticsContract.version !== CONTRACT_VERSION) throw new Error('La versión del contrato analítico no coincide con el informe.');
 const EVENTS = new Set(analyticsContract.events);
@@ -19,25 +20,31 @@ const ROW_KEYS = new Set(['event', 'count', ...analyticsContract.parameters]);
 const ROOT_KEYS = new Set(['contractVersion', 'period', 'consentMode', 'rows']);
 const PERIOD_KEYS = new Set(['start', 'end']);
 const VALUES = Object.fromEntries(Object.entries(analyticsContract.parameterValues).map(([key, values]) => [key, new Set(values)]));
+const EVENT_SHAPES = analyticsContract.eventShapes;
 
 const EXAMPLE = {
   contractVersion: CONTRACT_VERSION,
   period: { start: '2026-08-01', end: '2026-08-31' },
   consentMode: 'analytics-consent-only',
   rows: [
-    { event: 'assessment_start', count: 40, locale: 'es', source_section: 'assessment' },
-    { event: 'assessment_start', count: 10, locale: 'en', source_section: 'assessment' },
+    { event: 'assessment_start', count: 40, locale: 'es', segment: 'rural', source_section: 'assessment' },
+    { event: 'assessment_start', count: 10, locale: 'en', segment: 'hotels', source_section: 'assessment' },
+    { event: 'assessment_submit', count: 20, locale: 'es', segment: 'rural', plan: 'gestion', source_section: 'assessment' },
+    { event: 'assessment_submit', count: 5, locale: 'en', segment: 'hotels', plan: 'inteligente', source_section: 'assessment' },
     { event: 'assessment_complete', count: 20, locale: 'es', plan: 'gestion', source_section: 'assessment' },
     { event: 'assessment_complete', count: 5, locale: 'en', plan: 'inteligente', source_section: 'assessment' },
     { event: 'lead_submit', count: 6, locale: 'es', plan: 'gestion', source_section: 'homepage_contact' },
     { event: 'lead_submit', count: 1, locale: 'en', plan: 'inteligente', source_section: 'homepage_contact' },
-    { event: 'meeting_click', count: 2, locale: 'es', plan: 'gestion', source_section: 'homepage_contact' },
+    { event: 'meeting_click', count: 2, locale: 'es', source_section: 'homepage_contact' },
+    { event: 'solution_view', count: 18, locale: 'es', segment: 'rural', source_section: 'solution' },
+    { event: 'solution_view', count: 12, locale: 'es', segment: 'apartments', source_section: 'solution' },
+    { event: 'solution_view', count: 8, locale: 'en', segment: 'hotels', source_section: 'solution' },
     { event: 'demo_open', count: 32, locale: 'es', demo: 'terrava', source_section: 'website' },
   ],
 };
 
 export function usage() {
-  return `Logic Estancia · informe reproducible del embudo
+  return `Logic2B Estancias · informe reproducible del embudo
 
 Uso:
   pnpm funnel:report -- --validate
@@ -75,7 +82,7 @@ export function validateDataset(dataset) {
   if (start > end) throw new Error('period.start no puede ser posterior a period.end.');
   if (!Array.isArray(dataset.rows) || dataset.rows.length === 0) throw new Error('rows debe contener al menos una fila agregada.');
   const rows = dataset.rows.map((row, index) => validateRow(row, index));
-  if (!rows.some(({ event }) => FUNNEL.some(([stage]) => stage === event))) throw new Error('El dataset debe contener al menos un evento del embudo principal.');
+  if (!rows.some((row) => FUNNEL.some((stage) => matchesStage(row, stage)))) throw new Error('El dataset debe contener al menos un evento del embudo principal con su source_section canónico.');
   return { contractVersion: CONTRACT_VERSION, period: { start: dataset.period.start, end: dataset.period.end }, consentMode: dataset.consentMode, rows };
 }
 
@@ -89,39 +96,54 @@ function validateRow(row, index) {
     if (row[key] !== undefined && !allowed.has(row[key])) throw new Error(`${label}.${key} no está allowlisted.`);
   }
   if (row.step_index !== undefined && (!Number.isSafeInteger(row.step_index) || row.step_index < 1 || row.step_index > 20)) throw new Error(`${label}.step_index debe ser un entero entre 1 y 20.`);
+  validateEventShape(row, label);
   return { ...row };
 }
 
 export function buildReport(validDataset) {
   const eventTotals = Object.fromEntries([...EVENTS].sort().map((event) => [event, sum(validDataset.rows.filter((row) => row.event === event))]));
-  const stages = FUNNEL.map(([event, label], index) => {
-    const count = eventTotals[event];
-    const previous = index === 0 ? null : eventTotals[FUNNEL[index - 1][0]];
+  const stageCounts = FUNNEL.map((stage) => sum(validDataset.rows.filter((row) => matchesStage(row, stage))));
+  const stages = FUNNEL.map(({ event, label }, index) => {
+    const count = stageCounts[index];
+    const previous = index === 0 ? null : stageCounts[index - 1];
     return { event, label, count, fromPrevious: previous === null || previous === 0 ? null : round((count / previous) * 100) };
   });
   const warnings = [];
+  const notes = [];
   for (let index = 1; index < stages.length; index += 1) {
     if (stages[index].count > stages[index - 1].count) warnings.push(`${stages[index].event} supera a ${stages[index - 1].event}; revisa entradas externas, repeticiones o cambios de instrumentación.`);
   }
+  const excludedStageRows = validDataset.rows.filter((row) => FUNNEL.some(({ event }) => event === row.event) && !FUNNEL.some((stage) => matchesStage(row, stage)));
+  const excludedStageCount = sum(excludedStageRows);
+  if (excludedStageCount > 0) notes.push(`${excludedStageCount} recomendaciones de portada quedan fuera de las tasas del diagnóstico y permanecen en los totales de evento.`);
   const byLocale = ['es', 'en', 'sin_dimension'].map((locale) => ({
     locale,
-    stages: Object.fromEntries(FUNNEL.map(([event]) => [event, sum(validDataset.rows.filter((row) => row.event === event && (locale === 'sin_dimension' ? row.locale === undefined : row.locale === locale)))])),
+    stages: Object.fromEntries(FUNNEL.map((stage) => [stage.event, sum(validDataset.rows.filter((row) => matchesStage(row, stage) && (locale === 'sin_dimension' ? row.locale === undefined : row.locale === locale)))])),
   })).filter(({ stages: totals }) => Object.values(totals).some((count) => count > 0));
+  const solutionViewRows = validDataset.rows.filter((row) => row.event === 'solution_view' && row.source_section === 'solution');
+  const solutionViewsBySegment = ['rural', 'apartments', 'hotels'].map((segment) => ({
+    segment,
+    es: sum(solutionViewRows.filter((row) => row.segment === segment && row.locale === 'es')),
+    en: sum(solutionViewRows.filter((row) => row.segment === segment && row.locale === 'en')),
+    total: sum(solutionViewRows.filter((row) => row.segment === segment)),
+  })).filter(({ total }) => total > 0);
   return {
     contractVersion: validDataset.contractVersion,
     period: validDataset.period,
-    coverage: 'Solo navegación con consentimiento analítico explícito; recuentos agregados sin atribución usuario a usuario.',
+    coverage: 'Solo navegación con consentimiento analítico explícito; recuentos agregados sin atribución usuario a usuario. Las tasas usan únicamente el source_section canónico de cada etapa.',
     stages,
     eventTotals: Object.fromEntries(Object.entries(eventTotals).filter(([, count]) => count > 0)),
     byLocale,
+    solutionViewsBySegment,
     warnings,
+    notes,
     excludedOutcomes: ['proposals', 'won_projects', 'lost_projects', 'revenue', 'objections'],
   };
 }
 
 export function renderMarkdown(report) {
   const lines = [
-    '# Logic Estancia · Informe del embudo digital',
+    '# Logic2B Estancias · Informe del embudo digital',
     '',
     `Periodo: ${report.period.start} → ${report.period.end}  `,
     `Contrato: ${report.contractVersion}  `,
@@ -137,9 +159,17 @@ export function renderMarkdown(report) {
     '',
     '## Desglose por idioma',
     '',
-    '| Idioma | Inicio | Recomendación | Solicitud | Agenda |',
-    '| --- | ---: | ---: | ---: | ---: |',
-    ...report.byLocale.map(({ locale, stages }) => `| ${locale} | ${stages.assessment_start} | ${stages.assessment_complete} | ${stages.lead_submit} | ${stages.meeting_click} |`),
+    '| Idioma | Inicio | Entrega válida | Recomendación | Solicitud | Agenda |',
+    '| --- | ---: | ---: | ---: | ---: | ---: |',
+    ...report.byLocale.map(({ locale, stages }) => `| ${locale} | ${stages.assessment_start} | ${stages.assessment_submit} | ${stages.assessment_complete} | ${stages.lead_submit} | ${stages.meeting_click} |`),
+    '',
+    '## Vistas de soluciones',
+    '',
+    ...(report.solutionViewsBySegment.length ? [
+      '| Segmento | ES | EN | Total |',
+      '| --- | ---: | ---: | ---: |',
+      ...report.solutionViewsBySegment.map(({ segment, es, en, total }) => `| ${segment} | ${es} | ${en} | ${total} |`),
+    ] : ['Sin `solution_view` canónicos en el periodo.']),
     '',
     '## Totales de eventos observados',
     '',
@@ -150,6 +180,7 @@ export function renderMarkdown(report) {
     '## Controles de calidad',
     '',
     ...(report.warnings.length ? report.warnings.map((warning) => `- Revisar: ${warning}`) : ['- Sin incoherencias direccionales detectadas en los recuentos.']),
+    ...report.notes.map((note) => `- Contexto: ${note}`),
     '- Propuestas, proyectos ganados/perdidos, ingresos y objeciones quedan fuera: requieren evidencia comercial separada.',
     '- No interpretar este informe como tráfico total: la analítica solo se activa tras consentimiento explícito.',
   ];
@@ -160,7 +191,7 @@ export async function runFunnelReport({ args, stdin = '' }) {
   try {
     const options = parseArguments(args);
     if (options.help) return success(usage());
-    if (options.validate && !options.example && !stdin.trim()) return success(JSON.stringify({ ok: true, contractVersion: CONTRACT_VERSION, funnel: FUNNEL.map(([event]) => event), privacy: 'aggregated-allowlist-only' }, null, 2));
+    if (options.validate && !options.example && !stdin.trim()) return success(JSON.stringify({ ok: true, contractVersion: CONTRACT_VERSION, funnel: FUNNEL.map(({ event }) => event), privacy: 'aggregated-allowlist-only' }, null, 2));
     const raw = options.example ? EXAMPLE : parseInput(stdin);
     const dataset = validateDataset(raw);
     const report = buildReport(dataset);
@@ -196,6 +227,19 @@ function requiredValue(args, index, option) {
 }
 
 function isRecord(value) { return Boolean(value) && typeof value === 'object' && !Array.isArray(value); }
+function validateEventShape(row, label) {
+  const shape = EVENT_SHAPES[row.event];
+  if (!shape) return;
+  const missing = shape.required.filter((key) => row[key] === undefined);
+  if (missing.length) throw new Error(`${label} requiere dimensiones canónicas para ${row.event}: ${missing.join(', ')}.`);
+  const dimensions = Object.keys(row).filter((key) => key !== 'event' && key !== 'count');
+  const unexpected = dimensions.filter((key) => !shape.allowed.includes(key));
+  if (unexpected.length) throw new Error(`${label} contiene dimensiones no canónicas para ${row.event}: ${unexpected.join(', ')}.`);
+  for (const [key, allowed] of Object.entries(shape.values)) {
+    if (row[key] !== undefined && !allowed.includes(row[key])) throw new Error(`${label}.${key} no es canónico para ${row.event}.`);
+  }
+}
+function matchesStage(row, stage) { return row.event === stage.event && row.source_section === stage.sourceSection; }
 function sum(rows) { return rows.reduce((total, row) => total + row.count, 0); }
 function round(value) { return Math.round(value * 10) / 10; }
 function formatPercent(value) { return Number.isInteger(value) ? String(value) : value.toFixed(1); }

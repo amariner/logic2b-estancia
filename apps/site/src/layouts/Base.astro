@@ -149,7 +149,7 @@ const structuredData = [
       <span>{wa.label}</span>
     </a>
     <CookieBanner locale={locale} />
-    <script is:inline define:vars={{ consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, gtmContainerId: analyticsContract.containerId, allowedAnalyticsEvents: analyticsContract.surfaces.site, allowedAnalyticsParameters: analyticsContract.parameters, allowedAnalyticsParameterValues: analyticsContract.parameterValues, analyticsSafePaths: ANALYTICS_SAFE_PATHS }}>
+    <script is:inline define:vars={{ consentKey: CONSENT.key, legacyConsentKey: CONSENT.legacyKey, consentVersion: CONSENT.version, gtmContainerId: analyticsContract.containerId, allowedAnalyticsEvents: analyticsContract.surfaces.site, allowedAnalyticsParameters: analyticsContract.parameters, allowedAnalyticsParameterValues: analyticsContract.parameterValues, analyticsEventShapes: analyticsContract.eventShapes, analyticsSafePaths: ANALYTICS_SAFE_PATHS }}>
       const menu = document.querySelector('.menu');
       const mobile = document.querySelector('#mobile-nav');
       function setMobileMenu(open, moveFocus = false) {
@@ -262,8 +262,14 @@ const structuredData = [
           const allowed = allowedAnalyticsParameterValues[key];
           return typeof value === 'string' && Array.isArray(allowed) && allowed.includes(value);
         }));
+        const shape = analyticsEventShapes[event];
+        if (shape) {
+          const keys = Object.keys(safe);
+          if (shape.required.some((key) => !(key in safe)) || keys.some((key) => !shape.allowed.includes(key))) return;
+          if (Object.entries(shape.values).some(([key, allowed]) => key in safe && !allowed.includes(safe[key]))) return;
+        }
         window.estanciaRuntimeReady.then((runtime) => {
-          if (!isAnalyticsSafeLocation() || runtime.providers.analytics !== 'live') return;
+          if (!hasAnalyticsConsent() || !isAnalyticsSafeLocation() || runtime.providers.analytics !== 'live') return;
           window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event, ...safe });
         });
       };

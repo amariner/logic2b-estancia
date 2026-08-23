@@ -76,7 +76,7 @@ Las restricciones del modo demo prevalecen sobre cualquier otra operación de pr
 - Mantiene idempotencia, límites, minimización de datos y pruebas propias.
 - No convierte una interfaz de demostración en una operación real sin una decisión de rollout.
 
-Logic Estancia solo tiene hoy una mutación externa real implementada: la entrega del formulario comercial mediante Resend, desde la landing principal o una landing de segmento y con `COMMERCIAL_LEADS_ENABLED=true`. GTM exige modo real más consentimiento. Reservas, pagos, PMS, canales, mensajería, CRM, IA y operaciones hoteleras no tienen adaptadores reales en este repositorio. No debe inferirse su disponibilidad por la existencia de una pantalla.
+Logic2B Estancias solo tiene hoy una mutación externa real implementada: la entrega del formulario comercial único de la portada mediante Resend y con `COMMERCIAL_LEADS_ENABLED=true`. Las landings de segmento navegan a esa misma instancia con un origen allowlisted. GTM exige modo real, autorización de operaciones, proveedor `gtm` y consentimiento. Reservas, pagos, PMS, canales, mensajería, CRM, IA y operaciones hoteleras no tienen adaptadores reales en este repositorio. No debe inferirse su disponibilidad por la existencia de una pantalla.
 
 ## Barreras de servidor
 
@@ -99,7 +99,7 @@ El rechazo no debe crear una cuota de rate limit, referencia durable, alarma, lo
 
 | Superficie | Resultado visible en demo | Efecto real posible | Barrera efectiva en demo | Condición mínima de activación real |
 | --- | --- | --- | --- | --- |
-| Formularios comerciales de landing y segmentos | Confirmación simulada si la allowlist falta; entrega real solo si está activa | DO de coordinación y dos emails Resend | `403` antes de cuerpo, DO y proveedor si falta una puerta | `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend`, secretos completos y smoke aislado |
+| Formulario comercial único de la portada | Confirmación simulada si la allowlist falta; entrega real solo si está activa | DO de coordinación y dos emails Resend | `403` antes de cuerpo, DO y proveedor si falta una puerta | `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend`, secretos completos y smoke aislado |
 | Solicitudes y reservas | Fixtures de solicitud, alternativa y reserva | Reserva, inventario, comunicación o pago | Sin endpoint transaccional; estado temporal/restaurable | Adaptador, persistencia, permisos, migraciones y aceptación del cliente |
 | Planning y tarifas | Calendario y cifras ficticias | Cambios de unidad, disponibilidad o precio | Sin escritura ni PMS/canal conectado | Proveedor verificado, reconciliación, ownership y rollback |
 | Pagos | Explicación o recorrido visual | Crear sesión, autorización, captura o devolución | Endpoint ausente (`404`) y proveedor `disabled` | Contrato de pagos, secretos aislados, webhooks, conciliación y smoke |
@@ -108,7 +108,7 @@ El rechazo no debe crear una cuota de rate limit, referencia durable, alarma, lo
 | Canales | Matriz de cobertura con cero conexiones | Inventario, tarifas, reservas o mensajes | Sin OAuth, webhook o adaptador; proveedor `disabled` | Contrato por canal, mapeo, deduplicación, reconciliación y recuperación |
 | Automatizaciones y jobs | Sin superficie pública de demo | Jobs, colas, reglas o notificaciones | `jobs=false`; sin consumidor externo | Flag específico, observabilidad, reintentos, límites y kill switch |
 | IA supervisada | Sin superficie pública de demo | Inferencia o envío a un modelo | Sin modelo ni proveedor; contenido local | Proveedor, política de datos, fuentes, evaluación, revisión y fallback |
-| Analítica | Sin medición externa | Carga de GTM/GA y eventos agregados | `ANALYTICS_PROVIDER_MODE=disabled`, incluso con consentimiento previo | Ambas autorizaciones, modo `gtm`, consentimiento y contrato sin PII |
+| Analítica | Sin medición externa | Carga de GTM/GA y eventos agregados | `ANALYTICS_PROVIDER_MODE=disabled`, incluso con consentimiento previo | `DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true`, modo `gtm`, consentimiento y contrato sin PII |
 | Webhooks | Ninguno | Procesamiento de eventos de terceros | Ruta ausente o rechazo antes del cuerpo | Firma, replay protection, idempotencia, observabilidad y prueba aislada |
 
 ## Inventario de capacidades y comunicación
@@ -175,7 +175,7 @@ Una capacidad solo puede salir del modo demo en un despliegue aislado cuando se 
 9. Rollback ensayado.
 10. Aprobación explícita del rollout.
 
-Los formularios comerciales de la landing principal y las tres landings de segmento solo envían una solicitud cuando `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend` y la configuración de Resend es completa. Pueden convivir con `DEMO_MODE=true`; esa excepción no vuelve operativa ninguna demo de producto. En cualquier otra configuración la interfaz muestra una simulación y el endpoint rechaza antes de leer el cuerpo.
+El formulario comercial único de la portada solo envía una solicitud cuando `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend` y la configuración de Resend es completa. Las landings de segmento solo navegan a esa instancia. La captación puede convivir con `DEMO_MODE=true`; esa excepción no vuelve operativa ninguna demo de producto. En cualquier otra configuración la interfaz muestra una simulación y el endpoint rechaza antes de leer el cuerpo.
 
 ## Recuperación y rollback
 

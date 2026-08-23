@@ -1,4 +1,4 @@
-# Logic Estancia · Commercial playbook
+# Logic2B Estancias · Commercial playbook
 
 This document turns the 12-month product roadmap into an operating system. It does not claim that interviews, proposals, prices or signed projects already exist.
 
@@ -64,7 +64,7 @@ DEMO_MODE=false
 REAL_OPERATIONS_ENABLED=true
 ```
 
-The only exception is Logic Estancia's own commercial lead capture: it may coexist with `DEMO_MODE=true`, but only with `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend`, `LEADS_TRANSPORT=resend` and complete validated Resend configuration. Missing, empty or unknown values keep it disabled before the body is read. Provider selection is an additional gate, never a fallback:
+The only exception is Logic2B Estancias' own commercial lead capture: it may coexist with `DEMO_MODE=true`, but only with `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend`, `LEADS_TRANSPORT=resend` and complete validated Resend configuration. Missing, empty or unknown values keep it disabled before the body is read. Provider selection is an additional gate, never a fallback:
 
 - `EMAIL_PROVIDER_MODE=disabled` by default; `capture`/`mock` are reserved for isolated harnesses and currently resolve without output; `resend` is eligible only for the explicit commercial-lead allowlist.
 - `ANALYTICS_PROVIDER_MODE=disabled` in demo; `capture`/`mock` are reserved for isolated harnesses and currently resolve without output; `gtm` is eligible only in real mode and after consent.
@@ -84,7 +84,7 @@ Configure the mode gates in the Cloudflare Worker environment, never in tracked 
 Only an isolated real email deployment may also configure:
 
 - `LEADS_RESEND_API_KEY`: Resend credential.
-- `LEADS_FROM_EMAIL`: verified sender address shown under the Logic Estancia name.
+- `LEADS_FROM_EMAIL`: verified sender address shown under the Logic2B Estancias name.
 - `LEADS_INTERNAL_RECIPIENT`: internal mailbox that receives the complete request.
 - `LEADS_REPLY_TO`: monitored address used when the visitor replies to their summary.
 - `LEADS_MEETING_URL`: public HTTPS scheduling URL, without embedded credentials.
@@ -111,7 +111,7 @@ An internal Resend message is the mandatory delivery. A visitor summary without 
 
 ### Demo form boundary
 
-The commercial form on the Logic Estancia landing and the three commercial segment landings may call `/api/leads`. They become eligible for Resend only with `COMMERCIAL_LEADS_ENABLED=true` and complete email configuration; product demo mode may remain true. Without that allowlist, the endpoint returns `403` before reading the body, rate limiting, durable coordination or provider resolution. The interface must explain that no request was sent rather than showing a real-delivery receipt.
+Only the commercial form on the Logic2B Estancias homepage may call `/api/leads`; segment landings navigate to that single form and preserve only an allowlisted origin. It becomes eligible for Resend only with `COMMERCIAL_LEADS_ENABLED=true` and complete email configuration; product demo mode may remain true. Without that allowlist, the endpoint returns `403` before reading the body, rate limiting, durable coordination or provider resolution. The interface must explain that no request was sent rather than showing a real-delivery receipt.
 
 Nivora, Terrava, Aurem and their workspaces are fictitious visual fixtures. Their panels collect no visitor data and must never send email, create a lead, write to CRM, mutate inventory, create a booking or payment, publish content, start a job or contact an operational provider.
 
@@ -145,16 +145,18 @@ No ejecutes esta comprobación contra una demo: debe responder de forma cerrada 
 
 ## GA4/GTM contract
 
-GTM is disabled unconditionally in demo mode, even when a browser retains prior analytics consent. In a real deployment it also requires `ANALYTICS_PROVIDER_MODE=gtm`; consent alone never activates the provider.
+GTM is disabled unconditionally in demo mode, even when a browser retains prior analytics consent. A controlled analytics deployment requires the three explicit gates `DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true` and `ANALYTICS_PROVIDER_MODE=gtm`; consent alone never activates the provider. Keep `COMMERCIAL_LEADS_ENABLED=false` and every unrelated provider disabled unless each has a separate approval.
 
 Only configure the allowlisted events emitted by the site:
 
 - `solution_view`, `plan_select`
-- `assessment_start`, `assessment_step`, `assessment_complete`, `assessment_submit`
+- `assessment_start`, `assessment_step`, `assessment_submit`, `assessment_complete`
 - `demo_open`, `demo_mode_select`, `demo_step_complete`, `demo_flow_complete`, `demo_cta`
 - `lead_submit`, `meeting_click`, `cta_click`
 
 Allowed parameters are locale, segment, plan, demo, flow, step index and source section. Names, emails, phone numbers, dates, amounts, messages and demo state must never be sent.
+
+Before activation, configure Estancia-specific tags, triggers and parameter mappings inside the shared `GTM-TVDWZ9LC` container without changing Camp. Browser emission and the offline report consume the same canonical event shapes from `packages/config/src/analytics-contract.json`; incomplete events or event-incompatible dimensions are discarded or rejected. Deploying the current build and changing runtime gates both require explicit rollout approval, followed by a production check of the capability manifest, consent, CSP and exact `dataLayer` shapes before the baseline period begins.
 
 ## Content system
 
@@ -184,12 +186,13 @@ Before sending any output, a human must confirm the plan, scope, exclusions, dep
 Review the funnel in this order:
 
 1. Assessment starts.
-2. Assessment completion.
-3. Optional contact submission.
-4. Meetings.
-5. Proposals.
-6. Won and lost projects.
+2. Valid assessment submissions.
+3. Recommendations shown.
+4. Optional contact submission.
+5. Meetings.
+6. Proposals.
+7. Won and lost projects.
 
 Change one main conversion hypothesis at a time. Keep the three canonical demos and five deep flows unless sales evidence justifies more scope.
 
-The reproducible digital report is documented in [`docs/commercial/FUNNEL_REPORT.md`](commercial/FUNNEL_REPORT.md). It accepts only aggregated counts for the runtime allowlist and reports assessment starts, visible recommendations, delivered requests and optional meeting clicks. It deliberately excludes proposals, won/lost projects, revenue and objections, which require separate verified commercial evidence. Run `pnpm funnel:report -- --validate` to inspect the contract and `pnpm funnel:report -- --example` for a fictitious report before handling an authorised aggregate export.
+The reproducible digital report is documented in [`docs/commercial/FUNNEL_REPORT.md`](commercial/FUNNEL_REPORT.md). It accepts only aggregated counts for the runtime allowlist and reports assessment starts, valid final submissions, visible recommendations, delivered requests and optional meeting clicks. Diagnostic rates require `source_section=assessment`; the homepage scope recommendation remains visible only in event totals. It deliberately excludes proposals, won/lost projects, revenue and objections, which require separate verified commercial evidence. Run `pnpm funnel:report -- --validate` to inspect the contract and `pnpm funnel:report -- --example` for a fictitious report before handling an authorised aggregate export.

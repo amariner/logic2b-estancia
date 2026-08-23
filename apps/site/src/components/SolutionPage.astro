@@ -86,7 +86,7 @@ const visible = CAPABILITIES.filter(({ id }) => (copy.capabilityIds as readonly 
 const planNames: Record<PlanLevel, string> = en ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' } : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
 const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: copy.faq.map(([question, answer]) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })) };
 ---
-<section class="solution-hero">
+<section class="solution-hero" data-solution-view data-locale={locale} data-segment={segment}>
   <div class="shell solution-hero-layout">
     <div><p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p>{copy.body}</p><div class="hero-actions"><a class="pill" href={`${prefix}/?contact=${segment}#contacto`} data-contact-trigger data-track="cta_click" data-segment={segment} data-section="solution_hero">{en ? 'Request a conversation' : 'Pedir una conversación'}</a><a class="pill ghost" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the fictional case' : 'Explorar el caso ficticio'}</a></div></div>
     <a class="solution-hero-media" href={`${prefix}/demos/${business.demo}/`} aria-label={en ? `Explore the fictional ${copy.demoTitle} case` : `Explorar el caso ficticio ${copy.demoTitle}`}><picture><source type="image/avif" srcset={`/media/${business.demo}/hero-640.avif 640w, /media/${business.demo}/hero-960.avif 960w`} sizes="(max-width: 900px) 100vw, 45vw" /><img src={business.image} alt="" width="2016" height="1344" /></picture><span><small>{en ? 'Fictional visual case' : 'Caso visual ficticio'}</small><strong>{copy.demoTitle}</strong></span><b aria-hidden="true">↗</b></a>
@@ -155,3 +155,29 @@ const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEn
 <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
 
 <section class="section shell final-cta"><p class="eyebrow">{en ? 'A recommendation before a proposal' : 'Una recomendación antes que una propuesta'}</p><h2 class="heading">{en ? `See where ${business.plural.toLowerCase()} should start.` : `Descubre por dónde debería empezar tu ${segment === 'rural' ? 'casa rural' : segment === 'apartments' ? 'negocio de apartamentos' : 'hotel'}.`}</h2><p>{en ? 'The assessment uses capabilities; size only helps scope implementation.' : 'El diagnóstico utiliza capacidades; el tamaño solo ayuda a dimensionar la implantación.'}</p><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} data-track="cta_click" data-segment={segment} data-section="solution_footer">{en ? 'Start the assessment' : 'Empezar diagnóstico'} →</a></section>
+
+<script>
+  import { getConsent } from '../scripts/analytics-consent';
+
+  const solutionView = document.querySelector<HTMLElement>('[data-solution-view]');
+  const allowedLocales = new Set(['es', 'en']);
+  const allowedSegments = new Set(['rural', 'apartments', 'hotels']);
+  let solutionViewEmitted = false;
+
+  async function emitSolutionView(): Promise<void> {
+    if (solutionViewEmitted || !solutionView) return;
+
+    const runtime = await window.estanciaRuntimeReady;
+    if (solutionViewEmitted || runtime?.providers.analytics !== 'live' || !getConsent()?.analytics || !window.estanciaTrack) return;
+
+    const { locale, segment } = solutionView.dataset;
+    if (!locale || !segment || !allowedLocales.has(locale) || !allowedSegments.has(segment)) return;
+
+    solutionViewEmitted = true;
+    window.estanciaTrack('solution_view', { locale, segment, source_section: 'solution' });
+  }
+
+  window.addEventListener('estancia:consent-updated', () => { void emitSolutionView(); });
+  if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', () => { void emitSolutionView(); }, { once: true });
+  else void emitSolutionView();
+</script>
