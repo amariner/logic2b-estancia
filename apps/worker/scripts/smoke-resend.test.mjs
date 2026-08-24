@@ -55,7 +55,7 @@ describe('Resend smoke tool', () => {
 
   it('prints only an allowlisted response summary and never the email', async () => {
     const fetchImplementation = vi.fn()
-      .mockResolvedValueOnce(realRuntimeResponse())
+      .mockResolvedValueOnce(commercialRuntimeResponse())
       .mockResolvedValueOnce(new Response(JSON.stringify({
       ok: true,
       outcome: 'delivered',
@@ -76,7 +76,7 @@ describe('Resend smoke tool', () => {
 
   it('fails when replay verification returns a different reference', async () => {
     const fetchImplementation = vi.fn()
-      .mockResolvedValueOnce(realRuntimeResponse())
+      .mockResolvedValueOnce(commercialRuntimeResponse())
       .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, outcome: 'delivered', ref: reference, replayed: true }), { status: 202 }));
     const result = await runSmoke({
       args: ['--execute', '--run-id', 'release-20260817', '--expect-ref', 'ce74de03-c7db-4cf7-9624-133e09be6972'],
@@ -89,7 +89,7 @@ describe('Resend smoke tool', () => {
 
   it('treats a degraded provider result as a failed smoke', async () => {
     const fetchImplementation = vi.fn()
-      .mockResolvedValueOnce(realRuntimeResponse())
+      .mockResolvedValueOnce(commercialRuntimeResponse())
       .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, outcome: 'delivered_degraded', ref: reference }), { status: 202 }));
     const result = await runSmoke({
       args: ['--execute', '--run-id', 'release-20260817'],
@@ -135,9 +135,9 @@ describe('Resend smoke tool', () => {
   });
 });
 
-function realRuntimeResponse() {
+function commercialRuntimeResponse() {
   return new Response(JSON.stringify({
-    schemaVersion: '1.0.0', mode: 'real', demoMode: false, sideEffects: true, durableWrites: true, jobs: false,
+    schemaVersion: '1.0.0', mode: 'demo', demoMode: true, sideEffects: true, durableWrites: true, jobs: false,
     commercialLeadsEnabled: true,
     providers: { email: 'live' }, operations: { commercialLead: 'active' },
   }), { status: 200 });

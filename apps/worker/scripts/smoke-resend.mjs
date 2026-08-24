@@ -152,8 +152,8 @@ function allowsLiveEmail(value) {
   return Boolean(value
     && typeof value === 'object'
     && value.schemaVersion === '1.0.0'
-    && value.mode === 'real'
-    && value.demoMode === false
+    && ((value.mode === 'demo' && value.demoMode === true)
+      || (value.mode === 'real' && value.demoMode === false))
     && value.commercialLeadsEnabled === true
     && value.sideEffects === true
     && value.durableWrites === true
