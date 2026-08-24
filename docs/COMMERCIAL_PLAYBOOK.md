@@ -145,7 +145,7 @@ No ejecutes esta comprobación contra una demo: debe responder de forma cerrada 
 
 ## GA4/GTM contract
 
-GTM is disabled unconditionally in demo mode, even when a browser retains prior analytics consent. A controlled analytics deployment requires the three explicit gates `DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true` and `ANALYTICS_PROVIDER_MODE=gtm`; consent alone never activates the provider. Keep `COMMERCIAL_LEADS_ENABLED=false` and every unrelated provider disabled unless each has a separate approval.
+GTM is disabled unconditionally in demo mode, even when a browser retains prior analytics consent. A controlled analytics deployment requires the three explicit gates `DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true` and `ANALYTICS_PROVIDER_MODE=gtm`; consent alone never activates the provider. The separately approved homepage capture may remain active through `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend` and `LEADS_TRANSPORT=resend`; every unrelated provider remains disabled unless it receives its own approval.
 
 Only configure the allowlisted events emitted by the site:
 

@@ -64,12 +64,18 @@ const runtimeCopy = locale === 'es' ? {
   demoLabel: 'Modo demo seguro.',
   demoNote: 'Puedes completar el recorrido, pero no se enviará ni guardará ningún dato fuera de esta página.',
   demoOutcome: 'Simulación completada. No se ha enviado, almacenado ni comunicado ningún dato.',
+  unavailableLabel: 'Envío no disponible temporalmente.',
+  unavailableNote: 'No hemos podido verificar el estado del servicio. Tus datos no saldrán de esta página; recarga para intentarlo de nuevo o escríbenos por WhatsApp.',
+  unavailableOutcome: 'No hemos podido verificar el servicio. No se ha enviado, almacenado ni comunicado ningún dato.',
   liveLabel: 'Solicitud comercial real.',
   liveNote: 'Al enviarla, Logic2B recibirá estos datos por email únicamente para responderte.',
 } : {
   demoLabel: 'Safe demo mode.',
   demoNote: 'You can complete the journey, but no data will be sent or stored outside this page.',
   demoOutcome: 'Simulation complete. No data was sent, stored or communicated.',
+  unavailableLabel: 'Sending is temporarily unavailable.',
+  unavailableNote: 'We could not verify the service status. Your details will not leave this page; reload to try again or contact us on WhatsApp.',
+  unavailableOutcome: 'We could not verify the service. No data was sent, stored or communicated.',
   liveLabel: 'Live commercial enquiry.',
   liveNote: 'When submitted, Logic2B will receive these details by email only to reply to you.',
 };
@@ -256,7 +262,7 @@ const serviceSchema = {
   </div>
 </dialog>
 
-<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, timeout: c.contact.timeout, rateLimited: c.contact.rateLimited, retrying: c.contact.retrying, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback, leadRequestTimeoutMs, demoLabel: runtimeCopy.demoLabel, demoNote: runtimeCopy.demoNote, demoOutcome: runtimeCopy.demoOutcome, liveLabel: runtimeCopy.liveLabel, liveNote: runtimeCopy.liveNote }}>
+<script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, timeout: c.contact.timeout, rateLimited: c.contact.rateLimited, retrying: c.contact.retrying, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback, leadRequestTimeoutMs, demoLabel: runtimeCopy.demoLabel, demoNote: runtimeCopy.demoNote, demoOutcome: runtimeCopy.demoOutcome, unavailableLabel: runtimeCopy.unavailableLabel, unavailableNote: runtimeCopy.unavailableNote, unavailableOutcome: runtimeCopy.unavailableOutcome, liveLabel: runtimeCopy.liveLabel, liveNote: runtimeCopy.liveNote }}>
   const form = document.querySelector('[data-lead]');
   const status = form?.querySelector('.form-status');
   const receipt = form?.querySelector('[data-lead-receipt]');
@@ -278,9 +284,10 @@ const serviceSchema = {
   if (contactContext && contactAccommodationType instanceof HTMLSelectElement) contactAccommodationType.value = contactContext.accommodationType;
   window.estanciaRuntimeReady?.then((runtime) => {
     const live = runtime.operations?.commercialLead === 'active' && runtime.providers?.email === 'live';
-    if (runtimeLabel) runtimeLabel.textContent = live ? liveLabel : demoLabel;
-    if (runtimeCopy) runtimeCopy.textContent = live ? liveNote : demoNote;
-    if (runtimeNote) runtimeNote.dataset.mode = live ? 'real' : 'demo';
+    const unavailable = runtime.manifestAvailable === false;
+    if (runtimeLabel) runtimeLabel.textContent = unavailable ? unavailableLabel : live ? liveLabel : demoLabel;
+    if (runtimeCopy) runtimeCopy.textContent = unavailable ? unavailableNote : live ? liveNote : demoNote;
+    if (runtimeNote) runtimeNote.dataset.mode = unavailable ? 'unavailable' : live ? 'real' : 'demo';
   });
   document.querySelectorAll('[data-plan]').forEach((link) => link.addEventListener('click', () => {
     const plan = form?.querySelector('[name=plan]');
@@ -293,7 +300,7 @@ const serviceSchema = {
     if (button) button.disabled = true; if (label) label.textContent = sending; if (status) status.textContent = '';
     const runtime = await (window.estanciaRuntimeReady ?? Promise.resolve(null));
     if (runtime?.operations?.commercialLead !== 'active' || runtime?.providers?.email !== 'live') {
-      if (status) status.textContent = demoOutcome;
+      if (status) status.textContent = runtime?.manifestAvailable === false ? unavailableOutcome : demoOutcome;
       if (button) button.disabled = false;
       if (label) label.textContent = submit;
       return;

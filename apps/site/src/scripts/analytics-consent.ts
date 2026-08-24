@@ -93,6 +93,7 @@ declare global {
     estanciaLoadGtm?: () => void;
     estanciaTrack?: (event: string, parameters?: Record<string, string | number | undefined>) => void;
     estanciaRuntimeReady?: Promise<{
+      manifestAvailable: boolean;
       mode: 'demo' | 'real_locked' | 'real';
       demoMode: boolean;
       commercialLeadsEnabled: boolean;

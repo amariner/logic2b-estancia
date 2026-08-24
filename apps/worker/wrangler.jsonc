@@ -9,10 +9,10 @@
   "vars": {
     "DEMO_MODE": "true",
     "REAL_OPERATIONS_ENABLED": "false",
-    "COMMERCIAL_LEADS_ENABLED": "false",
-    "EMAIL_PROVIDER_MODE": "disabled",
+    "COMMERCIAL_LEADS_ENABLED": "true",
+    "EMAIL_PROVIDER_MODE": "resend",
     "ANALYTICS_PROVIDER_MODE": "disabled",
-    "LEADS_TRANSPORT": "disabled"
+    "LEADS_TRANSPORT": "resend"
   },
   "durable_objects": {
     "bindings": [

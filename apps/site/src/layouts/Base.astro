@@ -89,7 +89,8 @@ const structuredData = [
     <meta name="twitter:image:alt" content={socialImageAlt} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
     <script is:inline>
-      const safeRuntimeCapabilities = Object.freeze({ schemaVersion: '1.0.0', mode: 'demo', demoMode: true, commercialLeadsEnabled: false, sideEffects: false, durableWrites: false, jobs: false, providers: { analytics: 'disabled', email: 'disabled', payments: 'disabled', webhooks: 'disabled', externalStorage: 'disabled' }, operations: { commercialLead: 'blocked', payments: 'unavailable', webhooks: 'unavailable', automations: 'unavailable' } });
+      const runtimeManifestTimeoutMs = 4_000;
+      const safeRuntimeCapabilities = Object.freeze({ schemaVersion: '1.0.0', manifestAvailable: false, mode: 'demo', demoMode: true, commercialLeadsEnabled: false, sideEffects: false, durableWrites: false, jobs: false, providers: { analytics: 'disabled', email: 'disabled', payments: 'disabled', webhooks: 'disabled', externalStorage: 'disabled' }, operations: { commercialLead: 'blocked', payments: 'unavailable', webhooks: 'unavailable', automations: 'unavailable' } });
       const normalizeRuntimeCapabilities = (candidate) => {
         if (!candidate || candidate.schemaVersion !== '1.0.0' || !['demo', 'real_locked', 'real'].includes(candidate.mode) || candidate.jobs !== false) return safeRuntimeCapabilities;
         const emailLive = candidate.commercialLeadsEnabled === true && candidate.durableWrites === true && candidate.providers?.email === 'live' && candidate.operations?.commercialLead === 'active';
@@ -97,6 +98,7 @@ const structuredData = [
         if (candidate.demoMode !== (candidate.mode === 'demo') || (!emailLive && !analyticsLive && candidate.sideEffects !== false)) return safeRuntimeCapabilities;
         return {
           ...safeRuntimeCapabilities,
+          manifestAvailable: true,
           mode: candidate.mode, demoMode: candidate.demoMode === true, commercialLeadsEnabled: emailLive, sideEffects: emailLive || analyticsLive,
           durableWrites: emailLive,
           providers: {
@@ -110,10 +112,19 @@ const structuredData = [
           },
         };
       };
-      window.estanciaRuntimeReady = fetch('/api/capabilities', { method: 'GET', headers: { accept: 'application/json' }, credentials: 'same-origin' })
-        .then((response) => response.ok ? response.json() : safeRuntimeCapabilities)
-        .then(normalizeRuntimeCapabilities)
-        .catch(() => safeRuntimeCapabilities);
+      window.estanciaRuntimeReady = (async () => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), runtimeManifestTimeoutMs);
+        try {
+          const response = await fetch('/api/capabilities', { method: 'GET', headers: { accept: 'application/json' }, credentials: 'same-origin', signal: controller.signal });
+          if (!response.ok) return safeRuntimeCapabilities;
+          return normalizeRuntimeCapabilities(await response.json());
+        } catch {
+          return safeRuntimeCapabilities;
+        } finally {
+          clearTimeout(timeout);
+        }
+      })();
     </script>
     <title>{title}</title>
   </head>

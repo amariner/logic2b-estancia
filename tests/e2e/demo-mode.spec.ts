@@ -54,7 +54,7 @@ test('the sales form produces a local simulation and makes no lead request in de
   expect(leadRequests).toBe(0);
 });
 
-test('the sales form is inert when JavaScript is unavailable', async ({ browser }) => {
+test('the sales form cannot reach the lead API when JavaScript is unavailable', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   let leadRequests = 0;
@@ -65,10 +65,44 @@ test('the sales form is inert when JavaScript is unavailable', async ({ browser 
   const form = page.locator('[data-lead]');
   await expect(form).toHaveAttribute('method', 'dialog');
   await expect(form).not.toHaveAttribute('action');
-  await expect(form.getByRole('button', { name: 'Quiero una recomendación' })).toHaveAttribute('type', 'button');
+  await expect(form.getByRole('button', { name: 'Quiero una recomendación' })).toHaveAttribute('type', 'submit');
+  await form.locator('[name="name"]').fill('Persona ficticia');
+  await form.locator('[name="businessName"]').fill('Alojamiento ficticio');
+  await form.locator('[name="email"]').fill('demo@example.test');
+  await form.locator('[name="accept"]').evaluate((element) => {
+    (element as HTMLInputElement).checked = true;
+  });
+  const currentUrl = page.url();
+  await form.getByRole('button', { name: 'Quiero una recomendación' }).click({ force: true });
+  await expect(page).toHaveURL(currentUrl);
   expect(leadRequests).toBe(0);
   await context.close();
 });
+
+for (const { locale, path, submit, unavailable } of [
+  { locale: 'ES', path: '/', submit: 'Quiero una recomendación', unavailable: 'No hemos podido verificar el servicio. No se ha enviado, almacenado ni comunicado ningún dato.' },
+  { locale: 'EN', path: '/en/', submit: 'Get my recommendation', unavailable: 'We could not verify the service. No data was sent, stored or communicated.' },
+]) {
+  test(`the ${locale} sales form recovers when the runtime manifest hangs`, async ({ page }) => {
+    let leadRequests = 0;
+    await page.route('**/api/capabilities', () => {});
+    page.on('request', (request) => {
+      if (new URL(request.url()).pathname === '/api/leads') leadRequests += 1;
+    });
+    await page.goto(path);
+    const form = page.locator('[data-lead]');
+    await form.locator('[name="name"]').fill('Persona ficticia');
+    await form.locator('[name="businessName"]').fill('Alojamiento ficticio');
+    await form.locator('[name="email"]').fill('demo@example.test');
+    await form.locator('[name="accept"]').check();
+    const button = form.getByRole('button', { name: submit });
+    await button.click();
+    await expect(form.locator('[data-runtime-lead-note]')).toHaveAttribute('data-mode', 'unavailable', { timeout: 6_000 });
+    await expect(form.locator('.form-status')).toHaveText(unavailable);
+    await expect(button).toBeEnabled();
+    expect(leadRequests).toBe(0);
+  });
+}
 
 test('demo mode never loads analytics providers, even with prior consent', async ({ page }) => {
   await page.addInitScript(() => {

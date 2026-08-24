@@ -22,7 +22,7 @@ commercial_lead_allowed =
 
 - `DEMO_MODE`: solo el valor literal `false` permite evaluar un modo real. Ausente, vacío, `true` o cualquier otro valor significa demo.
 - `REAL_OPERATIONS_ENABLED`: segunda autorización para operaciones de producto; solo cuenta con `DEMO_MODE=false`.
-- `COMMERCIAL_LEADS_ENABLED`: allowlist independiente. Solo el literal `true` permite evaluar la entrega de leads comerciales desde la landing principal y las landings por tipo de estancia, incluso si `DEMO_MODE=true`.
+- `COMMERCIAL_LEADS_ENABLED`: allowlist independiente. Solo el literal `true` permite evaluar la entrega de leads comerciales desde el formulario único de la landing principal, incluso si `DEMO_MODE=true`. Las landings por tipo de estancia y el diagnóstico solo navegan hacia esa instancia.
 - `EMAIL_PROVIDER_MODE`: `disabled` por defecto. `capture` y `mock` quedan reservados para harnesses aislados y hoy se resuelven sin salida; `resend` solo es elegible para la allowlist comercial con configuración completa.
 - `ANALYTICS_PROVIDER_MODE`: `disabled` por defecto. `capture` y `mock` quedan reservados para harnesses aislados y hoy se resuelven sin salida; `gtm` solo es elegible con operaciones reales permitidas y consentimiento analítico.
 

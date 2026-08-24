@@ -22,7 +22,7 @@ La publicación es manual. El workflow `Deploy production` acepta una confirmaci
 
 Publicar un artefacto no activa operaciones. El modo real de producto solo puede intentarse en un despliegue aislado con `DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true` y el proveedor correspondiente habilitado explícitamente. La captación comercial puede habilitarse por separado, incluso mientras el producto sigue en demo, con `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend`, `LEADS_RESEND_API_KEY`, `LEADS_FROM_EMAIL`, `LEADS_INTERNAL_RECIPIENT` y `LEADS_REPLY_TO`. El destinatario interno validado para producción es `marinerandreu+logic@gmail.com`.
 
-Los formularios comerciales de la landing principal y de cada landing por tipo de estancia pueden llamar a `/api/leads`; solo envían con la allowlist comercial explícita y Resend completo. Si falta una puerta, fallan cerrado antes de leer el cuerpo, persistir o invocar proveedor. El diagnóstico enlaza a esos formularios, pero no envía por sí mismo; las demos Nivora, Terrava y Aurem nunca son elegibles para Resend. HubSpot permanece intencionadamente fuera de alcance. La configuración de captación crea el Durable Object que mantiene el rate limit y la idempotencia.
+El único formulario comercial está en la landing principal y puede llamar a `/api/leads`; solo envía con la allowlist comercial explícita y Resend completo. Si falta una puerta, falla cerrado antes de leer el cuerpo, persistir o invocar proveedor. Las landings por tipo de estancia y el diagnóstico enlazan a ese formulario, pero no envían por sí mismos; las demos Nivora, Terrava y Aurem nunca son elegibles para Resend. HubSpot permanece intencionadamente fuera de alcance. La configuración de captación crea el Durable Object que mantiene el rate limit y la idempotencia.
 
 Para desarrollo local, copia `apps/worker/.dev.vars.example` a `apps/worker/.dev.vars`. El ejemplo ya es seguro y no contiene credenciales. `.dev.vars` está excluido de Git; no guardes secretos reales en archivos versionados.
 
@@ -34,7 +34,7 @@ El despliegue ejecuta siempre el build completo del workspace antes de invocar W
 
 El smoke de Resend es seco por defecto y requiere autorización explícita para enviar dos correos inequívocamente marcados como prueba. El procedimiento seguro, la repetición idempotente y la comprobación manual en Resend están en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md#smoke-reproducible-de-resend).
 
-Las integraciones, reservas, pagos, canales, mensajería, SES.Hospedajes e IA de Nivora, Terrava, Aurem y sus dashboards son demostraciones locales, nunca ejecuciones externas. Sus formularios de producto no existen: la única captación permitida es la de las landings comerciales descritas arriba.
+Las integraciones, reservas, pagos, canales, mensajería, SES.Hospedajes e IA de Nivora, Terrava, Aurem y sus dashboards son demostraciones locales, nunca ejecuciones externas. Sus formularios de producto no existen: la única captación permitida es la de la landing principal descrita arriba.
 
 El contrato técnico completo, la matriz de efectos, los estados de capacidades, las pruebas de aislamiento y el procedimiento de activación/rollback están en [`docs/DEMO_MODE.md`](docs/DEMO_MODE.md).
 
