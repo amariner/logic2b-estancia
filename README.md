@@ -38,6 +38,8 @@ Las integraciones, reservas, pagos, canales, mensajería, SES.Hospedajes e IA de
 
 El contrato técnico completo, la matriz de efectos, los estados de capacidades, las pruebas de aislamiento y el procedimiento de activación/rollback están en [`docs/DEMO_MODE.md`](docs/DEMO_MODE.md).
 
+El inventario de bases, jobs, escrituras y el contrato probado de consumo D1 cero están en [`docs/D1_CONSUMPTION_AUDIT.md`](docs/D1_CONSUMPTION_AUDIT.md).
+
 La cadencia comercial, la taxonomía de GA4 y el guion de entrevistas están documentados en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md). HubSpot no forma parte del contrato ni del código ejecutable del Worker.
 
 ## Continuidad del desarrollo

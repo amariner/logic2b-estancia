@@ -123,10 +123,7 @@ describe('worker runtime isolation', () => {
     expect(deliver).toHaveBeenCalledOnce();
   });
 
-  it('keeps scheduled triggers inert', async () => {
-    const providerFetch = vi.spyOn(globalThis, 'fetch');
-    const scheduled = worker.scheduled;
-    await scheduled({} as ScheduledController, demoEnv);
-    expect(providerFetch).not.toHaveBeenCalled();
+  it('does not expose a scheduled handler', () => {
+    expect('scheduled' in worker).toBe(false);
   });
 });

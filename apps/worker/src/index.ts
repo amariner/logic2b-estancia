@@ -56,12 +56,6 @@ const worker = {
     }
     return new Response(response.body, { status: response.status, headers });
   },
-
-  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
-    // There are no scheduled capabilities in this product. Keeping the handler
-    // explicit makes an accidental trigger a verified no-op in demo and real mode.
-    if (!resolveRuntimeCapabilities(env).jobs) return;
-  },
 };
 
 export default worker;

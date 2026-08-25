@@ -22,6 +22,10 @@
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["LeadCoordinator"] }
   ],
+  "d1_databases": [],
+  "triggers": {
+    "crons": []
+  },
   "routes": [
     { "pattern": "estancia.logic2b.com", "custom_domain": true }
   ],
