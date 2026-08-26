@@ -83,7 +83,9 @@ test('capability maps expose truthful evidence and exact localized targets', asy
 
   await page.goto('/en/plans/');
   const evidenceLinks = page.locator('[data-capability-evidence]');
-  await expect(evidenceLinks).toHaveCount(9);
+  await expect(evidenceLinks).toHaveCount(10);
+  await expect(page.locator('[data-capability="supervised-ai"]')).toContainText('Visible in the demo');
+  await expect(page.locator('[data-capability-evidence="supervised-ai"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=automation');
   await expect(page.locator('[data-capability="revenue"]')).toContainText('Starting plan: Intelligent');
   await expect(page.locator('[data-capability="revenue"]')).toContainText('On the roadmap');
   await expect(page.locator('[data-capability-evidence-unavailable="revenue"]')).toBeVisible();
