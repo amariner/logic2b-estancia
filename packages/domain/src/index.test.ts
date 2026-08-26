@@ -47,10 +47,10 @@ describe('domain', () => {
       roles: 'demo_visual_disponible',
       channels: 'activable_por_proyecto',
       automation: 'demo_visual_pendiente',
-      'supervised-ai': 'demo_visual_pendiente',
+      'supervised-ai': 'demo_visual_disponible',
       revenue: 'en_ruta',
     });
-    const exposedWorkspaceViews = new Set(['home', 'enquiries', 'planning', 'bookings', 'guests', 'cleaning', 'maintenance', 'channels', 'control', 'reports']);
+    const exposedWorkspaceViews = new Set(['home', 'enquiries', 'planning', 'bookings', 'guests', 'cleaning', 'maintenance', 'channels', 'automation', 'control', 'reports']);
     expect(CAPABILITIES.filter(({ evidence }) => evidence.surface === 'workspace').every(({ evidence }) => evidence.surface === 'workspace' && exposedWorkspaceViews.has(evidence.view))).toBe(true);
   });
   it.each([

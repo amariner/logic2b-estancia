@@ -85,7 +85,7 @@ const labels = {
     maintenance: "Mantenimiento",
     website: "Mi web",
     channels: "Canales",
-    automation: "Automatización",
+    automation: "Copiloto",
     control: "Centro operativo",
     reports: "Informes",
     settings: "Ajustes",
@@ -100,7 +100,7 @@ const labels = {
     maintenance: "Maintenance",
     website: "My website",
     channels: "Channels",
-    automation: "Automation",
+    automation: "Copilot",
     control: "Operations centre",
     reports: "Reports",
     settings: "Settings",
@@ -148,6 +148,7 @@ const viewsFor = (scenario: Scenario): View[] =>
         "cleaning",
         "maintenance",
         "channels",
+        "automation",
         "control",
         "reports",
       ];
@@ -482,15 +483,31 @@ export function DashboardDemo({
             view: "channels",
           },
           {
-            phase: locale === "es" ? "06 · Tu encaje" : "06 · Your fit",
+            phase: locale === "es" ? "06 · Copiloto" : "06 · Copilot",
+            title:
+              locale === "es"
+                ? "Edita y revisa con control humano"
+                : "Edit and review with human control",
+            description:
+              locale === "es"
+                ? "El borrador parte de un fixture con fuentes visibles. Puedes editarlo, guardar una versión local y revisarlo según el rol sin llamar a un modelo."
+                : "The draft starts from a fixture with visible sources. You can edit it, save a local version and review it by role without calling a model.",
+            evidence:
+              locale === "es"
+                ? "Sin modelo ni proveedor · envío siempre bloqueado"
+                : "No model or provider · sending always blocked",
+            view: "automation",
+          },
+          {
+            phase: locale === "es" ? "07 · Tu encaje" : "07 · Your fit",
             title:
               locale === "es"
                 ? "Convierte la evidencia en alcance"
                 : "Turn evidence into scope",
             description:
               locale === "es"
-                ? "Ya has visto operación, ingresos y canales como paneles ficticios. El diagnóstico traduce tus necesidades en un punto de partida Básico, Gestión o Inteligente."
-                : "You have seen operations, revenue and channels as fictitious panels. The assessment turns your needs into a Basic, Management or Intelligent starting point.",
+                ? "Ya has visto operación, ingresos, canales y un copiloto supervisado como superficies ficticias. El diagnóstico traduce tus necesidades en un punto de partida Básico, Gestión o Inteligente."
+                : "You have seen operations, revenue, channels and a supervised copilot as fictitious surfaces. The assessment turns your needs into a Basic, Management or Intelligent starting point.",
             evidence:
               locale === "es"
                 ? "Resultado visible antes de pedir datos"
@@ -754,10 +771,10 @@ export function DashboardDemo({
           <p>
             {locale === "es"
               ? scenario === "aurem"
-                ? "Seis hitos conectan una llegada en riesgo con ingresos y canales. Puedes pausar y reanudar durante esta visita; la exploración libre mantiene disponibles las superficies visuales del escenario."
+                ? "Siete hitos conectan una llegada en riesgo con ingresos, canales y revisión humana del copiloto. Puedes pausar y reanudar durante esta visita; la exploración libre mantiene disponibles las superficies visuales del escenario."
                 : "Tres hitos recorren una solicitud hasta su reserva ficticia. Puedes pausar y reanudar; la exploración libre mantiene todas las secciones disponibles."
               : scenario === "aurem"
-                ? "Six milestones connect an at-risk arrival with revenue and channels. Pause and resume during this visit; free exploration keeps the scenario’s visual surfaces available."
+                ? "Seven milestones connect an at-risk arrival with revenue, channels and human review of the copilot. Pause and resume during this visit; free exploration keeps the scenario’s visual surfaces available."
                 : "Three milestones take an enquiry to its fictitious booking. Pause and resume at any time; free exploration keeps every area available."}
           </p>
 

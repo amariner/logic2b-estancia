@@ -36,6 +36,8 @@ const deepStateRoutes = [
   '/en/demos/aurem/gestion/?vista=reports',
   '/demos/aurem/gestion/?vista=channels',
   '/en/demos/aurem/gestion/?vista=channels',
+  '/demos/aurem/gestion/?vista=automation',
+  '/en/demos/aurem/gestion/?vista=automation',
 ];
 
 function formatViolations(path: string, violations: Awaited<ReturnType<AxeBuilder['analyze']>>['violations']) {

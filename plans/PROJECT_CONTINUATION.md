@@ -1,6 +1,6 @@
 # Logic2B Estancias · Checkpoint de continuidad
 
-Última actualización: 2026-08-24
+Última actualización: 2026-08-26
 
 Último incremento de infraestructura verificado: consultar `git rev-parse HEAD`
 
@@ -13,6 +13,16 @@ El smoke operativo de Resend ya es reproducible mediante una CLI segura: permane
 Para no saturar Higgsfield, cualquier imagen raster nueva que llegue a ser necesaria se generará con la suscripción integrada de OpenAI, mediante una llamada por recurso, pausa entre generaciones e inspección individual. La tarjeta social de marca continúa como `og-estancias.jpg`, optimizada a 1200 × 630 px y 188 KiB. El hero actual no ha requerido generación: reutiliza el fondo limpio del tema Remanso como WebP de 2560 × 1429 y 327 KiB, con derivados AVIF responsive de 34, 63 y 105 KiB. No usa vídeo, assets remotos, títulos, navegación ni gráficos horneados.
 
 El SHA actual de continuidad se obtiene siempre con `git rev-parse HEAD`; no se fija aquí para evitar que el propio commit de actualización deje el dato obsoleto.
+
+## Incremento verificado · 2026-08-26
+
+Se corrigió una divergencia entre el componente interno y la navegación pública de Aurem: el copiloto supervisado ya aparece como `Copiloto`/`Copilot` únicamente en el workspace Inteligente. La superficie parte de un fixture con fuentes visibles, permite edición y versionado temporal, limita la revisión según el rol ficticio y mantiene el envío permanentemente deshabilitado. No hay modelo, proveedor ni escritura HTTP; recargar restaura el escenario inicial.
+
+La guía narrativa de Aurem pasa de seis a siete hitos. El sexto abre el copiloto y explica la edición y revisión humana sin inferencia ni entrega; el séptimo conserva la salida localizada al diagnóstico. El contrato central marca `supervised-ai` como `demo_visual_disponible` y enlaza la vista `automation`, mientras las automatizaciones y jobs permanecen `demo_visual_pendiente` y totalmente inertes.
+
+Verificación local: `pnpm check` completo correcto; 4/4 E2E focalizados del recorrido y copiloto correctos; axe sobre las rutas profundas ES/EN completó sin violaciones tras reiniciar el servidor; landmarks y reflow a 320 px correctos. La ejecución monolítica conjunta vuelve a reproducir el cierre ambiental conocido de Wrangler/Miniflare: tras completar un barrido, el siguiente recibe `500` y `ERR_CONNECTION_REFUSED`; cada barrido aislado pasa desde un servidor limpio.
+
+Revisión multidisciplinar: marketing **corregido** — el plan Inteligente comunica el copiloto local sin confundirlo con automatizaciones activas; producto **corregido** — la capacidad visible coincide con su contrato y conserva límites explícitos; UX **corregido** — navegación y recorrido guiado conducen a una superficie real y localizada; UI/dirección visual **correcto** — se reutiliza el workspace existente sin introducir otra jerarquía; SEO **correcto** — documentación y planes evitan afirmar que toda IA sigue pendiente; arquitectura frontend **corregido** — navegación, tipo de evidencia y ruta profunda comparten `automation`; full stack **correcto** — no se añade endpoint, proveedor ni escritura; QA, accesibilidad, rendimiento y confianza **correcto** — roles, restauración, botón de envío bloqueado, ausencia de escrituras, axe, landmarks y reflow quedan cubiertos.
 
 ## Incrementos verificados · 2026-08-24
 

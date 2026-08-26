@@ -29,6 +29,6 @@ describe("read-only demo fixtures", () => {
   });
 
   it("keeps guided journey counts aligned with the visible read-only milestones", () => {
-    expect(TOUR_STEP_COUNTS).toEqual({ terrava: 3, aurem: 6 });
+    expect(TOUR_STEP_COUNTS).toEqual({ terrava: 3, aurem: 7 });
   });
 });

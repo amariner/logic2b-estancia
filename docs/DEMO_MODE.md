@@ -107,7 +107,7 @@ El rechazo no debe crear una cuota de rate limit, referencia durable, alarma, lo
 | Publicación web | Vista previa ficticia | Escritura en CMS o despliegue | Sin CMS ni credencial; publicación real ausente | Repositorio/entorno aislado, permisos, preview y rollback probado |
 | Canales | Matriz de cobertura con cero conexiones | Inventario, tarifas, reservas o mensajes | Sin OAuth, webhook o adaptador; proveedor `disabled` | Contrato por canal, mapeo, deduplicación, reconciliación y recuperación |
 | Automatizaciones y jobs | Sin superficie pública de demo | Jobs, colas, reglas o notificaciones | `jobs=false`; sin consumidor externo | Flag específico, observabilidad, reintentos, límites y kill switch |
-| IA supervisada | Sin superficie pública de demo | Inferencia o envío a un modelo | Sin modelo ni proveedor; contenido local | Proveedor, política de datos, fuentes, evaluación, revisión y fallback |
+| IA supervisada | Copiloto ficticio editable, versionado y revisable por rol | Inferencia o envío a un modelo | Sin modelo ni proveedor; estado en memoria, envío deshabilitado y restauración al recargar | Proveedor, política de datos, fuentes, evaluación, revisión y fallback |
 | Analítica | Sin medición externa | Carga de GTM/GA y eventos agregados | `ANALYTICS_PROVIDER_MODE=disabled`, incluso con consentimiento previo | `DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true`, modo `gtm`, consentimiento y contrato sin PII |
 | Webhooks | Ninguno | Procesamiento de eventos de terceros | Ruta ausente o rechazo antes del cuerpo | Firma, replay protection, idempotencia, observabilidad y prueba aislada |
 
@@ -137,7 +137,7 @@ Inventario comercial vigente:
 | Equipos y permisos | `demo_visual_disponible` | Diferencias visuales entre roles | No crea usuarios ni aplica autorización real |
 | Canales e inventario | `activable_por_proyecto` | Matriz visual de cobertura y requisitos | Cero canales conectados; cada proveedor exige validación |
 | Automatizaciones | `demo_visual_pendiente` | La narrativa y los fixtures existen | No hay job, regla, cola o mensajería activa |
-| Copiloto supervisado | `demo_visual_pendiente` | La narrativa de borrador y revisión existe | No hay modelo ni proveedor y nada se envía |
+| Copiloto supervisado | `demo_visual_disponible` | Fixture con fuentes, edición, versionado y revisión humana por rol | No hay modelo ni proveedor, nada se envía y recargar restaura el fixture |
 | Revenue y previsión | `en_ruta` | Solo un escenario matemático ficticio | No es una predicción ni una capacidad operacional disponible |
 
 Guardas de modo, validación de configuración, rate limit, idempotencia, sanitización de logs y adaptadores de proveedor son `solo_interna`: deben probarse, pero no venderse como pantallas de producto.
@@ -211,7 +211,7 @@ El smoke de Resend es seco por defecto. Nunca debe ejecutarse contra una demo ni
 
 - El único adaptador externo de operación implementado es Resend para el formulario comercial; no es un motor de reservas para clientes.
 - No existe todavía un despliegue de cliente con pagos, PMS, canales, CRM, mensajería, IA o jobs operativos.
-- Las capacidades marcadas `demo_visual_pendiente` necesitan recuperar una superficie coherente y pruebas antes de comunicarse como demostrables.
+- Las capacidades marcadas `demo_visual_pendiente` necesitan recuperar una superficie coherente y pruebas antes de comunicarse como demostrables. El copiloto supervisado ya dispone de esa superficie, pero sigue siendo un fixture local sin inferencia ni entrega.
 - Revenue utiliza matemáticas de fixtures; no entrena, predice ni recomienda precios reales.
 - Los textos legales necesitan validación profesional para cada implantación y proveedor.
 

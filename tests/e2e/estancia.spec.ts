@@ -1039,7 +1039,7 @@ test('Aurem guided journey connects read-only evidence to the assessment', async
   await page.getByRole('button', { name: 'Ver recorrido' }).click();
 
   await expect(page.getByRole('dialog', { name: 'Detecta la habitación en riesgo' })).toBeVisible();
-  await expect(page.getByRole('progressbar', { name: 'Progreso del recorrido' })).toHaveAttribute('aria-valuemax', '6');
+  await expect(page.getByRole('progressbar', { name: 'Progreso del recorrido' })).toHaveAttribute('aria-valuemax', '7');
 
   await page.getByRole('button', { name: 'Siguiente hito' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Limpieza' })).toBeVisible();
@@ -1054,6 +1054,10 @@ test('Aurem guided journey connects read-only evidence to the assessment', async
 
   await page.getByRole('button', { name: 'Siguiente hito' }).click();
   await expect(page.getByRole('dialog', { name: 'Revisa antes de conectar' })).toContainText('0 canales conectados · publicación bloqueada');
+
+  await page.getByRole('button', { name: 'Siguiente hito' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Copiloto' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Edita y revisa con control humano' })).toContainText('Sin modelo ni proveedor · envío siempre bloqueado');
 
   await page.getByRole('button', { name: 'Siguiente hito' }).click();
   const finalStep = page.getByRole('dialog', { name: 'Convierte la evidencia en alcance' });
@@ -1073,6 +1077,10 @@ test('Aurem guided journey and assessment exit remain localized in English', asy
   for (let step = 0; step < 5; step += 1) {
     await page.getByRole('button', { name: 'Next milestone' }).click();
   }
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Copilot' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Edit and review with human control' })).toContainText('No model or provider · sending always blocked');
+  await page.getByRole('button', { name: 'Next milestone' }).click();
 
   const finalStep = page.getByRole('dialog', { name: 'Turn evidence into scope' });
   await expect(finalStep).toContainText('Result shown before any data is requested');
@@ -1153,6 +1161,50 @@ test('Aurem channel matrix is an inspectable fixture with no publish action', as
     await expect(page.locator('.dash-content form, .dash-content textarea')).toHaveCount(0);
   }
 
+  expect(externalWrites).toEqual([]);
+});
+
+test('Aurem supervised copilot is public, role-gated and never sends', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) externalWrites.push(request.url());
+  });
+
+  await page.goto('/demos/aurem/gestion/');
+  await page.getByRole('button', { name: 'Copiloto', exact: true }).click();
+  await expect(page).toHaveURL(/vista=automation/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Copiloto' })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('sin modelo ni proveedor');
+  await expect(page.getByRole('button', { name: 'Enviar deshabilitado · proveedor no conectado' })).toBeDisabled();
+
+  const draft = page.getByLabel('Mensaje preparado');
+  await draft.fill('Borrador editado y revisado por una persona.');
+  await page.getByRole('button', { name: 'Guardar borrador local' }).click();
+  await expect(page.getByText('Versión 2 · edición local')).toBeVisible();
+  await page.getByRole('button', { name: 'Marcar como revisado' }).click();
+  await expect(page.getByText('Revisado', { exact: true })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByLabel('Mensaje preparado')).toHaveValue(/Hola Elena/);
+  await expect(page.getByText('Versión 1 · edición local')).toBeVisible();
+  await page.getByLabel('Rol').selectOption('cleaning');
+  await expect(page.getByRole('button', { name: 'Requiere Dirección o Recepción' })).toBeDisabled();
+  expect(externalWrites).toEqual([]);
+});
+
+test('Aurem supervised copilot remains localized and blocked in English', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) externalWrites.push(request.url());
+  });
+
+  await page.goto('/en/demos/aurem/gestion/?vista=automation');
+  await expect(page.getByRole('heading', { level: 1, name: 'Copilot' })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('no model or provider');
+  await expect(page.getByLabel('Prepared message')).toHaveValue(/Hello Elena/);
+  await expect(page.getByRole('button', { name: 'Send disabled · provider not connected' })).toBeDisabled();
+  await page.getByLabel('Role').selectOption('cleaning');
+  await expect(page.getByRole('button', { name: 'Requires Direction or Reception' })).toBeDisabled();
   expect(externalWrites).toEqual([]);
 });
 
