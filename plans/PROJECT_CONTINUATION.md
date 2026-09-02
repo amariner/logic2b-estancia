@@ -1,12 +1,24 @@
 # Logic2B Estancias · Checkpoint de continuidad
 
-Última actualización: 2026-08-26
+Última actualización: 2026-09-02
 
 Último incremento de infraestructura verificado: consultar `git rev-parse HEAD`
 
 Rama: `main`
 
 Estado general: base comercial y demostrativa implementada bajo la marca **Logic2B Estancias**, con portada y recorridos ES/EN para casas rurales, apartamentos turísticos y hoteles. El hero, los workflows, el diagnóstico, los recursos y las demos Nivora → Básico, Terrava → Gestión y Aurem → Inteligente comparten contratos centralizados y límites explícitos. La landing principal contiene la única instancia capaz de enviar una solicitud real mediante Resend a `marinerandreu+logic@gmail.com`; verticales y diagnóstico solo navegan hacia ella. Demos y dashboards permanecen locales y ficticios, sin reservas, pagos, comunicaciones, sincronizaciones, CRM ni proveedores externos. El Worker no contiene HubSpot, exige configuración completa, rate limit e idempotencia durable, limita Resend a 10 segundos y la espera del navegador a 15 segundos. El manifiesto público tiene un límite de 4 segundos y cualquier ausencia o incoherencia falla cerrada sin enviar datos. La captación comercial se mantiene como excepción aprobada con `DEMO_MODE=true`; operaciones reales y analítica continúan deshabilitadas. El despliegue productivo debe corresponder exactamente al `HEAD` remoto de `main`; la versión efectiva se consulta en Cloudflare para evitar fijar aquí un identificador que una publicación posterior deje obsoleto.
+
+Objetivo estratégico vigente: alcanzar una paridad estructural y de profundidad de producto alta con `camp.logic2b.com`, conservando la identidad visual de Estancias y adaptando el producto al alojamiento turístico. La referencia establece el orden y densidad del embudo —hero con prueba, flujo completo, explorador de producto, conectividad, planes, portfolio web, paneles, implantación, guías, FAQ y cierre—, pero no autoriza copiar precios, integraciones, métricas, identidad ni operaciones no verificadas. El contrato y la cola de trabajo están en [`plans/CAMP_PARITY_ROADMAP.md`](./CAMP_PARITY_ROADMAP.md).
+
+## Replanteamiento estratégico · 2026-09-02
+
+Se auditó la home y el ecosistema público de Logic2B Campings (`/precios/`, `/temas/`, `/paneles/`, `/docs/`, `/empezar/`, web demo y gestor) y se contrastaron con la portada, rutas, contratos de capacidad y demos actuales de Estancias. La conclusión es que Estancias ya tiene los tres escalones de producto y una base de confianza más estricta, pero todavía no los encadena con la misma claridad comercial ni ofrece la misma profundidad de evidencia pública.
+
+El roadmap anterior deja de dirigir la siguiente implementación. La prioridad vigente es **P0 · Espina dorsal de paridad en el home**: header orientado a producto, hero con prueba inmediata, flujo de siete momentos, explorador de cinco áreas y franja de capacidades/conexiones, usando Nivora, Terrava y Aurem sin crear enlaces o funciones ficticias. Después siguen planes y handoff, portfolio de 12 webs, seis fichas de panel, cinco guías por rol, madurez real de conexiones y medición.
+
+Revisión multidisciplinar previa: marketing **corregido** — la portada debe vender un sistema demostrable y no una colección de conceptos; producto **corregido** — la escalera Básico/Gestión/Inteligente se alinea con web, continuidad de reservas y operación avanzada; UX **corregido** — se define un recorrido sin callejones entre promesa, prueba y contacto; UI/dirección visual **correcto** — se conserva la identidad cálida y editorial, usando Camp solo como patrón estructural; SEO **corregido** — soluciones verticales permanecen como arquitectura de intención aunque salgan de la navegación primaria; arquitectura frontend **pendiente** — el próximo incremento debe centralizar bloques, evidencias y enlaces; full stack **correcto** — no cambian proveedores, endpoints ni puertas de ejecución; QA, accesibilidad, rendimiento y confianza **pendiente** — cada nuevo bloque requiere ES/EN, teclado, reflow, movimiento reducido, presupuestos de carga y límites visibles.
+
+Revisión multidisciplinar posterior del replanteamiento: marketing **correcto** — la paridad se define sobre el recorrido completo de compra y prueba; producto **correcto** — cada escalón conserva evidencia canónica y límites; UX **correcto** — el roadmap fija continuidad y CTAs sin callejones; UI/dirección visual **correcto** — la estética propia queda protegida como requisito; SEO **correcto** — las rutas verticales se conservan y la expansión exige canonical, hreflang, sitemap e indexación explícita; arquitectura frontend **pendiente** — corresponde a P0 crear el contrato compartido y los componentes; full stack **no aplica** — este replanteamiento no modifica ejecución ni proveedores; QA, accesibilidad, rendimiento y confianza **correcto** — el documento incorpora puertas medibles, mantiene la captación única y `pnpm check` pasa completo. No quedan hallazgos críticos de veracidad, privacidad, accesibilidad o pérdida de datos en el cambio de roadmap.
 
 El smoke operativo de Resend ya es reproducible mediante una CLI segura: permanece offline por defecto, exige autorización explícita y un buzón controlado para ejecutar, marca todo el payload como prueba técnica, verifica entrega/repetición y solo imprime una respuesta saneada. La ejecución autorizada del 24 de agosto devolvió `202 delivered` con referencia `834dd867-658f-4dad-a171-a694145cda5f`; su repetición devolvió la misma referencia con `replayed: true`, sin un segundo envío. La inspección visual del buzón sigue siendo una comprobación humana externa.
 
@@ -48,7 +60,7 @@ Revisión multidisciplinar del incremento analítico: marketing **correcto** —
 
 Revisión multidisciplinar del incremento de captación: marketing **corregido** — la conversación comercial real vuelve a estar disponible en la única superficie prevista; producto **correcto** — la excepción de captación no cambia el carácter local y ficticio de las demos; UX **corregido** — timeout acotado, estado indisponible distinto del demo, datos conservados y salida honesta; UI/dirección visual **correcto** — reutiliza el aviso existente sin introducir otra superficie; SEO **no aplica** — no cambia contenido indexable ni metadata; arquitectura frontend **correcto** — una única instancia y una única llamada a `/api/leads`; full stack **corregido** — tres puertas explícitas de email, cuatro secretos requeridos presentes, analítica y operaciones reales deshabilitadas, CSP y bloqueos demo intactos; QA, accesibilidad, rendimiento y confianza **correcto** — 84/84 E2E aislados, `pnpm check`, dry-run de 139 assets y cero proveedores invocados durante pruebas.
 
-Siguiente punto exacto de activación, bloqueado por aprobación humana: configurar en el contenedor compartido `GTM-TVDWZ9LC` las etiquetas, activadores y parámetros propios de Estancia sin modificar Camp; después activar de forma controlada las puertas requeridas por analítica (`DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true`, `ANALYTICS_PROVIDER_MODE=gtm`) manteniendo la captación comercial ya aprobada y el resto de proveedores deshabilitados. Tras verificar consentimiento, CSP, manifiesto y eventos canónicos en producción, recoger un periodo agregado comparable y ejecutar `pnpm funnel:report` para seleccionar una única hipótesis. No mezclar datos anteriores y posteriores.
+Siguiente punto exacto de implementación: ejecutar **P0 · Espina dorsal de paridad en el home** según `plans/CAMP_PARITY_ROADMAP.md`. La configuración de `GTM-TVDWZ9LC` y la activación analítica siguen siendo actividades externas pendientes; no bloquean el rediseño local y deberán abrir una línea base nueva después del cambio, sin mezclar datos anteriores y posteriores.
 
 ## Cómo reanudar
 
@@ -119,7 +131,21 @@ Al recibir `/goal continua con el desarrollo de este proyecto`:
 - Hero comercial ES/EN rehecho como composición editorial a dos columnas: propuesta contenida, sin tarjetas flotantes, y acceso visual directo a casas rurales, apartamentos y hoteles. Cada negocio dispone de landing propia, argumento específico, FAQ, evidencia ficticia, límites y diagnóstico precargado; las rutas antiguas de gestores conservan canonical de compatibilidad hacia apartamentos.
 - SEO comercial reforzado con títulos y descripciones únicos en doce superficies, `Service`/`OfferCatalog` coherente con el contenido visible, social cards grandes, política completa de snippets, enlaces internos y precarga de fuentes; Lighthouse móvil local deja las tres landings en 100/100/100/100 y la portada en 96/100/100/100, con CLS 0.
 
-## Siguiente cola priorizada
+## Roadmap estratégico vigente
+
+La cola priorizada actual vive en [`plans/CAMP_PARITY_ROADMAP.md`](./CAMP_PARITY_ROADMAP.md):
+
+1. P0 · Espina dorsal de paridad en el home.
+2. P1 · Planes y handoff comercial equivalentes.
+3. P2 · Portfolio web con 12 conceptos navegables.
+4. P3 · Seis fichas de panel propias de Estancias.
+5. P4 · Cinco guías por rol e implantación.
+6. P5 · Conectividad demostrable y madurez real.
+7. P6 · Medición y optimización con periodos comparables.
+
+El desarrollo continúa por P0. Las secciones siguientes conservan la cola anterior como evidencia histórica y sus dependencias externas; ya no determinan por sí solas el próximo incremento.
+
+## Cola anterior y dependencias previas
 
 ### P0 · Resiliencia real del embudo
 
@@ -178,7 +204,7 @@ P2 no conserva desarrollo local pendiente. La continuidad pasa a P3.
 - Completado: CTA móvil de contacto localizado y persistente, con instancia única del formulario de portada presentada en diálogo accesible; las verticales ya no contienen una implementación secundaria de captación.
 - Pendiente: ejecutar un único experimento principal de conversión y registrar hipótesis, variante y resultado. No se elige ni se declara un experimento sin línea base real.
 
-La corrección local previa a la medición externa está completada y probada. Siguiente punto exacto, sujeto a autorización humana: configurar dentro de `GTM-TVDWZ9LC` las etiquetas, activadores y parámetros de Estancia sin alterar Camp; activar de forma controlada `DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true` y `ANALYTICS_PROVIDER_MODE=gtm`, conservando la captación comercial aprobada y los demás proveedores deshabilitados; y verificar consentimiento, CSP, manifiesto y formas canónicas antes de obtener el primer periodo agregado. Después se ejecutará `pnpm funnel:report` para seleccionar una única hipótesis principal. `assessment_complete` de `homepage_scope` permanece visible en los totales, pero queda excluido del embudo de diagnóstico mediante `source_section`. Los datos anteriores y posteriores no se mezclarán sin segmentar por fecha; no se declarará un resultado sin observación real.
+La corrección local previa a la medición externa está completada y probada. Siguiente activación analítica externa, sujeta a autorización humana: configurar dentro de `GTM-TVDWZ9LC` las etiquetas, activadores y parámetros de Estancia sin alterar Camp; activar de forma controlada `DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true` y `ANALYTICS_PROVIDER_MODE=gtm`, conservando la captación comercial aprobada y los demás proveedores deshabilitados; y verificar consentimiento, CSP, manifiesto y formas canónicas antes de obtener el primer periodo agregado. Esta actividad no bloquea P0–P4, pero debe ejecutarse después de la nueva home para abrir una línea base comparable. Después se ejecutará `pnpm funnel:report` para seleccionar una única hipótesis principal. `assessment_complete` de `homepage_scope` permanece visible en los totales, pero queda excluido del embudo de diagnóstico mediante `source_section`. Los datos anteriores y posteriores no se mezclarán sin segmentar por fecha; no se declarará un resultado sin observación real.
 
 ## Actividades externas pendientes
 
