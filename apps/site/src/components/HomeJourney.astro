@@ -1,0 +1,35 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getHomeContract } from '../home-contract';
+
+const { locale } = Astro.props as { locale: Locale };
+const home = getHomeContract(locale);
+const en = locale === 'en';
+---
+
+<section id="recorrido" class="section home-journey" aria-labelledby="home-journey-title" data-home-journey>
+  <div class="shell">
+    <div class="section-head home-journey-heading">
+      <p class="eyebrow">{en ? 'One connected journey' : 'Un recorrido conectado'}</p>
+      <h2 id="home-journey-title" class="heading">{en ? 'From the first search to the work behind a ready stay.' : 'De la primera búsqueda al trabajo que deja una estancia preparada.'}</h2>
+      <p>{en ? 'Seven moments show where context moves forward, where a human decides and where a real project would need validation.' : 'Siete momentos enseñan dónde avanza el contexto, dónde decide una persona y dónde un proyecto real necesitaría validación.'}</p>
+    </div>
+    <ol class="home-journey-list">
+      {home.journey.map((moment) => (
+        <li class="home-journey-moment" data-flow-moment={moment.number}>
+          <div class="home-journey-top"><span>{moment.number}</span><i>{moment.phase}</i></div>
+          <h3>{moment.title}</h3>
+          <p>{moment.text}</p>
+          <dl>
+            <div><dt>{en ? 'Input' : 'Entrada'}</dt><dd>{moment.input}</dd></div>
+            <div><dt>{en ? 'Output' : 'Salida'}</dt><dd>{moment.output}</dd></div>
+          </dl>
+          <p class="home-journey-control"><span>{en ? 'Boundary' : 'Límite'}</span>{moment.control}</p>
+          <a href={moment.href}>{moment.cta} <span aria-hidden="true">→</span></a>
+        </li>
+      ))}
+    </ol>
+    <p class="home-journey-note" role="note">{en ? 'Illustrative product journey · fictional data · no external effects' : 'Recorrido ilustrativo del producto · datos ficticios · sin efectos externos'}</p>
+  </div>
+</section>
+

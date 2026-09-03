@@ -127,6 +127,40 @@ test('fictional cases keep their canonical plans truthful and localized', async 
   }
 });
 
+test('home exposes the connected product spine in both languages', async ({ page, request }) => {
+  for (const [path, prefix, labels] of [
+    ['/', '', { webs: 'Webs', gestor: 'Gestor', plans: 'Planes', recorrido: 'Ver recorrido', evidence: 'Evidencia' }],
+    ['/en/', '/en', { webs: 'Websites', gestor: 'Workspace', plans: 'Plans', recorrido: 'See the journey', evidence: 'Evidence' }],
+  ] as const) {
+    await page.goto(path);
+    const header = page.locator('.site-header');
+    await expect(header.getByRole('link', { name: labels.webs, exact: true })).toHaveAttribute('href', '#webs');
+    await expect(header.getByRole('link', { name: labels.gestor, exact: true })).toHaveAttribute('href', '#gestor');
+    await expect(header.getByRole('link', { name: labels.plans, exact: true })).toHaveAttribute('href', '#planes');
+    await expect(header.getByRole('link', { name: labels.recorrido, exact: true })).toHaveAttribute('href', '#recorrido');
+
+    await expect(page.locator('[data-hero-proof]')).toHaveCount(3);
+    await expect(page.locator('[data-hero-proof="nivora"]')).toContainText(/Nivora One/);
+    await expect(page.locator('[data-hero-proof="terrava"]')).toContainText(/Terrava Collection/);
+    await expect(page.locator('[data-hero-proof="aurem"]')).toContainText(/Aurem Hotel/);
+    await expect(page.locator('[data-home-journey] [data-flow-moment]')).toHaveCount(7);
+    await expect(page.locator('[data-product-explorer] [data-product-area]')).toHaveCount(5);
+    await expect(page.locator('[data-capability-band] [data-capability-group]')).toHaveCount(4);
+
+    const deepLinks = await page.locator('[data-home-journey] a, [data-product-explorer] a').evaluateAll((links) => links
+      .map((link) => link.getAttribute('href'))
+      .filter((href): href is string => Boolean(href && href.startsWith('/'))));
+    for (const href of new Set(deepLinks)) expect((await request.get(href)).status(), href).toBe(200);
+    await expect(page.locator('[data-capability-band]')).toContainText(labels.evidence);
+
+    await page.goto(prefix ? '/en/plans/' : '/planes/');
+    await expect(header.getByRole('link', { name: labels.webs, exact: true })).toHaveAttribute('href', `${prefix}/#webs`);
+    await expect(header.getByRole('link', { name: labels.gestor, exact: true })).toHaveAttribute('href', `${prefix}/#gestor`);
+    await expect(header.getByRole('link', { name: labels.plans, exact: true })).toHaveAttribute('href', `${prefix}/#planes`);
+    await expect(header.getByRole('link', { name: labels.recorrido, exact: true })).toHaveAttribute('href', `${prefix}/#recorrido`);
+  }
+});
+
 test('capability evidence opens the exact fictitious flow without external writes', async ({ page }) => {
   const externalWrites: string[] = [];
   page.on('request', (request) => {

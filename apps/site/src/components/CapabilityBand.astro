@@ -1,0 +1,58 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { CAPABILITIES, type Capability, type PlanLevel } from '@logic-estancia/domain';
+import {
+  capabilityEvidenceHref,
+  capabilityEvidenceLabel,
+  capabilityStatusDetail,
+  capabilityStatusLabel,
+} from '../capability-evidence';
+import { getHomeContract } from '../home-contract';
+
+const { locale } = Astro.props as { locale: Locale };
+const home = getHomeContract(locale);
+const en = locale === 'en';
+const planNames: Record<PlanLevel, string> = en
+  ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' }
+  : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
+const capabilities = new Map(CAPABILITIES.map((capability) => [capability.id, capability]));
+
+function getCapability(id: string): Capability | undefined {
+  return capabilities.get(id);
+}
+---
+
+<section id="conexiones" class="section capability-band" aria-labelledby="capability-band-title" data-capability-band>
+  <div class="shell">
+    <div class="section-head capability-band-heading">
+      <p class="eyebrow">{home.capabilityStatusCopy.eyebrow}</p>
+      <h2 id="capability-band-title" class="heading">{home.capabilityStatusCopy.title}</h2>
+      <p>{home.capabilityStatusCopy.body}</p>
+    </div>
+    <div class="capability-band-grid">
+      {home.capabilityGroups.map((group) => (
+        <article class="capability-band-card" data-capability-group={group.id}>
+          <div class="capability-band-card-heading"><span>{group.number}</span><small>{group.title}</small></div>
+          <p>{group.text}</p>
+          <ul>
+            {group.capabilityIds.map((id) => {
+              const capability = getCapability(id);
+              if (!capability) return null;
+              const href = capabilityEvidenceHref(capability, locale);
+              return (
+                <li data-capability={capability.id} data-capability-status={capability.status}>
+                  <div class="capability-band-label"><strong>{capability.label[locale]}</strong><span class={`capability-status ${capability.status}`}>{capabilityStatusLabel(capability.status, locale)}</span></div>
+                  <small>{capabilityStatusDetail(capability.status, locale)} · {en ? 'From' : 'Desde'} {planNames[capability.minimumPlan]}</small>
+                  <p><b>{home.capabilityStatusCopy.evidence}:</b> {capability.evidence.proof[locale]}</p>
+                  <p class="capability-band-boundary"><b>{home.capabilityStatusCopy.boundary}:</b> {capability.evidence.boundary[locale]}</p>
+                  {href ? <a href={href} data-capability-evidence={capability.id}>{capabilityEvidenceLabel(capability, locale)} <span aria-hidden="true">→</span></a> : <span class="capability-no-evidence" data-capability-evidence-unavailable={capability.id}>{capabilityEvidenceLabel(capability, locale)}</span>}
+                </li>
+              );
+            })}
+          </ul>
+        </article>
+      ))}
+    </div>
+    <p class="capability-band-footnote" role="note">{en ? 'Demo status is not production activation. Connections require a validated project, provider and agreed scope.' : 'El estado de demo no equivale a activación en producción. Las conexiones requieren proyecto, proveedor y alcance validados.'}</p>
+  </div>
+</section>

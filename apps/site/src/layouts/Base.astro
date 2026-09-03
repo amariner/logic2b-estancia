@@ -12,6 +12,7 @@ import CookieBanner from '../components/CookieBanner.astro';
 import BrandLockup from '../components/BrandLockup.astro';
 import { content } from '../content';
 import { getBusinesses } from '../businesses';
+import { getHomeContract } from '../home-contract';
 import { ANALYTICS_SAFE_PATHS } from '../public-routes';
 
 interface Props { locale: Locale; title?: string; description?: string; route?: string; alternateRoute?: string; translated?: boolean; image?: string; imageAlt?: string; preloadImage?: string; preloadImageSrcset?: string; preloadImageSizes?: string; preloadImageType?: string; }
@@ -21,6 +22,10 @@ const businessNav = getBusinesses(locale);
 const prefix = locale === 'en' ? '/en' : '';
 const cleanRoute = route.replace(/^\//, '').replace(/\/$/, '');
 const routePath = cleanRoute ? `/${cleanRoute}/` : '/';
+const productNav = getHomeContract(locale).navigation.map((item) => ({
+  ...item,
+  href: routePath === '/' ? item.href : `${prefix}/${item.href}`,
+}));
 const canonical = `${PRODUCT.url}${prefix}${routePath}`;
 const cleanAlternate = (alternateRoute ?? route).replace(/^\//, '').replace(/\/$/, '');
 const alternatePath = cleanAlternate ? `/${cleanAlternate}/` : '/';
@@ -134,8 +139,7 @@ const structuredData = [
       <div class="topbar shell">
         <BrandLockup locale={locale} />
         <nav aria-label={locale === 'es' ? 'Principal' : 'Main'}>
-          {businessNav.map((business) => <a href={business.href}>{business.label}</a>)}
-          <a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a>
+          {productNav.map((item) => <a href={item.href}>{item.label}</a>)}
         </nav>
         <div class="top-actions">
           {translated && <a class="locale" href={localeHref}>{locale === 'es' ? 'EN' : 'ES'}</a>}
@@ -144,15 +148,15 @@ const structuredData = [
         <button class="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">{locale === 'es' ? 'Menú' : 'Menu'}</button>
       </div>
       <nav id="mobile-nav" class="mobile-nav" aria-label={locale === 'es' ? 'Principal móvil' : 'Mobile main'} hidden>
-        {businessNav.map((business) => <a href={business.href}>{business.label}</a>)}
-        <a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a>
+        {productNav.map((item) => <a href={item.href}>{item.label}</a>)}
+        {businessNav.map((business) => <a class="mobile-nav-secondary" href={business.href}>{business.label}</a>)}
         <a class="mobile-nav-contact" href={`${prefix}/#contacto`} data-contact-trigger aria-haspopup="dialog">{locale === 'es' ? 'Contactar' : 'Contact us'} <span aria-hidden="true">→</span></a>
       </nav>
     </header>
     <main id="contenido"><slot /></main>
     <footer class="footer shell">
       <BrandLockup locale={locale} />
-      <div>{businessNav.map((business) => <a href={business.href}>{business.label}</a>)}<a href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{c.nav.levels}</a><a href={`${prefix}/docs/`}>{c.nav.docs}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
+      <div>{productNav.map((item) => <a href={item.href}>{item.label}</a>)}{businessNav.map((business) => <a href={business.href}>{business.label}</a>)}<a href={`${prefix}/docs/`}>{c.nav.docs}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/privacidad/`}>{locale === 'es' ? 'Privacidad' : 'Privacy'}</a><a href={`${prefix}/cookies/`}>Cookies</a></div>
       <p>© 2026 Logic2B · Castelló</p>
     </footer>
     <a class="whatsapp" href={wa.href} target="_blank" rel="noopener noreferrer" aria-label={locale === 'es' ? 'Contacta con Logic2B por WhatsApp' : 'Contact Logic2B on WhatsApp'} title={`${locale === 'es' ? 'Contacta con Logic2B por WhatsApp' : 'Contact Logic2B on WhatsApp'} · ${wa.phone}`} data-whatsapp data-visible="false" tabindex="-1">
@@ -237,7 +241,7 @@ const structuredData = [
           if ('assessment' in values && values.assessment !== '1') return false;
           if ('contact' in values && !['rural', 'apartments', 'hotels'].includes(values.contact)) return false;
           if ('assessment' in values && 'contact' in values) return false;
-          return ['', '#contacto', '#negocio', '#producto', '#demos', '#niveles', '#alcance'].includes(location.hash);
+          return ['', '#contacto', '#negocio', '#producto', '#demos', '#niveles', '#planes', '#webs', '#gestor', '#recorrido', '#conexiones', '#alcance'].includes(location.hash);
         }
         if (assessment) {
           const allowedKeys = new Set(['segment', 'plan', 'properties', 'units', 'demo']);
