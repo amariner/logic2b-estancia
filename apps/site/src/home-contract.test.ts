@@ -21,7 +21,7 @@ describe('home product contract', () => {
       expect(home.capabilityGroups).toHaveLength(4);
       expect(home.capabilityGroups.flatMap(({ capabilityIds }) => capabilityIds)).toEqual([
         'brand-web', 'website-editor',
-        'email-enquiries', 'enquiry-workspace', 'planning',
+        'email-enquiries', 'enquiry-workspace', 'planning', 'guest-context',
         'operations-centre', 'cleaning', 'maintenance', 'roles',
         'channels', 'automation', 'supervised-ai',
       ]);

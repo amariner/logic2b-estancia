@@ -8,8 +8,8 @@ describe('panel portfolio contract', () => {
       const panels = getPanelPortfolio(locale);
       expect(panels.map(({ id }) => id)).toEqual(PANEL_IDS);
       expect(panels).toHaveLength(6);
-      expect(panels.filter(({ status }) => status === 'published')).toHaveLength(2);
-      expect(panels.filter(({ status }) => status === 'preparation')).toHaveLength(4);
+      expect(panels.filter(({ status }) => status === 'published')).toHaveLength(4);
+      expect(panels.filter(({ status }) => status === 'preparation')).toHaveLength(2);
       expect(panels.map(({ plan }) => plan)).toEqual(['gestion', 'gestion', 'gestion', 'inteligente', 'inteligente', 'inteligente']);
 
       for (const panel of panels) {
@@ -32,14 +32,18 @@ describe('panel portfolio contract', () => {
     }
   });
 
-  it('publishes only exact Terrava evidence routes in both languages', () => {
+  it('publishes only exact Terrava and Aurem evidence routes in both languages', () => {
     expect(getPublishedPanels('es').map(({ id, detailHref, evidenceHref }) => [id, detailHref, evidenceHref])).toEqual([
       ['enquiries', '/paneles/solicitudes/', '/demos/terrava/gestion/?vista=enquiries'],
       ['planning', '/paneles/planning/', '/demos/terrava/gestion/?vista=planning'],
+      ['guests-arrivals', '/paneles/huespedes-llegadas/', '/demos/terrava/gestion/?vista=guests'],
+      ['preparation', '/paneles/preparacion/', '/demos/aurem/gestion/?vista=cleaning'],
     ]);
     expect(getPublishedPanels('en').map(({ id, detailHref, evidenceHref }) => [id, detailHref, evidenceHref])).toEqual([
       ['enquiries', '/en/panels/enquiries/', '/en/demos/terrava/gestion/?vista=enquiries'],
       ['planning', '/en/panels/planning/', '/en/demos/terrava/gestion/?vista=planning'],
+      ['guests-arrivals', '/en/panels/guests-arrivals/', '/en/demos/terrava/gestion/?vista=guests'],
+      ['preparation', '/en/panels/preparation/', '/en/demos/aurem/gestion/?vista=cleaning'],
     ]);
   });
 });

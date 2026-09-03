@@ -7,9 +7,9 @@ const originalWebPaths = originalWebConcepts.flatMap((slug) => [`/webs/${slug}/`
 const paths = [
   '/', '/en/', '/docs/', '/en/docs/',
   '/soluciones/casas-rurales/', '/soluciones/apartamentos/', '/soluciones/hoteles/', '/planes/', '/webs/', '/diagnostico/',
-  '/paneles/', '/paneles/solicitudes/', '/paneles/planning/',
+  '/paneles/', '/paneles/solicitudes/', '/paneles/planning/', '/paneles/huespedes-llegadas/', '/paneles/preparacion/',
   '/en/solutions/rural-stays/', '/en/solutions/apartments/', '/en/solutions/hotels/', '/en/plans/', '/en/webs/', '/en/assessment/',
-  '/en/panels/', '/en/panels/enquiries/', '/en/panels/planning/',
+  '/en/panels/', '/en/panels/enquiries/', '/en/panels/planning/', '/en/panels/guests-arrivals/', '/en/panels/preparation/',
   ...originalWebPaths,
   '/recursos/gestor-reservas-apartamentos-turisticos/', '/recursos/web-hotel-reservas-directas-operacion/',
   '/legal/', '/privacidad/', '/cookies/',
@@ -74,7 +74,7 @@ test('public routes are complete and demos remain isolated', async ({ page }) =>
 
 test('capability maps expose truthful evidence and exact localized targets', async ({ page, request }) => {
   await page.goto('/soluciones/casas-rurales/');
-  await expect(page.locator('[data-capability-evidence]')).toHaveCount(4);
+  await expect(page.locator('[data-capability-evidence]')).toHaveCount(5);
   const planning = page.locator('[data-capability="planning"]');
   await expect(planning).toContainText('Desde Gestión');
   await expect(planning).toContainText('Calendario ficticio de solo lectura');
@@ -88,7 +88,7 @@ test('capability maps expose truthful evidence and exact localized targets', asy
 
   await page.goto('/en/plans/');
   const evidenceLinks = page.locator('[data-capability-evidence]');
-  await expect(evidenceLinks).toHaveCount(10);
+  await expect(evidenceLinks).toHaveCount(11);
   await expect(page.locator('[data-capability="supervised-ai"]')).toContainText('Visible in the demo');
   await expect(page.locator('[data-capability-evidence="supervised-ai"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=automation');
   await expect(page.locator('[data-capability="revenue"]')).toContainText('Starting plan: Intelligent');
@@ -174,17 +174,21 @@ test('panel portfolio publishes only complete localized evidence pages', async (
     ['/paneles/', [
       ['enquiries', '/paneles/solicitudes/', '/demos/terrava/gestion/?vista=enquiries'],
       ['planning', '/paneles/planning/', '/demos/terrava/gestion/?vista=planning'],
+      ['guests-arrivals', '/paneles/huespedes-llegadas/', '/demos/terrava/gestion/?vista=guests'],
+      ['preparation', '/paneles/preparacion/', '/demos/aurem/gestion/?vista=cleaning'],
     ]],
     ['/en/panels/', [
       ['enquiries', '/en/panels/enquiries/', '/en/demos/terrava/gestion/?vista=enquiries'],
       ['planning', '/en/panels/planning/', '/en/demos/terrava/gestion/?vista=planning'],
+      ['guests-arrivals', '/en/panels/guests-arrivals/', '/en/demos/terrava/gestion/?vista=guests'],
+      ['preparation', '/en/panels/preparation/', '/en/demos/aurem/gestion/?vista=cleaning'],
     ]],
   ] as const) {
     await expectCleanPage(page, indexPath);
     const portfolio = page.locator('[data-panel-portfolio]');
     await expect(portfolio.locator('[data-panel-card]')).toHaveCount(6);
-    await expect(portfolio.locator('[data-panel-status="published"]')).toHaveCount(2);
-    await expect(portfolio.locator('[data-panel-status="preparation"]')).toHaveCount(4);
+    await expect(portfolio.locator('[data-panel-status="published"]')).toHaveCount(4);
+    await expect(portfolio.locator('[data-panel-status="preparation"]')).toHaveCount(2);
     await expect(portfolio.locator('[data-panel-status="preparation"] a')).toHaveCount(0);
 
     for (const [id, detailHref, evidenceHref] of published) {

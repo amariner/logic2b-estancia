@@ -39,6 +39,7 @@ describe('domain', () => {
       'email-enquiries': 'demo_visual_pendiente',
       'enquiry-workspace': 'demo_visual_disponible',
       planning: 'demo_visual_disponible',
+      'guest-context': 'demo_visual_disponible',
       'website-editor': 'demo_visual_pendiente',
       'basic-reports': 'demo_visual_disponible',
       'operations-centre': 'demo_visual_disponible',

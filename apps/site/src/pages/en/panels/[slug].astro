@@ -8,10 +8,23 @@ export function getStaticPaths() {
 }
 
 const { panel } = Astro.props as { panel: PanelPortfolioItem };
-const title = `${panel.title}: hospitality management workspace | Logic2B Estancias`;
-const description = panel.id === 'enquiries'
-  ? 'Compare a fictitious enquiry, its dates, property and alternative in Terrava. Review the local evidence, human decision and operating boundary of Management.'
-  : 'Explore a fictitious fourteen-day planning view with properties, stays and an alternative. Review its local evidence and the operating boundary of Management.';
+const titles: Record<PanelPortfolioItem['id'], string> = {
+  enquiries: 'Enquiries: hospitality workspace | Logic2B Estancias',
+  planning: 'Planning: hospitality workspace | Logic2B Estancias',
+  'guests-arrivals': 'Guests and arrivals: hospitality workspace | Logic2B Estancias',
+  preparation: 'Preparation: operations workspace | Logic2B Estancias',
+  'operations-revenue': 'Operations and revenue | Logic2B Estancias',
+  copilot: 'Supervised copilot | Logic2B Estancias',
+};
+const descriptions: Record<PanelPortfolioItem['id'], string> = {
+  enquiries: 'Compare a fictitious enquiry, its dates, property and alternative in Terrava. Review the local evidence, human decision and operating boundary of Management.',
+  planning: 'Explore a fictitious fourteen-day planning view with properties, stays and an alternative. Review its local evidence and the operating boundary of Management.',
+  'guests-arrivals': 'Review two fictitious guests, their source and status in Terrava. Check the minimum arrival context and the explicit boundary of Management.',
+  preparation: 'Inspect room 408, its preparation window and a fictitious checklist in Aurem. Check the human review step and its operating boundaries.',
+  'operations-revenue': '', copilot: '',
+};
+const title = titles[panel.id];
+const description = descriptions[panel.id];
 ---
 
 <Base locale="en" route={`panels/${panel.slug}`} alternateRoute={`paneles/${panel.alternateSlug}`} title={title} description={description}><PanelDetailPage locale="en" panel={panel} /></Base>

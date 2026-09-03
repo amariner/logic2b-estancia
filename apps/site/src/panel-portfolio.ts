@@ -13,7 +13,7 @@ export const PANEL_IDS = [
 
 export type PanelId = (typeof PANEL_IDS)[number];
 export type PanelPublicationStatus = 'published' | 'preparation';
-export type PanelPreviewKind = 'enquiries' | 'planning';
+export type PanelPreviewKind = 'enquiries' | 'planning' | 'guests-arrivals' | 'preparation';
 
 interface LocalizedPanelCopy {
   slug: string;
@@ -97,34 +97,46 @@ const definitions: readonly PanelDefinition[] = [
     },
   },
   {
-    id: 'guests-arrivals', number: '03', plan: 'gestion', status: 'preparation',
-    capabilityIds: ['enquiry-workspace', 'operations-centre'], evidenceCapabilityId: 'enquiry-workspace', preview: null,
+    id: 'guests-arrivals', number: '03', plan: 'gestion', status: 'published',
+    capabilityIds: ['guest-context'], evidenceCapabilityId: 'guest-context', preview: 'guests-arrivals',
     copy: {
       es: {
         slug: 'huespedes-llegadas', title: 'Huéspedes y llegadas',
-        summary: 'Ficha prevista para explicar cómo el contexto de una estancia acompaña a la llegada sin crear registros reales.',
-        decision: 'Preparar la llegada con la información necesaria y el mínimo acceso.', outcome: '', visiblePoints: [], flow: [],
+        summary: 'El contexto de una estancia reúne titular, origen y estado para preparar una llegada sin convertir la demo en un registro de viajeros.',
+        decision: 'Consultar la información mínima antes de recibir al huésped sin duplicarla entre herramientas.',
+        outcome: 'El equipo distingue una consulta recibida de una estancia en casa usando únicamente datos ficticios.',
+        visiblePoints: ['Marina Costa y M. Laurent como casos ficticios', 'Emails reservados bajo example.test', 'Origen de la estancia', 'Estado de cada huésped'],
+        flow: ['La solicitud conserva el contexto', 'La tabla muestra solo los campos necesarios', 'El equipo consulta el estado', 'Cualquier registro real queda fuera de la demo'],
       },
       en: {
         slug: 'guests-arrivals', title: 'Guests and arrivals',
-        summary: 'Planned page for explaining how stay context reaches arrival without creating live guest records.',
-        decision: 'Prepare arrival with the necessary information and minimum access.', outcome: '', visiblePoints: [], flow: [],
+        summary: 'Stay context brings together holder, source and status to prepare an arrival without turning the demo into a traveller register.',
+        decision: 'Check the minimum information before welcoming a guest without duplicating it across tools.',
+        outcome: 'The team distinguishes a received enquiry from an in-house stay using fictitious data only.',
+        visiblePoints: ['Marina Costa and M. Laurent as fictitious cases', 'Reserved example.test email addresses', 'Source of the stay', 'Status of each guest'],
+        flow: ['The enquiry keeps its context', 'The table shows only the needed fields', 'The team checks the status', 'Every live registration remains outside the demo'],
       },
     },
   },
   {
-    id: 'preparation', number: '04', plan: 'inteligente', status: 'preparation',
-    capabilityIds: ['cleaning', 'maintenance'], evidenceCapabilityId: 'cleaning', preview: null,
+    id: 'preparation', number: '04', plan: 'inteligente', status: 'published',
+    capabilityIds: ['cleaning', 'operations-centre'], evidenceCapabilityId: 'cleaning', preview: 'preparation',
     copy: {
       es: {
         slug: 'preparacion', title: 'Preparación',
-        summary: 'Ficha prevista para reunir limpieza, estado de habitación y revisión humana antes de una llegada.',
-        decision: 'Ver qué falta, quién revisa y qué no puede darse por terminado.', outcome: '', visiblePoints: [], flow: [],
+        summary: 'Habitación, ventana de preparación y checklist comparten una vista para que la validación final siga teniendo responsable humano.',
+        decision: 'Ver qué falta y quién debe revisar la habitación antes de la llegada.',
+        outcome: 'Una persona lee estado y checklist precargados; la demo no asigna, valida ni actualiza habitaciones.',
+        visiblePoints: ['Habitación ficticia 408 · Terrace', 'Salida 11:08 y llegada 15:00', 'Estado Pendiente', 'Checklist de limpieza y validación de recepción'],
+        flow: ['La salida abre una ventana de preparación', 'El fixture muestra el estado pendiente', 'Limpieza y recepción leen sus responsabilidades', 'La validación real permanece fuera de la demo'],
       },
       en: {
         slug: 'preparation', title: 'Preparation',
-        summary: 'Planned page bringing together cleaning, room status and human review before arrival.',
-        decision: 'See what remains, who reviews it and what cannot yet be considered ready.', outcome: '', visiblePoints: [], flow: [],
+        summary: 'Room, preparation window and checklist share one view so final validation keeps a human owner.',
+        decision: 'See what remains and who must review the room before arrival.',
+        outcome: 'A person reads preloaded status and checklist; the demo assigns, validates or updates no room.',
+        visiblePoints: ['Fictitious room 408 · Terrace', 'Departure 11:08 and arrival 15:00', 'Pending status', 'Housekeeping and reception validation checklist'],
+        flow: ['Departure opens a preparation window', 'The fixture shows the pending status', 'Housekeeping and reception read their responsibilities', 'Live validation remains outside the demo'],
       },
     },
   },

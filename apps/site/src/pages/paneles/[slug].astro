@@ -8,10 +8,23 @@ export function getStaticPaths() {
 }
 
 const { panel } = Astro.props as { panel: PanelPortfolioItem };
-const title = `${panel.title}: panel de gestión para alojamientos | Logic2B Estancias`;
-const description = panel.id === 'enquiries'
-  ? 'Compara una solicitud ficticia, sus fechas, alojamiento y alternativa en Terrava. Revisa la evidencia local, la decisión humana y el límite operativo del plan Gestión.'
-  : 'Explora un planning ficticio de catorce días con propiedades, estancias y una alternativa. Revisa la evidencia local y el límite operativo del plan Gestión.';
+const titles: Record<PanelPortfolioItem['id'], string> = {
+  enquiries: 'Solicitudes: panel de alojamientos | Logic2B Estancias',
+  planning: 'Planning: panel de alojamientos | Logic2B Estancias',
+  'guests-arrivals': 'Huéspedes y llegadas: panel de alojamientos | Logic2B Estancias',
+  preparation: 'Preparación: panel operativo | Logic2B Estancias',
+  'operations-revenue': 'Operación e ingresos | Logic2B Estancias',
+  copilot: 'Copiloto supervisado | Logic2B Estancias',
+};
+const descriptions: Record<PanelPortfolioItem['id'], string> = {
+  enquiries: 'Compara una solicitud ficticia, sus fechas, alojamiento y alternativa en Terrava. Revisa la evidencia local, la decisión humana y el límite operativo del plan Gestión.',
+  planning: 'Explora un planning ficticio de catorce días con propiedades, estancias y una alternativa. Revisa la evidencia local y el límite operativo del plan Gestión.',
+  'guests-arrivals': 'Revisa dos huéspedes ficticios, su origen y estado en Terrava. Comprueba el contexto mínimo de llegada y el límite explícito del plan Gestión.',
+  preparation: 'Inspecciona la habitación 408, su ventana de preparación y un checklist ficticio en Aurem. Comprueba la revisión humana y sus límites operativos.',
+  'operations-revenue': '', copilot: '',
+};
+const title = titles[panel.id];
+const description = descriptions[panel.id];
 ---
 
 <Base locale="es" route={`paneles/${panel.slug}`} alternateRoute={`panels/${panel.alternateSlug}`} title={title} description={description}><PanelDetailPage locale="es" panel={panel} /></Base>

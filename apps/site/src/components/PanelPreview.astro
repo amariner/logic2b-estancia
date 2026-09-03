@@ -5,17 +5,22 @@ import type { PanelPreviewKind } from '../panel-portfolio';
 const { locale, kind, compact = false } = Astro.props as { locale: Locale; kind: PanelPreviewKind; compact?: boolean };
 const en = locale === 'en';
 const properties = ['Aira', 'Bruma', 'Cauce', 'Duna', 'Era'];
+const labels: Record<PanelPreviewKind, string> = {
+  enquiries: en ? 'Fictitious Terrava enquiry comparison in read-only mode' : 'Comparación ficticia de una solicitud de Terrava en solo lectura',
+  planning: en ? 'Fictitious fourteen-day Terrava planning in read-only mode' : 'Planning ficticio de Terrava de catorce días en solo lectura',
+  'guests-arrivals': en ? 'Fictitious Terrava guest context table in read-only mode' : 'Tabla ficticia de contexto de huéspedes de Terrava en solo lectura',
+  preparation: en ? 'Fictitious Aurem room preparation checklist in read-only mode' : 'Checklist ficticio de preparación de habitación de Aurem en solo lectura',
+};
+const brand = kind === 'preparation' ? 'Aurem Hotel' : 'Terrava Collection';
 ---
 
 <div
   class:list={['panel-preview', `panel-preview-${kind}`, { 'is-compact': compact }]}
   role="img"
-  aria-label={kind === 'enquiries'
-    ? (en ? 'Fictitious Terrava enquiry comparison in read-only mode' : 'Comparación ficticia de una solicitud de Terrava en solo lectura')
-    : (en ? 'Fictitious fourteen-day Terrava planning in read-only mode' : 'Planning ficticio de Terrava de catorce días en solo lectura')}
+  aria-label={labels[kind]}
   data-panel-preview={kind}
 >
-  <div class="panel-preview-bar"><span>Terrava Collection</span><small>{en ? 'Local demo · read-only' : 'Demo local · solo lectura'}</small></div>
+  <div class="panel-preview-bar"><span>{brand}</span><small>{en ? 'Local demo · read-only' : 'Demo local · solo lectura'}</small></div>
   <div class="panel-preview-shell">
     <aside aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></aside>
     {kind === 'enquiries' ? (
@@ -25,7 +30,7 @@ const properties = ['Aira', 'Bruma', 'Cauce', 'Duna', 'Era'];
         <div class="panel-preview-comparison"><section><span>Casa Aira</span><strong>{en ? 'No fit' : 'Sin encaje'}</strong><small>{en ? 'First night occupied' : 'Primera noche ocupada'}</small></section><section><span>Casa Bruma</span><strong>€ 612</strong><small>{en ? 'Full stay available' : 'Estancia completa disponible'}</small></section></div>
         <footer>{en ? 'Compare only · no booking or message' : 'Solo compara · sin reserva ni mensaje'}</footer>
       </div>
-    ) : (
+    ) : kind === 'planning' ? (
       <div class="panel-preview-content panel-preview-planning">
         <header><div><strong>{en ? 'August · 14 days' : 'Agosto · 14 días'}</strong><small>{en ? 'All properties' : 'Todas las propiedades'}</small></div><span>{en ? 'Fictitious calendar · EUR' : 'Calendario ficticio · EUR'}</span></header>
         <div class="panel-preview-calendar">
@@ -33,6 +38,26 @@ const properties = ['Aira', 'Bruma', 'Cauce', 'Duna', 'Era'];
           {properties.map((property, row) => <div class="panel-preview-row"><span>Casa {property}</span>{Array.from({ length: 10 }, (_, day) => <i class:list={{ occupied: day >= row % 4 && day < (row % 4) + 3, alternative: property === 'Bruma' && day === 6 }}></i>)}</div>)}
         </div>
         <footer><strong>Marina Costa · Casa Bruma</strong><span>{en ? 'View only · no inventory changes' : 'Solo visualización · sin cambios de inventario'}</span></footer>
+      </div>
+    ) : kind === 'guests-arrivals' ? (
+      <div class="panel-preview-content panel-preview-guests">
+        <header><div><span>{en ? 'Stay context' : 'Contexto de estancia'}</span><strong>{en ? 'Guests' : 'Huéspedes'}</strong><small>{en ? 'Two fictitious records' : 'Dos registros ficticios'}</small></div><b>{en ? 'Read only' : 'Solo lectura'}</b></header>
+        <div class="panel-preview-guest-table">
+          <div class="panel-preview-guest-head"><span>{en ? 'Guest' : 'Huésped'}</span><span>{en ? 'Fictitious email' : 'Email ficticio'}</span><span>{en ? 'Source' : 'Origen'}</span><span>{en ? 'Status' : 'Estado'}</span></div>
+          <div><strong>Marina Costa</strong><span>marina@example.test</span><span>{en ? 'Demo data' : 'Dato de la demo'}</span><b>{en ? 'Enquiry received' : 'Consulta recibida'}</b></div>
+          <div><strong>M. Laurent</strong><span>laurent@example.test</span><span>{en ? 'France' : 'Francia'}</span><b>{en ? 'In house' : 'En casa'}</b></div>
+        </div>
+        <footer><span>{en ? 'No profile, traveller report or message' : 'Sin perfil, registro de viajeros ni mensaje'}</span></footer>
+      </div>
+    ) : (
+      <div class="panel-preview-content panel-preview-preparation">
+        <header><div><span>{en ? 'Housekeeping' : 'Limpieza'}</span><strong>408 · Terrace</strong><small>{en ? 'Departure 11:08 · arrival 15:00' : 'Salida 11:08 · llegada 15:00'}</small></div><b>{en ? 'Pending' : 'Pendiente'}</b></header>
+        <div class="panel-preview-checklist">
+          <p><i aria-hidden="true"></i><span><strong>{en ? 'Linen and bathroom' : 'Ropa y baño'}</strong><small>{en ? 'Housekeeping review' : 'Revisión de limpieza'}</small></span></p>
+          <p><i aria-hidden="true"></i><span><strong>{en ? 'Surfaces and minibar' : 'Superficies y minibar'}</strong><small>{en ? 'Housekeeping review' : 'Revisión de limpieza'}</small></span></p>
+          <p><i aria-hidden="true"></i><span><strong>{en ? 'Reception validation' : 'Validación de recepción'}</strong><small>{en ? 'Human final check' : 'Comprobación humana final'}</small></span></p>
+        </div>
+        <footer><span>{en ? 'Sample checklist · no assignment or room update' : 'Checklist de muestra · sin asignación ni cambio de habitación'}</span></footer>
       </div>
     )}
   </div>

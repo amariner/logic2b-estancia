@@ -15,6 +15,8 @@ const translatedPairs = [
   ['/paneles/', '/en/panels/'],
   ['/paneles/solicitudes/', '/en/panels/enquiries/'],
   ['/paneles/planning/', '/en/panels/planning/'],
+  ['/paneles/huespedes-llegadas/', '/en/panels/guests-arrivals/'],
+  ['/paneles/preparacion/', '/en/panels/preparation/'],
   ['/webs/linde/', '/en/webs/linde/'],
   ['/webs/cobalto/', '/en/webs/cobalto/'],
   ['/webs/oria/', '/en/webs/oria/'],
@@ -146,6 +148,7 @@ test('commercial search surfaces use specific, unique metadata and people-first 
   const commercialRoutes = [
     '/', '/en/', '/planes/', '/en/plans/', '/webs/', '/en/webs/',
     '/paneles/', '/en/panels/', '/paneles/solicitudes/', '/en/panels/enquiries/', '/paneles/planning/', '/en/panels/planning/',
+    '/paneles/huespedes-llegadas/', '/en/panels/guests-arrivals/', '/paneles/preparacion/', '/en/panels/preparation/',
     '/webs/linde/', '/en/webs/linde/', '/webs/cobalto/', '/en/webs/cobalto/', '/webs/oria/', '/en/webs/oria/',
     '/webs/boscara/', '/en/webs/boscara/', '/webs/velares/', '/en/webs/velares/', '/webs/nocta/', '/en/webs/nocta/',
     '/webs/riscoa/', '/en/webs/riscoa/', '/webs/solerna/', '/en/webs/solerna/', '/webs/cendra/', '/en/webs/cendra/',
