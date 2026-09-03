@@ -2,7 +2,7 @@
 
 Última revisión de la referencia: 2026-09-02
 
-Estado de ejecución: P0, P1, P2 y P3 cerrados; 12/12 direcciones web y 6/6 fichas de panel navegables verificadas. P4 está en curso con 3/5 guías publicadas y un contrato de implantación completo; P5–P6 permanecen pendientes.
+Estado de ejecución: P0, P1, P2 y P3 cerrados; 12/12 direcciones web y 6/6 fichas de panel navegables verificadas. P4 está en curso con 4/5 guías publicadas y un contrato de implantación completo; P5–P6 permanecen pendientes.
 
 Referencia: [camp.logic2b.com](https://camp.logic2b.com/)
 
@@ -170,7 +170,7 @@ Entregables:
 3. Enlaces contextuales desde home, planes, soluciones, webs y paneles.
 4. Revisión jurídica española antes de convertir textos de privacidad, pagos, registro de viajeros o contratos en afirmaciones operativas.
 
-Estado al 2026-09-04: **P4 en curso, 3/5 guías publicadas**. El índice canónico existente `/docs/` y `/en/docs/` sustituye la propuesta duplicada `/guias/`: conserva la ruta ya enlazada desde footer, sitemap y analítica, y coincide con la arquitectura pública de referencia. Un registro único mantiene los cinco roles y sus estados. Propiedad/dirección, reservas/recepción y operaciones disponen de ficha ES/EN, responsabilidad, relevo humano, capacidades, evidencia exacta, validaciones, límites, metadata, canonical, `hreflang`, sitemap, pruebas y QA. Operaciones enlaza dos fichas comerciales y las vistas locales `control`, `cleaning` y `maintenance` de Aurem sin atribuirles asignación, notificación o ejecución real. Marketing/revenue y técnica/privacidad permanecen explícitamente en preparación. El índice explica entradas, decisiones, pruebas, publicación supervisada, soporte y fuera de alcance; todavía no se han propagado enlaces contextuales desde otras superficies.
+Estado al 2026-09-04: **P4 en curso, 4/5 guías publicadas**. El índice canónico existente `/docs/` y `/en/docs/` sustituye la propuesta duplicada `/guias/`: conserva la ruta ya enlazada desde footer, sitemap y analítica, y coincide con la arquitectura pública de referencia. Un registro único mantiene los cinco roles y sus estados. Propiedad/dirección, reservas/recepción, operaciones y marketing/ingresos disponen de ficha ES/EN, responsabilidad, relevo humano, capacidades, evidencia exacta, validaciones, límites, metadata, canonical, `hreflang`, sitemap, pruebas y QA. Operaciones enlaza dos fichas comerciales y las vistas locales `control`, `cleaning` y `maintenance` de Aurem sin atribuirles asignación, notificación o ejecución real. Marketing/ingresos enlaza la muestra de marca de Nivora y las métricas explicables de Aurem, mantiene forecasting `en ruta` sin enlace y no presenta cifras ficticias como resultados. Técnica/privacidad permanece explícitamente en preparación. El índice explica entradas, decisiones, pruebas, publicación supervisada, soporte y fuera de alcance; todavía no se han propagado enlaces contextuales desde otras superficies.
 
 ### P5 · Conectividad demostrable y madurez real
 
@@ -228,4 +228,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Continuar **P4 · Guías, implantación y confianza de compra** publicando Marketing e ingresos en ES/EN. Debe unir marca, adquisición y métricas explicables sin convertir cifras ficticias en resultados comerciales ni confundir ADR/RevPAR observables con forecasting: `explainable-revenue` puede enlazar a Aurem, mientras `revenue` permanece `en ruta`. La ficha solo cuenta al completar responsabilidades, relevos, evidencia exacta, metadata, límites, pruebas y QA para pasar de 3/5 a 4/5. Técnica/privacidad permanece en preparación y los enlaces contextuales desde home, planes, soluciones, webs y paneles se incorporarán después de verificar los cinco destinos.
+Completar **P4 · Guías, implantación y confianza de compra** publicando Técnica y privacidad en ES/EN. Debe ordenar fuentes, roles y permisos, proveedores, pruebas, publicación y reversión, minimización de datos y consentimiento; enlazar solo evidencia exacta de roles, canales y copiloto supervisado de Aurem; mantener canales como activables por proyecto y automatización como pendiente; y evitar afirmaciones legales no verificadas. La ficha solo cuenta al completar responsabilidades, relevos, evidencia exacta, metadata, límites, pruebas y QA para pasar de 4/5 a 5/5. Después se incorporarán enlaces contextuales desde home, planes, soluciones, webs y paneles y se verificará el cierre de P4.
