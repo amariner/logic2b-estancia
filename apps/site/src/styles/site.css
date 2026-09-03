@@ -771,6 +771,9 @@
 .web-concept-boscara { --concept-paper: #e9ebe4; --concept-ink: #18211b; }
 .web-concept-velares { --concept-paper: #f2e9df; --concept-ink: #38261f; }
 .web-concept-nocta { --concept-paper: #e7e9ee; --concept-ink: #111b2b; }
+.web-concept-riscoa { --concept-paper: #e7ebe5; --concept-ink: #172119; }
+.web-concept-solerna { --concept-paper: #f1ece1; --concept-ink: #39291c; }
+.web-concept-cendra { --concept-paper: #e8e5e0; --concept-ink: #1f1915; }
 .web-concept-notice { display: flex; min-height: 74px; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid color-mix(in srgb, var(--concept-ink) 16%, transparent); }
 .web-concept-notice p { display: flex; gap: 12px 20px; align-items: baseline; margin: 0; font-size: .68rem; }
 .web-concept-notice p span { color: color-mix(in srgb, var(--concept-ink) 72%, transparent); }

@@ -2,7 +2,7 @@ import type { Locale } from '@logic-estancia/config';
 import type { DemoSlug, PlanLevel } from '@logic-estancia/domain';
 
 export type PortfolioVertical = 'rural' | 'apartments' | 'hotels';
-export const PORTFOLIO_ORIGINAL_SLUGS = ['linde', 'cobalto', 'oria', 'boscara', 'velares', 'nocta'] as const;
+export const PORTFOLIO_ORIGINAL_SLUGS = ['linde', 'cobalto', 'oria', 'boscara', 'velares', 'nocta', 'riscoa', 'solerna', 'cendra'] as const;
 export type PortfolioOriginalSlug = (typeof PORTFOLIO_ORIGINAL_SLUGS)[number];
 export type PortfolioStatus = 'canonical' | 'original';
 
@@ -191,6 +191,57 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
         ],
       },
     },
+    {
+      slug: 'riscoa', number: '10', brand: 'Riscoa Casas', vertical: 'rural', verticalLabel: 'Casa rural', plan: 'gestion', planLabel: 'Gestión', status: 'original', statusLabel: 'Concepto navegable',
+      summary: 'Tres casas en una ladera atlántica, conectadas por el paisaje y por una forma más clara de responder cada solicitud.',
+      visualIntent: 'Granito mojado, helechos, madera oscura y niebla baja construyen una identidad atlántica precisa, natural y sin tópicos de cabaña.',
+      businessProblem: 'Varias casas separadas necesitan conservar su carácter y compartir continuidad de solicitudes sin presentarse como un inventario indiferenciado.',
+      visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Inicio editorial', 'Las casas', 'Caminos y clima', 'Preparar la llegada'],
+      boundaryLabel: 'Límite de la evidencia', boundary: 'Concepto web ficticio; no representa casas reales, registra solicitudes, consulta disponibilidad, modifica planning ni coordina llegadas.',
+      image: '/media/riscoa/hero.webp', imageAlt: 'Casas rurales ficticias de madera y granito en una ladera con niebla para Riscoa Casas', demoHref: '/webs/riscoa/', demoCta: 'Explorar concepto web', assessmentCta: 'Evaluar este punto de partida',
+      showcase: {
+        eyebrow: 'Tres casas unidas por el paisaje', title: 'Cada camino llega a su casa.', intro: 'Riscoa ordena una pequeña colección sin borrar las diferencias entre sus casas. La web prepara la conversación; la continuidad de Gestión se demuestra en el caso canónico.',
+        moments: [
+          { number: '01', title: 'Separadas, pero coordinadas', text: 'Cada casa mantiene vistas, acceso y ritmo propios dentro de una lectura común.' },
+          { number: '02', title: 'El clima también prepara', text: 'Camino, lluvia y equipaje aportan contexto útil sin convertir la página en un flujo de llegada.' },
+          { number: '03', title: 'Gestión sin falsas conexiones', text: 'Solicitudes y planning pertenecen a Terrava; este concepto no guarda datos ni cambia calendarios.' },
+        ],
+      },
+    },
+    {
+      slug: 'solerna', number: '11', brand: 'Solerna Apartamentos', vertical: 'apartments', verticalLabel: 'Apartamentos', plan: 'basico', planLabel: 'Básico', status: 'original', statusLabel: 'Concepto navegable',
+      summary: 'Apartamentos serenos sobre los tejados de una ciudad histórica, explicados desde la luz, el umbral y la vida a pie.',
+      visualIntent: 'Cal, terracota gastada, madera y sombra fresca convierten un interior sencillo en una identidad urbana cálida y reconocible.',
+      businessProblem: 'Una colección compacta necesita una presencia propia que explique sus diferencias antes de asumir una capa de gestión todavía no validada.',
+      visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Inicio editorial', 'Apartamentos', 'Azoteas y luz', 'La ciudad cercana'],
+      boundaryLabel: 'Límite de la evidencia', boundary: 'Dirección web ficticia; no representa apartamentos reales, recoge solicitudes, consulta fechas, cobra, confirma reservas ni incluye gestor.',
+      image: '/media/solerna/hero.webp', imageAlt: 'Apartamento ficticio de cal abierto a tejados históricos para Solerna Apartamentos', demoHref: '/webs/solerna/', demoCta: 'Explorar concepto web', assessmentCta: 'Evaluar este punto de partida',
+      showcase: {
+        eyebrow: 'La ciudad empieza dentro', title: 'La luz entra antes que el ruido.', intro: 'Solerna usa sombra, altura y vistas próximas para presentar apartamentos sin reducirlos a una tabla de equipamiento. Básico demuestra presencia; no incorpora reserva ni workspace.',
+        moments: [
+          { number: '01', title: 'Elegir por la luz', text: 'Orientación, umbral y relación con los tejados distinguen cada estancia con pocos elementos.' },
+          { number: '02', title: 'La ciudad queda a escala humana', text: 'Calles y ritmos cotidianos ayudan a imaginar la estancia sin inventar experiencias.' },
+          { number: '03', title: 'Presencia antes que sistema', text: 'La salida abre el diagnóstico; esta ruta no consulta fechas, recoge datos ni confirma noches.' },
+        ],
+      },
+    },
+    {
+      slug: 'cendra', number: '12', brand: 'Cendra Hotel', vertical: 'hotels', verticalLabel: 'Hotel', plan: 'inteligente', planLabel: 'Inteligente', status: 'original', statusLabel: 'Concepto navegable',
+      summary: 'Un hotel urbano dentro de una antigua imprenta, donde arquitectura, llegada y capas operativas comparten una dirección clara.',
+      visualIntent: 'Ladrillo ennegrecido, acero, vegetación contenida y luz ámbar mínima construyen una identidad urbana profunda y nada corporativa.',
+      businessProblem: 'Un hotel con varias zonas y turnos necesita explicar su carácter y anticipar prioridades sin convertir la web en un centro de control.',
+      visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Inicio editorial', 'Habitaciones', 'El patio', 'Edificio y ciudad'],
+      boundaryLabel: 'Límite de la evidencia', boundary: 'Concepto web ficticio; no representa un hotel real ni demuestra el gestor Inteligente, inventario, tareas, revenue, IA o coordinación en vivo.',
+      image: '/media/cendra/hero.webp', imageAlt: 'Patio ficticio de hotel en una antigua imprenta de ladrillo para Cendra Hotel', demoHref: '/webs/cendra/', demoCta: 'Explorar concepto web', assessmentCta: 'Evaluar este punto de partida',
+      showcase: {
+        eyebrow: 'Una imprenta convertida en hotel', title: 'El edificio guarda el pulso.', intro: 'Cendra presenta habitaciones, circulaciones y espacios comunes como partes de una misma experiencia. La anticipación operativa pertenece a Inteligente y se prueba por separado.',
+        moments: [
+          { number: '01', title: 'Las capas siguen visibles', text: 'Ladrillo, patios y galerías cuentan la transformación sin convertirla en decorado industrial.' },
+          { number: '02', title: 'Llegar también es orientarse', text: 'Recorridos y zonas comunes reducen incertidumbre sin simular check-in ni control de accesos.' },
+          { number: '03', title: 'La inteligencia exige evidencia', text: 'Operación, revenue y copiloto viven en Aurem; esta web no ejecuta ni predice nada.' },
+        ],
+      },
+    },
   ],
   en: [
     {
@@ -322,6 +373,57 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
           { number: '01', title: 'Darkness belongs to the place', text: 'The story prepares an open-sky stay without fabricating availability or experiences.' },
           { number: '02', title: 'Sleep without stimulation', text: 'Rooms, light and materials are explained through rest, not a list of extras.' },
           { number: '03', title: 'Conversation, not booking', text: 'The exit leads to the commercial assessment; the demo collects no data and confirms no night.' },
+        ],
+      },
+    },
+    {
+      slug: 'riscoa', number: '10', brand: 'Riscoa Casas', vertical: 'rural', verticalLabel: 'Rural stays', plan: 'gestion', planLabel: 'Management', status: 'original', statusLabel: 'Navigable concept',
+      summary: 'Three homes on an Atlantic hillside, connected by landscape and a clearer way to continue every enquiry.',
+      visualIntent: 'Wet granite, ferns, dark timber and low mist create a precise Atlantic identity without cabin clichés.',
+      businessProblem: 'Several separate homes need to keep their character while sharing enquiry continuity instead of looking like undifferentiated inventory.',
+      visibleLabel: 'Visible pages and surfaces', visiblePages: ['Editorial home', 'The homes', 'Paths and weather', 'Preparing arrival'],
+      boundaryLabel: 'Evidence boundary', boundary: 'Fictional website concept; it is not a real collection and records no enquiry, checks no availability, changes no planning and coordinates no arrival.',
+      image: '/media/riscoa/hero.webp', imageAlt: 'Fictional timber and granite rural homes on a misty hillside for Riscoa Casas', demoHref: '/en/webs/riscoa/', demoCta: 'Explore website concept', assessmentCta: 'Assess this starting point',
+      showcase: {
+        eyebrow: 'Three homes joined by landscape', title: 'Every path reaches its own home.', intro: 'Riscoa organises a small collection without erasing the differences between its homes. The website prepares the conversation; Management continuity is proven in the canonical case.',
+        moments: [
+          { number: '01', title: 'Separate, yet coordinated', text: 'Every home keeps its own view, access and pace within one shared reading.' },
+          { number: '02', title: 'Weather prepares the stay too', text: 'Path, rain and luggage provide useful context without turning the page into an arrival flow.' },
+          { number: '03', title: 'Management without false connections', text: 'Enquiries and planning belong to Terrava; this concept stores no data and changes no calendar.' },
+        ],
+      },
+    },
+    {
+      slug: 'solerna', number: '11', brand: 'Solerna Apartamentos', vertical: 'apartments', verticalLabel: 'Apartments', plan: 'basico', planLabel: 'Basic', status: 'original', statusLabel: 'Navigable concept',
+      summary: 'Calm apartments above a historic city’s rooftops, explained through light, thresholds and life on foot.',
+      visualIntent: 'Limewash, worn terracotta, timber and cool shade turn a simple interior into a warm, recognisable urban identity.',
+      businessProblem: 'A compact collection needs an owned presence that explains its differences before adopting a management layer it has not yet validated.',
+      visibleLabel: 'Visible pages and surfaces', visiblePages: ['Editorial home', 'Apartments', 'Rooftops and light', 'The nearby city'],
+      boundaryLabel: 'Evidence boundary', boundary: 'Fictional website direction; it is not a real apartment collection and collects no enquiry, checks no date, takes no payment, confirms no booking and includes no workspace.',
+      image: '/media/solerna/hero.webp', imageAlt: 'Fictional limewashed apartment opening to historic rooftops for Solerna Apartments', demoHref: '/en/webs/solerna/', demoCta: 'Explore website concept', assessmentCta: 'Assess this starting point',
+      showcase: {
+        eyebrow: 'The city begins indoors', title: 'Light arrives before the noise.', intro: 'Solerna uses shade, height and nearby views to present apartments without reducing them to an equipment table. Basic proves presence; it adds no booking or workspace.',
+        moments: [
+          { number: '01', title: 'Choose through light', text: 'Orientation, threshold and relationship to the rooftops distinguish every stay with few elements.' },
+          { number: '02', title: 'The city stays human in scale', text: 'Streets and everyday rhythms help picture the stay without inventing experiences.' },
+          { number: '03', title: 'Presence before system', text: 'The exit opens the assessment; this route checks no date, collects no data and confirms no night.' },
+        ],
+      },
+    },
+    {
+      slug: 'cendra', number: '12', brand: 'Cendra Hotel', vertical: 'hotels', verticalLabel: 'Hotel', plan: 'inteligente', planLabel: 'Intelligent', status: 'original', statusLabel: 'Navigable concept',
+      summary: 'A city hotel in a former printing works, where architecture, arrival and operations share one clear direction.',
+      visualIntent: 'Blackened brick, steel, restrained planting and minimal amber light create a deep urban identity without corporate polish.',
+      businessProblem: 'A hotel with several zones and shifts needs to explain its character and anticipate priorities without turning its website into a control centre.',
+      visibleLabel: 'Visible pages and surfaces', visiblePages: ['Editorial home', 'Rooms', 'The courtyard', 'Building and city'],
+      boundaryLabel: 'Evidence boundary', boundary: 'Fictional website concept; it is not a real hotel and does not demonstrate the Intelligent workspace, inventory, tasks, revenue, AI or live coordination.',
+      image: '/media/cendra/hero.webp', imageAlt: 'Fictional hotel courtyard in a former brick printing works for Cendra Hotel', demoHref: '/en/webs/cendra/', demoCta: 'Explore website concept', assessmentCta: 'Assess this starting point',
+      showcase: {
+        eyebrow: 'A printing works turned hotel', title: 'The building keeps its pulse.', intro: 'Cendra presents rooms, circulation and shared spaces as parts of one experience. Operational anticipation belongs to Intelligent scope and is proven elsewhere.',
+        moments: [
+          { number: '01', title: 'The layers remain visible', text: 'Brick, courtyards and galleries tell the transformation without becoming industrial set dressing.' },
+          { number: '02', title: 'Arrival also means orientation', text: 'Routes and shared spaces reduce uncertainty without simulating check-in or access control.' },
+          { number: '03', title: 'Intelligence requires evidence', text: 'Operations, revenue and copilot live in Aurem; this website runs and predicts nothing.' },
         ],
       },
     },
