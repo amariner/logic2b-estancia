@@ -3,14 +3,14 @@ import { CAPABILITIES } from '@logic-estancia/domain';
 import { getGuidePortfolio, getPublishedGuides, GUIDE_IDS, validateGuideCapabilities } from './guide-portfolio';
 
 describe('guide portfolio contract', () => {
-  it('keeps five localized roles with two complete published guides', () => {
+  it('keeps five localized roles with three complete published guides', () => {
     expect(() => validateGuideCapabilities()).not.toThrow();
     for (const locale of ['es', 'en'] as const) {
       const guides = getGuidePortfolio(locale);
       expect(guides.map(({ id }) => id)).toEqual(GUIDE_IDS);
       expect(guides).toHaveLength(5);
-      expect(guides.filter(({ status }) => status === 'published')).toHaveLength(2);
-      expect(guides.filter(({ status }) => status === 'preparation')).toHaveLength(3);
+      expect(guides.filter(({ status }) => status === 'published')).toHaveLength(3);
+      expect(guides.filter(({ status }) => status === 'preparation')).toHaveLength(2);
       for (const guide of guides) {
         for (const capabilityId of guide.capabilityIds) expect(CAPABILITIES.some(({ id }) => id === capabilityId), `${locale}:${guide.id}:${capabilityId}`).toBe(true);
         if (guide.status === 'published') {
@@ -20,10 +20,12 @@ describe('guide portfolio contract', () => {
           expect(guide.validations).toHaveLength(4);
           expect(guide.boundaries).toHaveLength(3);
           expect(guide.panelLinks.length).toBeGreaterThanOrEqual(2);
+          if (guide.id === 'operations') expect(guide.capabilityLinks).toHaveLength(3);
         } else {
           expect(guide.detailHref).toBeNull();
           expect(guide.responsibilities).toEqual([]);
           expect(guide.panelLinks).toEqual([]);
+          expect(guide.capabilityLinks).toEqual([]);
         }
       }
     }
@@ -33,10 +35,12 @@ describe('guide portfolio contract', () => {
     expect(getPublishedGuides('es').map(({ id, detailHref }) => [id, detailHref])).toEqual([
       ['direction', '/docs/direccion-propiedad/'],
       ['reception', '/docs/reservas-recepcion/'],
+      ['operations', '/docs/operaciones/'],
     ]);
     expect(getPublishedGuides('en').map(({ id, detailHref }) => [id, detailHref])).toEqual([
       ['direction', '/en/docs/ownership-direction/'],
       ['reception', '/en/docs/reservations-reception/'],
+      ['operations', '/en/docs/operations/'],
     ]);
   });
 });

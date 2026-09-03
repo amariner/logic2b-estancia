@@ -27,6 +27,7 @@ const commercialRoutes = [
   '/docs/', '/en/docs/',
   '/docs/direccion-propiedad/', '/en/docs/ownership-direction/',
   '/docs/reservas-recepcion/', '/en/docs/reservations-reception/',
+  '/docs/operaciones/', '/en/docs/operations/',
   '/recursos/gestor-reservas-apartamentos-turisticos/',
   '/recursos/web-hotel-reservas-directas-operacion/',
 ];

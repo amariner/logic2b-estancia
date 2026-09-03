@@ -1,5 +1,6 @@
 import type { Locale } from '@logic-estancia/config';
 import { CAPABILITIES } from '@logic-estancia/domain';
+import { capabilityEvidenceHref } from './capability-evidence';
 import { getPanelPortfolio, type PanelId } from './panel-portfolio';
 
 export const GUIDE_IDS = ['direction', 'reception', 'operations', 'marketing-revenue', 'technical-privacy'] as const;
@@ -8,6 +9,11 @@ export type GuideStatus = 'published' | 'preparation';
 
 interface GuidePanelDefinition {
   id: PanelId;
+  label: Record<Locale, string>;
+}
+
+interface GuideCapabilityDefinition {
+  id: string;
   label: Record<Locale, string>;
 }
 
@@ -30,6 +36,7 @@ interface GuideDefinition {
   status: GuideStatus;
   capabilityIds: readonly string[];
   panels: readonly GuidePanelDefinition[];
+  capabilityEvidence?: readonly GuideCapabilityDefinition[];
   copy: Record<Locale, GuideCopy>;
 }
 
@@ -40,6 +47,7 @@ export interface GuidePortfolioItem extends GuideCopy {
   statusLabel: string;
   capabilityIds: readonly string[];
   panelLinks: readonly { id: PanelId; label: string; href: string }[];
+  capabilityLinks: readonly { id: string; label: string; href: string }[];
   detailHref: string | null;
   alternateSlug: string;
 }
@@ -163,10 +171,65 @@ const definitions: readonly GuideDefinition[] = [
     },
   },
   {
-    id: 'operations', number: '03', status: 'preparation', capabilityIds: ['operations-centre', 'cleaning', 'maintenance'], panels: [],
+    id: 'operations', number: '03', status: 'published', capabilityIds: ['operations-centre', 'cleaning', 'maintenance'],
+    panels: [
+      { id: 'preparation', label: { es: 'Preparación', en: 'Preparation' } },
+      { id: 'operations-revenue', label: { es: 'Operación e ingresos', en: 'Operations and revenue' } },
+    ],
+    capabilityEvidence: [
+      { id: 'operations-centre', label: { es: 'Abrir centro operativo en Aurem', en: 'Open the Aurem operations centre' } },
+      { id: 'cleaning', label: { es: 'Abrir limpieza y preparación en Aurem', en: 'Open housekeeping and preparation in Aurem' } },
+      { id: 'maintenance', label: { es: 'Abrir mantenimiento en Aurem', en: 'Open maintenance in Aurem' } },
+    ],
     copy: {
-      es: { slug: 'operaciones', role: 'Operaciones', title: 'Coordinar preparación e incidencias', question: '¿Cómo comparte el equipo prioridad, estado y responsabilidad?', summary: 'Responsabilidades de operación, limpieza y mantenimiento sobre un contexto común.', outcome: '', responsibilities: [], handoff: [], validations: [], boundaries: [] },
-      en: { slug: 'operations', role: 'Operations', title: 'Coordinate preparation and incidents', question: 'How does the team share priority, status and ownership?', summary: 'Operations, housekeeping and maintenance responsibilities over shared context.', outcome: '', responsibilities: [], handoff: [], validations: [], boundaries: [] },
+      es: {
+        slug: 'operaciones', role: 'Operaciones', title: 'Coordinar preparación e incidencias sin ocultar al responsable',
+        question: '¿Qué necesita operaciones para priorizar una llegada, preparar una habitación y escalar una incidencia sin perder la responsabilidad?',
+        summary: 'Una guía para compartir prioridad, estado y siguiente revisión entre operación, limpieza y mantenimiento sin presentar coordinación visual como ejecución automática.',
+        outcome: 'Un relevo operativo trazable: la señal conserva contexto, cada revisión tiene responsable y cualquier acción real termina en la fuente acordada.',
+        responsibilities: [
+          'Leer llegadas, preparación e incidencias desde la fuente acordada antes de priorizar.',
+          'Nombrar responsable y punto de revisión para limpieza, mantenimiento y excepciones.',
+          'Contrastar prioridad y estado antes de modificar un sistema o avisar a otra persona.',
+          'Escalar bloqueos y conservar una aceptación humana antes de cerrar el caso.',
+        ],
+        handoff: ['Señal y contexto compartidos', 'Responsable y prioridad revisados', 'Preparación o incidencia contrastada', 'Cierre humano en la fuente acordada'],
+        validations: [
+          'Qué sistema es fuente de verdad y qué significa cada prioridad, estado y plazo.',
+          'Quién asigna, valida y escala durante cada turno, incluida la cobertura fuera de horario.',
+          'Qué datos operativos o personales son imprescindibles y qué roles pueden consultarlos.',
+          'Quién puede actualizar un PMS, cerrar una orden o contactar con personal y proveedores.',
+        ],
+        boundaries: [
+          'Aurem usa un fixture local ficticio; sus vistas no prueban ejecución operativa en un alojamiento.',
+          'La demo no asigna ni valida tareas, no notifica al equipo y no cambia un PMS real.',
+          'No crea o cierra órdenes de trabajo ni contacta con proveedores; recargar restaura el escenario local.',
+        ],
+      },
+      en: {
+        slug: 'operations', role: 'Operations', title: 'Coordinate preparation and incidents without hiding ownership',
+        question: 'What does operations need to prioritise an arrival, prepare a room and escalate an incident without losing accountability?',
+        summary: 'A guide for sharing priority, status and the next review across operations, housekeeping and maintenance without presenting visual coordination as automated execution.',
+        outcome: 'A traceable operating handoff: the signal keeps its context, every review has an owner and every live action ends in the agreed source.',
+        responsibilities: [
+          'Read arrivals, preparation and incidents from the agreed source before prioritising.',
+          'Name an owner and review point for housekeeping, maintenance and exceptions.',
+          'Check priority and status before updating a system or notifying another person.',
+          'Escalate blockers and retain human acceptance before closing the case.',
+        ],
+        handoff: ['Shared signal and context', 'Owner and priority reviewed', 'Preparation or incident checked', 'Human closure in the agreed source'],
+        validations: [
+          'Which system is the source of truth and what every priority, status and deadline means.',
+          'Who assigns, validates and escalates on every shift, including out-of-hours cover.',
+          'Which operating or personal data is essential and which roles may inspect it.',
+          'Who may update a PMS, close a work order or contact staff and suppliers.',
+        ],
+        boundaries: [
+          'Aurem uses a fictitious local fixture; its views do not prove live execution at a property.',
+          'The demo assigns or validates no task, notifies no team and updates no live PMS.',
+          'It creates or closes no work order and contacts no supplier; reloading restores the local scenario.',
+        ],
+      },
     },
   },
   {
@@ -198,6 +261,13 @@ export function getGuidePortfolio(locale: Locale): readonly GuidePortfolioItem[]
       if (!panel?.detailHref) throw new Error(`missing_guide_panel:${definition.id}:${panelDefinition.id}`);
       return { id: panelDefinition.id, label: panelDefinition.label[locale], href: panel.detailHref };
     });
+    const capabilityLinks = (definition.capabilityEvidence ?? []).map((linkDefinition) => {
+      const capability = CAPABILITIES.find((candidate) => candidate.id === linkDefinition.id);
+      if (!capability || !definition.capabilityIds.includes(linkDefinition.id)) throw new Error(`missing_guide_capability_evidence:${definition.id}:${linkDefinition.id}`);
+      const href = capabilityEvidenceHref(capability, locale);
+      if (!href) throw new Error(`missing_guide_capability_href:${definition.id}:${linkDefinition.id}`);
+      return { id: linkDefinition.id, label: linkDefinition.label[locale], href };
+    });
     return {
       ...definition,
       ...copy,
@@ -205,6 +275,7 @@ export function getGuidePortfolio(locale: Locale): readonly GuidePortfolioItem[]
         ? (locale === 'en' ? 'Published guide' : 'Guía publicada')
         : (locale === 'en' ? 'In preparation' : 'En preparación'),
       panelLinks,
+      capabilityLinks,
       detailHref: published ? `${prefix}/docs/${copy.slug}/` : null,
       alternateSlug: definition.copy[otherLocale].slug,
     };

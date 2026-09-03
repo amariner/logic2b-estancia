@@ -11,7 +11,8 @@ const { guide } = Astro.props as { guide: GuidePortfolioItem };
 const metadata: Record<GuidePortfolioItem['id'], { title: string; description: string }> = {
   direction: { title: 'Guía para propiedad y dirección | Logic2B Estancias', description: 'Define alcance, responsables, evidencia, publicación y reversión antes de conectar la operación de un alojamiento. Guía honesta para propiedad y dirección.' },
   reception: { title: 'Guía de reservas y recepción | Logic2B Estancias', description: 'Ordena solicitudes, planning y llegadas con responsabilidad humana visible. Revisa evidencia ficticia y límites antes de activar reservas o comunicaciones.' },
-  operations: { title: '', description: '' }, 'marketing-revenue': { title: '', description: '' }, 'technical-privacy': { title: '', description: '' },
+  operations: { title: 'Guía de operaciones para alojamientos | Logic2B Estancias', description: 'Coordina preparación, limpieza, mantenimiento e incidencias con responsables y escalado visibles. Revisa evidencia ficticia y límites antes de activar.' },
+  'marketing-revenue': { title: '', description: '' }, 'technical-privacy': { title: '', description: '' },
 };
 ---
 <Base locale="es" route={`docs/${guide.slug}`} alternateRoute={`docs/${guide.alternateSlug}`} title={metadata[guide.id].title} description={metadata[guide.id].description}><GuideDetailPage locale="es" guide={guide} /></Base>
