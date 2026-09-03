@@ -293,10 +293,64 @@ const definitions: readonly GuideDefinition[] = [
     },
   },
   {
-    id: 'technical-privacy', number: '05', status: 'preparation', capabilityIds: ['roles', 'channels', 'supervised-ai'], panels: [],
+    id: 'technical-privacy', number: '05', status: 'published', capabilityIds: ['roles', 'channels', 'supervised-ai', 'automation'],
+    panels: [
+      { id: 'copilot', label: { es: 'Copiloto supervisado', en: 'Supervised copilot' } },
+    ],
+    capabilityEvidence: [
+      { id: 'roles', label: { es: 'Abrir representación de roles en Aurem', en: 'Open the role representation in Aurem' } },
+      { id: 'channels', label: { es: 'Abrir requisitos de canales en Aurem', en: 'Open channel requirements in Aurem' } },
+      { id: 'supervised-ai', label: { es: 'Abrir revisión supervisada en Aurem', en: 'Open supervised review in Aurem' } },
+    ],
     copy: {
-      es: { slug: 'tecnica-privacidad', role: 'Técnica y privacidad', title: 'Validar accesos, proveedores y reversión', question: '¿Qué debe estar acordado antes de activar datos o sistemas?', summary: 'Fuentes, permisos, proveedores, pruebas y aceptación sin presentar una demo como producción.', outcome: '', responsibilities: [], handoff: [], validations: [], boundaries: [] },
-      en: { slug: 'technical-privacy', role: 'Technical and privacy', title: 'Validate access, providers and rollback', question: 'What must be agreed before activating data or systems?', summary: 'Sources, permissions, providers, tests and acceptance without presenting a demo as production.', outcome: '', responsibilities: [], handoff: [], validations: [], boundaries: [] },
+      es: {
+        slug: 'tecnica-privacidad', role: 'Técnica y privacidad', title: 'Validar accesos, proveedores y reversión',
+        question: '¿Qué debe estar acordado antes de activar datos o sistemas?',
+        summary: 'Una guía para acordar fuentes, finalidad, permisos, proveedores, pruebas y reversión sin presentar una demo como producción ni como certificación.',
+        outcome: 'Un contrato de activación revisable: cada dato tiene finalidad y responsable, cada acceso y proveedor tiene condiciones, y cualquier cambio conserva aceptación y vuelta atrás.',
+        responsibilities: [
+          'Inventariar fuentes, finalidad, datos mínimos y cualquier consentimiento aplicable antes de solicitar accesos o credenciales.',
+          'Acordar quién concede, usa, revisa y revoca cada permiso con el menor alcance necesario.',
+          'Evaluar cada proveedor y canal por separado antes de compartir datos, mapear campos o publicar.',
+          'Definir pruebas, aceptación, ventana de cambio, observación y reversión antes de activar.',
+        ],
+        handoff: ['Fuente, finalidad y mínimo acordados', 'Roles y accesos revisados', 'Proveedor y pruebas aceptados', 'Publicación supervisada y reversible'],
+        validations: [
+          'Quién responde de cada fuente, para qué se usa, qué campos son imprescindibles y qué política de conservación o eliminación se acuerda.',
+          'Quién concede, revisa y revoca accesos, cómo se registra una excepción y qué recuperación existe ante una cuenta o credencial comprometida.',
+          'Qué revisión contractual, técnica, de seguridad y de protección de datos necesita cada proveedor según el proyecto y la jurisdicción aplicable.',
+          'Qué fixture, recorridos, fallos, seguridad, accesibilidad, aceptación, observación y reversión deben superarse antes y después del cambio.',
+        ],
+        boundaries: [
+          'Los roles de Aurem son una representación local: no crean cuentas, permisos o datos de producción.',
+          'La matriz muestra cero canales conectados; no contiene credenciales, no sincroniza ni publica y cada activación exige validación propia.',
+          'El copiloto no usa modelo o proveedor y no envía nada; esta guía tampoco sustituye asesoría jurídica, evaluación de seguridad o certificación de cumplimiento.',
+        ],
+      },
+      en: {
+        slug: 'technical-privacy', role: 'Technical and privacy', title: 'Validate access, providers and rollback',
+        question: 'What must be agreed before activating data or systems?',
+        summary: 'A guide for agreeing sources, purpose, permissions, providers, tests and rollback without presenting a demo as production or certification.',
+        outcome: 'A reviewable activation contract: every datum has a purpose and owner, every access and provider has conditions, and every change retains acceptance and rollback.',
+        responsibilities: [
+          'Inventory sources, purpose, minimum data and any applicable consent before requesting access or credentials.',
+          'Agree who grants, uses, reviews and revokes every permission with the least scope required.',
+          'Evaluate every provider and channel separately before sharing data, mapping fields or publishing.',
+          'Define tests, acceptance, change window, observation and rollback before activation.',
+        ],
+        handoff: ['Source, purpose and minimum agreed', 'Roles and access reviewed', 'Provider and tests accepted', 'Supervised and reversible publication'],
+        validations: [
+          'Who owns every source, why it is used, which fields are essential and which retention or deletion policy is agreed.',
+          'Who grants, reviews and revokes access, how an exception is recorded and which recovery exists for a compromised account or credential.',
+          'Which contractual, technical, security and data-protection review every provider needs for the project and applicable jurisdiction.',
+          'Which fixture, journeys, failures, security, accessibility, acceptance, observation and rollback must pass before and after the change.',
+        ],
+        boundaries: [
+          'Aurem roles are a local representation: they create no live account, permission or production data.',
+          'The matrix shows zero connected channels; it holds no credentials, synchronises or publishes nothing, and every activation needs its own validation.',
+          'The copilot uses no model or provider and sends nothing; this guide also replaces no legal advice, security assessment or compliance certification.',
+        ],
+      },
     },
   },
 ] as const;

@@ -13,7 +13,7 @@ const metadata: Record<GuidePortfolioItem['id'], { title: string; description: s
   reception: { title: 'Reservations and reception guide | Logic2B Estancias', description: 'Organise enquiries, planning and arrivals with visible human ownership. Review fictitious evidence and boundaries before activating bookings or messages.' },
   operations: { title: 'Hospitality operations guide | Logic2B Estancias', description: 'Coordinate preparation, housekeeping, maintenance and incidents with visible owners and escalation. Review fictitious evidence and boundaries before activation.' },
   'marketing-revenue': { title: 'Marketing and revenue guide | Logic2B Estancias', description: 'Separate brand, signal, ADR, RevPAR and explainable revenue from unavailable results or forecasts. A verifiable hospitality guide.' },
-  'technical-privacy': { title: '', description: '' },
+  'technical-privacy': { title: 'Technical and privacy guide | Logic2B Estancias', description: 'Agree sources, access, providers, tests and rollback before activating data or systems. A verifiable guide without claiming compliance or production.' },
 };
 ---
 <Base locale="en" route={`docs/${guide.slug}`} alternateRoute={`docs/${guide.alternateSlug}`} title={metadata[guide.id].title} description={metadata[guide.id].description}><GuideDetailPage locale="en" guide={guide} /></Base>

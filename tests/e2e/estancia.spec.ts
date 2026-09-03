@@ -219,7 +219,7 @@ test('panel portfolio publishes only complete localized evidence pages', async (
   expect(writes).toEqual([]);
 });
 
-test('role guides publish four complete journeys and keep one honest preparation state', async ({ page, request }) => {
+test('role guides publish five complete journeys with truthful capability maturity', async ({ page, request }) => {
   const writes: string[] = [];
   page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
 
@@ -229,19 +229,21 @@ test('role guides publish four complete journeys and keep one honest preparation
       ['reception', '/docs/reservas-recepcion/', 3, 0],
       ['operations', '/docs/operaciones/', 2, 3],
       ['marketing-revenue', '/docs/marketing-ingresos/', 1, 2],
+      ['technical-privacy', '/docs/tecnica-privacidad/', 1, 3],
     ]],
     ['/en/docs/', [
       ['direction', '/en/docs/ownership-direction/', 2, 0],
       ['reception', '/en/docs/reservations-reception/', 3, 0],
       ['operations', '/en/docs/operations/', 2, 3],
       ['marketing-revenue', '/en/docs/marketing-revenue/', 1, 2],
+      ['technical-privacy', '/en/docs/technical-privacy/', 1, 3],
     ]],
   ] as const) {
     await expectCleanPage(page, indexPath);
     const portfolio = page.locator('[data-guide-portfolio]');
     await expect(portfolio.locator('[data-guide-card]')).toHaveCount(5);
-    await expect(portfolio.locator('[data-guide-status="published"]')).toHaveCount(4);
-    await expect(portfolio.locator('[data-guide-status="preparation"]')).toHaveCount(1);
+    await expect(portfolio.locator('[data-guide-status="published"]')).toHaveCount(5);
+    await expect(portfolio.locator('[data-guide-status="preparation"]')).toHaveCount(0);
     await expect(portfolio.locator('[data-guide-status="preparation"] a')).toHaveCount(0);
     await expect(portfolio.locator('[data-guide-implementation] li')).toHaveCount(6);
 
@@ -275,6 +277,15 @@ test('role guides publish four complete journeys and keep one honest preparation
         await expect(detail.locator('[data-guide-capability-evidence="explainable-revenue"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=reports`);
         await expect(detail.locator('[data-guide-capability="revenue"]')).toContainText(indexPath.startsWith('/en') ? 'On the roadmap' : 'En ruta');
         await expect(detail.locator('[data-guide-capability-evidence="revenue"]')).toHaveCount(0);
+      }
+      if (id === 'technical-privacy') {
+        const prefix = indexPath.startsWith('/en') ? '/en' : '';
+        await expect(detail.locator('[data-guide-capability-evidence="roles"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=home`);
+        await expect(detail.locator('[data-guide-capability-evidence="channels"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=channels`);
+        await expect(detail.locator('[data-guide-capability-evidence="supervised-ai"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=automation`);
+        await expect(detail.locator('[data-guide-capability="channels"]')).toContainText(indexPath.startsWith('/en') ? 'Activated per project' : 'Activable por proyecto');
+        await expect(detail.locator('[data-guide-capability="automation"]')).toContainText(indexPath.startsWith('/en') ? 'Visual demo pending' : 'Demo visual pendiente');
+        await expect(detail.locator('[data-guide-capability-evidence="automation"]')).toHaveCount(0);
       }
     }
   }

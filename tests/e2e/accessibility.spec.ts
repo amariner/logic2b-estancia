@@ -29,6 +29,7 @@ const commercialRoutes = [
   '/docs/reservas-recepcion/', '/en/docs/reservations-reception/',
   '/docs/operaciones/', '/en/docs/operations/',
   '/docs/marketing-ingresos/', '/en/docs/marketing-revenue/',
+  '/docs/tecnica-privacidad/', '/en/docs/technical-privacy/',
   '/recursos/gestor-reservas-apartamentos-turisticos/',
   '/recursos/web-hotel-reservas-directas-operacion/',
 ];
