@@ -233,10 +233,63 @@ const definitions: readonly GuideDefinition[] = [
     },
   },
   {
-    id: 'marketing-revenue', number: '04', status: 'preparation', capabilityIds: ['brand-web', 'explainable-revenue', 'revenue'], panels: [],
+    id: 'marketing-revenue', number: '04', status: 'published', capabilityIds: ['brand-web', 'explainable-revenue', 'revenue'],
+    panels: [
+      { id: 'operations-revenue', label: { es: 'Operación e ingresos', en: 'Operations and revenue' } },
+    ],
+    capabilityEvidence: [
+      { id: 'brand-web', label: { es: 'Abrir web modular de Nivora', en: 'Open the Nivora modular website' } },
+      { id: 'explainable-revenue', label: { es: 'Abrir métricas explicables en Aurem', en: 'Open explainable metrics in Aurem' } },
+    ],
     copy: {
-      es: { slug: 'marketing-ingresos', role: 'Marketing e ingresos', title: 'Separar señal, explicación y previsión', question: '¿Qué evidencia permite decidir sin convertir una lectura en una promesa?', summary: 'Marca, captación y métricas explicables con una frontera clara ante cualquier previsión.', outcome: '', responsibilities: [], handoff: [], validations: [], boundaries: [] },
-      en: { slug: 'marketing-revenue', role: 'Marketing and revenue', title: 'Separate signal, explanation and forecast', question: 'What evidence supports a decision without turning a reading into a promise?', summary: 'Brand, acquisition and explainable metrics with a clear boundary before forecasting.', outcome: '', responsibilities: [], handoff: [], validations: [], boundaries: [] },
+      es: {
+        slug: 'marketing-ingresos', role: 'Marketing e ingresos', title: 'Separar marca, señal y previsión antes de decidir',
+        question: '¿Qué puede afirmar marketing sobre captación e ingresos cuando la evidencia es una web ficticia y un escenario de muestra?',
+        summary: 'Una guía para relacionar mensaje, señal y lectura de ingresos sin presentar una dirección visual como resultado comercial ni una fórmula como previsión.',
+        outcome: 'Una decisión trazable que distingue la promesa aprobada, la señal que se mediría, la lectura explicable disponible y cualquier previsión todavía ausente.',
+        responsibilities: [
+          'Acordar audiencia, problema, promesa y siguiente acción usando solo evidencia que pueda revisarse.',
+          'Definir qué señal agregada se mediría, con consentimiento y sin enviar datos personales a analítica.',
+          'Explicar periodo, unidades, fórmula y conjunto de muestra antes de interpretar ocupación, ADR, RevPAR o ingresos.',
+          'Etiquetar resultados comerciales y previsiones como no disponibles hasta contar con datos y validación reales.',
+        ],
+        handoff: ['Promesa y audiencia acordadas', 'Fuente y definición de la señal', 'Lectura explicable con fórmula', 'Decisión humana sin forecasting'],
+        validations: [
+          'Quién aprueba mensaje, contenido, llamada a la acción y cualquier afirmación comercial.',
+          'Qué evento agregado respondería a la pregunta, bajo qué consentimiento y sin dimensiones libres o PII.',
+          'Qué periodo, unidades, fórmulas y fuentes sostendrían una lectura cuando existan datos reales.',
+          'Quién puede aprobar campañas, precios o una futura previsión y qué evidencia necesita para hacerlo.',
+        ],
+        boundaries: [
+          'Nivora es una marca ficticia: su web no demuestra captación, solicitudes, inventario, reservas o resultados reales.',
+          'Las cifras de Aurem proceden de un escenario ficticio y no usan PMS, canales, contabilidad o pagos.',
+          'La previsión de demanda y precio no está disponible; tampoco se publican precios antes de la validación comercial prevista.',
+        ],
+      },
+      en: {
+        slug: 'marketing-revenue', role: 'Marketing and revenue', title: 'Separate brand, signal and forecast before deciding',
+        question: 'What can marketing claim about acquisition and revenue when the evidence is a fictitious website and a sample scenario?',
+        summary: 'A guide for connecting message, signal and revenue reading without presenting a visual direction as a commercial result or a formula as a forecast.',
+        outcome: 'A traceable decision that separates the approved promise, the signal that would be measured, the available explainable reading and any forecast still absent.',
+        responsibilities: [
+          'Agree the audience, problem, promise and next action using only evidence that can be reviewed.',
+          'Define which aggregate signal would be measured, with consent and without sending personal data to analytics.',
+          'Explain period, units, formula and sample dataset before interpreting occupancy, ADR, RevPAR or revenue.',
+          'Label commercial results and forecasts unavailable until real data and validation exist.',
+        ],
+        handoff: ['Promise and audience agreed', 'Source and signal definition', 'Explainable reading with formula', 'Human decision without forecasting'],
+        validations: [
+          'Who approves the message, content, call to action and every commercial claim.',
+          'Which aggregate event would answer the question, under what consent and without free dimensions or PII.',
+          'Which period, units, formulas and sources would support a reading when real data exists.',
+          'Who may approve campaigns, prices or a future forecast and what evidence they need.',
+        ],
+        boundaries: [
+          'Nivora is a fictitious brand: its website demonstrates no live acquisition, enquiry, inventory, booking or result.',
+          'Aurem figures come from a fictitious scenario and use no live PMS, channel, accounting or payment data.',
+          'Demand and pricing forecasts are unavailable; prices are not published before the planned commercial validation.',
+        ],
+      },
     },
   },
   {

@@ -9,6 +9,7 @@ const paths = [
   '/docs/direccion-propiedad/', '/docs/reservas-recepcion/',
   '/en/docs/ownership-direction/', '/en/docs/reservations-reception/',
   '/docs/operaciones/', '/en/docs/operations/',
+  '/docs/marketing-ingresos/', '/en/docs/marketing-revenue/',
   '/soluciones/casas-rurales/', '/soluciones/apartamentos/', '/soluciones/hoteles/', '/planes/', '/webs/', '/diagnostico/',
   '/paneles/', '/paneles/solicitudes/', '/paneles/planning/', '/paneles/huespedes-llegadas/', '/paneles/preparacion/', '/paneles/operacion-ingresos/', '/paneles/copiloto-supervisado/',
   '/en/solutions/rural-stays/', '/en/solutions/apartments/', '/en/solutions/hotels/', '/en/plans/', '/en/webs/', '/en/assessment/',
@@ -218,7 +219,7 @@ test('panel portfolio publishes only complete localized evidence pages', async (
   expect(writes).toEqual([]);
 });
 
-test('role guides publish three complete journeys and keep two honest preparation states', async ({ page, request }) => {
+test('role guides publish four complete journeys and keep one honest preparation state', async ({ page, request }) => {
   const writes: string[] = [];
   page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
 
@@ -227,18 +228,20 @@ test('role guides publish three complete journeys and keep two honest preparatio
       ['direction', '/docs/direccion-propiedad/', 2, 0],
       ['reception', '/docs/reservas-recepcion/', 3, 0],
       ['operations', '/docs/operaciones/', 2, 3],
+      ['marketing-revenue', '/docs/marketing-ingresos/', 1, 2],
     ]],
     ['/en/docs/', [
       ['direction', '/en/docs/ownership-direction/', 2, 0],
       ['reception', '/en/docs/reservations-reception/', 3, 0],
       ['operations', '/en/docs/operations/', 2, 3],
+      ['marketing-revenue', '/en/docs/marketing-revenue/', 1, 2],
     ]],
   ] as const) {
     await expectCleanPage(page, indexPath);
     const portfolio = page.locator('[data-guide-portfolio]');
     await expect(portfolio.locator('[data-guide-card]')).toHaveCount(5);
-    await expect(portfolio.locator('[data-guide-status="published"]')).toHaveCount(3);
-    await expect(portfolio.locator('[data-guide-status="preparation"]')).toHaveCount(2);
+    await expect(portfolio.locator('[data-guide-status="published"]')).toHaveCount(4);
+    await expect(portfolio.locator('[data-guide-status="preparation"]')).toHaveCount(1);
     await expect(portfolio.locator('[data-guide-status="preparation"] a')).toHaveCount(0);
     await expect(portfolio.locator('[data-guide-implementation] li')).toHaveCount(6);
 
@@ -265,6 +268,13 @@ test('role guides publish three complete journeys and keep two honest preparatio
         await expect(detail.locator('[data-guide-capability-evidence="operations-centre"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=control`);
         await expect(detail.locator('[data-guide-capability-evidence="cleaning"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=cleaning`);
         await expect(detail.locator('[data-guide-capability-evidence="maintenance"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=maintenance`);
+      }
+      if (id === 'marketing-revenue') {
+        const prefix = indexPath.startsWith('/en') ? '/en' : '';
+        await expect(detail.locator('[data-guide-capability-evidence="brand-web"]')).toHaveAttribute('href', `${prefix}/demos/nivora/#espacio`);
+        await expect(detail.locator('[data-guide-capability-evidence="explainable-revenue"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=reports`);
+        await expect(detail.locator('[data-guide-capability="revenue"]')).toContainText(indexPath.startsWith('/en') ? 'On the roadmap' : 'En ruta');
+        await expect(detail.locator('[data-guide-capability-evidence="revenue"]')).toHaveCount(0);
       }
     }
   }

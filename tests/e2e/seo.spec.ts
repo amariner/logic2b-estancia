@@ -7,6 +7,7 @@ const translatedPairs = [
   ['/docs/direccion-propiedad/', '/en/docs/ownership-direction/'],
   ['/docs/reservas-recepcion/', '/en/docs/reservations-reception/'],
   ['/docs/operaciones/', '/en/docs/operations/'],
+  ['/docs/marketing-ingresos/', '/en/docs/marketing-revenue/'],
   ['/legal/', '/en/legal/'],
   ['/privacidad/', '/en/privacidad/'],
   ['/cookies/', '/en/cookies/'],
@@ -152,7 +153,7 @@ test('sitemap contains every indexable final URL exactly once and excludes demos
 test('commercial search surfaces use specific, unique metadata and people-first headings', async ({ page }) => {
   const commercialRoutes = [
     '/', '/en/', '/planes/', '/en/plans/', '/webs/', '/en/webs/',
-    '/docs/', '/en/docs/', '/docs/direccion-propiedad/', '/en/docs/ownership-direction/', '/docs/reservas-recepcion/', '/en/docs/reservations-reception/', '/docs/operaciones/', '/en/docs/operations/',
+    '/docs/', '/en/docs/', '/docs/direccion-propiedad/', '/en/docs/ownership-direction/', '/docs/reservas-recepcion/', '/en/docs/reservations-reception/', '/docs/operaciones/', '/en/docs/operations/', '/docs/marketing-ingresos/', '/en/docs/marketing-revenue/',
     '/paneles/', '/en/panels/', '/paneles/solicitudes/', '/en/panels/enquiries/', '/paneles/planning/', '/en/panels/planning/',
     '/paneles/huespedes-llegadas/', '/en/panels/guests-arrivals/', '/paneles/preparacion/', '/en/panels/preparation/',
     '/paneles/operacion-ingresos/', '/en/panels/operations-revenue/', '/paneles/copiloto-supervisado/', '/en/panels/supervised-copilot/',

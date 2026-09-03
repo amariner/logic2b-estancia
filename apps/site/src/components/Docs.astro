@@ -34,7 +34,7 @@ const implementation = en ? [
 
   <section class="section guide-catalog" aria-labelledby="guide-catalog-title">
     <div class="shell">
-      <div class="guide-section-heading"><div><p class="eyebrow">{en ? 'A shared operating language' : 'Un lenguaje operativo compartido'}</p><h2 id="guide-catalog-title" class="heading">{en ? 'Start with the people who must make and review the decision.' : 'Empieza por las personas que deben decidir y revisar.'}</h2></div><p>{en ? 'Ownership and direction, reservations and reception, and operations are ready to explore. Marketing and revenue, and technical and privacy remain visibly in preparation.' : 'Propiedad y dirección, reservas y recepción, y operaciones ya se pueden explorar. Marketing e ingresos, y técnica y privacidad permanecen visiblemente en preparación.'}</p></div>
+      <div class="guide-section-heading"><div><p class="eyebrow">{en ? 'A shared operating language' : 'Un lenguaje operativo compartido'}</p><h2 id="guide-catalog-title" class="heading">{en ? 'Start with the people who must make and review the decision.' : 'Empieza por las personas que deben decidir y revisar.'}</h2></div><p>{en ? 'Ownership and direction, reservations and reception, operations, and marketing and revenue are ready to explore. Technical and privacy remains visibly in preparation.' : 'Propiedad y dirección, reservas y recepción, operaciones, y marketing e ingresos ya se pueden explorar. Técnica y privacidad permanece visiblemente en preparación.'}</p></div>
       <div class="guide-grid">
         {guides.map((guide) => (
           <article class:list={['guide-card', { 'is-published': guide.status === 'published' }]} data-guide-card={guide.id} data-guide-status={guide.status}>
