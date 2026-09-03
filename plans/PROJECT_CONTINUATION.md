@@ -1,6 +1,6 @@
 # Logic2B Estancias · Checkpoint de continuidad
 
-Última actualización: 2026-09-02
+Última actualización: 2026-09-03
 
 Último incremento de infraestructura verificado: consultar `git rev-parse HEAD`
 
@@ -60,7 +60,23 @@ Revisión multidisciplinar del incremento analítico: marketing **correcto** —
 
 Revisión multidisciplinar del incremento de captación: marketing **corregido** — la conversación comercial real vuelve a estar disponible en la única superficie prevista; producto **correcto** — la excepción de captación no cambia el carácter local y ficticio de las demos; UX **corregido** — timeout acotado, estado indisponible distinto del demo, datos conservados y salida honesta; UI/dirección visual **correcto** — reutiliza el aviso existente sin introducir otra superficie; SEO **no aplica** — no cambia contenido indexable ni metadata; arquitectura frontend **correcto** — una única instancia y una única llamada a `/api/leads`; full stack **corregido** — tres puertas explícitas de email, cuatro secretos requeridos presentes, analítica y operaciones reales deshabilitadas, CSP y bloqueos demo intactos; QA, accesibilidad, rendimiento y confianza **correcto** — 84/84 E2E aislados, `pnpm check`, dry-run de 139 assets y cero proveedores invocados durante pruebas.
 
-Siguiente punto exacto de implementación: ejecutar **P0 · Espina dorsal de paridad en el home** según `plans/CAMP_PARITY_ROADMAP.md`. La configuración de `GTM-TVDWZ9LC` y la activación analítica siguen siendo actividades externas pendientes; no bloquean el rediseño local y deberán abrir una línea base nueva después del cambio, sin mezclar datos anteriores y posteriores.
+El siguiente punto exacto de implementación era ejecutar **P0 · Espina dorsal de paridad en el home** según `plans/CAMP_PARITY_ROADMAP.md`; queda cerrado en el incremento verificado del 2026-09-03. La configuración de `GTM-TVDWZ9LC` y la activación analítica siguen siendo actividades externas pendientes; no bloquean el siguiente desarrollo local y deberán abrir una línea base nueva, sin mezclar datos anteriores y posteriores.
+
+## Incremento verificado · 2026-09-03
+
+Se completó P0 · Espina dorsal de paridad en el home. La navegación principal ES/EN pasa a estar orientada al producto con `Webs`, `Gestor`, `Planes` y `Ver recorrido`/`See the journey`; las soluciones verticales siguen disponibles en el menú móvil secundario y el footer. En la home los enlaces usan anclajes directos y, desde páginas secundarias como `/planes/` y `/en/plans/`, vuelven a la home localizada para no dejar destinos vacíos.
+
+La portada incorpora un contrato bilingüe único en `apps/site/src/home-contract.ts` para navegación, los tres casos canónicos, siete momentos de recorrido, cinco áreas de producto y cuatro grupos de capacidades. Nivora continúa demostrando Básico sin dashboard, Terrava Gestión y Aurem Inteligente. Los componentes `CapabilityBand`, `HomeJourney` y `ProductExplorer` consumen ese contrato y las capacidades/evidencias existentes: muestran estados honestos, límites, datos ficticios y enlaces profundos a las vistas ya navegables. No se añadieron proveedores, endpoints, analítica, precios, CRM ni acciones externas.
+
+La prueba E2E verifica ES/EN, los tres accesos de caso, siete momentos, cinco áreas, cuatro grupos, enlaces profundos con respuesta 200 y retorno de navegación desde planes. El CSS añade reflow de la nueva espina dorsal a 320 px, movimiento reducido y foco visible; el formulario único y las barreras de demo permanecen intactos.
+
+Verificación: `pnpm check` completo correcto — 7/7 tareas de lint, 21/21 tareas de typecheck/test/build y 17/17 pruebas operativas —; contrato local 2/2; E2E focalizado 5/5 para home y anchos 320/375/430/1366; `astro check` 0 errores, warnings o hints; `git diff --check` correcto. QA visual en navegador local a 1280 × 720 y 390 × 844: primer pliegue, capacidades, recorrido y explorador legibles, sin overflow horizontal; menú móvil abre con teclado, enfoca el primer enlace, cierra con Escape y devuelve el foco al botón. La media `prefers-reduced-motion` queda declarada y la carga diferida conserva el rendimiento bajo el pliegue.
+
+Revisión multidisciplinar posterior: marketing **corregido** — la prueba inmediata y el arco de siete momentos hacen visible el producto completo; diseño de producto **correcto** — se conservan planes, casos canónicos y límites; UX **corregido** — hay continuidad entre anclas, demos, estados y siguiente paso, con acordeón nativo y menú accesible; UI/dirección visual **correcto** — la estructura gana densidad sin copiar identidad de Camp y mantiene la dirección editorial cálida; SEO **correcto** — no cambian canonicals, hreflang, sitemap ni rutas verticales, y no aparecen precios o claims no validados; arquitectura frontend **corregido** — bloques, navegación, áreas y grupos comparten contrato; full stack **no aplica** — no se modifican APIs, proveedores, runtime ni permisos; QA, accesibilidad, rendimiento y confianza comercial **correcto** — verificación E2E, reflow, teclado, reduced motion, enlaces válidos, ausencia de overflow y límites visibles sin hallazgos críticos.
+
+No quedan bloqueos técnicos del incremento. Permanecen las dependencias externas ya registradas: configuración/activación controlada de GTM, periodo analítico real, revisión legal española, entrevistas/propuestas antes de publicar precios y validaciones humanas de lectores de pantalla/alto contraste. SHA del incremento de código: `8aed6b3` (verificable con `git rev-parse HEAD` antes del commit de este checkpoint); el checkpoint se actualiza en un commit posterior para conservar ese SHA sin auto-referencia.
+
+Siguiente punto exacto de implementación: **P1 · Planes y handoff comercial equivalentes**, empezando por tarjetas ricas de Básico, Gestión e Inteligente en home y `/planes/`, con preview de web para los tres, preview de dashboard solo para Gestión/Inteligente y contexto allowlisted hacia diagnóstico/contacto sin PII.
 
 ## Cómo reanudar
 
