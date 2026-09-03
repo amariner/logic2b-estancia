@@ -2,7 +2,8 @@ import type { Locale } from '@logic-estancia/config';
 import type { DemoSlug, PlanLevel } from '@logic-estancia/domain';
 
 export type PortfolioVertical = 'rural' | 'apartments' | 'hotels';
-export type PortfolioOriginalSlug = 'linde' | 'cobalto' | 'oria';
+export const PORTFOLIO_ORIGINAL_SLUGS = ['linde', 'cobalto', 'oria', 'boscara', 'velares', 'nocta'] as const;
+export type PortfolioOriginalSlug = (typeof PORTFOLIO_ORIGINAL_SLUGS)[number];
 export type PortfolioStatus = 'canonical' | 'original';
 
 export interface PortfolioShowcaseMoment {
@@ -139,6 +140,57 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
         ],
       },
     },
+    {
+      slug: 'boscara', number: '07', brand: 'Boscara Finca', vertical: 'rural', verticalLabel: 'Casa rural', plan: 'inteligente', planLabel: 'Inteligente', status: 'original', statusLabel: 'Concepto navegable',
+      summary: 'Una finca de montaña entre bosque y pradera para grupos que necesitan imaginar el lugar y preparar mejor cada llegada.',
+      visualIntent: 'Piedra húmeda, niebla y bosque caducifolio construyen una identidad rural profunda, contemporánea y sin decorado folclórico.',
+      businessProblem: 'Una finca con varios espacios y estancias de grupo necesita ordenar expectativas y prioridades sin convertir la web en un panel operativo.',
+      visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Inicio editorial', 'La finca', 'Casas y encuentros', 'El territorio'],
+      boundaryLabel: 'Límite de la evidencia', boundary: 'Dirección web ficticia; no representa una finca real ni demuestra el gestor Inteligente, disponibilidad, tareas, automatizaciones o coordinación en vivo.',
+      image: '/media/boscara/hero.webp', imageAlt: 'Finca rural ficticia de piedra entre bosque y niebla para Boscara Finca', demoHref: '/webs/boscara/', demoCta: 'Explorar concepto web', assessmentCta: 'Evaluar este punto de partida',
+      showcase: {
+        eyebrow: 'La montaña empieza antes de llegar', title: 'El bosque marca el ritmo.', intro: 'Boscara presenta una finca de grupo a través de sus espacios, estaciones y formas de encuentro. La coordinación avanzada pertenece al alcance Inteligente y se demuestra por separado.',
+        moments: [
+          { number: '01', title: 'Una finca, varios ritmos', text: 'Casas, pradera y espacios comunes se explican por el uso que permiten, no como una lista de metros.' },
+          { number: '02', title: 'La llegada gana contexto', text: 'Camino, clima y composición del grupo preparan una conversación más concreta antes de decidir.' },
+          { number: '03', title: 'La operación no se simula', text: 'El punto de partida Inteligente responde a capacidades; esta web no ejecuta planning, tareas ni avisos.' },
+        ],
+      },
+    },
+    {
+      slug: 'velares', number: '08', brand: 'Velares Apartamentos', vertical: 'apartments', verticalLabel: 'Apartamentos', plan: 'gestion', planLabel: 'Gestión', status: 'original', statusLabel: 'Concepto navegable',
+      summary: 'Apartamentos alrededor de un patio mediterráneo, con una identidad compartida y continuidad para cada solicitud.',
+      visualIntent: 'Cal, terracota, sombra vegetal y umbrales habitados para convertir un edificio histórico en una marca contemporánea y cercana.',
+      businessProblem: 'Varios apartamentos en una misma casa necesitan diferenciarse y compartir continuidad de solicitudes sin parecer un inventario anónimo.',
+      visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Inicio editorial', 'Apartamentos', 'El patio', 'La ciudad a pie'],
+      boundaryLabel: 'Límite de la evidencia', boundary: 'Concepto web ficticio; no representa apartamentos reales, consulta disponibilidad, registra solicitudes, bloquea fechas ni modifica el planning de Gestión.',
+      image: '/media/velares/hero.webp', imageAlt: 'Patio mediterráneo ficticio para Velares Apartamentos', demoHref: '/webs/velares/', demoCta: 'Explorar concepto web', assessmentCta: 'Evaluar este punto de partida',
+      showcase: {
+        eyebrow: 'Una casa que contiene muchas estancias', title: 'La ciudad sucede alrededor.', intro: 'Velares usa el patio como origen común para presentar apartamentos distintos y una vida de barrio accesible. La web explica; la continuidad operativa se valida en la evidencia canónica de Gestión.',
+        moments: [
+          { number: '01', title: 'El patio orienta', text: 'La arquitectura común da coherencia a la colección antes de entrar en cada apartamento.' },
+          { number: '02', title: 'Cada estancia se distingue', text: 'Luz, altura y relación con la calle ayudan a elegir sin reducir la propuesta a capacidad y precio.' },
+          { number: '03', title: 'Gestión continúa el relato', text: 'Solicitudes y planning pertenecen al caso canónico; esta ruta no guarda datos ni cambia calendarios.' },
+        ],
+      },
+    },
+    {
+      slug: 'nocta', number: '09', brand: 'Nocta Hotel', vertical: 'hotels', verticalLabel: 'Hotel', plan: 'basico', planLabel: 'Básico', status: 'original', statusLabel: 'Concepto navegable',
+      summary: 'Un hotel pequeño en una meseta silenciosa que convierte oscuridad, paisaje y descanso en una razón para elegirlo.',
+      visualIntent: 'Azul profundo, tierra compactada y luz ámbar mínima para una identidad hotelera sobria que evita el lujo genérico.',
+      businessProblem: 'Un hotel de pocas habitaciones necesita explicar su singularidad antes de incorporar una capa de gestión que todavía no ha validado.',
+      visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Inicio editorial', 'Habitaciones', 'La noche', 'Paisaje y silencio'],
+      boundaryLabel: 'Límite de la evidencia', boundary: 'Concepto web ficticio; no representa un hotel real, consulta habitaciones, recoge solicitudes, cobra, confirma reservas ni incluye workspace.',
+      image: '/media/nocta/hero.webp', imageAlt: 'Hotel ficticio de tierra en una meseta al anochecer para Nocta Hotel', demoHref: '/webs/nocta/', demoCta: 'Explorar concepto web', assessmentCta: 'Evaluar este punto de partida',
+      showcase: {
+        eyebrow: 'Un hotel pensado para bajar el volumen', title: 'Cuando cae la noche, todo se aclara.', intro: 'Nocta convierte oscuridad, materia y horizonte en una propuesta web directa. Básico demuestra presencia e identidad; no añade inventario, reserva ni panel.',
+        moments: [
+          { number: '01', title: 'La oscuridad forma parte del lugar', text: 'El relato prepara una estancia de cielo abierto sin fabricar disponibilidad ni experiencias.' },
+          { number: '02', title: 'Dormir sin estímulos', text: 'Habitaciones, luz y materiales se explican desde el descanso, no desde una lista de extras.' },
+          { number: '03', title: 'Conversación, no reserva', text: 'La salida conduce al diagnóstico comercial; la demo no recoge datos ni confirma noches.' },
+        ],
+      },
+    },
   ],
   en: [
     {
@@ -219,6 +271,57 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
           { number: '01', title: 'Rooms without noise', text: 'Choice is built around orientation, light and use, with information that is easy to compare.' },
           { number: '02', title: 'Arrival is already explained', text: 'Access, times and context reduce questions without turning the page into check-in.' },
           { number: '03', title: 'Management as the next layer', text: 'Continuity with reception belongs to Management scope and is proven in the canonical case.' },
+        ],
+      },
+    },
+    {
+      slug: 'boscara', number: '07', brand: 'Boscara Finca', vertical: 'rural', verticalLabel: 'Rural stay', plan: 'inteligente', planLabel: 'Intelligent', status: 'original', statusLabel: 'Navigable concept',
+      summary: 'A mountain estate between forest and meadow for groups that need to picture the place and prepare every arrival.',
+      visualIntent: 'Wet stone, mist and deciduous woodland create a deep, contemporary rural identity without folkloric set dressing.',
+      businessProblem: 'An estate with several spaces and group stays needs to organise expectations and priorities without turning its website into an operations dashboard.',
+      visibleLabel: 'Visible pages and surfaces', visiblePages: ['Editorial home', 'The estate', 'Houses and gatherings', 'The territory'],
+      boundaryLabel: 'Evidence boundary', boundary: 'Fictional website direction; it is not a real estate and does not demonstrate the Intelligent workspace, availability, tasks, automations or live coordination.',
+      image: '/media/boscara/hero.webp', imageAlt: 'Fictional stone rural estate among forest and mist for Boscara Finca', demoHref: '/en/webs/boscara/', demoCta: 'Explore website concept', assessmentCta: 'Assess this starting point',
+      showcase: {
+        eyebrow: 'The mountain begins before arrival', title: 'The forest sets the pace.', intro: 'Boscara presents a group estate through its spaces, seasons and ways of gathering. Advanced coordination belongs to Intelligent scope and is demonstrated elsewhere.',
+        moments: [
+          { number: '01', title: 'One estate, several rhythms', text: 'Houses, meadow and shared spaces are explained by what they make possible, not as a list of square metres.' },
+          { number: '02', title: 'Arrival gains context', text: 'Road, weather and group composition prepare a more specific conversation before a decision.' },
+          { number: '03', title: 'Operations are not simulated', text: 'Intelligent is capability-led; this website runs no planning, task or alert.' },
+        ],
+      },
+    },
+    {
+      slug: 'velares', number: '08', brand: 'Velares Apartamentos', vertical: 'apartments', verticalLabel: 'Apartments', plan: 'gestion', planLabel: 'Management', status: 'original', statusLabel: 'Navigable concept',
+      summary: 'Apartments around a Mediterranean courtyard, with a shared identity and clearer continuity for each enquiry.',
+      visualIntent: 'Limewash, terracotta, leafy shade and inhabited thresholds turn a historic building into a warm contemporary brand.',
+      businessProblem: 'Several apartments in one house need to feel distinct while sharing enquiry continuity instead of resembling anonymous inventory.',
+      visibleLabel: 'Visible pages and surfaces', visiblePages: ['Editorial home', 'Apartments', 'The courtyard', 'The walkable city'],
+      boundaryLabel: 'Evidence boundary', boundary: 'Fictional website concept; it is not a real apartment collection and checks no availability, records no enquiry, blocks no date and changes no Management planning.',
+      image: '/media/velares/hero.webp', imageAlt: 'Fictional Mediterranean courtyard for Velares Apartments', demoHref: '/en/webs/velares/', demoCta: 'Explore website concept', assessmentCta: 'Assess this starting point',
+      showcase: {
+        eyebrow: 'One house containing many stays', title: 'The city happens around it.', intro: 'Velares uses the courtyard as a shared origin for distinct apartments and walkable neighbourhood life. The website explains; operating continuity is validated through canonical Management evidence.',
+        moments: [
+          { number: '01', title: 'The courtyard gives direction', text: 'Shared architecture makes the collection coherent before each apartment is introduced.' },
+          { number: '02', title: 'Every stay remains distinct', text: 'Light, floor and relationship to the street support choice beyond capacity and price.' },
+          { number: '03', title: 'Management continues the story', text: 'Enquiries and planning belong to the canonical case; this route stores no data and changes no calendar.' },
+        ],
+      },
+    },
+    {
+      slug: 'nocta', number: '09', brand: 'Nocta Hotel', vertical: 'hotels', verticalLabel: 'Hotel', plan: 'basico', planLabel: 'Basic', status: 'original', statusLabel: 'Navigable concept',
+      summary: 'A small hotel on a silent plateau that turns darkness, landscape and rest into a recognisable reason to choose it.',
+      visualIntent: 'Deep blue, rammed earth and minimal amber light build a restrained hotel identity without generic luxury cues.',
+      businessProblem: 'A small-room-count hotel needs to explain its singularity before adding a management layer it has not yet validated.',
+      visibleLabel: 'Visible pages and surfaces', visiblePages: ['Editorial home', 'Rooms', 'The night', 'Landscape and silence'],
+      boundaryLabel: 'Evidence boundary', boundary: 'Fictional website concept; it is not a real hotel and checks no room, collects no enquiry, takes no payment, confirms no booking and includes no workspace.',
+      image: '/media/nocta/hero.webp', imageAlt: 'Fictional rammed-earth hotel on a plateau at dusk for Nocta Hotel', demoHref: '/en/webs/nocta/', demoCta: 'Explore website concept', assessmentCta: 'Assess this starting point',
+      showcase: {
+        eyebrow: 'A hotel designed to turn the volume down', title: 'When night falls, everything becomes clear.', intro: 'Nocta turns darkness, material and horizon into a direct website proposition. Basic proves presence and identity; it adds no inventory, booking or workspace.',
+        moments: [
+          { number: '01', title: 'Darkness belongs to the place', text: 'The story prepares an open-sky stay without fabricating availability or experiences.' },
+          { number: '02', title: 'Sleep without stimulation', text: 'Rooms, light and materials are explained through rest, not a list of extras.' },
+          { number: '03', title: 'Conversation, not booking', text: 'The exit leads to the commercial assessment; the demo collects no data and confirms no night.' },
         ],
       },
     },

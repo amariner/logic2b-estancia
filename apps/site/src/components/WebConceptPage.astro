@@ -1,7 +1,7 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { getPlanCards, planHandoffHref } from '../plan-contract';
-import type { OriginalWebPortfolioConcept } from '../web-portfolio';
+import { getWebPortfolio, type OriginalWebPortfolioConcept } from '../web-portfolio';
 
 const { locale, concept } = Astro.props as { locale: Locale; concept: OriginalWebPortfolioConcept };
 const en = locale === 'en';
@@ -9,6 +9,7 @@ const plan = getPlanCards(locale).find((candidate) => candidate.id === concept.p
 if (!plan) throw new Error(`missing_plan_for_concept:${concept.slug}`);
 const assessmentHref = planHandoffHref(locale, plan, en ? '/en/webs/' : '/webs/', concept.vertical);
 const portfolioHref = en ? '/en/webs/' : '/webs/';
+const portfolioCount = getWebPortfolio(locale).length;
 const sourceSet = `/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w, /media/${concept.slug}/hero-1280.avif 1280w`;
 ---
 <article class={`web-concept web-concept-${concept.slug}`} data-web-concept={concept.slug}>
@@ -63,6 +64,6 @@ const sourceSet = `/media/${concept.slug}/hero-640.avif 640w, /media/${concept.s
 
   <footer class="web-concept-next shell">
     <div><p class="eyebrow">{en ? 'Continue with evidence' : 'Continúa con evidencia'}</p><h2>{en ? 'Compare this direction with the full portfolio.' : 'Compara esta dirección con el portfolio completo.'}</h2></div>
-    <div><a class="text-link" href={portfolioHref}>{en ? 'See all six website directions' : 'Ver las seis direcciones web'} <span aria-hidden="true">→</span></a><a class="pill" href={assessmentHref}>{concept.assessmentCta} <span aria-hidden="true">→</span></a></div>
+    <div><a class="text-link" href={portfolioHref}>{en ? `See all ${portfolioCount} website directions` : `Ver las ${portfolioCount} direcciones web`} <span aria-hidden="true">→</span></a><a class="pill" href={assessmentHref}>{concept.assessmentCta} <span aria-hidden="true">→</span></a></div>
   </footer>
 </article>

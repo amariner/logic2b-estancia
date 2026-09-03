@@ -746,7 +746,7 @@
 .portfolio-arrow { display: grid; width: 31px; height: 31px; flex: 0 0 auto; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--slate); font-size: .9rem; }
 .portfolio-card-summary { min-height: 76px; margin: 17px 0 0; color: var(--slate); font-size: .78rem; line-height: 1.55; }
 .portfolio-card-media { display: block; overflow: hidden; margin-top: 20px; border-radius: 13px; background: var(--mist); }
-.portfolio-card-media img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; transition: transform 500ms var(--ease-out); }
+.portfolio-card-media img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; transition: transform 500ms var(--ease-out); }
 .portfolio-card-media:hover img { transform: scale(1.03); }
 .portfolio-card-media:focus-visible { outline: 3px solid var(--sienna); outline-offset: 4px; }
 .portfolio-card-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; border-top: 1px solid var(--line); padding-top: 15px; }
@@ -768,9 +768,12 @@
 .web-concept { --concept-paper: #f3efe5; --concept-ink: #1b211a; color: var(--concept-ink); background: var(--concept-paper); }
 .web-concept-cobalto { --concept-paper: #e9edf0; --concept-ink: #17212a; }
 .web-concept-oria { --concept-paper: #edf1ed; --concept-ink: #172221; }
+.web-concept-boscara { --concept-paper: #e9ebe4; --concept-ink: #18211b; }
+.web-concept-velares { --concept-paper: #f2e9df; --concept-ink: #38261f; }
+.web-concept-nocta { --concept-paper: #e7e9ee; --concept-ink: #111b2b; }
 .web-concept-notice { display: flex; min-height: 74px; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid color-mix(in srgb, var(--concept-ink) 16%, transparent); }
 .web-concept-notice p { display: flex; gap: 12px 20px; align-items: baseline; margin: 0; font-size: .68rem; }
-.web-concept-notice p span { color: color-mix(in srgb, var(--concept-ink) 65%, transparent); }
+.web-concept-notice p span { color: color-mix(in srgb, var(--concept-ink) 72%, transparent); }
 .web-concept-notice a { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; color: inherit; font-size: .68rem; font-weight: 650; text-underline-offset: 4px; }
 .web-concept-hero { position: relative; min-height: min(760px, calc(100svh - 72px)); overflow: hidden; color: white; background: var(--concept-ink); }
 .web-concept-hero picture, .web-concept-hero picture img, .web-concept-shade { position: absolute; inset: 0; width: 100%; height: 100%; }

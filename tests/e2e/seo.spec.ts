@@ -15,6 +15,9 @@ const translatedPairs = [
   ['/webs/linde/', '/en/webs/linde/'],
   ['/webs/cobalto/', '/en/webs/cobalto/'],
   ['/webs/oria/', '/en/webs/oria/'],
+  ['/webs/boscara/', '/en/webs/boscara/'],
+  ['/webs/velares/', '/en/webs/velares/'],
+  ['/webs/nocta/', '/en/webs/nocta/'],
   ['/diagnostico/', '/en/assessment/'],
 ] as const;
 const spanishOnly = [
@@ -137,6 +140,7 @@ test('commercial search surfaces use specific, unique metadata and people-first 
   const commercialRoutes = [
     '/', '/en/', '/planes/', '/en/plans/', '/webs/', '/en/webs/',
     '/webs/linde/', '/en/webs/linde/', '/webs/cobalto/', '/en/webs/cobalto/', '/webs/oria/', '/en/webs/oria/',
+    '/webs/boscara/', '/en/webs/boscara/', '/webs/velares/', '/en/webs/velares/', '/webs/nocta/', '/en/webs/nocta/',
     '/soluciones/casas-rurales/', '/en/solutions/rural-stays/',
     '/soluciones/apartamentos/', '/en/solutions/apartments/',
     '/soluciones/hoteles/', '/en/solutions/hotels/',

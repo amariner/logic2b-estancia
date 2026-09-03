@@ -7,7 +7,7 @@ import { getBusinesses } from '../businesses';
 import { spanishResources } from '../resources';
 import { getHomeContract } from '../home-contract';
 import { getPlanCards } from '../plan-contract';
-import { getCanonicalWebPortfolio } from '../web-portfolio';
+import { getCanonicalWebPortfolio, getWebPortfolio } from '../web-portfolio';
 import CapabilityBand from './CapabilityBand.astro';
 import HumanService from './HumanService.astro';
 import HomeJourney from './HomeJourney.astro';
@@ -29,6 +29,7 @@ const demoPlanNames: Record<PlanLevel, string> = locale === 'es'
   ? { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' }
   : { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' };
 const demos = getCanonicalWebPortfolio(locale);
+const portfolioCount = getWebPortfolio(locale).length;
 const directionSignals = locale === 'es' ? [
   ['01', 'Demanda y marca', 'Qué entiende el huésped, por qué te recuerda y dónde empieza la conversación directa.'],
   ['02', 'Reservas y continuidad', 'Qué necesita cada solicitud para avanzar sin reconstruir su historia en varias herramientas.'],
@@ -194,7 +195,7 @@ const serviceSchema = {
 <section id="demos" class="section shell">
   <div class="section-head"><p class="eyebrow">{c.demos.eyebrow}</p><h2 class="heading">{c.demos.title}</h2><p>{locale === 'es' ? 'Puedes recorrer cada caso sin registrarte. Todo lo que ocurre dentro es local, ficticio y está etiquetado para que la evidencia no se confunda con una promesa.' : 'Explore every case without registering. Everything inside is local, fictional and labelled so evidence is never confused with a promise.'}</p></div>
   <div class="demo-grid">{demos.map((demo) => <a class="demo-card card" href={demo.demoHref} data-demo-card={demo.slug}><picture><source type="image/avif" srcset={`/media/${demo.slug}/hero-640.avif 640w, /media/${demo.slug}/hero-960.avif 960w`} sizes="(max-width: 760px) 100vw, 33vw" /><img src={demo.image} alt="" loading="lazy" width="2016" height="1344" /></picture><div><span class="eyebrow">{locale === 'es' ? 'Caso ficticio' : 'Fictional case'} · {demoPlanNames[DEMO_PLANS[demo.slug]]}</span><h3>{demo.brand}</h3><p>{demo.businessProblem}</p><span>{c.demos.open} →</span></div></a>)}</div>
-  <a class="text-link demo-portfolio-link" href={`${prefix}/webs/`}>{locale === 'es' ? 'Ver las seis direcciones web' : 'See all six website directions'} <span aria-hidden="true">→</span></a>
+  <a class="text-link demo-portfolio-link" href={`${prefix}/webs/`}>{locale === 'es' ? `Ver las ${portfolioCount} direcciones web` : `See all ${portfolioCount} website directions`} <span aria-hidden="true">→</span></a>
 </section>
 
 <section id="planes" class="section levels">
