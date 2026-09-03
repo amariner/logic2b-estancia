@@ -12,6 +12,7 @@ const routes = [
   { path: '/soluciones/apartamentos/', indexable: true },
   { path: '/soluciones/hoteles/', indexable: true },
   { path: '/planes/', indexable: true },
+  { path: '/webs/', indexable: true },
   { path: '/diagnostico/', indexable: true },
   { path: '/demos/terrava/', indexable: false },
 ];

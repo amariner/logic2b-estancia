@@ -3,7 +3,8 @@ import type { PlanLevel } from '@logic-estancia/domain';
 
 export type PlanWebSlug = 'nivora' | 'terrava' | 'aurem';
 export type PlanPanelSlug = 'none' | 'terrava' | 'aurem';
-export type PlanHandoffSource = '/' | '/planes/' | '/en/' | '/en/plans/';
+export type PlanHandoffSource = '/' | '/planes/' | '/en/' | '/en/plans/' | '/webs/' | '/en/webs/';
+export type PlanHandoffSegment = 'rural' | 'apartments' | 'hotels' | 'unknown';
 
 export interface PlanCardData {
   id: PlanLevel;
@@ -83,14 +84,14 @@ export function getPlanCards(locale: Locale): readonly PlanCardData[] {
   return cards[locale];
 }
 
-export function planHandoffHref(locale: Locale, plan: PlanCardData, sourcePath: PlanHandoffSource): string {
+export function planHandoffHref(locale: Locale, plan: PlanCardData, sourcePath: PlanHandoffSource, segment: PlanHandoffSegment = 'unknown'): string {
   const prefix = locale === 'en' ? '/en' : '';
   const assessment = locale === 'en' ? 'assessment' : 'diagnostico';
   const params = new URLSearchParams({
     plan: plan.id,
     web: plan.webSlug,
     panel: plan.panelSlug,
-    segment: 'unknown',
+    segment,
     sourcePath,
   });
   return `${prefix}/${assessment}/?${params.toString()}`;

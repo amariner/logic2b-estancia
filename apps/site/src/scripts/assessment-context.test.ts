@@ -28,6 +28,7 @@ describe('assessment context', () => {
 
   it('rejects unknown values, invalid bounds and expired contexts', () => {
     const memory = storage();
+    expect(saveAssessmentContext(memory, { ...valid, sourcePath: '/webs/' }, 1_000)).toMatchObject({ sourcePath: '/webs/' });
     expect(saveAssessmentContext(memory, { ...valid, plan: 'premium' }, 1_000)).toBeNull();
     expect(saveAssessmentContext(memory, { ...valid, web: 'not-a-demo' }, 1_000)).toBeNull();
     expect(saveAssessmentContext(memory, { ...valid, sourcePath: '/free-text' }, 1_000)).toBeNull();

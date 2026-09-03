@@ -1,5 +1,6 @@
 import type { Locale } from '@logic-estancia/config';
 import type { PlanLevel } from '@logic-estancia/domain';
+import { getWebPortfolio } from './web-portfolio';
 
 export type HomeNavigationKey = 'webs' | 'gestor' | 'planes' | 'recorrido';
 
@@ -69,7 +70,7 @@ export interface HomeContract {
 
 const spanish: Omit<HomeContract, 'locale'> = {
   navigation: [
-    { key: 'webs', label: 'Webs', href: '#webs' },
+    { key: 'webs', label: 'Webs', href: '/webs/' },
     { key: 'gestor', label: 'Gestor', href: '#gestor' },
     { key: 'planes', label: 'Planes', href: '#planes' },
     { key: 'recorrido', label: 'Ver recorrido', href: '#recorrido' },
@@ -112,7 +113,7 @@ const spanish: Omit<HomeContract, 'locale'> = {
 
 const english: Omit<HomeContract, 'locale'> = {
   navigation: [
-    { key: 'webs', label: 'Websites', href: '#webs' },
+    { key: 'webs', label: 'Websites', href: '/webs/' },
     { key: 'gestor', label: 'Workspace', href: '#gestor' },
     { key: 'planes', label: 'Plans', href: '#planes' },
     { key: 'recorrido', label: 'See the journey', href: '#recorrido' },
@@ -154,5 +155,15 @@ const english: Omit<HomeContract, 'locale'> = {
 };
 
 export function getHomeContract(locale: Locale): HomeContract {
-  return { ...((locale === 'en' ? english : spanish)), locale };
+  const homeCases = getWebPortfolio(locale).map((concept) => ({
+    slug: concept.slug,
+    brand: concept.brand,
+    label: concept.verticalLabel,
+    text: concept.summary,
+    plan: concept.plan,
+    planLabel: concept.planLabel,
+    href: concept.demoHref,
+    image: concept.image,
+  }));
+  return { ...((locale === 'en' ? english : spanish)), locale, heroCases: homeCases };
 }

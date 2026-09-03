@@ -24,7 +24,7 @@ const cleanRoute = route.replace(/^\//, '').replace(/\/$/, '');
 const routePath = cleanRoute ? `/${cleanRoute}/` : '/';
 const productNav = getHomeContract(locale).navigation.map((item) => ({
   ...item,
-  href: routePath === '/' ? item.href : `${prefix}/${item.href}`,
+  href: item.href.startsWith('#') ? (routePath === '/' ? item.href : `${prefix}/${item.href}`) : `${prefix}${item.href}`,
 }));
 const canonical = `${PRODUCT.url}${prefix}${routePath}`;
 const cleanAlternate = (alternateRoute ?? route).replace(/^\//, '').replace(/\/$/, '');

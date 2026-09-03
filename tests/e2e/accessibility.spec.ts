@@ -6,7 +6,7 @@ const commercialRoutes = [
   '/soluciones/casas-rurales/', '/en/solutions/rural-stays/',
   '/soluciones/apartamentos/', '/en/solutions/apartments/',
   '/soluciones/hoteles/', '/en/solutions/hotels/',
-  '/planes/', '/en/plans/',
+  '/planes/', '/en/plans/', '/webs/', '/en/webs/',
   '/diagnostico/', '/en/assessment/',
   '/docs/', '/en/docs/',
   '/recursos/gestor-reservas-apartamentos-turisticos/',
@@ -132,7 +132,15 @@ test('representative families tolerate text resized to 200 percent', async ({ pa
   for (const path of ['/', '/planes/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/?vista=reports']) {
     await gotoStable(page, path);
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
+    const reflow = await page.evaluate(() => ({
+      pageScrollWidth: document.documentElement.scrollWidth,
+      viewportWidth: innerWidth,
+      offenders: [document.body, ...document.querySelectorAll<HTMLElement>('body *')].flatMap((element) => {
+        const bounds = element.getBoundingClientRect();
+        return bounds.right <= innerWidth + 0.5 && element.scrollWidth <= element.clientWidth + 0.5 ? [] : [`${element.tagName.toLowerCase()}${element.className ? `.${String(element.className).replace(/\s+/g, '.')}` : ''}`];
+      }).slice(0, 8),
+    }));
+    expect(reflow.pageScrollWidth <= reflow.viewportWidth, `${path}: ${JSON.stringify(reflow)}`).toBe(true);
   }
 });
 

@@ -1,0 +1,62 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getWebPortfolio } from '../web-portfolio';
+import WebPortfolioCard from './WebPortfolioCard.astro';
+
+const { locale } = Astro.props as { locale: Locale };
+const en = locale === 'en';
+const concepts = getWebPortfolio(locale);
+const sourcePath = en ? '/en/webs/' : '/webs/';
+const copy = en ? {
+  eyebrow: 'Web portfolio', title: 'A point of view for every kind of stay.', intro: 'The first collection keeps three canonical cases navigable: one urban apartment, one rural collection and one hotel operation. Each card states the visual intent, the business problem, the pages you can see and the boundary of the evidence.', collection: 'First collection', collectionNote: 'Three canonical concepts are available now. Additional directions will be published only when their route, content, localization and QA are ready.', verticalLegend: 'Accommodation type', planLegend: 'Starting plan', all: 'All', rural: 'Rural stays', apartments: 'Apartments', hotels: 'Hotel', basic: 'Basic', management: 'Management', intelligent: 'Intelligent', result: 'Showing 3 navigable concepts', empty: 'No concept matches both filters. Choose another combination.', ctaEyebrow: 'A considered next step', ctaTitle: 'See which layer your operation needs first.', ctaBody: 'The assessment uses capabilities to suggest a starting point. Size helps scope implementation; it does not decide the plan.', cta: 'Start the assessment',
+} : {
+  eyebrow: 'Portfolio web', title: 'Una dirección propia para cada tipo de estancia.', intro: 'La primera colección mantiene tres casos canónicos navegables: un apartamento urbano, una colección rural y la operación de un hotel. Cada ficha explica la intención visual, el problema de negocio, las páginas visibles y el límite de la evidencia.', collection: 'Primera colección', collectionNote: 'Hay tres conceptos canónicos disponibles. Las direcciones adicionales solo se publicarán cuando su ruta, contenido, localización y QA estén preparados.', verticalLegend: 'Tipo de alojamiento', planLegend: 'Plan de partida', all: 'Todos', rural: 'Casa rural', apartments: 'Apartamentos', hotels: 'Hotel', basic: 'Básico', management: 'Gestión', intelligent: 'Inteligente', result: 'Mostrando 3 conceptos navegables', empty: 'Ningún concepto coincide con ambos filtros. Elige otra combinación.', ctaEyebrow: 'Un siguiente paso con criterio', ctaTitle: 'Descubre qué capa necesita primero tu operación.', ctaBody: 'El diagnóstico recomienda un punto de partida por capacidades. El tamaño ayuda a dimensionar la implantación; no decide el plan.', cta: 'Empezar diagnóstico',
+};
+---
+<div data-web-portfolio>
+<section class="portfolio-hero section"><div class="shell"><p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p class="portfolio-intro">{copy.intro}</p></div></section>
+<section class="section portfolio-catalog" aria-labelledby="portfolio-catalog-title">
+  <div class="shell">
+    <div class="portfolio-catalog-heading"><div><p class="eyebrow">{copy.collection}</p><h2 id="portfolio-catalog-title" class="heading">{en ? 'See the evidence before you choose the scope.' : 'Mira la evidencia antes de elegir el alcance.'}</h2></div><p>{copy.collectionNote}</p></div>
+    <div class="portfolio-filters" aria-label={en ? 'Filter portfolio concepts' : 'Filtrar conceptos del portfolio'}>
+      <fieldset><legend>{copy.verticalLegend}</legend><div class="portfolio-filter-list">{[['all', copy.all], ['rural', copy.rural], ['apartments', copy.apartments], ['hotels', copy.hotels]].map(([value, label], index) => <button type="button" class={index === 0 ? 'is-active' : ''} aria-pressed={index === 0 ? 'true' : 'false'} data-portfolio-vertical-filter={value}>{label}</button>)}</div></fieldset>
+      <fieldset><legend>{copy.planLegend}</legend><div class="portfolio-filter-list">{[['all', copy.all], ['basico', copy.basic], ['gestion', copy.management], ['inteligente', copy.intelligent]].map(([value, label], index) => <button type="button" class={index === 0 ? 'is-active' : ''} aria-pressed={index === 0 ? 'true' : 'false'} data-portfolio-plan-filter={value}>{label}</button>)}</div></fieldset>
+    </div>
+    <p class="portfolio-filter-status" data-portfolio-filter-status aria-live="polite">{copy.result}</p>
+    <div class="portfolio-grid">{concepts.map((concept) => <WebPortfolioCard locale={locale} concept={concept} sourcePath={sourcePath} />)}</div>
+    <p class="portfolio-filter-empty" data-portfolio-filter-empty hidden>{copy.empty}</p>
+  </div>
+</section>
+<section class="section shell final-cta portfolio-final"><p class="eyebrow">{copy.ctaEyebrow}</p><h2 class="heading">{copy.ctaTitle}</h2><p>{copy.ctaBody}</p><a class="pill" href={`${en ? '/en' : ''}/${en ? 'assessment' : 'diagnostico'}/`} data-track="cta_click" data-section="portfolio">{copy.cta} <span aria-hidden="true">→</span></a></section>
+</div>
+
+<script is:inline define:vars={{ locale, result: copy.result }}>
+  const portfolio = document.querySelector('[data-web-portfolio]');
+  const cards = portfolio ? [...portfolio.querySelectorAll('[data-portfolio-card]')] : [];
+  const status = portfolio?.querySelector('[data-portfolio-filter-status]');
+  const empty = portfolio?.querySelector('[data-portfolio-filter-empty]');
+  let activeVertical = 'all';
+  let activePlan = 'all';
+  const updateFilter = (kind, value) => {
+    if (kind === 'vertical') activeVertical = value;
+    else activePlan = value;
+    portfolio?.querySelectorAll(kind === 'vertical' ? '[data-portfolio-vertical-filter]' : '[data-portfolio-plan-filter]').forEach((button) => {
+      const selected = button.dataset[kind === 'vertical' ? 'portfolioVerticalFilter' : 'portfolioPlanFilter'] === (kind === 'vertical' ? activeVertical : activePlan);
+      button.classList.toggle('is-active', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+    let visible = 0;
+    cards.forEach((card) => {
+      const matches = (activeVertical === 'all' || card.dataset.portfolioVertical === activeVertical) && (activePlan === 'all' || card.dataset.portfolioPlan === activePlan);
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    if (status) status.textContent = visible === cards.length ? result : `${visible} ${locale === 'en' ? 'navigable concepts shown' : 'conceptos navegables visibles'}`;
+    if (empty) empty.hidden = visible !== 0;
+  };
+  portfolio?.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target.closest('[data-portfolio-vertical-filter], [data-portfolio-plan-filter]') : null;
+    if (!target) return;
+    updateFilter(target.dataset.portfolioVerticalFilter ? 'vertical' : 'plan', target.dataset.portfolioVerticalFilter ?? target.dataset.portfolioPlanFilter ?? 'all');
+  });
+</script>

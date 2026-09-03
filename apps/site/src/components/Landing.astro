@@ -17,6 +17,11 @@ const c = content[locale];
 const home = getHomeContract(locale);
 const planCards = getPlanCards(locale);
 const prefix = locale === 'en' ? '/en' : '';
+const heroShortcutHrefs = [
+  home.heroCases[0]?.href,
+  '#recorrido',
+  `${prefix}/demos/terrava/gestion/?vista=home`,
+] as const;
 const wa = logic2bContact(locale, 'commercial');
 const businesses = getBusinesses(locale);
 const demoPlanNames: Record<PlanLevel, string> = locale === 'es'
@@ -94,39 +99,50 @@ const serviceSchema = {
   },
 };
 ---
-<section class="hero">
+<section class="hero" data-hero data-hero-pause={c.hero.pause} data-hero-resume={c.hero.resume}>
   <div class="hero-layout shell">
     <div class="hero-copy">
       <p class="eyebrow">{c.hero.eyebrow}</p>
-      <h1 class="display">{c.hero.title} <em>{c.hero.accent}</em></h1>
+      <h1 class="display hero-title" aria-label={c.hero.label}>
+        <span>{c.hero.lead}</span>
+        <span class="hero-word-stack" aria-hidden="true">{c.hero.terms.map((term) => <span class="hero-word" data-hero-word>{term}</span>)}</span>
+        <span>{c.hero.tail}</span>
+      </h1>
       <p>{c.hero.body}</p>
-      <div class="hero-actions"><a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="hero">{c.hero.primary}</a><a class="pill ghost" href="#producto">{c.hero.secondary}</a></div>
-      <ul class="hero-assurances" aria-label={locale === 'es' ? 'Principios del servicio' : 'Service principles'}><li>{locale === 'es' ? 'Proyecto por capacidades' : 'Capability-led project'}</li><li>{locale === 'es' ? 'Configurado por Logic2B' : 'Configured by Logic2B'}</li><li>{locale === 'es' ? 'Acompañamiento humano' : 'Human support'}</li></ul>
-    </div>
-    <figure class="hero-command artifact">
-      <div class="hero-remanso-scene" data-hero-scene>
-        <picture class="hero-remanso-picture">
-          <source type="image/avif" srcset="/media/remanso/hero-640.avif 640w, /media/remanso/hero-960.avif 960w, /media/remanso/hero-1280.avif 1280w" sizes="(max-width: 640px) calc(100vw - 28px), (max-width: 800px) calc(100vw - 40px), (max-width: 1100px) 760px, 650px" />
-          <img src="/media/remanso/hero.webp" alt="" width="2560" height="1429" loading="eager" decoding="async" fetchpriority="high" data-hero-scene-layer />
-        </picture>
-        <div class="hero-booking-demo" role="group" aria-label={locale === 'es' ? 'Simulación visual; no comprueba disponibilidad ni realiza reservas' : 'Visual simulation; it does not check availability or make bookings'}>
-          <div class="hero-booking-field"><span>{locale === 'es' ? 'Entrada' : 'Check-in'}</span><strong>{locale === 'es' ? 'Elegir fecha' : 'Choose date'}</strong></div>
-          <div class="hero-booking-field"><span>{locale === 'es' ? 'Salida' : 'Check-out'}</span><strong>{locale === 'es' ? 'Elegir fecha' : 'Choose date'}</strong></div>
-          <div class="hero-booking-field"><span>{locale === 'es' ? 'Huéspedes' : 'Guests'}</span><strong>2</strong></div>
-          <span class="hero-booking-action"><strong>{locale === 'es' ? 'Consultar' : 'Check'}</strong><span aria-hidden="true">→</span></span>
-          <small class="hero-booking-disclaimer">{locale === 'es' ? 'Concepto ficticio · sin disponibilidad real' : 'Fictional concept · no live availability'}</small>
-        </div>
+      <div class="hero-start" aria-label={locale === 'es' ? 'Siguiente paso' : 'Next step'}>
+        <a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-track="cta_click" data-section="hero">{c.hero.primary} <span aria-hidden="true">→</span></a>
+        <a class="hero-start-link" href="#producto">{c.hero.secondary} <span aria-hidden="true">↓</span></a>
       </div>
-      <figcaption class="sr-only">{locale === 'es' ? 'Concepto visual ficticio de una casa rural entre montañas y bruma.' : 'Fictional visual concept of a rural stay among mountains and mist.'}</figcaption>
-    </figure>
-  </div>
-  <div id="webs" class="hero-product-rail shell" aria-labelledby="hero-product-title" data-hero-product-rail>
-    <div class="hero-product-rail-heading"><p class="eyebrow">{locale === 'es' ? 'Prueba inmediata' : 'Immediate proof'}</p><h2 id="hero-product-title">{locale === 'es' ? 'Tres casos. Tres formas de empezar.' : 'Three cases. Three ways to start.'}</h2><p>{locale === 'es' ? 'Elige una web ficticia y recorre el nivel de producto que representa.' : 'Choose a fictional website and explore the product level it represents.'}</p></div>
-    <div class="hero-case-grid">
-      {home.heroCases.map((demo) => <a class="hero-case" href={demo.href} data-hero-proof={demo.slug}><picture><source type="image/avif" srcset={`/media/${demo.slug}/hero-640.avif 640w, /media/${demo.slug}/hero-960.avif 960w`} sizes="(max-width: 640px) calc(100vw - 28px), (max-width: 760px) 33vw, 20vw" /><img src={demo.image} alt="" width="2016" height="1344" loading="lazy" /></picture><div><span>{demo.label} · {demo.planLabel}</span><strong>{demo.brand}</strong><p>{demo.text}</p><b aria-hidden="true">↗</b></div></a>)}
+      <ul class="hero-shortcuts" aria-label={locale === 'es' ? 'Accesos al recorrido' : 'Journey shortcuts'}>{c.hero.shortcuts.map((shortcut, index) => <li><a href={heroShortcutHrefs[index]} data-hero-shortcut>{shortcut} <span aria-hidden="true">↗</span></a></li>)}</ul>
+      <p class="hero-note">{c.hero.note}</p>
     </div>
+    <aside id="webs" class="hero-case-gallery" aria-labelledby="hero-case-gallery-title">
+      <div class="hero-case-gallery-top"><div><p class="eyebrow">{c.hero.rail}</p><h2 id="hero-case-gallery-title">{c.hero.railTitle}</h2></div><button type="button" class="hero-motion-toggle" data-hero-motion-toggle aria-pressed="false"><span data-hero-motion-label>{c.hero.pause}</span><span aria-hidden="true">Ⅱ</span></button></div>
+      <div class="hero-case-rails" data-hero-rail>
+        <div class="hero-case-rail"><div class="hero-case-track hero-case-track-up">
+          {[...home.heroCases, ...home.heroCases].map((demo, index) => index < home.heroCases.length ? <a class="hero-gallery-case" href={demo.href} data-hero-proof={demo.slug}><picture><source type="image/avif" srcset={`/media/${demo.slug}/hero-640.avif 640w, /media/${demo.slug}/hero-960.avif 960w`} sizes="(max-width: 640px) calc(100vw - 64px), 250px" /><img src={demo.image} alt="" width="2016" height="1344" loading="eager" decoding="async" /></picture><span>{demo.label} · {demo.planLabel}</span><strong>{demo.brand}</strong><b aria-hidden="true">↗</b></a> : <div class="hero-gallery-case" aria-hidden="true" data-hero-case-clone><img src={demo.image} alt="" width="2016" height="1344" loading="lazy" decoding="async" /><span>{demo.label} · {demo.planLabel}</span><strong>{demo.brand}</strong></div>)}
+        </div></div>
+        <div class="hero-case-rail hero-case-rail-secondary" aria-hidden="true"><div class="hero-case-track hero-case-track-down">
+          {[...home.heroCases].reverse().concat([...home.heroCases].reverse()).map((demo) => <div class="hero-gallery-case"><img src={demo.image} alt="" width="2016" height="1344" loading="lazy" decoding="async" /><span>{demo.label} · {demo.planLabel}</span><strong>{demo.brand}</strong></div>)}
+        </div></div>
+      </div>
+    </aside>
   </div>
 </section>
+
+<script>
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  const rail = hero?.querySelector<HTMLElement>('[data-hero-rail]');
+  const toggle = hero?.querySelector<HTMLButtonElement>('[data-hero-motion-toggle]');
+  const label = hero?.querySelector<HTMLElement>('[data-hero-motion-label]');
+  const setMotion = (paused: boolean) => {
+    if (!hero || !rail || !toggle || !label) return;
+    rail.dataset.paused = String(paused);
+    toggle.setAttribute('aria-pressed', String(paused));
+    label.textContent = paused ? hero.dataset.heroResume ?? '' : hero.dataset.heroPause ?? '';
+  };
+  toggle?.addEventListener('click', () => setMotion(toggle.getAttribute('aria-pressed') !== 'true'));
+</script>
 
 <CapabilityBand locale={locale} />
 <HomeJourney locale={locale} />

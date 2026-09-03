@@ -5,7 +5,7 @@ export const INDEXABLE_PATHS = [
   '/soluciones/casas-rurales/', '/en/solutions/rural-stays/',
   '/soluciones/apartamentos/', '/en/solutions/apartments/',
   '/soluciones/hoteles/', '/en/solutions/hotels/',
-  '/planes/', '/en/plans/', '/diagnostico/', '/en/assessment/',
+  '/planes/', '/en/plans/', '/webs/', '/en/webs/', '/diagnostico/', '/en/assessment/',
   '/recursos/gestor-reservas-apartamentos-turisticos/',
   '/recursos/web-hotel-reservas-directas-operacion/',
 ] as const;
