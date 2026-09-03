@@ -7,6 +7,7 @@ describe('home product contract', () => {
       const home = getHomeContract(locale);
 
       expect(home.navigation).toHaveLength(4);
+      expect(home.navigation.find(({ key }) => key === 'gestor')?.href).toBe(locale === 'en' ? '/panels/' : '/paneles/');
       expect(home.heroCases).toHaveLength(3);
       expect(home.heroCases.map(({ slug, plan }) => [slug, plan])).toEqual([
         ['nivora', 'basico'],
@@ -41,4 +42,3 @@ describe('home product contract', () => {
     }
   });
 });
-

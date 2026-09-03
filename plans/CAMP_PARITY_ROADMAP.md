@@ -2,7 +2,7 @@
 
 Última revisión de la referencia: 2026-09-02
 
-Estado de ejecución: P0, P1 y P2 cerrados; 12/12 direcciones web navegables verificadas. P3–P6 permanecen pendientes.
+Estado de ejecución: P0, P1 y P2 cerrados; 12/12 direcciones web y 2/6 fichas de panel navegables verificadas. P3 está en curso; P4–P6 permanecen pendientes.
 
 Referencia: [camp.logic2b.com](https://camp.logic2b.com/)
 
@@ -157,6 +157,8 @@ Entregables:
 4. Navegación de vuelta a plan, vertical, demo y contacto conservando solo contexto cerrado.
 5. Fichas indexables comerciales; las superficies de demo continúan `noindex`.
 
+Estado al 2026-09-04: el índice localizado, el registro único y las seis superficies ya existen con estados explícitos. Solicitudes y Planning cuentan como las primeras **2/6** fichas navegables, con composición coherente con los fixtures locales, ficha comercial ES/EN, contrato y límite, metadata, canonical, `hreflang`, sitemap, pruebas y enlace exacto a Terrava. Huéspedes y llegadas, Preparación, Operación e ingresos y Copiloto supervisado continúan visibles como `ficha en preparación`, sin enlace ni evidencia simulada.
+
 ### P4 · Guías, implantación y confianza de compra
 
 Objetivo: hacer visible que el producto se implanta y se opera con responsabilidades claras.
@@ -224,4 +226,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Comenzar **P3 · Escaparate de paneles propio de Estancias** con el índice localizado `/paneles/` y `/en/panels/`, un registro único de las seis superficies y sus estados honestos. La primera entrega debe enlazar Solicitudes y Planning a las vistas locales existentes de Terrava, conservar los límites de demo y dejar las demás fichas fuera del contador hasta que tengan contenido navegable, metadata, pruebas y QA. No se crean formularios, operaciones, proveedores ni capturas que sugieran conexiones activas.
+Continuar **P3 · Escaparate de paneles propio de Estancias** con Huéspedes y llegadas y Preparación para avanzar de 2/6 a 4/6. Antes de publicarlas se debe contrastar cada composición con el fixture local subyacente, enlazar una vista exacta de Terrava o Aurem, completar contenido ES/EN, contrato, límite, metadata, pruebas y QA. Si una superficie no dispone de evidencia honesta suficiente, permanece en preparación y se avanza con la siguiente sin crear acciones, conexiones ni estados operativos ficticios.

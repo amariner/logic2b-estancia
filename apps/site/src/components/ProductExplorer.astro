@@ -1,18 +1,21 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { getHomeContract } from '../home-contract';
+import { getPublishedPanels } from '../panel-portfolio';
 
 const { locale } = Astro.props as { locale: Locale };
 const home = getHomeContract(locale);
 const en = locale === 'en';
+const panelCount = getPublishedPanels(locale).length;
 ---
 
 <section id="gestor" class="section product-explorer" aria-labelledby="product-explorer-title" data-product-explorer>
   <div class="shell">
-    <div class="section-head">
+    <div class="section-head product-explorer-heading">
       <p class="eyebrow">{en ? 'Explore the product' : 'Explora el producto'}</p>
       <h2 id="product-explorer-title" class="heading">{en ? 'Five areas. One context that does not get lost.' : 'Cinco áreas. Un contexto que no se pierde.'}</h2>
       <p>{en ? 'Open each area to see the exact fictional evidence, its starting plan and the boundary that keeps the demo honest.' : 'Abre cada área para ver la evidencia ficticia exacta, su plan de partida y el límite que mantiene la demo honesta.'}</p>
+      <a class="text-link" href={en ? '/en/panels/' : '/paneles/'}>{en ? `Explore ${panelCount} verified workspace pages` : `Explorar ${panelCount} fichas de panel verificadas`} <span aria-hidden="true">→</span></a>
     </div>
     <div class="product-explorer-list">
       {home.productAreas.map((area, index) => (
@@ -35,4 +38,3 @@ const en = locale === 'en';
     </div>
   </div>
 </section>
-

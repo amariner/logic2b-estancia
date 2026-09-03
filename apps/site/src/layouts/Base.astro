@@ -291,7 +291,7 @@ const structuredData = [
       document.addEventListener('click', (event) => { const target = event.target.closest?.('[data-track]'); if (!target) return; window.estanciaTrack?.(target.dataset.track, { locale: document.documentElement.lang, plan: target.dataset.plan, segment: target.dataset.segment, source_section: target.dataset.section }); });
       const wa = document.querySelector('[data-whatsapp]');
       const footer = document.querySelector('footer');
-      const commercialActions = document.querySelectorAll('.portfolio-card-links, .web-concept-next');
+      const commercialActions = document.querySelectorAll('[data-commercial-actions], .portfolio-card-links, .web-concept-next');
       const visibleCommercialActions = new Set();
       let footerVisible = false; let contactVisible = false;
       const toggleWa = () => {
@@ -305,7 +305,7 @@ const structuredData = [
           entries.forEach((entry) => {
             if (entry.target === footer) footerVisible = entry.isIntersecting;
             if (entry.target === contactSection) contactVisible = entry.isIntersecting;
-            if (entry.target instanceof HTMLElement && entry.target.matches('.portfolio-card-links, .web-concept-next')) {
+            if (entry.target instanceof HTMLElement && entry.target.matches('[data-commercial-actions], .portfolio-card-links, .web-concept-next')) {
               if (entry.isIntersecting) visibleCommercialActions.add(entry.target);
               else visibleCommercialActions.delete(entry.target);
             }

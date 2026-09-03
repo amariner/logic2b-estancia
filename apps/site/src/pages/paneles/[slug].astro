@@ -1,0 +1,17 @@
+---
+import Base from '../../layouts/Base.astro';
+import PanelDetailPage from '../../components/PanelDetailPage.astro';
+import { getPublishedPanels, type PanelPortfolioItem } from '../../panel-portfolio';
+
+export function getStaticPaths() {
+  return getPublishedPanels('es').map((panel) => ({ params: { slug: panel.slug }, props: { panel } }));
+}
+
+const { panel } = Astro.props as { panel: PanelPortfolioItem };
+const title = `${panel.title}: panel de gestión para alojamientos | Logic2B Estancias`;
+const description = panel.id === 'enquiries'
+  ? 'Compara una solicitud ficticia, sus fechas, alojamiento y alternativa en Terrava. Revisa la evidencia local, la decisión humana y el límite operativo del plan Gestión.'
+  : 'Explora un planning ficticio de catorce días con propiedades, estancias y una alternativa. Revisa la evidencia local y el límite operativo del plan Gestión.';
+---
+
+<Base locale="es" route={`paneles/${panel.slug}`} alternateRoute={`panels/${panel.alternateSlug}`} title={title} description={description}><PanelDetailPage locale="es" panel={panel} /></Base>

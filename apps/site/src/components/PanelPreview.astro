@@ -1,0 +1,39 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import type { PanelPreviewKind } from '../panel-portfolio';
+
+const { locale, kind, compact = false } = Astro.props as { locale: Locale; kind: PanelPreviewKind; compact?: boolean };
+const en = locale === 'en';
+const properties = ['Aira', 'Bruma', 'Cauce', 'Duna', 'Era'];
+---
+
+<div
+  class:list={['panel-preview', `panel-preview-${kind}`, { 'is-compact': compact }]}
+  role="img"
+  aria-label={kind === 'enquiries'
+    ? (en ? 'Fictitious Terrava enquiry comparison in read-only mode' : 'Comparación ficticia de una solicitud de Terrava en solo lectura')
+    : (en ? 'Fictitious fourteen-day Terrava planning in read-only mode' : 'Planning ficticio de Terrava de catorce días en solo lectura')}
+  data-panel-preview={kind}
+>
+  <div class="panel-preview-bar"><span>Terrava Collection</span><small>{en ? 'Local demo · read-only' : 'Demo local · solo lectura'}</small></div>
+  <div class="panel-preview-shell">
+    <aside aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></aside>
+    {kind === 'enquiries' ? (
+      <div class="panel-preview-content panel-preview-enquiry">
+        <header><div><span>{en ? 'Fictitious case' : 'Caso ficticio'}</span><strong>Marina Costa · 4 {en ? 'guests' : 'huéspedes'}</strong><small>{en ? '21–24 Aug' : '21–24 ago'} · Casa Aira</small></div><b>REQ-024</b></header>
+        <p>{en ? 'Casa Aira has no fit for the first night.' : 'Casa Aira no encaja la primera noche.'}</p>
+        <div class="panel-preview-comparison"><section><span>Casa Aira</span><strong>{en ? 'No fit' : 'Sin encaje'}</strong><small>{en ? 'First night occupied' : 'Primera noche ocupada'}</small></section><section><span>Casa Bruma</span><strong>€ 612</strong><small>{en ? 'Full stay available' : 'Estancia completa disponible'}</small></section></div>
+        <footer>{en ? 'Compare only · no booking or message' : 'Solo compara · sin reserva ni mensaje'}</footer>
+      </div>
+    ) : (
+      <div class="panel-preview-content panel-preview-planning">
+        <header><div><strong>{en ? 'August · 14 days' : 'Agosto · 14 días'}</strong><small>{en ? 'All properties' : 'Todas las propiedades'}</small></div><span>{en ? 'Fictitious calendar · EUR' : 'Calendario ficticio · EUR'}</span></header>
+        <div class="panel-preview-calendar">
+          <div class="panel-preview-days"><span></span>{Array.from({ length: 10 }, (_, index) => <b>{18 + index}</b>)}</div>
+          {properties.map((property, row) => <div class="panel-preview-row"><span>Casa {property}</span>{Array.from({ length: 10 }, (_, day) => <i class:list={{ occupied: day >= row % 4 && day < (row % 4) + 3, alternative: property === 'Bruma' && day === 6 }}></i>)}</div>)}
+        </div>
+        <footer><strong>Marina Costa · Casa Bruma</strong><span>{en ? 'View only · no inventory changes' : 'Solo visualización · sin cambios de inventario'}</span></footer>
+      </div>
+    )}
+  </div>
+</div>

@@ -12,6 +12,9 @@ const translatedPairs = [
   ['/soluciones/hoteles/', '/en/solutions/hotels/'],
   ['/planes/', '/en/plans/'],
   ['/webs/', '/en/webs/'],
+  ['/paneles/', '/en/panels/'],
+  ['/paneles/solicitudes/', '/en/panels/enquiries/'],
+  ['/paneles/planning/', '/en/panels/planning/'],
   ['/webs/linde/', '/en/webs/linde/'],
   ['/webs/cobalto/', '/en/webs/cobalto/'],
   ['/webs/oria/', '/en/webs/oria/'],
@@ -142,6 +145,7 @@ test('sitemap contains every indexable final URL exactly once and excludes demos
 test('commercial search surfaces use specific, unique metadata and people-first headings', async ({ page }) => {
   const commercialRoutes = [
     '/', '/en/', '/planes/', '/en/plans/', '/webs/', '/en/webs/',
+    '/paneles/', '/en/panels/', '/paneles/solicitudes/', '/en/panels/enquiries/', '/paneles/planning/', '/en/panels/planning/',
     '/webs/linde/', '/en/webs/linde/', '/webs/cobalto/', '/en/webs/cobalto/', '/webs/oria/', '/en/webs/oria/',
     '/webs/boscara/', '/en/webs/boscara/', '/webs/velares/', '/en/webs/velares/', '/webs/nocta/', '/en/webs/nocta/',
     '/webs/riscoa/', '/en/webs/riscoa/', '/webs/solerna/', '/en/webs/solerna/', '/webs/cendra/', '/en/webs/cendra/',

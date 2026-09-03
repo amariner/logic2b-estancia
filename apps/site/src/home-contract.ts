@@ -71,7 +71,7 @@ export interface HomeContract {
 const spanish: Omit<HomeContract, 'locale'> = {
   navigation: [
     { key: 'webs', label: 'Webs', href: '/webs/' },
-    { key: 'gestor', label: 'Gestor', href: '#gestor' },
+    { key: 'gestor', label: 'Gestor', href: '/paneles/' },
     { key: 'planes', label: 'Planes', href: '#planes' },
     { key: 'recorrido', label: 'Ver recorrido', href: '#recorrido' },
   ],
@@ -114,7 +114,7 @@ const spanish: Omit<HomeContract, 'locale'> = {
 const english: Omit<HomeContract, 'locale'> = {
   navigation: [
     { key: 'webs', label: 'Websites', href: '/webs/' },
-    { key: 'gestor', label: 'Workspace', href: '#gestor' },
+    { key: 'gestor', label: 'Workspace', href: '/panels/' },
     { key: 'planes', label: 'Plans', href: '#planes' },
     { key: 'recorrido', label: 'See the journey', href: '#recorrido' },
   ],

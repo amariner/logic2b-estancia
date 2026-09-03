@@ -1,0 +1,17 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PanelDetailPage from '../../../components/PanelDetailPage.astro';
+import { getPublishedPanels, type PanelPortfolioItem } from '../../../panel-portfolio';
+
+export function getStaticPaths() {
+  return getPublishedPanels('en').map((panel) => ({ params: { slug: panel.slug }, props: { panel } }));
+}
+
+const { panel } = Astro.props as { panel: PanelPortfolioItem };
+const title = `${panel.title}: hospitality management workspace | Logic2B Estancias`;
+const description = panel.id === 'enquiries'
+  ? 'Compare a fictitious enquiry, its dates, property and alternative in Terrava. Review the local evidence, human decision and operating boundary of Management.'
+  : 'Explore a fictitious fourteen-day planning view with properties, stays and an alternative. Review its local evidence and the operating boundary of Management.';
+---
+
+<Base locale="en" route={`panels/${panel.slug}`} alternateRoute={`paneles/${panel.alternateSlug}`} title={title} description={description}><PanelDetailPage locale="en" panel={panel} /></Base>

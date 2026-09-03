@@ -7,6 +7,9 @@ const commercialRoutes = [
   '/soluciones/apartamentos/', '/en/solutions/apartments/',
   '/soluciones/hoteles/', '/en/solutions/hotels/',
   '/planes/', '/en/plans/', '/webs/', '/en/webs/',
+  '/paneles/', '/en/panels/',
+  '/paneles/solicitudes/', '/en/panels/enquiries/',
+  '/paneles/planning/', '/en/panels/planning/',
   '/webs/linde/', '/en/webs/linde/',
   '/webs/cobalto/', '/en/webs/cobalto/',
   '/webs/oria/', '/en/webs/oria/',
@@ -138,7 +141,7 @@ test('every audited route reflows without page-level horizontal scrolling at 320
 
 test('representative families tolerate text resized to 200 percent', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  for (const path of ['/', '/planes/', '/webs/linde/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/?vista=reports']) {
+  for (const path of ['/', '/planes/', '/paneles/solicitudes/', '/webs/linde/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/?vista=reports']) {
     await gotoStable(page, path);
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
     const reflow = await page.evaluate(() => ({
@@ -203,7 +206,7 @@ test("Aurem guided milestones expose accessible progress and move focus with the
   );
 });
 
-for (const path of ['/', '/webs/linde/', '/demos/terrava/', '/demos/aurem/gestion/']) {
+for (const path of ['/', '/paneles/solicitudes/', '/webs/linde/', '/demos/terrava/', '/demos/aurem/gestion/']) {
   test(`${path} exposes a visible keyboard focus indicator`, async ({ page }) => {
     await gotoStable(page, path);
     await page.keyboard.press('Tab');
@@ -217,7 +220,7 @@ for (const path of ['/', '/webs/linde/', '/demos/terrava/', '/demos/aurem/gestio
   });
 }
 
-for (const path of ['/', '/webs/linde/', '/demos/terrava/', '/demos/aurem/gestion/']) {
+for (const path of ['/', '/paneles/solicitudes/', '/webs/linde/', '/demos/terrava/', '/demos/aurem/gestion/']) {
   test(`${path} suppresses non-essential motion when requested`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await gotoStable(page, path);

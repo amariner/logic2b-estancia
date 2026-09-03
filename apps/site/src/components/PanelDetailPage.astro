@@ -1,0 +1,86 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { CAPABILITIES } from '@logic-estancia/domain';
+import { capabilityStatusDetail, capabilityStatusLabel } from '../capability-evidence';
+import { getPublishedPanels, type PanelPortfolioItem } from '../panel-portfolio';
+import { getPlanCards, planHandoffHref } from '../plan-contract';
+import PanelPreview from './PanelPreview.astro';
+
+const { locale, panel } = Astro.props as { locale: Locale; panel: PanelPortfolioItem };
+const en = locale === 'en';
+const indexHref = en ? '/en/panels/' : '/paneles/';
+const sourcePath = en ? '/en/panels/' : '/paneles/';
+const detailTitle = panel.id === 'enquiries'
+  ? (en ? 'Enquiries with context' : 'Solicitudes con contexto')
+  : (en ? 'Planning with shared context' : 'Planning con contexto compartido');
+const plan = getPlanCards(locale).find((candidate) => candidate.id === panel.plan);
+if (!plan) throw new Error(`missing_plan_for_panel:${panel.id}`);
+const evidenceHref = panel.evidenceHref;
+const preview = panel.preview;
+if (!evidenceHref || !preview) throw new Error(`missing_published_panel_evidence:${panel.id}`);
+const assessmentHref = planHandoffHref(locale, plan, sourcePath);
+const publishedPanels = getPublishedPanels(locale);
+const panelIndex = publishedPanels.findIndex((candidate) => candidate.id === panel.id);
+const nextPanel = publishedPanels[(panelIndex + 1) % publishedPanels.length];
+const capability = panel.evidenceCapability;
+const relatedCapabilities = panel.capabilityIds.map((id) => {
+  const related = CAPABILITIES.find((candidate) => candidate.id === id);
+  if (!related) throw new Error(`missing_related_panel_capability:${id}`);
+  return related;
+});
+---
+
+<article class="panel-detail" data-panel-detail={panel.id}>
+  <header class="panel-detail-notice shell">
+    <p><strong>{en ? 'Commercial evidence page' : 'Ficha de evidencia comercial'}</strong><span>{en ? 'Underlying local demo · fictitious preloaded data' : 'Demo local subyacente · datos ficticios precargados'}</span></p>
+    <a href={indexHref}>{en ? 'Back to all workspaces' : 'Volver a todos los paneles'} <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <section class="panel-detail-hero section" aria-labelledby="panel-detail-title">
+    <div class="shell panel-detail-hero-grid">
+      <div class="panel-detail-hero-copy">
+        <p class="eyebrow">{panel.number} · {panel.planLabel}</p>
+        <h1 id="panel-detail-title" class="display">{detailTitle}</h1>
+        <p>{panel.summary}</p>
+        <dl>
+          <div><dt>{en ? 'Decision' : 'Decisión'}</dt><dd>{panel.decision}</dd></div>
+          <div><dt>{en ? 'Result in view' : 'Resultado visible'}</dt><dd>{panel.outcome}</dd></div>
+        </dl>
+      </div>
+      <PanelPreview locale={locale} kind={preview} />
+    </div>
+  </section>
+
+  <section class="section shell panel-detail-visible" aria-labelledby="panel-visible-title">
+    <div><p class="eyebrow">{en ? 'What you can inspect' : 'Qué puedes inspeccionar'}</p><h2 id="panel-visible-title" class="heading">{en ? 'Enough context to understand the decision.' : 'Contexto suficiente para entender la decisión.'}</h2></div>
+    <ul>{panel.visiblePoints.map((point, index) => <li><span>0{index + 1}</span><p>{point}</p></li>)}</ul>
+  </section>
+
+  <section class="section panel-detail-flow" aria-labelledby="panel-flow-title">
+    <div class="shell">
+      <p class="eyebrow">{en ? 'How the context moves' : 'Cómo avanza el contexto'}</p>
+      <h2 id="panel-flow-title" class="heading">{en ? 'The view supports a sequence; it does not execute it.' : 'La vista acompaña una secuencia; no la ejecuta.'}</h2>
+      <ol>{panel.flow.map((step, index) => <li><span>0{index + 1}</span><p>{step}</p></li>)}</ol>
+    </div>
+  </section>
+
+  <section class="section shell panel-detail-evidence" aria-labelledby="panel-evidence-title" data-panel-boundary>
+    <div>
+      <p class="eyebrow">{en ? 'Contract and boundary' : 'Contrato y límite'}</p>
+      <h2 id="panel-evidence-title" class="heading">{en ? 'The promise stops where the evidence stops.' : 'La promesa termina donde termina la evidencia.'}</h2>
+    </div>
+    <div>
+      <p class="panel-detail-status"><span class={`capability-status ${capability.status}`}>{capabilityStatusLabel(capability.status, locale)}</span><small>{capabilityStatusDetail(capability.status, locale)}</small></p>
+      <p><strong>{en ? 'Observable evidence' : 'Evidencia observable'}:</strong> {capability.evidence.proof[locale]}</p>
+      <p><strong>{en ? 'Boundary' : 'Límite'}:</strong> {capability.evidence.boundary[locale]}</p>
+      <p><strong>{en ? 'Related capabilities' : 'Capacidades relacionadas'}:</strong> {relatedCapabilities.map((related) => related.label[locale]).join(' · ')}</p>
+    </div>
+  </section>
+
+  <section class="section shell panel-detail-actions" data-commercial-actions>
+    <div><p class="eyebrow">{en ? 'Check the source' : 'Comprueba la fuente'}</p><h2 class="heading">{en ? 'Open the exact Terrava view or assess the starting plan.' : 'Abre la vista exacta de Terrava o evalúa el plan de partida.'}</h2><p>{en ? 'The demo opens without registration and resets to its fictitious fixture. The assessment keeps only allowlisted project context and collects no personal data.' : 'La demo abre sin registro y vuelve a su fixture ficticio. El diagnóstico conserva solo contexto de proyecto permitido y no recoge datos personales.'}</p></div>
+    <div><a class="text-link" href={evidenceHref} data-panel-evidence={panel.id}>{en ? 'Open local demo evidence' : 'Abrir evidencia en la demo local'} <span aria-hidden="true">↗</span></a><a class="pill" href={assessmentHref} data-panel-assess={panel.id}>{en ? `Assess ${panel.planLabel}` : `Evaluar ${panel.planLabel}`} <span aria-hidden="true">→</span></a></div>
+  </section>
+
+  {nextPanel && nextPanel.id !== panel.id && <footer class="panel-detail-next shell"><p><span>{en ? 'Next verified workspace' : 'Siguiente panel verificado'}</span><strong>{nextPanel.title}</strong></p><a href={nextPanel.detailHref ?? indexHref}>{en ? 'Continue exploring' : 'Seguir explorando'} <span aria-hidden="true">→</span></a></footer>}
+</article>

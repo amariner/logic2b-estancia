@@ -3,7 +3,7 @@ import type { PlanLevel } from '@logic-estancia/domain';
 
 export type PlanWebSlug = 'nivora' | 'terrava' | 'aurem';
 export type PlanPanelSlug = 'none' | 'terrava' | 'aurem';
-export type PlanHandoffSource = '/' | '/planes/' | '/en/' | '/en/plans/' | '/webs/' | '/en/webs/';
+export type PlanHandoffSource = '/' | '/planes/' | '/en/' | '/en/plans/' | '/webs/' | '/en/webs/' | '/paneles/' | '/en/panels/';
 export type PlanHandoffSegment = 'rural' | 'apartments' | 'hotels' | 'unknown';
 
 export interface PlanCardData {

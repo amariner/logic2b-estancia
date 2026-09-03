@@ -7,7 +7,9 @@ const originalWebPaths = originalWebConcepts.flatMap((slug) => [`/webs/${slug}/`
 const paths = [
   '/', '/en/', '/docs/', '/en/docs/',
   '/soluciones/casas-rurales/', '/soluciones/apartamentos/', '/soluciones/hoteles/', '/planes/', '/webs/', '/diagnostico/',
+  '/paneles/', '/paneles/solicitudes/', '/paneles/planning/',
   '/en/solutions/rural-stays/', '/en/solutions/apartments/', '/en/solutions/hotels/', '/en/plans/', '/en/webs/', '/en/assessment/',
+  '/en/panels/', '/en/panels/enquiries/', '/en/panels/planning/',
   ...originalWebPaths,
   '/recursos/gestor-reservas-apartamentos-turisticos/', '/recursos/web-hotel-reservas-directas-operacion/',
   '/legal/', '/privacidad/', '/cookies/',
@@ -132,13 +134,13 @@ test('fictional cases keep their canonical plans truthful and localized', async 
 
 test('home exposes the connected product spine in both languages', async ({ page, request }) => {
   for (const [path, prefix, labels] of [
-    ['/', '', { webs: 'Webs', gestor: 'Gestor', plans: 'Planes', recorrido: 'Ver recorrido', evidence: 'Evidencia' }],
-    ['/en/', '/en', { webs: 'Websites', gestor: 'Workspace', plans: 'Plans', recorrido: 'See the journey', evidence: 'Evidence' }],
+    ['/', '', { webs: 'Webs', panels: '/paneles/', gestor: 'Gestor', plans: 'Planes', recorrido: 'Ver recorrido', evidence: 'Evidencia' }],
+    ['/en/', '/en', { webs: 'Websites', panels: '/en/panels/', gestor: 'Workspace', plans: 'Plans', recorrido: 'See the journey', evidence: 'Evidence' }],
   ] as const) {
     await page.goto(path);
     const header = page.locator('.site-header');
     await expect(header.getByRole('link', { name: labels.webs, exact: true })).toHaveAttribute('href', `${prefix}/webs/`);
-    await expect(header.getByRole('link', { name: labels.gestor, exact: true })).toHaveAttribute('href', '#gestor');
+    await expect(header.getByRole('link', { name: labels.gestor, exact: true })).toHaveAttribute('href', labels.panels);
     await expect(header.getByRole('link', { name: labels.plans, exact: true })).toHaveAttribute('href', '#planes');
     await expect(header.getByRole('link', { name: labels.recorrido, exact: true })).toHaveAttribute('href', '#recorrido');
 
@@ -158,10 +160,48 @@ test('home exposes the connected product spine in both languages', async ({ page
 
     await page.goto(prefix ? '/en/plans/' : '/planes/');
     await expect(header.getByRole('link', { name: labels.webs, exact: true })).toHaveAttribute('href', `${prefix}/webs/`);
-    await expect(header.getByRole('link', { name: labels.gestor, exact: true })).toHaveAttribute('href', `${prefix}/#gestor`);
+    await expect(header.getByRole('link', { name: labels.gestor, exact: true })).toHaveAttribute('href', labels.panels);
     await expect(header.getByRole('link', { name: labels.plans, exact: true })).toHaveAttribute('href', `${prefix}/#planes`);
     await expect(header.getByRole('link', { name: labels.recorrido, exact: true })).toHaveAttribute('href', `${prefix}/#recorrido`);
   }
+});
+
+test('panel portfolio publishes only complete localized evidence pages', async ({ page, request }) => {
+  const writes: string[] = [];
+  page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
+
+  for (const [indexPath, published] of [
+    ['/paneles/', [
+      ['enquiries', '/paneles/solicitudes/', '/demos/terrava/gestion/?vista=enquiries'],
+      ['planning', '/paneles/planning/', '/demos/terrava/gestion/?vista=planning'],
+    ]],
+    ['/en/panels/', [
+      ['enquiries', '/en/panels/enquiries/', '/en/demos/terrava/gestion/?vista=enquiries'],
+      ['planning', '/en/panels/planning/', '/en/demos/terrava/gestion/?vista=planning'],
+    ]],
+  ] as const) {
+    await expectCleanPage(page, indexPath);
+    const portfolio = page.locator('[data-panel-portfolio]');
+    await expect(portfolio.locator('[data-panel-card]')).toHaveCount(6);
+    await expect(portfolio.locator('[data-panel-status="published"]')).toHaveCount(2);
+    await expect(portfolio.locator('[data-panel-status="preparation"]')).toHaveCount(4);
+    await expect(portfolio.locator('[data-panel-status="preparation"] a')).toHaveCount(0);
+
+    for (const [id, detailHref, evidenceHref] of published) {
+      await page.goto(indexPath);
+      await expect(page.locator(`[data-panel-portfolio] [data-panel-open="${id}"]`)).toHaveAttribute('href', detailHref);
+      expect((await request.get(detailHref)).status(), detailHref).toBe(200);
+      await expectCleanPage(page, detailHref);
+      await expect(page.locator(`[data-panel-detail="${id}"]`)).toBeVisible();
+      await expect(page.locator(`[data-panel-evidence="${id}"]`)).toHaveAttribute('href', evidenceHref);
+      await expect(page.locator('[data-panel-boundary]')).toBeVisible();
+      await expect(page.locator('[data-panel-detail] form, [data-panel-detail] input, [data-panel-detail] textarea, [data-panel-detail] select')).toHaveCount(0);
+      const assessmentHref = await page.locator(`[data-panel-assess="${id}"]`).getAttribute('href');
+      expect(new URL(assessmentHref ?? '', appOrigin).searchParams.get('sourcePath')).toBe(indexPath);
+      expect((await request.get(evidenceHref)).status(), evidenceHref).toBe(200);
+    }
+  }
+  expect(writes).toEqual([]);
 });
 
 test('portfolio exposes twelve truthful navigable directions in both languages', async ({ page, request }) => {

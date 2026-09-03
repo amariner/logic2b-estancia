@@ -1,0 +1,54 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getPanelPortfolio, getPublishedPanels } from '../panel-portfolio';
+import PanelPreview from './PanelPreview.astro';
+
+const { locale } = Astro.props as { locale: Locale };
+const en = locale === 'en';
+const prefix = en ? '/en' : '';
+const panels = getPanelPortfolio(locale);
+const publishedCount = getPublishedPanels(locale).length;
+---
+
+<div data-panel-portfolio>
+  <section class="panel-portfolio-hero section">
+    <div class="shell panel-portfolio-hero-grid">
+      <div>
+        <p class="eyebrow">{en ? 'Workspace portfolio' : 'Portfolio de paneles'}</p>
+        <h1 class="display">{en ? 'See the decision before you see the software.' : 'Mira la decisión antes que el software.'}</h1>
+      </div>
+      <div>
+        <p>{en ? 'Six management surfaces organise the commercial evidence for Management and Intelligent. Only pages with complete content and an exact local demo count as navigable.' : 'Seis superficies de gestión ordenan la evidencia comercial de Gestión e Inteligente. Solo cuentan como navegables las fichas con contenido completo y una demo local exacta.'}</p>
+        <dl><div><dt>{en ? 'Verified now' : 'Verificadas ahora'}</dt><dd>{publishedCount}/6</dd></div><div><dt>{en ? 'External actions' : 'Acciones externas'}</dt><dd>{en ? 'None' : 'Ninguna'}</dd></div></dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section panel-portfolio-catalog" aria-labelledby="panel-catalog-title">
+    <div class="shell">
+      <div class="panel-portfolio-heading">
+        <div><p class="eyebrow">{en ? 'Evidence by responsibility' : 'Evidencia por responsabilidad'}</p><h2 id="panel-catalog-title" class="heading">{en ? 'Start with the surfaces that can already be checked.' : 'Empieza por las superficies que ya se pueden comprobar.'}</h2></div>
+        <p>{en ? 'Enquiries and Planning already have a complete commercial page and a direct Terrava view. The remaining four stay visibly in preparation until their pages meet the same standard.' : 'Solicitudes y Planning ya tienen ficha comercial completa y una vista directa en Terrava. Las otras cuatro permanecen visiblemente en preparación hasta alcanzar el mismo estándar.'}</p>
+      </div>
+      <div class="panel-portfolio-grid">
+        {panels.map((panel) => (
+          <article class:list={['panel-portfolio-card', { 'is-published': panel.status === 'published' }]} data-panel-card={panel.id} data-panel-status={panel.status}>
+            <header><span>{panel.number}</span><small>{panel.statusLabel}</small></header>
+            <div class="panel-portfolio-card-title"><div><p>{panel.planLabel}</p><h2>{panel.title}</h2></div><span aria-hidden="true">{panel.status === 'published' ? '↗' : '·'}</span></div>
+            <p>{panel.summary}</p>
+            {panel.preview ? <PanelPreview locale={locale} kind={panel.preview} compact /> : <div class="panel-preview-pending" aria-hidden="true"><i></i><i></i><i></i><span>{en ? 'Page structure in preparation' : 'Estructura de ficha en preparación'}</span></div>}
+            <div class="panel-portfolio-card-foot">
+              <p><strong>{en ? 'Decision it supports' : 'Decisión que acompaña'}</strong>{panel.decision}</p>
+              {panel.detailHref ? <a class="text-link" href={panel.detailHref} data-panel-open={panel.id}>{en ? `Explore ${panel.title}` : `Explorar ${panel.title}`} <span aria-hidden="true">→</span></a> : <span>{en ? 'Not counted as navigable yet' : 'Todavía no cuenta como navegable'}</span>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section shell panel-index-cta" data-commercial-actions>
+    <div><p class="eyebrow">{en ? 'Choose by capability' : 'Elige por capacidad'}</p><h2 class="heading">{en ? 'The plan follows the problem you need to solve.' : 'El plan sigue el problema que necesitas resolver.'}</h2><p>{en ? 'Management begins with continuity for enquiries and planning. Intelligent adds operating coordination only when the required capabilities justify it.' : 'Gestión empieza con continuidad para solicitudes y planning. Inteligente añade coordinación operativa solo cuando las capacidades necesarias lo justifican.'}</p></div>
+    <a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-track="cta_click" data-section="panels">{en ? 'Find my starting point' : 'Ver mi punto de partida'} <span aria-hidden="true">→</span></a>
+  </section>
+</div>
