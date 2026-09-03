@@ -2,6 +2,8 @@
 
 Última revisión de la referencia: 2026-09-02
 
+Estado de ejecución: P0 y P1 cerrados; P2 en curso con 6/12 direcciones web navegables verificadas. P3–P6 permanecen pendientes.
+
 Referencia: [camp.logic2b.com](https://camp.logic2b.com/)
 
 Alcance: arquitectura comercial, profundidad de producto, evidencia navegable y recorrido de conversión.
@@ -141,6 +143,8 @@ Entregables:
 
 Un concepto solo cuenta como demo cuando su ruta es navegable, responsive, localizada según alcance y no contiene acciones falsas. Antes de eso se etiqueta como `en preparación`, no como disponible.
 
+Estado al 2026-09-03: las colecciones uno y dos están completas. Nivora, Terrava y Aurem continúan como casos canónicos; Linde Casa, Cobalto Stays y Oria Hotel añaden una dirección original por vertical con rutas ES/EN, assets propios, límites, SEO, pruebas y QA. Profundidad verificada: **6/12**.
+
 ### P3 · Escaparate de paneles propio de Estancias
 
 Objetivo: igualar la prueba comercial del gestor sin copiar el dashboard de Camp.
@@ -220,4 +224,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Implementar **P0 · Espina dorsal de paridad en el home**, empezando por un contrato de datos compartido para bloques, evidencias y enlaces. El incremento debe terminar con header, hero, flujo de siete momentos, explorador de cinco áreas y franja de capacidades ya funcionando en ES/EN con los tres casos actuales. Todavía no se crean los nueve conceptos adicionales, las seis fichas de panel ni las cinco guías: esos activos pertenecen a P2, P3 y P4 y no deben simularse mediante enlaces vacíos.
+Continuar **P2 · Portfolio web con profundidad comparable** con la tercera colección: un concepto rural, uno de apartamentos y uno de hotel para pasar de 6/12 a 9/12. Cada dirección debe aportar identidad y assets propios, ruta ES/EN completa, límites visibles, canonical, `hreflang`, sitemap, pruebas y QA visual antes de entrar en el contador. No se crean todavía las seis fichas de panel ni las cinco guías; pertenecen a P3 y P4 y no deben simularse con enlaces vacíos.

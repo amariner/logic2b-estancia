@@ -110,6 +110,22 @@ No quedan bloqueos técnicos de este incremento. Permanecen las dependencias ext
 
 Siguiente punto exacto de implementación: continuar **P2 · Portfolio web con profundidad comparable** construyendo la segunda colección de conceptos únicamente si cada uno puede tener ruta navegable, contenido localizado cuando proceda, límites explícitos y QA. Antes, evaluar si la sección de demos posterior de la home puede consumir `web-portfolio.ts` sin eliminar matices de producto ni romper las rutas canónicas.
 
+## Incremento verificado · 2026-09-03 · P2 segunda colección
+
+P2 avanza de 3 a 6 direcciones web navegables. La segunda colección añade Linde Casa para rural/Básico, Cobalto Stays para apartamentos/Inteligente y Oria Hotel para hotel/Gestión. Son conceptos originales y ficticios, no clientes ni alojamientos reales. Cada uno dispone de ruta ES/EN, fotografía editorial propia y responsive, intención visual, problema comercial, tres momentos narrativos, alcance explícito y salida al portfolio o al diagnóstico. Ninguna ruta contiene formulario, disponibilidad, inventario, reserva, pago, mensaje, proveedor o escritura externa.
+
+El registro `web-portfolio.ts` pasa a ser una unión discriminada entre casos canónicos y conceptos originales, con selectores explícitos para ambos grupos. La sección posterior de demos de la home deja de duplicar sus tres casos y consume ahora el mismo registro canónico que el hero y el portfolio; la home sigue mostrando únicamente Nivora, Terrava y Aurem como prueba de producto. El índice `/webs/` mantiene filtros por vertical y plan, cuenta dos conceptos por vertical y diferencia la evidencia canónica del plan cuando un concepto original remite a Terrava o Aurem.
+
+Las seis rutas nuevas quedan incorporadas a metadata, canonical, `hreflang`, sitemap, mapa público y pruebas de indexación. Los assets se sirven como AVIF responsive con fallback WebP y se precarga únicamente el hero correspondiente. QA visual en 1280 px y 390 × 844 confirma jerarquía legible, ausencia de overflow y adaptación de navegación, hero, momentos, límites y CTAs. El contador de profundidad web queda en **6/12**; no se cuentan páginas vacías ni conceptos en preparación.
+
+Verificación del SHA de código `4d3827e`: `pnpm check` completo correcto — 7/7 tareas de lint, 21/21 de typecheck/test/build, 9 pruebas del site, 79 del Worker y 17 operativas —; E2E focalizado 7/7; accesibilidad y SEO 23/23; matriz Playwright completa 92/92; `git diff --check` correcto. Las pruebas cubren las seis rutas ES/EN, filtros, enlaces 200, metadata única, canonical/hreflang/sitemap, ausencia de controles y escrituras, axe, teclado, movimiento reducido, texto al 200 % y reflow a 320, 375, 430 y 1366 px.
+
+Revisión multidisciplinar posterior: marketing **corregido** — el portfolio ya demuestra variedad sectorial y visual sin atribuir clientes, resultados o precios; diseño de producto **correcto** — los conceptos separan dirección web de evidencia operativa y conservan Básico/Gestión/Inteligente por capacidades; UX **corregido** — cada ficha ofrece recorrido, límite y siguiente paso sin callejón ni acción falsa; UI/dirección visual **corregido** — tres identidades propias amplían la percepción de capacidad sin copiar la estética de Camp; SEO **corregido** — las rutas son únicas, localizadas, indexables y completas en canonical, `hreflang` y sitemap; arquitectura frontend **corregido** — el registro discriminado alimenta home, índice, fichas y generación estática, y elimina la deuda de datos duplicados; full stack **no aplica** — no cambian Worker, endpoints, proveedores, permisos ni escritura; QA, accesibilidad, rendimiento y confianza comercial **correcto** — 92/92 E2E, assets responsive, límites visibles y cero acciones operativas no dejan hallazgos críticos.
+
+No quedan bloqueos técnicos del incremento. Permanecen las dependencias externas ya registradas: configuración/activación controlada de GTM, periodo analítico real, revisión legal española, entrevistas/propuestas antes de publicar precios y validaciones humanas de lectores de pantalla/alto contraste.
+
+Siguiente punto exacto de implementación: continuar **P2 · Portfolio web con profundidad comparable** con una tercera colección de tres conceptos navegables —uno rural, uno de apartamentos y uno de hotel— para pasar de 6/12 a 9/12. Solo cuentan cuando tengan identidad y assets propios, ruta ES/EN, contenido completo, límites, metadata, sitemap, pruebas y QA visual; P3 no comienza hasta cerrar las 12 direcciones o documentar un bloqueo real de P2.
+
 ## Cómo reanudar
 
 Al recibir `/goal continua con el desarrollo de este proyecto`:
@@ -191,7 +207,7 @@ La cola priorizada actual vive en [`plans/CAMP_PARITY_ROADMAP.md`](./CAMP_PARITY
 6. P5 · Conectividad demostrable y madurez real.
 7. P6 · Medición y optimización con periodos comparables.
 
-El desarrollo continúa por P0. Las secciones siguientes conservan la cola anterior como evidencia histórica y sus dependencias externas; ya no determinan por sí solas el próximo incremento.
+P0 y P1 están cerrados. P2 está en curso con 6/12 direcciones web navegables; el siguiente incremento exacto es la tercera colección para alcanzar 9/12. Las secciones siguientes conservan la cola anterior como evidencia histórica y sus dependencias externas; ya no determinan por sí solas el próximo incremento.
 
 ## Cola anterior y dependencias previas
 
