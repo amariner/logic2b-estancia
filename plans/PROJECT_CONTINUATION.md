@@ -142,6 +142,22 @@ No quedan bloqueos técnicos del incremento. La sincronización remota sí perma
 
 Siguiente punto exacto de implementación: completar **P2 · Portfolio web con profundidad comparable** con la cuarta y última colección —una dirección rural, una de apartamentos y una de hotel— para pasar de 9/12 a 12/12. Solo después de verificar identidades, assets, rutas ES/EN, límites, SEO, pruebas y QA de las tres direcciones podrá comenzar P3 · Escaparate de paneles.
 
+## Incremento verificado · 2026-09-03 · P2 cuarta colección y cierre
+
+P2 queda cerrado en **12/12** direcciones web navegables. La cuarta colección añade Riscoa Casas para rural/Gestión, Solerna Apartamentos para apartamentos/Básico y Cendra Hotel para hotel/Inteligente. El catálogo conserva Nivora, Terrava y Aurem como casos canónicos y completa nueve conceptos originales y ficticios: cuatro direcciones por vertical, cuatro por plan y presencia de Básico, Gestión e Inteligente dentro de cada tipo de alojamiento. Las nuevas fichas ES/EN incluyen intención visual, problema comercial, cuatro superficies visibles, tres momentos narrativos, límites y salida contextual; no contienen disponibilidad, reserva, pago, comunicación, proveedor, formulario ni escritura externa.
+
+Las tres fotografías editoriales se generaron con ImageGen integrado, se inspeccionaron individualmente y se incorporaron como AVIF responsive de 640/960/1280 px con fallback WebP. Slugs, registros, contadores, filtros, rutas públicas, sitemap, canonical y `hreflang` comparten la misma fuente. Las pruebas fijan exactamente doce conceptos, nueve originales, cuatro por vertical, cuatro por plan y la correspondencia ES/EN. El QA visual a 1440 × 900 y 390 × 844 confirmó direcciones diferenciadas, imágenes cargadas, H1 legibles, reflow sin desbordamiento y ausencia de controles falsos.
+
+El QA móvil detectó que el contacto flotante de WhatsApp podía tapar la fila de acciones del portfolio. La observación de obstrucciones incluye ahora `.portfolio-card-links` y `.web-concept-next`, por lo que el acceso se retira mientras un CTA comercial está visible; la regresión E2E comprueba el viewport y el estado oculto. La descripción inglesa de Cendra se acortó hasta el presupuesto SEO después de que la primera ejecución la señalara.
+
+Durante el barrido largo se reprodujo una regresión externa de Wrangler/Miniflare 4.114+ que termina `wrangler dev` con `Error inside ProxyWorker` y `Network connection lost`. Para que CI vuelva a ser determinista se fijó Wrangler 4.113.0 —última versión anterior a la regresión— y la fecha de compatibilidad máxima soportada por ese runtime, `2026-07-28`. No cambia bindings, puertas, proveedores ni alcance del Worker. Con esa configuración, el SHA de código `4534c66` supera `pnpm check` completo —7/7 tareas de lint, 21/21 de typecheck/test/build, 9 pruebas del site, 79 del Worker y 17 operativas—, SEO **7/7**, accesibilidad **16/16** y la matriz Playwright final **94/94** en una única ejecución de cuatro minutos; `git diff --check` también queda limpio.
+
+Revisión multidisciplinar posterior: marketing **corregido** — doce direcciones distintas demuestran amplitud sin atribuir clientes ni resultados; diseño de producto **correcto** — el reparto 4 × vertical y 4 × plan conserva la escalera y los límites canónicos; UX **corregido** — las fichas mantienen salida clara y WhatsApp ya no obstruye acciones; UI/dirección visual **correcto** — Riscoa, Solerna y Cendra aportan lenguajes propios y coherentes con Estancias; SEO **corregido** — rutas y señales se derivan del registro, y Cendra cumple el presupuesto de descripción; arquitectura frontend **corregido** — conteos, slugs, localización y destinos permanecen centralizados; full stack **corregido** — la versión local de Wrangler se estabiliza sin añadir capacidades, bindings o efectos; QA, accesibilidad, rendimiento y confianza comercial **corregido** — imágenes, reflow, acción flotante, axe, SEO y 94/94 E2E cierran los hallazgos. No quedan problemas críticos de veracidad, privacidad, accesibilidad o pérdida de datos.
+
+La sincronización remota continúa como bloqueo de transporte: antes de este cierre `origin/main` seguía en `a7b2830`, sin divergencia y por detrás de los commits locales; el `push` anterior terminó con `RPC failed; HTTP 400`. Se reintentará una vez con el incremento completo, sin cambiar transporte ni configuración para eludir el fallo. Permanecen las dependencias externas registradas: GTM y línea base real, revisión jurídica española, entrevistas/propuestas previas a cualquier precio y validaciones humanas de lector de pantalla/alto contraste.
+
+Siguiente punto exacto de implementación: comenzar **P3 · Escaparate de paneles propio de Estancias** con `/paneles/` y `/en/panels/`, un registro único para seis superficies y las primeras fichas navegables de Solicitudes y Planning enlazadas a las vistas locales de Terrava. Las otras cuatro fichas no entrarán en el contador hasta disponer de contenido, estado honesto, metadata, límites, pruebas y QA; no se añadirá una segunda captación ni se simularán conexiones activas.
+
 ## Cómo reanudar
 
 Al recibir `/goal continua con el desarrollo de este proyecto`:
@@ -223,7 +239,7 @@ La cola priorizada actual vive en [`plans/CAMP_PARITY_ROADMAP.md`](./CAMP_PARITY
 6. P5 · Conectividad demostrable y madurez real.
 7. P6 · Medición y optimización con periodos comparables.
 
-P0 y P1 están cerrados. P2 está en curso con 9/12 direcciones web navegables; el siguiente incremento exacto es la cuarta y última colección para alcanzar 12/12. Las secciones siguientes conservan la cola anterior como evidencia histórica y sus dependencias externas; ya no determinan por sí solas el próximo incremento.
+P0, P1 y P2 están cerrados. El portfolio alcanza 12/12 direcciones navegables, con cuatro por vertical y cuatro por plan. El siguiente incremento exacto es P3: abrir el escaparate de paneles con índice ES/EN, registro único y las primeras fichas enlazadas a evidencia real de Terrava. Las secciones siguientes conservan la cola anterior como evidencia histórica y sus dependencias externas; ya no determinan por sí solas el próximo incremento.
 
 ## Cola anterior y dependencias previas
 

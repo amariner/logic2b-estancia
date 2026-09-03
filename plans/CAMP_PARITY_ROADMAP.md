@@ -2,7 +2,7 @@
 
 Última revisión de la referencia: 2026-09-02
 
-Estado de ejecución: P0 y P1 cerrados; P2 en curso con 9/12 direcciones web navegables verificadas. P3–P6 permanecen pendientes.
+Estado de ejecución: P0, P1 y P2 cerrados; 12/12 direcciones web navegables verificadas. P3–P6 permanecen pendientes.
 
 Referencia: [camp.logic2b.com](https://camp.logic2b.com/)
 
@@ -143,7 +143,7 @@ Entregables:
 
 Un concepto solo cuenta como demo cuando su ruta es navegable, responsive, localizada según alcance y no contiene acciones falsas. Antes de eso se etiqueta como `en preparación`, no como disponible.
 
-Estado al 2026-09-03: las tres primeras colecciones están completas. Nivora, Terrava y Aurem continúan como casos canónicos; Linde Casa, Cobalto Stays, Oria Hotel, Boscara Finca, Velares Apartamentos y Nocta Hotel aportan dos direcciones originales por vertical con rutas ES/EN, assets propios, límites, SEO, pruebas y QA. Cada vertical cubre ya Básico, Gestión e Inteligente. Profundidad verificada: **9/12**.
+Estado al 2026-09-03: P2 está cerrado con cuatro colecciones completas. Nivora, Terrava y Aurem continúan como casos canónicos; Linde Casa, Cobalto Stays, Oria Hotel, Boscara Finca, Velares Apartamentos, Nocta Hotel, Riscoa Casas, Solerna Apartamentos y Cendra Hotel completan nueve conceptos originales con rutas ES/EN, assets propios, límites, SEO, pruebas y QA. Hay cuatro direcciones por vertical, cuatro por plan y cada vertical cubre Básico, Gestión e Inteligente. Profundidad verificada: **12/12**.
 
 ### P3 · Escaparate de paneles propio de Estancias
 
@@ -224,4 +224,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Completar **P2 · Portfolio web con profundidad comparable** con la cuarta y última colección: un concepto rural, uno de apartamentos y uno de hotel para pasar de 9/12 a 12/12. Cada dirección debe aportar identidad y assets propios, ruta ES/EN completa, límites visibles, canonical, `hreflang`, sitemap, pruebas y QA visual antes de entrar en el contador. No se crean todavía las seis fichas de panel ni las cinco guías; P3 solo comienza cuando P2 alcance 12/12 o exista un bloqueo real documentado.
+Comenzar **P3 · Escaparate de paneles propio de Estancias** con el índice localizado `/paneles/` y `/en/panels/`, un registro único de las seis superficies y sus estados honestos. La primera entrega debe enlazar Solicitudes y Planning a las vistas locales existentes de Terrava, conservar los límites de demo y dejar las demás fichas fuera del contador hasta que tengan contenido navegable, metadata, pruebas y QA. No se crean formularios, operaciones, proveedores ni capturas que sugieran conexiones activas.
