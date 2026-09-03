@@ -2,7 +2,7 @@
 
 Última revisión de la referencia: 2026-09-02
 
-Estado de ejecución: P0 y P1 cerrados; P2 en curso con 6/12 direcciones web navegables verificadas. P3–P6 permanecen pendientes.
+Estado de ejecución: P0 y P1 cerrados; P2 en curso con 9/12 direcciones web navegables verificadas. P3–P6 permanecen pendientes.
 
 Referencia: [camp.logic2b.com](https://camp.logic2b.com/)
 
@@ -143,7 +143,7 @@ Entregables:
 
 Un concepto solo cuenta como demo cuando su ruta es navegable, responsive, localizada según alcance y no contiene acciones falsas. Antes de eso se etiqueta como `en preparación`, no como disponible.
 
-Estado al 2026-09-03: las colecciones uno y dos están completas. Nivora, Terrava y Aurem continúan como casos canónicos; Linde Casa, Cobalto Stays y Oria Hotel añaden una dirección original por vertical con rutas ES/EN, assets propios, límites, SEO, pruebas y QA. Profundidad verificada: **6/12**.
+Estado al 2026-09-03: las tres primeras colecciones están completas. Nivora, Terrava y Aurem continúan como casos canónicos; Linde Casa, Cobalto Stays, Oria Hotel, Boscara Finca, Velares Apartamentos y Nocta Hotel aportan dos direcciones originales por vertical con rutas ES/EN, assets propios, límites, SEO, pruebas y QA. Cada vertical cubre ya Básico, Gestión e Inteligente. Profundidad verificada: **9/12**.
 
 ### P3 · Escaparate de paneles propio de Estancias
 
@@ -224,4 +224,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Continuar **P2 · Portfolio web con profundidad comparable** con la tercera colección: un concepto rural, uno de apartamentos y uno de hotel para pasar de 6/12 a 9/12. Cada dirección debe aportar identidad y assets propios, ruta ES/EN completa, límites visibles, canonical, `hreflang`, sitemap, pruebas y QA visual antes de entrar en el contador. No se crean todavía las seis fichas de panel ni las cinco guías; pertenecen a P3 y P4 y no deben simularse con enlaces vacíos.
+Completar **P2 · Portfolio web con profundidad comparable** con la cuarta y última colección: un concepto rural, uno de apartamentos y uno de hotel para pasar de 9/12 a 12/12. Cada dirección debe aportar identidad y assets propios, ruta ES/EN completa, límites visibles, canonical, `hreflang`, sitemap, pruebas y QA visual antes de entrar en el contador. No se crean todavía las seis fichas de panel ni las cinco guías; P3 solo comienza cuando P2 alcance 12/12 o exista un bloqueo real documentado.

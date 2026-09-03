@@ -126,6 +126,22 @@ No quedan bloqueos técnicos del incremento. Permanecen las dependencias externa
 
 Siguiente punto exacto de implementación: continuar **P2 · Portfolio web con profundidad comparable** con una tercera colección de tres conceptos navegables —uno rural, uno de apartamentos y uno de hotel— para pasar de 6/12 a 9/12. Solo cuentan cuando tengan identidad y assets propios, ruta ES/EN, contenido completo, límites, metadata, sitemap, pruebas y QA visual; P3 no comienza hasta cerrar las 12 direcciones o documentar un bloqueo real de P2.
 
+## Incremento verificado · 2026-09-03 · P2 tercera colección
+
+P2 avanza de 6 a **9/12** direcciones web navegables. La tercera colección añade Boscara Finca para rural/Inteligente, Velares Apartamentos para apartamentos/Gestión y Nocta Hotel para hotel/Básico. Con esta distribución, cada vertical ya muestra al menos una dirección asociada a cada plan sin alterar los casos canónicos. Los tres conceptos son originales y ficticios; cada uno ofrece ruta ES/EN, identidad editorial y fotografía propia responsive, tres momentos narrativos, alcance, límites visibles y salida contextual al diagnóstico. No contienen disponibilidad, inventario, reserva, pago, comunicación, proveedor, formulario ni escritura externa.
+
+El registro único exporta ahora también la lista cerrada de slugs originales. Las rutas públicas y el sitemap se derivan de esa fuente en vez de mantener otra lista manual; los contadores de home, portfolio y fichas se calculan desde los nueve registros. Metadata, canonical, `hreflang` y títulos permanecen únicos y dentro de sus presupuestos. Las imágenes se generaron con ImageGen integrado, se inspeccionaron individualmente y se sirven en AVIF de 640/960/1280 px con fallback WebP.
+
+El QA visual descubrió que las imágenes `lazy` todavía fuera del viewport reservaban la altura intrínseca del bitmap antes de cargar y alargaban las tarjetas móviles. Se corrigió con altura responsive explícita y una regresión E2E que valida el ratio 16:10 sin forzar la carga. La auditoría axe detectó además contraste insuficiente en la etiqueta secundaria de Velares; el token se ajustó y la repetición completa quedó limpia en ES/EN. QA de `/webs/`, Boscara, Velares y Nocta a 1280 px y 390 × 844 confirma jerarquía, legibilidad, reflow y ausencia de acciones falsas.
+
+Verificación del SHA de código `df48aa8`: `pnpm check` completo correcto — 7/7 tareas de lint, 21/21 de typecheck/test/build, 9 pruebas del site, 79 del Worker y 17 operativas —; E2E focalizado 4/4; accesibilidad y SEO 22/23 inicialmente por el contraste de Velares y 1/1 limpio tras corregirlo; matriz Playwright completa final **93/93**; `git diff --check` correcto. Las pruebas cubren las nueve direcciones, las doce rutas originales ES/EN, filtros y reparto de planes, metadata, canonical, `hreflang`, sitemap, ausencia de controles/escrituras, axe, reflow y reserva de espacio responsive antes del lazy load.
+
+Revisión multidisciplinar posterior: marketing **corregido** — el catálogo demuestra nueve direcciones y cobertura de los tres planes por vertical sin atribuir clientes ni resultados; diseño de producto **correcto** — Boscara/Inteligente, Velares/Gestión y Nocta/Básico completan la matriz manteniendo capacidades y límites; UX **corregido** — el espacio reservado de imágenes lazy evita tarjetas móviles sobredimensionadas y cada ficha conserva una salida clara; UI/dirección visual **corregido** — tres lenguajes propios amplían variedad y Velares cumple contraste AA; SEO **corregido** — slugs, rutas públicas, sitemap y localización comparten una única fuente; arquitectura frontend **corregido** — contadores y rutas dejan de duplicar cantidades o slugs; full stack **no aplica** — no cambian Worker, endpoints, proveedores, permisos ni escrituras; QA, accesibilidad, rendimiento y confianza comercial **corregido** — 93/93 E2E, axe limpio, assets responsive, límites y regresión del lazy load cierran los hallazgos. No quedan problemas críticos de veracidad, privacidad, accesibilidad o pérdida de datos.
+
+No quedan bloqueos técnicos del incremento. Permanecen las dependencias externas ya registradas: configuración/activación controlada de GTM, periodo analítico real, revisión legal española, entrevistas/propuestas antes de publicar precios y validaciones humanas de lectores de pantalla/alto contraste.
+
+Siguiente punto exacto de implementación: completar **P2 · Portfolio web con profundidad comparable** con la cuarta y última colección —una dirección rural, una de apartamentos y una de hotel— para pasar de 9/12 a 12/12. Solo después de verificar identidades, assets, rutas ES/EN, límites, SEO, pruebas y QA de las tres direcciones podrá comenzar P3 · Escaparate de paneles.
+
 ## Cómo reanudar
 
 Al recibir `/goal continua con el desarrollo de este proyecto`:
@@ -207,7 +223,7 @@ La cola priorizada actual vive en [`plans/CAMP_PARITY_ROADMAP.md`](./CAMP_PARITY
 6. P5 · Conectividad demostrable y madurez real.
 7. P6 · Medición y optimización con periodos comparables.
 
-P0 y P1 están cerrados. P2 está en curso con 6/12 direcciones web navegables; el siguiente incremento exacto es la tercera colección para alcanzar 9/12. Las secciones siguientes conservan la cola anterior como evidencia histórica y sus dependencias externas; ya no determinan por sí solas el próximo incremento.
+P0 y P1 están cerrados. P2 está en curso con 9/12 direcciones web navegables; el siguiente incremento exacto es la cuarta y última colección para alcanzar 12/12. Las secciones siguientes conservan la cola anterior como evidencia histórica y sus dependencias externas; ya no determinan por sí solas el próximo incremento.
 
 ## Cola anterior y dependencias previas
 
