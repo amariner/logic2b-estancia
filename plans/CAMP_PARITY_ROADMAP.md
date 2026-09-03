@@ -2,7 +2,7 @@
 
 Última revisión de la referencia: 2026-09-02
 
-Estado de ejecución: P0, P1 y P2 cerrados; 12/12 direcciones web y 4/6 fichas de panel navegables verificadas. P3 está en curso; P4–P6 permanecen pendientes.
+Estado de ejecución: P0, P1, P2 y P3 cerrados; 12/12 direcciones web y 6/6 fichas de panel navegables verificadas. P4–P6 permanecen pendientes.
 
 Referencia: [camp.logic2b.com](https://camp.logic2b.com/)
 
@@ -157,7 +157,7 @@ Entregables:
 4. Navegación de vuelta a plan, vertical, demo y contacto conservando solo contexto cerrado.
 5. Fichas indexables comerciales; las superficies de demo continúan `noindex`.
 
-Estado al 2026-09-04: el índice localizado, el registro único y las seis superficies ya existen con estados explícitos. Solicitudes, Planning, Huéspedes y llegadas y Preparación cuentan como **4/6** fichas navegables, con composición coherente con los fixtures locales, ficha comercial ES/EN, contrato y límite, metadata, canonical, `hreflang`, sitemap, pruebas y enlace exacto a Terrava o Aurem. Operación e ingresos y Copiloto supervisado continúan visibles como `ficha en preparación`, sin enlace ni evidencia simulada.
+Estado al 2026-09-04: **P3 cerrado en 6/6**. Solicitudes, Planning y Huéspedes y llegadas enlazan a evidencia exacta de Terrava; Preparación, Operación e ingresos y Copiloto supervisado enlazan a Aurem. Todas las fichas cuentan con composición coherente con su fixture local, contenido ES/EN, contrato y límite por capacidad, metadata, canonical, `hreflang`, sitemap, pruebas y QA. Operación e ingresos separa métricas explicables visibles de la previsión de demanda y precio `en ruta`; Copiloto separa el borrador supervisado visible de las automatizaciones con demo pendiente.
 
 ### P4 · Guías, implantación y confianza de compra
 
@@ -226,4 +226,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Completar **P3 · Escaparate de paneles propio de Estancias** con Operación e ingresos y Copiloto supervisado para avanzar de 4/6 a 6/6. Operación e ingresos debe separar con claridad los informes básicos disponibles de cualquier previsión `revenue` que permanece en ruta; Copiloto debe representar únicamente el fixture local supervisado de Aurem, con fuentes, edición y revisión humana, sin modelo, envío ni automatización. Ambas fichas requieren contenido ES/EN, contrato, límite, metadata, pruebas y QA antes de contarse.
+Comenzar **P4 · Guías, implantación y confianza de compra** con un registro único y un índice `/guias/` ES/EN para los cinco roles previstos. El primer incremento debe publicar fichas completas para propiedad/dirección y reservas/recepción, mantener las otras tres explícitamente en preparación y añadir al índice un bloque de implantación que distinga entradas, decisiones, pruebas, publicación supervisada, soporte y trabajo fuera de alcance. Los enlaces desde home, planes, soluciones, webs y paneles solo se añaden cuando el destino sea navegable y esté verificado.
