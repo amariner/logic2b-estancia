@@ -1,6 +1,6 @@
 import type { Locale } from '@logic-estancia/config';
 import type { PlanLevel } from '@logic-estancia/domain';
-import { getWebPortfolio } from './web-portfolio';
+import { getCanonicalWebPortfolio } from './web-portfolio';
 
 export type HomeNavigationKey = 'webs' | 'gestor' | 'planes' | 'recorrido';
 
@@ -155,7 +155,7 @@ const english: Omit<HomeContract, 'locale'> = {
 };
 
 export function getHomeContract(locale: Locale): HomeContract {
-  const homeCases = getWebPortfolio(locale).map((concept) => ({
+  const homeCases = getCanonicalWebPortfolio(locale).map((concept) => ({
     slug: concept.slug,
     brand: concept.brand,
     label: concept.verticalLabel,

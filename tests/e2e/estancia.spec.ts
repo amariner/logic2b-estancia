@@ -5,7 +5,9 @@ const appOrigin = 'http://127.0.0.1:8790';
 const paths = [
   '/', '/en/', '/docs/', '/en/docs/',
   '/soluciones/casas-rurales/', '/soluciones/apartamentos/', '/soluciones/hoteles/', '/planes/', '/webs/', '/diagnostico/',
+  '/webs/linde/', '/webs/cobalto/', '/webs/oria/',
   '/en/solutions/rural-stays/', '/en/solutions/apartments/', '/en/solutions/hotels/', '/en/plans/', '/en/webs/', '/en/assessment/',
+  '/en/webs/linde/', '/en/webs/cobalto/', '/en/webs/oria/',
   '/recursos/gestor-reservas-apartamentos-turisticos/', '/recursos/web-hotel-reservas-directas-operacion/',
   '/legal/', '/privacidad/', '/cookies/',
   '/en/legal/', '/en/privacidad/', '/en/cookies/',
@@ -161,6 +163,47 @@ test('home exposes the connected product spine in both languages', async ({ page
   }
 });
 
+test('portfolio exposes six truthful navigable directions in both languages', async ({ page, request }) => {
+  for (const [path, prefix] of [['/webs/', ''], ['/en/webs/', '/en']] as const) {
+    await page.goto(path);
+    await expect(page.locator('[data-portfolio-card]')).toHaveCount(6);
+    await expect(page.locator('[data-portfolio-card][data-portfolio-vertical="rural"]')).toHaveCount(2);
+    await expect(page.locator('[data-portfolio-card][data-portfolio-vertical="apartments"]')).toHaveCount(2);
+    await expect(page.locator('[data-portfolio-card][data-portfolio-vertical="hotels"]')).toHaveCount(2);
+
+    for (const slug of ['linde', 'cobalto', 'oria']) {
+      const card = page.locator(`[data-portfolio-card="${slug}"]`);
+      await expect(card).toContainText(path === '/webs/' ? 'Concepto navegable' : 'Navigable concept');
+      const href = `${prefix}/webs/${slug}/`;
+      await expect(card.locator(`[data-portfolio-open="${slug}"]`)).toHaveAttribute('href', href);
+      expect((await request.get(href)).status(), href).toBe(200);
+    }
+  }
+});
+
+test('original website concepts are localized, indexable and non-operational', async ({ page }) => {
+  const writes: string[] = [];
+  page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
+
+  for (const [path, slug, otherLocale] of [
+    ['/webs/linde/', 'linde', '/en/webs/linde/'],
+    ['/webs/cobalto/', 'cobalto', '/en/webs/cobalto/'],
+    ['/webs/oria/', 'oria', '/en/webs/oria/'],
+    ['/en/webs/linde/', 'linde', '/webs/linde/'],
+    ['/en/webs/cobalto/', 'cobalto', '/webs/cobalto/'],
+    ['/en/webs/oria/', 'oria', '/webs/oria/'],
+  ] as const) {
+    await expectCleanPage(page, path);
+    await expect(page.locator(`[data-web-concept="${slug}"]`)).toBeVisible();
+    await expect(page.locator('[data-web-concept] form, [data-web-concept] input, [data-web-concept] textarea, [data-web-concept] select')).toHaveCount(0);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /index,follow/);
+    await expect(page.locator('link[rel="alternate"]')).toHaveCount(3);
+    const alternates = await page.locator('link[rel="alternate"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+    expect(alternates.some((href) => href?.endsWith(otherLocale))).toBe(true);
+  }
+  expect(writes).toEqual([]);
+});
+
 test('capability evidence opens the exact fictitious flow without external writes', async ({ page }) => {
   const externalWrites: string[] = [];
   page.on('request', (request) => {
@@ -181,7 +224,7 @@ test('capability evidence opens the exact fictitious flow without external write
 for (const width of [320, 375, 430, 1366]) {
   test(`core experiences fit ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width < 500 ? 860 : 900 });
-    for (const path of ['/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/']) await expectCleanPage(page, path);
+    for (const path of ['/', '/webs/linde/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/']) await expectCleanPage(page, path);
   });
 }
 
@@ -519,7 +562,7 @@ test('rich plan cards expose canonical previews and carry evidence context into 
   await expect(page.locator('[data-assessment-handoff]')).toContainText('terrava');
 });
 
-test('web portfolio exposes localized canonical cases and accessible filters', async ({ page, request }) => {
+test('web portfolio exposes localized collections and accessible filters', async ({ page, request }) => {
   for (const [path, prefix, labels, sourcePath] of [
     ['/webs/', '', ['Nivora One', 'Terrava Collection', 'Aurem Hotel'], '/webs/'],
     ['/en/webs/', '/en', ['Nivora One', 'Terrava Collection', 'Aurem Hotel'], '/en/webs/'],
@@ -527,7 +570,7 @@ test('web portfolio exposes localized canonical cases and accessible filters', a
     await page.goto(path);
     const portfolio = page.locator('[data-web-portfolio]');
     await expect(portfolio.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(portfolio.locator('[data-portfolio-card]')).toHaveCount(3);
+    await expect(portfolio.locator('[data-portfolio-card]')).toHaveCount(6);
     await expect(portfolio.locator('[data-portfolio-vertical-filter]')).toHaveCount(4);
     await expect(portfolio.locator('[data-portfolio-plan-filter]')).toHaveCount(4);
     for (const [index, slug] of ['nivora', 'terrava', 'aurem'].entries()) {
@@ -546,16 +589,17 @@ test('web portfolio exposes localized canonical cases and accessible filters', a
       expect((await request.get(assessmentHref ?? '')).status()).toBe(200);
     }
     await portfolio.locator('[data-portfolio-vertical-filter="rural"]').click();
-    await expect(portfolio.locator('[data-portfolio-card]:not([hidden])')).toHaveCount(1);
+    await expect(portfolio.locator('[data-portfolio-card]:not([hidden])')).toHaveCount(2);
     await expect(portfolio.locator('[data-portfolio-card="terrava"]')).toBeVisible();
-    await expect(portfolio.locator('[data-portfolio-filter-status]')).toContainText(/1/);
+    await expect(portfolio.locator('[data-portfolio-card="linde"]')).toBeVisible();
+    await expect(portfolio.locator('[data-portfolio-filter-status]')).toContainText(/2/);
     await expect(portfolio.locator('[data-portfolio-vertical-filter="rural"]')).toHaveAttribute('aria-pressed', 'true');
     await portfolio.locator('[data-portfolio-plan-filter="inteligente"]').click();
     await expect(portfolio.locator('[data-portfolio-card]:not([hidden])')).toHaveCount(0);
     await expect(portfolio.locator('[data-portfolio-filter-empty]')).toBeVisible();
     await portfolio.locator('[data-portfolio-vertical-filter="all"]').click();
     await portfolio.locator('[data-portfolio-plan-filter="all"]').click();
-    await expect(portfolio.locator('[data-portfolio-card]:not([hidden])')).toHaveCount(3);
+    await expect(portfolio.locator('[data-portfolio-card]:not([hidden])')).toHaveCount(6);
   }
 });
 

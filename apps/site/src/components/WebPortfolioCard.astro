@@ -7,6 +7,9 @@ const { locale, concept, sourcePath } = Astro.props as { locale: Locale; concept
 const plan = getPlanCards(locale).find((candidate) => candidate.id === concept.plan);
 if (!plan) throw new Error(`missing_plan_for_portfolio:${concept.slug}`);
 const panelHref = plan.panelSlug === 'none' ? null : `${locale === 'en' ? '/en' : ''}/demos/${plan.panelSlug}/gestion/?vista=home`;
+const panelCta = concept.status === 'original'
+  ? (locale === 'en' ? 'See canonical plan evidence' : 'Ver evidencia canónica del plan')
+  : (locale === 'en' ? 'View workspace' : 'Ver gestor');
 const assessmentHref = planHandoffHref(locale, plan, sourcePath, concept.vertical as PortfolioVertical);
 const headingId = `portfolio-${concept.slug}-title`;
 ---
@@ -20,6 +23,5 @@ const headingId = `portfolio-${concept.slug}-title`;
   <div class="portfolio-card-detail"><div><p class="eyebrow">{locale === 'en' ? 'Visual intent' : 'Intención visual'}</p><p>{concept.visualIntent}</p></div><div><p class="eyebrow">{locale === 'en' ? 'Business problem' : 'Problema de negocio'}</p><p>{concept.businessProblem}</p></div></div>
   <div class="portfolio-card-detail"><p class="eyebrow">{concept.visibleLabel}</p><ul>{concept.visiblePages.map((page) => <li>{page}</li>)}</ul></div>
   <p class="portfolio-card-boundary"><strong>{concept.boundaryLabel}:</strong> {concept.boundary}</p>
-  <div class="portfolio-card-links"><div><a class="text-link" href={concept.demoHref} data-portfolio-open={concept.slug}>{concept.demoCta} <span aria-hidden="true">→</span></a>{panelHref && <a class="text-link" href={panelHref} data-portfolio-panel={concept.slug}>{locale === 'en' ? 'View workspace' : 'Ver gestor'} <span aria-hidden="true">→</span></a>}</div><a class="pill" href={assessmentHref} data-portfolio-assess={concept.slug}>{concept.assessmentCta} <span aria-hidden="true">→</span></a></div>
+  <div class="portfolio-card-links"><div><a class="text-link" href={concept.demoHref} data-portfolio-open={concept.slug}>{concept.demoCta} <span aria-hidden="true">→</span></a>{panelHref && <a class="text-link" href={panelHref} data-portfolio-panel={concept.slug}>{panelCta} <span aria-hidden="true">→</span></a>}</div><a class="pill" href={assessmentHref} data-portfolio-assess={concept.slug}>{concept.assessmentCta} <span aria-hidden="true">→</span></a></div>
 </article>
-

@@ -12,6 +12,9 @@ const translatedPairs = [
   ['/soluciones/hoteles/', '/en/solutions/hotels/'],
   ['/planes/', '/en/plans/'],
   ['/webs/', '/en/webs/'],
+  ['/webs/linde/', '/en/webs/linde/'],
+  ['/webs/cobalto/', '/en/webs/cobalto/'],
+  ['/webs/oria/', '/en/webs/oria/'],
   ['/diagnostico/', '/en/assessment/'],
 ] as const;
 const spanishOnly = [
@@ -133,6 +136,7 @@ test('sitemap contains every indexable final URL exactly once and excludes demos
 test('commercial search surfaces use specific, unique metadata and people-first headings', async ({ page }) => {
   const commercialRoutes = [
     '/', '/en/', '/planes/', '/en/plans/', '/webs/', '/en/webs/',
+    '/webs/linde/', '/en/webs/linde/', '/webs/cobalto/', '/en/webs/cobalto/', '/webs/oria/', '/en/webs/oria/',
     '/soluciones/casas-rurales/', '/en/solutions/rural-stays/',
     '/soluciones/apartamentos/', '/en/solutions/apartments/',
     '/soluciones/hoteles/', '/en/solutions/hotels/',

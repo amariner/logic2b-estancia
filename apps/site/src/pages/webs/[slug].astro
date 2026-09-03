@@ -1,0 +1,14 @@
+---
+import Base from '../../layouts/Base.astro';
+import WebConceptPage from '../../components/WebConceptPage.astro';
+import { getOriginalWebPortfolio, type OriginalWebPortfolioConcept } from '../../web-portfolio';
+
+export function getStaticPaths() {
+  return getOriginalWebPortfolio('es').map((concept) => ({ params: { slug: concept.slug }, props: { concept } }));
+}
+
+const { concept } = Astro.props as { concept: OriginalWebPortfolioConcept };
+const title = `${concept.brand}: concepto web para ${concept.verticalLabel.toLowerCase()} | Logic2B Estancias`;
+const description = `${concept.summary} Concepto ficticio y navegable con límites explícitos.`;
+---
+<Base locale="es" route={`webs/${concept.slug}`} alternateRoute={`webs/${concept.slug}`} title={title} description={description} image={concept.image} imageAlt={concept.imageAlt} preloadImage={`/media/${concept.slug}/hero-1280.avif`} preloadImageSrcset={`/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w, /media/${concept.slug}/hero-1280.avif 1280w`} preloadImageSizes="100vw" preloadImageType="image/avif"><WebConceptPage locale="es" concept={concept} /></Base>
