@@ -1,0 +1,32 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import type { PlanCardData, PlanHandoffSource } from '../plan-contract';
+import { planHandoffHref } from '../plan-contract';
+
+const { locale, plan, sourcePath, featured = false } = Astro.props as { locale: Locale; plan: PlanCardData; sourcePath: PlanHandoffSource; featured?: boolean };
+const prefix = locale === 'en' ? '/en' : '';
+const webHref = `${prefix}/demos/${plan.webSlug}/`;
+const panelHref = plan.panelSlug === 'none' ? null : `${prefix}/demos/${plan.panelSlug}/gestion/?vista=home`;
+const previewAlt = locale === 'en' ? `${plan.name} fictional website preview` : `Vista previa de web ficticia del plan ${plan.name}`;
+---
+<article class={`plan-card card ${featured ? 'featured' : ''}`} data-plan-card={plan.id}>
+  <div class="plan-card-heading"><span class="plan-number">{plan.number}</span><span class="plan-card-fit">{locale === 'en' ? 'Starting point' : 'Punto de partida'}</span></div>
+  <h2>{plan.name}</h2>
+  <p class="plan-card-summary">{plan.summary}</p>
+  <div class="plan-preview" data-plan-preview={plan.id} role="img" aria-label={previewAlt}>
+    <div class="plan-preview-frame">
+      <div class="plan-preview-bar"><span>{plan.previewTitle}</span><small>{locale === 'en' ? 'Fictional demo' : 'Demo ficticia'}</small></div>
+      <div class="plan-preview-body">
+        <img src={`/media/${plan.webSlug}/hero.webp`} alt="" width="2016" height="1344" loading="lazy" decoding="async" />
+        {panelHref && <div class="plan-preview-panel"><strong>{plan.panelSlug === 'terrava' ? (locale === 'en' ? 'Workspace' : 'Gestor') : (locale === 'en' ? 'Operations' : 'Operación')}</strong>{plan.previewItems.map((item) => <span>{item}</span>)}</div>}
+      </div>
+    </div>
+    <p>{plan.previewNote}</p>
+  </div>
+  <div class="plan-card-detail"><strong>{plan.visibleLabel}</strong><ul>{plan.visible.map((item) => <li>{item}</li>)}</ul></div>
+  <div class="plan-card-detail"><strong>{plan.boundaryLabel}</strong><p>{plan.boundary}</p></div>
+  <div class="plan-card-links">
+    <div>{webHref && <a class="text-link" href={webHref} data-plan-web={plan.id}>{plan.webCta} <span aria-hidden="true">→</span></a>}{panelHref && <a class="text-link" href={panelHref} data-plan-panel={plan.id}>{plan.panelCta} <span aria-hidden="true">→</span></a>}</div>
+    <a class="pill" href={planHandoffHref(locale, plan, sourcePath)} data-plan={plan.id} data-plan-assess={plan.id} data-track="plan_select" data-section={sourcePath === '/' || sourcePath === '/en/' ? 'homepage_plans' : 'plans_grid'}>{plan.assessCta} <span aria-hidden="true">→</span></a>
+  </div>
+</article>

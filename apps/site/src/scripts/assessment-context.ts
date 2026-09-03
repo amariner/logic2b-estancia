@@ -6,6 +6,10 @@ const locales = ['es', 'en'] as const;
 const accommodationTypes = ['apartment', 'rural', 'hotel'] as const;
 const businessModes = ['mono', 'multi'] as const;
 const plans = ['basico', 'gestion', 'inteligente'] as const;
+const webValues = ['nivora', 'terrava', 'aurem'] as const;
+const panelValues = ['none', 'terrava', 'aurem'] as const;
+const segmentValues = ['rural', 'apartments', 'hotels', 'unknown'] as const;
+const sourcePaths = ['/', '/planes/', '/en/', '/en/plans/'] as const;
 const stackValues = ['website', 'email', 'booking-engine', 'calendar', 'channels', 'pms'] as const;
 const capabilityValues = ['enquiries', 'bookings', 'planning', 'guests', 'rates', 'web-editor', 'cleaning', 'teams', 'maintenance', 'channels', 'automation', 'ai', 'metrics'] as const;
 const timelines = ['0-3', '3-6', '6-12', 'exploring'] as const;
@@ -15,6 +19,10 @@ type Locale = typeof locales[number];
 type AccommodationType = typeof accommodationTypes[number];
 type BusinessMode = typeof businessModes[number];
 type Plan = typeof plans[number];
+type WebValue = typeof webValues[number];
+type PanelValue = typeof panelValues[number];
+type SegmentValue = typeof segmentValues[number];
+type SourcePath = typeof sourcePaths[number];
 type StackValue = typeof stackValues[number];
 type CapabilityValue = typeof capabilityValues[number];
 type Timeline = typeof timelines[number];
@@ -29,6 +37,10 @@ export interface AssessmentContext {
   propertyCount: number;
   unitCount: number;
   plan: Plan;
+  web?: WebValue;
+  panel?: PanelValue;
+  segment?: SegmentValue;
+  sourcePath?: SourcePath;
   currentStack: StackValue[];
   requestedCapabilities: CapabilityValue[];
   timeline: Timeline;
@@ -40,6 +52,7 @@ type StorageWriter = Pick<Storage, 'setItem' | 'removeItem'>;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 const member = <T extends readonly string[]>(values: T, value: unknown): value is T[number] => typeof value === 'string' && values.includes(value);
+const optionalMember = <T extends readonly string[]>(values: T, value: unknown): T[number] | null | undefined => value === undefined ? undefined : member(values, value) ? value : null;
 const integer = (value: unknown, max: number): number | null => {
   const parsed = typeof value === 'string' && value.trim() ? Number(value) : value;
   return typeof parsed === 'number' && Number.isInteger(parsed) && parsed >= 1 && parsed <= max ? parsed : null;
@@ -56,11 +69,15 @@ export function parseAssessmentContext(value: unknown, now = Date.now()): Assess
   const unitCount = integer(value.unitCount, 100_000);
   const currentStack = members(stackValues, value.currentStack);
   const requestedCapabilities = members(capabilityValues, value.requestedCapabilities);
+  const web = optionalMember(webValues, value.web);
+  const panel = optionalMember(panelValues, value.panel);
+  const segment = optionalMember(segmentValues, value.segment);
+  const sourcePath = optionalMember(sourcePaths, value.sourcePath);
   const createdAt = value.createdAt;
   if (typeof createdAt !== 'number' || !Number.isFinite(createdAt) || createdAt > now || now - createdAt > ASSESSMENT_CONTEXT_MAX_AGE) return null;
   if (!member(locales, value.locale) || !member(accommodationTypes, value.accommodationType) || !member(businessModes, value.businessMode)) return null;
   if (!member(plans, value.plan) || !member(timelines, value.timeline) || !member(investmentRanges, value.investmentRange)) return null;
-  if (!propertyCount || !unitCount || !currentStack || !requestedCapabilities) return null;
+  if (!propertyCount || !unitCount || !currentStack || !requestedCapabilities || web === null || panel === null || segment === null || sourcePath === null) return null;
   return {
     version: ASSESSMENT_CONTEXT_VERSION,
     createdAt,
@@ -70,6 +87,10 @@ export function parseAssessmentContext(value: unknown, now = Date.now()): Assess
     propertyCount,
     unitCount,
     plan: value.plan,
+    ...(web === undefined ? {} : { web }),
+    ...(panel === undefined ? {} : { panel }),
+    ...(segment === undefined ? {} : { segment }),
+    ...(sourcePath === undefined ? {} : { sourcePath }),
     currentStack,
     requestedCapabilities,
     timeline: value.timeline,
@@ -160,6 +181,7 @@ function renderLeadContext(context: AssessmentContext): void {
     if (formFields[name]) formFields[name].value = String(value);
   }
   const c = copy[context.locale];
+  const labels: string[] = [...c.labels];
   const values = [
     c.plans[context.plan], c.types[context.accommodationType],
     `${context.propertyCount} ${c.properties} · ${context.unitCount} ${c.units}`,
@@ -167,7 +189,9 @@ function renderLeadContext(context: AssessmentContext): void {
     context.requestedCapabilities.map((value) => c.capabilities[value]).join(', ') || c.empty,
     c.timelines[context.timeline], c.investments[context.investmentRange],
   ];
-  list.replaceChildren(...c.labels.flatMap((label, index) => {
+  if (context.web) { labels.push(context.locale === 'en' ? 'Web evidence' : 'Evidencia web'); values.push(context.web); }
+  if (context.panel && context.panel !== 'none') { labels.push(context.locale === 'en' ? 'Panel evidence' : 'Evidencia de gestor'); values.push(context.panel); }
+  list.replaceChildren(...labels.flatMap((label, index) => {
     const term = document.createElement('dt'); term.textContent = label;
     const description = document.createElement('dd'); description.textContent = values[index];
     return [term, description];
@@ -203,7 +227,13 @@ if (typeof window !== 'undefined') {
     leadFields() {
       if (!activeLeadContext) return {};
       const { businessMode, currentStack, requestedCapabilities, timeline, investmentRange } = activeLeadContext;
-      return { businessMode, currentStack, requestedCapabilities, timeline, investmentRange, sourcePath: activeLeadContext.locale === 'en' ? '/en/assessment/' : '/diagnostico/' };
+      return {
+        businessMode, currentStack, requestedCapabilities, timeline, investmentRange,
+        ...(activeLeadContext.web ? { web: activeLeadContext.web } : {}),
+        ...(activeLeadContext.panel ? { panel: activeLeadContext.panel } : {}),
+        ...(activeLeadContext.segment ? { segment: activeLeadContext.segment } : {}),
+        sourcePath: activeLeadContext.sourcePath ?? (activeLeadContext.locale === 'en' ? '/en/assessment/' : '/diagnostico/'),
+      };
     },
     clear() { const storage = browserSessionStorage(); if (storage) clearAssessmentContext(storage); activeLeadContext = null; withoutAssessmentMarker(); },
   };

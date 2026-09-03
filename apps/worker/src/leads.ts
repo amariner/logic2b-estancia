@@ -14,6 +14,9 @@ export interface LeadEnv extends RuntimeModeEnv {
 }
 
 const planInput = z.enum(['basico', 'gestion', 'inteligente', 'inicio', 'automatiza']);
+const webInput = z.enum(['nivora', 'terrava', 'aurem']);
+const panelInput = z.enum(['none', 'terrava', 'aurem']);
+const segmentInput = z.enum(['rural', 'apartments', 'hotels', 'unknown']);
 const RESEND_TIMEOUT_MS = 10_000;
 const MAX_LEAD_BODY_BYTES = 32 * 1_024;
 const requiredSingleLine = (max: number) => z.string().trim().min(1).max(max).regex(/^[^\r\n\u2028\u2029]*$/);
@@ -41,6 +44,9 @@ export const leadSchema = z.object({
   propertyCount: z.number().int().min(1).max(10_000),
   unitCount: z.number().int().min(1).max(100_000),
   plan: planInput.or(z.literal('')).optional(),
+  web: webInput.optional(),
+  panel: panelInput.optional(),
+  segment: segmentInput.optional(),
   currentStack: z.array(requiredSingleLine(60)).max(20).optional(),
   requestedCapabilities: z.array(requiredSingleLine(60)).max(30).optional(),
   timeline: z.enum(['0-3', '3-6', '6-12', 'exploring']).optional(),
@@ -280,6 +286,7 @@ function leadRows(lead: Lead): [string, string][] {
     ['Tipo', lead.accommodationType], ['Modelo', lead.businessMode || '—'], ['Propiedades', String(lead.propertyCount)],
     ['Unidades', String(lead.unitCount)], ['Plan recomendado', lead.plan || '—'], ['Situación actual', lead.currentStack?.join(', ') || '—'],
     ['Capacidades', lead.requestedCapabilities?.join(', ') || '—'], ['Plazo', lead.timeline || '—'], ['Inversión', lead.investmentRange || '—'],
+    ['Evidencia web', lead.web || '—'], ['Evidencia de gestor', lead.panel || '—'], ['Segmento', lead.segment || '—'],
     ['Idioma', lead.lang || '—'], ['Origen', lead.sourcePath || '—'], ['Campaña', lead.sourceCampaign || '—'],
     ['Consentimiento comercial', lead.marketingConsent ? 'Sí' : 'No'], ['Privacidad', 'Aceptada para responder'],
   ];

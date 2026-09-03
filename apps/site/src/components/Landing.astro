@@ -6,13 +6,16 @@ import { content } from '../content';
 import { getBusinesses } from '../businesses';
 import { spanishResources } from '../resources';
 import { getHomeContract } from '../home-contract';
+import { getPlanCards } from '../plan-contract';
 import CapabilityBand from './CapabilityBand.astro';
 import HumanService from './HumanService.astro';
 import HomeJourney from './HomeJourney.astro';
+import PlanCard from './PlanCard.astro';
 import ProductExplorer from './ProductExplorer.astro';
 const { locale } = Astro.props as { locale: Locale };
 const c = content[locale];
 const home = getHomeContract(locale);
+const planCards = getPlanCards(locale);
 const prefix = locale === 'en' ? '/en' : '';
 const wa = logic2bContact(locale, 'commercial');
 const businesses = getBusinesses(locale);
@@ -27,15 +30,6 @@ const demos: readonly { slug: DemoSlug; name: string; text: string; image: strin
   { slug: 'nivora', name: 'Nivora One', text: 'When a distinctive stay needs a website that does it justice and starts a direct conversation.', image: '/media/nivora/hero.webp' },
   { slug: 'terrava', name: 'Terrava Collection', text: 'When eight homes share demand but should not repeat the same work eight times.', image: '/media/terrava/hero.webp' },
   { slug: 'aurem', name: 'Aurem Hotel', text: 'When the guest cannot see the problem yet, but the team needs to spot it and coordinate.', image: '/media/aurem/hero.webp' },
-];
-const levels = locale === 'es' ? [
-  ['00', 'Básico', 'Deja de parecer uno más cuando te comparan y convierte el interés en una conversación comercial directa.', 'basico'],
-  ['01', 'Gestión', 'Da continuidad a cada consulta y reserva sin reconstruir su historia en varias herramientas.', 'gestion'],
-  ['02', 'Inteligente', 'Haz visible lo que necesita atención antes de que se convierta en una urgencia para el equipo.', 'inteligente'],
-] : [
-  ['00', 'Basic', 'Stop looking interchangeable when guests compare and turn interest into a direct commercial conversation.', 'basico'],
-  ['01', 'Management', 'Give every enquiry and booking continuity without rebuilding its story across several tools.', 'gestion'],
-  ['02', 'Intelligent', 'Make what needs attention visible before it turns into an urgent problem for the team.', 'inteligente'],
 ];
 const directionSignals = locale === 'es' ? [
   ['01', 'Demanda y marca', 'Qué entiende el huésped, por qué te recuerda y dónde empieza la conversación directa.'],
@@ -96,7 +90,7 @@ const serviceSchema = {
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
     name: locale === 'es' ? 'Planes de Logic2B Estancias' : 'Logic2B Estancias plans',
-    itemListElement: levels.map(([, name, description]) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name, description } })),
+  itemListElement: planCards.map(({ name, summary }) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name, description: summary } })),
   },
 };
 ---
@@ -194,7 +188,7 @@ const serviceSchema = {
 </section>
 
 <section id="planes" class="section levels">
-  <div class="shell"><div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2></div><div class="level-grid">{levels.map(([n, name, text, value]) => <article><span>{n}</span><h3>{name}</h3><p>{text}</p><a href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/?plan=${value}`} data-plan={value} data-track="plan_select" data-section="homepage_plans">{locale === 'es' ? 'Ver si encaja' : 'See if it fits'} <span aria-hidden="true">→</span></a></article>)}</div><p class="level-note">{c.levels.note}</p><a class="text-link" href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{locale === 'es' ? 'Comparar los tres planes y sus límites' : 'Compare all three plans and their boundaries'} <span aria-hidden="true">→</span></a></div>
+  <div class="shell"><div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2><p>{locale === 'es' ? 'Cada punto de partida combina una web demostrable, un alcance explícito y un paso siguiente que puedes revisar.' : 'Each starting point combines a demonstrable website, a clear boundary and a next step you can review.'}</p></div><div class="plans-grid" data-plan-showcase>{planCards.map((plan, index) => <PlanCard locale={locale} plan={plan} sourcePath={locale === 'en' ? '/en/' : '/'} featured={index === 1} />)}</div><p class="level-note">{c.levels.note}</p><a class="text-link" href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{locale === 'es' ? 'Comparar los tres planes y sus límites' : 'Compare all three plans and their boundaries'} <span aria-hidden="true">→</span></a></div>
 </section>
 
 <section id="alcance" class="section scope-section">

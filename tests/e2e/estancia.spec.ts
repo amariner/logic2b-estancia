@@ -521,11 +521,48 @@ test('hero keeps the clean Remanso scene and booking overlay within bounds at ev
   }
 });
 
-test('plan interest carries the selected plan into the assessment', async ({ page }) => {
+test('rich plan cards expose canonical previews and carry evidence context into assessment', async ({ page, request }) => {
+  for (const [path, prefix, labels, sourcePath] of [
+    ['/', '', ['Básico', 'Gestión', 'Inteligente'], '/'],
+    ['/en/', '/en', ['Basic', 'Management', 'Intelligent'], '/en/'],
+    ['/planes/', '', ['Básico', 'Gestión', 'Inteligente'], '/planes/'],
+    ['/en/plans/', '/en', ['Basic', 'Management', 'Intelligent'], '/en/plans/'],
+  ] as const) {
+    await page.goto(path);
+    await expect(page.locator('[data-plan-card]')).toHaveCount(3);
+    for (const [index, plan] of ['basico', 'gestion', 'inteligente'].entries()) {
+      const card = page.locator(`[data-plan-card="${plan}"]`);
+      await expect(card).toContainText(labels[index]);
+      await expect(card.locator(`[data-plan-preview="${plan}"]`)).toBeVisible();
+      await expect(card.locator(`[data-plan-web="${plan}"]`)).toHaveAttribute('href', `${prefix}/demos/${plan === 'basico' ? 'nivora' : plan === 'gestion' ? 'terrava' : 'aurem'}/`);
+      const panel = card.locator(`[data-plan-panel="${plan}"]`);
+      if (plan === 'basico') await expect(panel).toHaveCount(0);
+      else await expect(panel).toHaveAttribute('href', `${prefix}/demos/${plan === 'gestion' ? 'terrava' : 'aurem'}/gestion/?vista=home`);
+      const assessmentHref = await card.locator(`[data-plan-assess="${plan}"]`).getAttribute('href');
+      expect(assessmentHref).toBeTruthy();
+      const target = new URL(assessmentHref ?? '', appOrigin);
+      expect(target.searchParams.get('plan')).toBe(plan);
+      expect(target.searchParams.get('web')).toBe(plan === 'basico' ? 'nivora' : plan === 'gestion' ? 'terrava' : 'aurem');
+      expect(target.searchParams.get('panel')).toBe(plan === 'basico' ? 'none' : plan === 'gestion' ? 'terrava' : 'aurem');
+      expect(target.searchParams.get('sourcePath')).toBe(sourcePath);
+      expect((await request.get(assessmentHref ?? '')).status()).toBe(200);
+    }
+  }
+
   await page.goto('/');
-  await page.locator('.level-grid article').nth(1).getByRole('link', { name: /Ver si encaja/ }).click();
-  await expect(page).toHaveURL(/\/diagnostico\/\?plan=gestion$/);
+  await page.locator('[data-plan-card="gestion"]').getByRole('link', { name: 'Evaluar este plan' }).click();
+  await expect(page).toHaveURL(/\/diagnostico\/\?plan=gestion&web=terrava&panel=terrava&segment=unknown&sourcePath=%2F$/);
   await expect(page.locator('[name="bookingNeeds"][value="bookings"]')).toBeChecked();
+  await page.locator('[data-step="1"]').getByText('Apartamentos', { exact: true }).click();
+  for (let step = 0; step < 5; step += 1) await page.getByRole('button', { name: /Siguiente/ }).click();
+  await page.getByRole('button', { name: /Ver recomendación/ }).click();
+  const localContext = await page.evaluate(() => sessionStorage.getItem('logic-estancia-assessment-v1'));
+  expect(localContext).toContain('"web":"terrava"');
+  expect(localContext).toContain('"panel":"terrava"');
+  expect(localContext).toContain('"sourcePath":"/"');
+  await page.getByRole('link', { name: /Continuar con este contexto/ }).click();
+  await expect(page.locator('[data-assessment-handoff]')).toContainText('Evidencia web');
+  await expect(page.locator('[data-assessment-handoff]')).toContainText('terrava');
 });
 
 test('business landing links preserve the prospect segment in the assessment and contact handoff', async ({ page }) => {

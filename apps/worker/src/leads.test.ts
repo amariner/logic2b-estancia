@@ -41,6 +41,11 @@ describe('leads', () => {
   });
   it('requires explicit consent', () => expect(leadSchema.safeParse({ ...lead, accept: false }).success).toBe(false));
   it('normalizes legacy plan values at the API edge', () => expect(leadSchema.parse({ ...lead, plan: 'automatiza' }).plan).toBe('inteligente'));
+  it('keeps only allowlisted handoff evidence metadata', () => {
+    expect(leadSchema.parse({ ...lead, web: 'terrava', panel: 'terrava', segment: 'unknown' })).toMatchObject({ web: 'terrava', panel: 'terrava', segment: 'unknown' });
+    expect(leadSchema.safeParse({ ...lead, web: 'other-demo' }).success).toBe(false);
+    expect(leadSchema.safeParse({ ...lead, panel: 'https://example.test' }).success).toBe(false);
+  });
   it('normalizes email casing for a stable submission identity', () => expect(leadSchema.parse({ ...lead, email: 'ADA@Example.Test' }).email).toBe('ada@example.test'));
   it('rejects line breaks in fields that reach email headers and structured rows', () => {
     expect(leadSchema.safeParse({ ...lead, businessName: 'Casa Ada\r\nBcc: attacker@example.test' }).success).toBe(false);

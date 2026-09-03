@@ -3,6 +3,7 @@ import { ASSESSMENT_CONTEXT_KEY, ASSESSMENT_CONTEXT_MAX_AGE, clearAssessmentCont
 
 const valid = {
   locale: 'es', accommodationType: 'hotel', businessMode: 'multi', propertyCount: '2', unitCount: '48', plan: 'inteligente',
+  web: 'aurem', panel: 'aurem', segment: 'unknown', sourcePath: '/planes/',
   currentStack: ['pms', 'channels'], requestedCapabilities: ['maintenance', 'automation'], timeline: '3-6', investmentRange: '8k-20k',
 };
 
@@ -28,6 +29,8 @@ describe('assessment context', () => {
   it('rejects unknown values, invalid bounds and expired contexts', () => {
     const memory = storage();
     expect(saveAssessmentContext(memory, { ...valid, plan: 'premium' }, 1_000)).toBeNull();
+    expect(saveAssessmentContext(memory, { ...valid, web: 'not-a-demo' }, 1_000)).toBeNull();
+    expect(saveAssessmentContext(memory, { ...valid, sourcePath: '/free-text' }, 1_000)).toBeNull();
     expect(saveAssessmentContext(memory, { ...valid, unitCount: 100_001 }, 1_000)).toBeNull();
     const saved = saveAssessmentContext(memory, valid, 1_000);
     expect(parseAssessmentContext(saved, 1_000 + ASSESSMENT_CONTEXT_MAX_AGE + 1)).toBeNull();
