@@ -1,0 +1,17 @@
+---
+import Base from '../../../layouts/Base.astro';
+import GuideDetailPage from '../../../components/GuideDetailPage.astro';
+import { getPublishedGuides, type GuidePortfolioItem } from '../../../guide-portfolio';
+
+export function getStaticPaths() {
+  return getPublishedGuides('en').map((guide) => ({ params: { slug: guide.slug }, props: { guide } }));
+}
+
+const { guide } = Astro.props as { guide: GuidePortfolioItem };
+const metadata: Record<GuidePortfolioItem['id'], { title: string; description: string }> = {
+  direction: { title: 'Guide for ownership and direction | Logic2B Estancias', description: 'Define scope, owners, evidence, publication and rollback before connecting accommodation operations. An honest guide for ownership and direction.' },
+  reception: { title: 'Reservations and reception guide | Logic2B Estancias', description: 'Organise enquiries, planning and arrivals with visible human ownership. Review fictitious evidence and boundaries before activating bookings or messages.' },
+  operations: { title: '', description: '' }, 'marketing-revenue': { title: '', description: '' }, 'technical-privacy': { title: '', description: '' },
+};
+---
+<Base locale="en" route={`docs/${guide.slug}`} alternateRoute={`docs/${guide.alternateSlug}`} title={metadata[guide.id].title} description={metadata[guide.id].description}><GuideDetailPage locale="en" guide={guide} /></Base>

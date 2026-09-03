@@ -6,6 +6,8 @@ const originalWebPaths = originalWebConcepts.flatMap((slug) => [`/webs/${slug}/`
 
 const paths = [
   '/', '/en/', '/docs/', '/en/docs/',
+  '/docs/direccion-propiedad/', '/docs/reservas-recepcion/',
+  '/en/docs/ownership-direction/', '/en/docs/reservations-reception/',
   '/soluciones/casas-rurales/', '/soluciones/apartamentos/', '/soluciones/hoteles/', '/planes/', '/webs/', '/diagnostico/',
   '/paneles/', '/paneles/solicitudes/', '/paneles/planning/', '/paneles/huespedes-llegadas/', '/paneles/preparacion/', '/paneles/operacion-ingresos/', '/paneles/copiloto-supervisado/',
   '/en/solutions/rural-stays/', '/en/solutions/apartments/', '/en/solutions/hotels/', '/en/plans/', '/en/webs/', '/en/assessment/',
@@ -210,6 +212,47 @@ test('panel portfolio publishes only complete localized evidence pages', async (
       const assessmentHref = await page.locator(`[data-panel-assess="${id}"]`).getAttribute('href');
       expect(new URL(assessmentHref ?? '', appOrigin).searchParams.get('sourcePath')).toBe(indexPath);
       expect((await request.get(evidenceHref)).status(), evidenceHref).toBe(200);
+    }
+  }
+  expect(writes).toEqual([]);
+});
+
+test('role guides publish two complete journeys and keep three honest preparation states', async ({ page, request }) => {
+  const writes: string[] = [];
+  page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
+
+  for (const [indexPath, published] of [
+    ['/docs/', [
+      ['direction', '/docs/direccion-propiedad/', 2],
+      ['reception', '/docs/reservas-recepcion/', 3],
+    ]],
+    ['/en/docs/', [
+      ['direction', '/en/docs/ownership-direction/', 2],
+      ['reception', '/en/docs/reservations-reception/', 3],
+    ]],
+  ] as const) {
+    await expectCleanPage(page, indexPath);
+    const portfolio = page.locator('[data-guide-portfolio]');
+    await expect(portfolio.locator('[data-guide-card]')).toHaveCount(5);
+    await expect(portfolio.locator('[data-guide-status="published"]')).toHaveCount(2);
+    await expect(portfolio.locator('[data-guide-status="preparation"]')).toHaveCount(3);
+    await expect(portfolio.locator('[data-guide-status="preparation"] a')).toHaveCount(0);
+    await expect(portfolio.locator('[data-guide-implementation] li')).toHaveCount(6);
+
+    for (const [id, detailHref, evidenceCount] of published) {
+      await page.goto(indexPath);
+      await expect(page.locator(`[data-guide-open="${id}"]`)).toHaveAttribute('href', detailHref);
+      expect((await request.get(detailHref)).status(), detailHref).toBe(200);
+      await expectCleanPage(page, detailHref);
+      const detail = page.locator(`[data-guide-detail="${id}"]`);
+      await expect(detail).toBeVisible();
+      await expect(detail.locator('[data-guide-evidence]')).toHaveCount(evidenceCount);
+      await expect(detail.locator('[data-guide-boundary]')).toBeVisible();
+      await expect(detail.locator('form, input, textarea, select')).toHaveCount(0);
+      await expect(detail.locator('[data-guide-assess]')).toHaveAttribute('href', indexPath.startsWith('/en') ? '/en/assessment/' : '/diagnostico/');
+      for (const href of await detail.locator('[data-guide-evidence]').evaluateAll((links) => links.map((link) => link.getAttribute('href')).filter(Boolean) as string[])) {
+        expect((await request.get(href)).status(), href).toBe(200);
+      }
     }
   }
   expect(writes).toEqual([]);

@@ -1,0 +1,39 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { CAPABILITIES } from '@logic-estancia/domain';
+import { capabilityStatusLabel } from '../capability-evidence';
+import { getPublishedGuides, type GuidePortfolioItem } from '../guide-portfolio';
+
+const { locale, guide } = Astro.props as { locale: Locale; guide: GuidePortfolioItem };
+const en = locale === 'en';
+const prefix = en ? '/en' : '';
+const indexHref = `${prefix}/docs/`;
+const capabilities = guide.capabilityIds.map((id) => {
+  const capability = CAPABILITIES.find((candidate) => candidate.id === id);
+  if (!capability) throw new Error(`missing_guide_detail_capability:${guide.id}:${id}`);
+  return capability;
+});
+const publishedGuides = getPublishedGuides(locale);
+const guideIndex = publishedGuides.findIndex((candidate) => candidate.id === guide.id);
+const nextGuide = publishedGuides[(guideIndex + 1) % publishedGuides.length];
+---
+
+<article class="guide-detail" data-guide-detail={guide.id}>
+  <header class="guide-detail-notice shell"><p><strong>{en ? 'Decision guide' : 'Guía de decisión'}</strong><span>{en ? 'Role, evidence and human validation' : 'Rol, evidencia y validación humana'}</span></p><a href={indexHref}>{en ? 'Back to all guides' : 'Volver a todas las guías'} <span aria-hidden="true">↗</span></a></header>
+
+  <section class="section guide-detail-hero" aria-labelledby="guide-detail-title">
+    <div class="shell guide-detail-hero-grid"><div><p class="eyebrow">{guide.number} · {guide.role}</p><h1 id="guide-detail-title" class="display">{guide.title}</h1><p>{guide.summary}</p></div><aside><span>{en ? 'Question this role must answer' : 'Pregunta que debe responder este rol'}</span><blockquote>{guide.question}</blockquote><p><strong>{en ? 'Expected outcome' : 'Resultado esperado'}</strong>{guide.outcome}</p></aside></div>
+  </section>
+
+  <section class="section shell guide-responsibilities" aria-labelledby="guide-responsibilities-title"><div><p class="eyebrow">{en ? 'Visible ownership' : 'Responsabilidad visible'}</p><h2 id="guide-responsibilities-title" class="heading">{en ? 'What this role must bring to the table.' : 'Qué debe aportar este rol a la conversación.'}</h2></div><ol>{guide.responsibilities.map((item, index) => <li><span>0{index + 1}</span><p>{item}</p></li>)}</ol></section>
+
+  <section class="section guide-handoff" aria-labelledby="guide-handoff-title"><div class="shell"><p class="eyebrow">{en ? 'Human handoff' : 'Relevo humano'}</p><h2 id="guide-handoff-title" class="heading">{en ? 'Context moves; accountability does not disappear.' : 'El contexto avanza; la responsabilidad no desaparece.'}</h2><ol>{guide.handoff.map((item, index) => <li><span>0{index + 1}</span><p>{item}</p></li>)}</ol></div></section>
+
+  <section class="section shell guide-evidence" aria-labelledby="guide-evidence-title"><div><p class="eyebrow">{en ? 'Evidence to inspect' : 'Evidencia que puedes inspeccionar'}</p><h2 id="guide-evidence-title" class="heading">{en ? 'The guide points to pages that state their own boundary.' : 'La guía enlaza fichas que declaran su propio límite.'}</h2><p>{en ? 'These pages use preloaded fictitious data and perform no external action.' : 'Estas fichas usan datos ficticios precargados y no ejecutan ninguna acción externa.'}</p></div><div><ul class="guide-capabilities">{capabilities.map((capability) => <li><span><strong>{capability.label[locale]}</strong>{capability.description[locale]}</span><small class={`capability-status ${capability.status}`}>{capabilityStatusLabel(capability.status, locale)}</small></li>)}</ul><nav aria-label={en ? 'Related evidence pages' : 'Fichas de evidencia relacionadas'}>{guide.panelLinks.map((panel) => <a href={panel.href} data-guide-evidence={panel.id}>{panel.label} <span aria-hidden="true">↗</span></a>)}</nav></div></section>
+
+  <section class="section guide-validation" aria-labelledby="guide-validation-title"><div class="shell guide-validation-grid"><div><p class="eyebrow">{en ? 'Before activation' : 'Antes de activar'}</p><h2 id="guide-validation-title" class="heading">{en ? 'What a person still has to validate.' : 'Qué debe validar todavía una persona.'}</h2><ul>{guide.validations.map((item) => <li>{item}</li>)}</ul></div><aside data-guide-boundary><p class="eyebrow">{en ? 'Outside this guide' : 'Fuera de esta guía'}</p><h3>{en ? 'A boundary is part of the deliverable.' : 'El límite forma parte del entregable.'}</h3><ul>{guide.boundaries.map((item) => <li>{item}</li>)}</ul></aside></div></section>
+
+  <section class="section shell guide-detail-actions" data-commercial-actions><div><p class="eyebrow">{en ? 'Next useful conversation' : 'Siguiente conversación útil'}</p><h2 class="heading">{en ? 'Assess the capabilities and keep the human owner visible.' : 'Evalúa las capacidades y conserva visible al responsable humano.'}</h2><p>{en ? 'The assessment stores only allowlisted project context in this browser and collects no personal data.' : 'El diagnóstico conserva solo contexto de proyecto permitido en este navegador y no recoge datos personales.'}</p></div><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-guide-assess={guide.id}>{en ? 'Find my starting point' : 'Ver mi punto de partida'} <span aria-hidden="true">→</span></a></section>
+
+  {nextGuide && nextGuide.id !== guide.id && <footer class="guide-detail-next shell"><p><span>{en ? 'Next published guide' : 'Siguiente guía publicada'}</span><strong>{nextGuide.role}</strong></p><a href={nextGuide.detailHref ?? indexHref}>{en ? 'Continue reading' : 'Seguir leyendo'} <span aria-hidden="true">→</span></a></footer>}
+</article>

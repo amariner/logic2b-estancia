@@ -25,6 +25,8 @@ const commercialRoutes = [
   '/webs/cendra/', '/en/webs/cendra/',
   '/diagnostico/', '/en/assessment/',
   '/docs/', '/en/docs/',
+  '/docs/direccion-propiedad/', '/en/docs/ownership-direction/',
+  '/docs/reservas-recepcion/', '/en/docs/reservations-reception/',
   '/recursos/gestor-reservas-apartamentos-turisticos/',
   '/recursos/web-hotel-reservas-directas-operacion/',
 ];

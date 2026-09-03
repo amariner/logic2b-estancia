@@ -1,17 +1,57 @@
 ---
 import type { Locale } from '@logic-estancia/config';
+import { getGuidePortfolio, getPublishedGuides } from '../guide-portfolio';
+
 const { locale } = Astro.props as { locale: Locale };
+const en = locale === 'en';
+const prefix = en ? '/en' : '';
+const guides = getGuidePortfolio(locale);
+const publishedCount = getPublishedGuides(locale).length;
+const implementation = en ? [
+  ['01', 'Inputs', 'Goals, current process, accountable people and candidate sources. No credential is requested until the scope needs it.'],
+  ['02', 'Decisions', 'Capability, source of truth, permissions and acceptance owner are agreed before implementation.'],
+  ['03', 'Tests', 'Fixtures, expected journeys, security, accessibility and failure states turn the promise into checkable evidence.'],
+  ['04', 'Supervised publication', 'A person accepts the result, the change window and rollback before anything moves to a live environment.'],
+  ['05', 'Support', 'Ownership, escalation, observation and review cadence remain visible after publication.'],
+  ['06', 'Outside the scope', 'Legal advice, payments, guest reporting, live integrations and forecasting require separate validation.'],
+] : [
+  ['01', 'Entradas', 'Objetivos, proceso actual, responsables y fuentes candidatas. No se pide una credencial hasta que el alcance la necesite.'],
+  ['02', 'Decisiones', 'Capacidad, fuente de verdad, permisos y responsable de aceptación se acuerdan antes de implementar.'],
+  ['03', 'Pruebas', 'Fixtures, recorridos esperados, seguridad, accesibilidad y fallos convierten la promesa en evidencia comprobable.'],
+  ['04', 'Publicación supervisada', 'Una persona acepta el resultado, la ventana de cambio y la reversión antes de pasar a un entorno real.'],
+  ['05', 'Soporte', 'Responsabilidad, escalado, observación y ritmo de revisión siguen visibles después de publicar.'],
+  ['06', 'Fuera de alcance', 'Asesoría legal, pagos, registro de viajeros, integraciones reales y previsión requieren validación separada.'],
+];
 ---
-<div class="prose shell">
-  <p class="eyebrow">{locale === 'es' ? 'Guías esenciales' : 'Essential guides'}</p>
-  <h1>{locale === 'es' ? 'Entender antes de activar.' : 'Understand before activation.'}</h1>
-  <p>{locale === 'es' ? 'Logic2B Estancias separa con claridad lo que existe, lo que puedes recorrer en una demo y lo que exige un cliente, proveedor y contrato.' : 'Logic2B Estancias clearly separates what exists, what you can explore in a demo and what requires a client, provider and contract.'}</p>
-  <h2>{locale === 'es' ? 'Mono y multiestancia' : 'Single and multi-stay'}</h2>
-  <p>{locale === 'es' ? 'Toda cuenta usa empresa → propiedad → unidad. Un piso tiene una propiedad y una unidad; un hotel puede tener una propiedad y muchas habitaciones; una gestora rural puede reunir varias propiedades.' : 'Every account uses organisation → property → unit. An apartment has one property and one unit; a hotel can have one property and many rooms; a rural operator can bring together several properties.'}</p>
-  <h2>{locale === 'es' ? 'Los tres planes' : 'The three plans'}</h2>
-  <ol><li>{locale === 'es' ? 'Básico: web y SEO visibles; cualquier solicitud por email se acota y valida como proyecto.' : 'Basic: visible website and SEO; any email enquiry is scoped and validated as a project.'}</li><li>{locale === 'es' ? 'Gestión: solicitudes, planning e informes visuales de solo lectura; reserva y edición real requieren activación.' : 'Management: read-only visual enquiries, planning and reports; live booking and editing require activation.'}</li><li>{locale === 'es' ? 'Inteligente: centro operativo, equipos, mantenimiento y copiloto supervisado local; canales se activan por proyecto y las automatizaciones siguen pendientes.' : 'Intelligent: visual operations, teams, maintenance and a local supervised copilot; channels activate per project and automations remain pending.'}</li></ol>
-  <h2>{locale === 'es' ? 'Qué es una demo' : 'What a demo is'}</h2>
-  <p>{locale === 'es' ? 'Los datos están precargados, son ficticios y vuelven al escenario inicial al recargar. El copiloto solo edita y revisa un fixture local: no usa modelo, proveedor ni envío. Pagos, mensajería, SES.Hospedajes y facturación no tienen una superficie pública de demo ni ejecutan acciones externas. Los canales solo muestran requisitos y cero conexiones. La única excepción comercial es el formulario de la portada: solo envía con una allowlist explícita.' : 'Data is preloaded, fictitious and returns to its initial scenario on reload. The copilot only edits and reviews a local fixture: it uses no model, provider or delivery. Payments, messaging, guest reporting and invoicing have no public demo surface and perform no external action. Channels only show requirements and zero connections. The only commercial exception is the homepage form: it sends only with an explicit allowlist.'}</p>
-  <h2>{locale === 'es' ? 'Activación en España' : 'Activation in Spain'}</h2>
-  <p>{locale === 'es' ? 'Antes de activar un cliente se cierra inventario, tarifas, permisos, dominio, privacidad, correo, cobro, registro de viajeros, canales, copias y reversión. Ninguna demo sustituye esa aceptación.' : 'Before activating a client we close inventory, rates, permissions, domain, privacy, email, payments, guest reporting, channels, backups and rollback. No demo replaces that acceptance.'}</p>
+
+<div data-guide-portfolio>
+  <section class="guide-hero section">
+    <div class="shell guide-hero-grid">
+      <div><p class="eyebrow">{en ? 'Guides by responsibility' : 'Guías por responsabilidad'}</p><h1 class="display">{en ? 'Decide who owns the outcome before choosing what to connect.' : 'Decide quién responde del resultado antes de elegir qué conectar.'}</h1></div>
+      <div><p>{en ? 'Five Logic2B Estancias role-based guides turn a commercial promise into decisions, evidence and human handoffs. Only guides with complete content and verifiable routes count as published.' : 'Cinco guías por rol de Logic2B Estancias convierten una promesa comercial en decisiones, evidencia y relevos humanos. Solo cuentan como publicadas las guías con contenido completo y recorridos comprobables.'}</p><dl><div><dt>{en ? 'Published now' : 'Publicadas ahora'}</dt><dd>{publishedCount}/5</dd></div><div><dt>{en ? 'Live operations' : 'Operaciones reales'}</dt><dd>{en ? 'None' : 'Ninguna'}</dd></div></dl></div>
+    </div>
+  </section>
+
+  <section class="section guide-catalog" aria-labelledby="guide-catalog-title">
+    <div class="shell">
+      <div class="guide-section-heading"><div><p class="eyebrow">{en ? 'A shared operating language' : 'Un lenguaje operativo compartido'}</p><h2 id="guide-catalog-title" class="heading">{en ? 'Start with the people who must make and review the decision.' : 'Empieza por las personas que deben decidir y revisar.'}</h2></div><p>{en ? 'Ownership and direction, then reservations and reception, are ready to explore. Operations, marketing and revenue, and technical and privacy remain visibly in preparation.' : 'Propiedad y dirección, y después reservas y recepción, ya se pueden explorar. Operaciones, marketing e ingresos, y técnica y privacidad permanecen visiblemente en preparación.'}</p></div>
+      <div class="guide-grid">
+        {guides.map((guide) => (
+          <article class:list={['guide-card', { 'is-published': guide.status === 'published' }]} data-guide-card={guide.id} data-guide-status={guide.status}>
+            <header><span>{guide.number}</span><small>{guide.statusLabel}</small></header>
+            <div class="guide-card-role"><span aria-hidden="true">{guide.status === 'published' ? '↗' : '·'}</span><p>{guide.role}</p></div>
+            <h2>{guide.title}</h2><p>{guide.summary}</p>
+            <div class="guide-card-question"><strong>{en ? 'Question it resolves' : 'Pregunta que resuelve'}</strong><p>{guide.question}</p></div>
+            <footer>{guide.detailHref ? <a class="text-link" href={guide.detailHref} data-guide-open={guide.id}>{en ? 'Open guide' : 'Abrir guía'} <span aria-hidden="true">→</span></a> : <span>{en ? 'Not navigable yet' : 'Todavía no es navegable'}</span>}</footer>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section guide-implementation" aria-labelledby="implementation-title" data-guide-implementation>
+    <div class="shell"><div class="guide-section-heading"><div><p class="eyebrow">{en ? 'Implementation contract' : 'Contrato de implantación'}</p><h2 id="implementation-title" class="heading">{en ? 'Six questions every activation must answer.' : 'Seis preguntas que toda activación debe responder.'}</h2></div><p>{en ? 'This sequence separates a local demonstration from a live service. It is a review framework, not proof that any external system is already connected.' : 'Esta secuencia separa una demostración local de un servicio real. Es un marco de revisión, no la prueba de que ya exista una conexión externa.'}</p></div><ol class="implementation-grid">{implementation.map(([number, title, text]) => <li><span>{number}</span><h3>{title}</h3><p>{text}</p></li>)}</ol></div>
+  </section>
+
+  <section class="section shell guide-index-cta" data-commercial-actions><div><p class="eyebrow">{en ? 'Choose by capability' : 'Elige por capacidad'}</p><h2 class="heading">{en ? 'Bring the first decision, not a finished specification.' : 'Trae la primera decisión, no una especificación cerrada.'}</h2><p>{en ? 'The assessment organises needs, responsibilities and the most credible starting plan without collecting personal data.' : 'El diagnóstico ordena necesidades, responsabilidades y el punto de partida más creíble sin recoger datos personales.'}</p></div><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-guide-assess>{en ? 'Find my starting point' : 'Ver mi punto de partida'} <span aria-hidden="true">→</span></a></section>
 </div>

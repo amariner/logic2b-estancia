@@ -4,6 +4,8 @@ const origin = 'https://estancia.logic2b.com';
 const translatedPairs = [
   ['/', '/en/'],
   ['/docs/', '/en/docs/'],
+  ['/docs/direccion-propiedad/', '/en/docs/ownership-direction/'],
+  ['/docs/reservas-recepcion/', '/en/docs/reservations-reception/'],
   ['/legal/', '/en/legal/'],
   ['/privacidad/', '/en/privacidad/'],
   ['/cookies/', '/en/cookies/'],
@@ -149,6 +151,7 @@ test('sitemap contains every indexable final URL exactly once and excludes demos
 test('commercial search surfaces use specific, unique metadata and people-first headings', async ({ page }) => {
   const commercialRoutes = [
     '/', '/en/', '/planes/', '/en/plans/', '/webs/', '/en/webs/',
+    '/docs/', '/en/docs/', '/docs/direccion-propiedad/', '/en/docs/ownership-direction/', '/docs/reservas-recepcion/', '/en/docs/reservations-reception/',
     '/paneles/', '/en/panels/', '/paneles/solicitudes/', '/en/panels/enquiries/', '/paneles/planning/', '/en/panels/planning/',
     '/paneles/huespedes-llegadas/', '/en/panels/guests-arrivals/', '/paneles/preparacion/', '/en/panels/preparation/',
     '/paneles/operacion-ingresos/', '/en/panels/operations-revenue/', '/paneles/copiloto-supervisado/', '/en/panels/supervised-copilot/',
