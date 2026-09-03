@@ -99,7 +99,7 @@ const spanish: Omit<HomeContract, 'locale'> = {
   capabilityGroups: [
     { id: 'web', number: '01', title: 'Web y presencia', text: 'Lo que el huésped ve y lo que tu marca puede explicar hoy.', capabilityIds: ['brand-web', 'website-editor'] },
     { id: 'continuidad', number: '02', title: 'Solicitudes y continuidad', text: 'El contexto que pasa de la conversación al planning.', capabilityIds: ['email-enquiries', 'enquiry-workspace', 'planning', 'guest-context'] },
-    { id: 'operacion', number: '03', title: 'Equipo y operación', text: 'Preparación, prioridades y responsabilidad antes del turno.', capabilityIds: ['operations-centre', 'cleaning', 'maintenance', 'roles'] },
+    { id: 'operacion', number: '03', title: 'Equipo y operación', text: 'Preparación, prioridades y responsabilidad antes del turno.', capabilityIds: ['operations-centre', 'cleaning', 'maintenance', 'roles', 'explainable-revenue'] },
     { id: 'conexiones', number: '04', title: 'Conexiones supervisadas', text: 'Canales y automatización se validan por proyecto, no por asociación visual.', capabilityIds: ['channels', 'automation', 'supervised-ai'] },
   ],
   capabilityStatusCopy: {
@@ -142,7 +142,7 @@ const english: Omit<HomeContract, 'locale'> = {
   capabilityGroups: [
     { id: 'web', number: '01', title: 'Website and presence', text: 'What guests see and what your brand can explain today.', capabilityIds: ['brand-web', 'website-editor'] },
     { id: 'continuidad', number: '02', title: 'Enquiries and continuity', text: 'The context that moves from conversation to planning.', capabilityIds: ['email-enquiries', 'enquiry-workspace', 'planning', 'guest-context'] },
-    { id: 'operacion', number: '03', title: 'Team and operations', text: 'Preparation, priorities and ownership before the shift.', capabilityIds: ['operations-centre', 'cleaning', 'maintenance', 'roles'] },
+    { id: 'operacion', number: '03', title: 'Team and operations', text: 'Preparation, priorities and ownership before the shift.', capabilityIds: ['operations-centre', 'cleaning', 'maintenance', 'roles', 'explainable-revenue'] },
     { id: 'conexiones', number: '04', title: 'Supervised connections', text: 'Channels and automation are validated per project, not implied by a visual.', capabilityIds: ['channels', 'automation', 'supervised-ai'] },
   ],
   capabilityStatusCopy: {

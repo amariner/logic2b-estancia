@@ -42,6 +42,7 @@ describe('domain', () => {
       'guest-context': 'demo_visual_disponible',
       'website-editor': 'demo_visual_pendiente',
       'basic-reports': 'demo_visual_disponible',
+      'explainable-revenue': 'demo_visual_disponible',
       'operations-centre': 'demo_visual_disponible',
       cleaning: 'demo_visual_disponible',
       maintenance: 'demo_visual_disponible',

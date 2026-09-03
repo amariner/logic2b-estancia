@@ -15,8 +15,8 @@ const detailTitles: Record<PanelPortfolioItem['id'], Record<Locale, string>> = {
   planning: { es: 'Planning con contexto compartido', en: 'Planning with shared context' },
   'guests-arrivals': { es: 'Huéspedes y llegadas con contexto', en: 'Guests and arrivals with context' },
   preparation: { es: 'Preparación antes de la llegada', en: 'Preparation before arrival' },
-  'operations-revenue': { es: 'Operación e ingresos', en: 'Operations and revenue' },
-  copilot: { es: 'Copiloto supervisado', en: 'Supervised copilot' },
+  'operations-revenue': { es: 'Operación e ingresos explicables', en: 'Explainable operations and revenue' },
+  copilot: { es: 'Copiloto supervisado con fuentes', en: 'Supervised copilot with sources' },
 };
 const detailTitle = detailTitles[panel.id][locale];
 const plan = getPlanCards(locale).find((candidate) => candidate.id === panel.plan);
@@ -80,7 +80,10 @@ const relatedCapabilities = panel.capabilityIds.map((id) => {
       <p class="panel-detail-status"><span class={`capability-status ${capability.status}`}>{capabilityStatusLabel(capability.status, locale)}</span><small>{capabilityStatusDetail(capability.status, locale)}</small></p>
       <p><strong>{en ? 'Observable evidence' : 'Evidencia observable'}:</strong> {capability.evidence.proof[locale]}</p>
       <p><strong>{en ? 'Boundary' : 'Límite'}:</strong> {capability.evidence.boundary[locale]}</p>
-      <p><strong>{en ? 'Related capabilities' : 'Capacidades relacionadas'}:</strong> {relatedCapabilities.map((related) => related.label[locale]).join(' · ')}</p>
+      <div class="panel-capability-scope" data-panel-capability-scope>
+        <strong>{en ? 'Capability scope' : 'Alcance de capacidades'}</strong>
+        <ul>{relatedCapabilities.map((related) => <li><span>{related.label[locale]}</span><span class={`capability-status ${related.status}`}>{capabilityStatusLabel(related.status, locale)}</span></li>)}</ul>
+      </div>
     </div>
   </section>
 

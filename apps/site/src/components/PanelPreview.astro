@@ -10,8 +10,10 @@ const labels: Record<PanelPreviewKind, string> = {
   planning: en ? 'Fictitious fourteen-day Terrava planning in read-only mode' : 'Planning ficticio de Terrava de catorce días en solo lectura',
   'guests-arrivals': en ? 'Fictitious Terrava guest context table in read-only mode' : 'Tabla ficticia de contexto de huéspedes de Terrava en solo lectura',
   preparation: en ? 'Fictitious Aurem room preparation checklist in read-only mode' : 'Checklist ficticio de preparación de habitación de Aurem en solo lectura',
+  'operations-revenue': en ? 'Explainable fictitious Aurem revenue scenario with forecasting unavailable' : 'Escenario ficticio explicable de ingresos de Aurem con previsión no disponible',
+  copilot: en ? 'Fictitious Aurem copilot draft with sources and external delivery blocked' : 'Borrador ficticio del copiloto de Aurem con fuentes y envío externo bloqueado',
 };
-const brand = kind === 'preparation' ? 'Aurem Hotel' : 'Terrava Collection';
+const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 'Aurem Hotel' : 'Terrava Collection';
 ---
 
 <div
@@ -49,7 +51,7 @@ const brand = kind === 'preparation' ? 'Aurem Hotel' : 'Terrava Collection';
         </div>
         <footer><span>{en ? 'No profile, traveller report or message' : 'Sin perfil, registro de viajeros ni mensaje'}</span></footer>
       </div>
-    ) : (
+    ) : kind === 'preparation' ? (
       <div class="panel-preview-content panel-preview-preparation">
         <header><div><span>{en ? 'Housekeeping' : 'Limpieza'}</span><strong>408 · Terrace</strong><small>{en ? 'Departure 11:08 · arrival 15:00' : 'Salida 11:08 · llegada 15:00'}</small></div><b>{en ? 'Pending' : 'Pendiente'}</b></header>
         <div class="panel-preview-checklist">
@@ -58,6 +60,26 @@ const brand = kind === 'preparation' ? 'Aurem Hotel' : 'Terrava Collection';
           <p><i aria-hidden="true"></i><span><strong>{en ? 'Reception validation' : 'Validación de recepción'}</strong><small>{en ? 'Human final check' : 'Comprobación humana final'}</small></span></p>
         </div>
         <footer><span>{en ? 'Sample checklist · no assignment or room update' : 'Checklist de muestra · sin asignación ni cambio de habitación'}</span></footer>
+      </div>
+    ) : kind === 'operations-revenue' ? (
+      <div class="panel-preview-content panel-preview-revenue">
+        <header><div><span>{en ? 'Explainable local scenario' : 'Escenario local explicable'}</span><strong>{en ? 'Revenue · 28 days' : 'Ingresos · 28 días'}</strong><small>{en ? '96 fictitious rooms' : '96 habitaciones ficticias'}</small></div><b>{en ? 'No forecast' : 'Sin previsión'}</b></header>
+        <div class="panel-preview-metrics">
+          <p><span>{en ? 'Simulated revenue' : 'Ingresos simulados'}</span><strong>{en ? '€296,608' : '€296.608'}</strong></p>
+          <p><span>{en ? 'Occupancy' : 'Ocupación'}</span><strong>89%</strong></p>
+          <p><span>ADR</span><strong>€124</strong></p>
+          <p><span>RevPAR</span><strong>€110</strong></p>
+        </div>
+        <div class="panel-preview-weeks" aria-hidden="true"><i style="--bar: 88%"><span>88%</span></i><i style="--bar: 92%"><span>92%</span></i><i style="--bar: 86%"><span>86%</span></i><i style="--bar: 90%"><span>90%</span></i></div>
+        <footer><span>{en ? 'Formulas and sample ledger · no PMS, accounting or forecast' : 'Fórmulas y libro de muestra · sin PMS, contabilidad ni previsión'}</span></footer>
+      </div>
+    ) : (
+      <div class="panel-preview-content panel-preview-copilot">
+        <header><div><span>{en ? 'Local copilot · no model' : 'Copiloto local · sin modelo'}</span><strong>{en ? 'Reply for Marina Costa' : 'Respuesta para Marina Costa'}</strong><small>{en ? 'Version 1 · local edit' : 'Versión 1 · edición local'}</small></div><b>{en ? 'Draft' : 'Borrador'}</b></header>
+        <p class="panel-preview-draft">{en ? 'Hello Marina, your Terrace room will be ready from 15:00…' : 'Hola Marina, tu habitación Terrace estará lista a partir de las 15:00…'}</p>
+        <div class="panel-preview-sources"><span>{en ? 'Fixture sources' : 'Fuentes fixture'}</span><b>AUR-812</b><b>{en ? 'Arrival policy' : 'Política de entrada'}</b><b>408 · {en ? 'pending' : 'pendiente'}</b></div>
+        <div class="panel-preview-trace"><span class="done">✓ {en ? 'Fixture draft' : 'Borrador de fixture'}</span><span>○ {en ? 'Human review' : 'Revisión humana'}</span><span class="blocked">× {en ? 'Delivery blocked' : 'Envío bloqueado'}</span></div>
+        <footer><span>{en ? 'No model, provider, message or automation' : 'Sin modelo, proveedor, mensaje ni automatización'}</span></footer>
       </div>
     )}
   </div>

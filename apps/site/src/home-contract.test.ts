@@ -22,7 +22,7 @@ describe('home product contract', () => {
       expect(home.capabilityGroups.flatMap(({ capabilityIds }) => capabilityIds)).toEqual([
         'brand-web', 'website-editor',
         'email-enquiries', 'enquiry-workspace', 'planning', 'guest-context',
-        'operations-centre', 'cleaning', 'maintenance', 'roles',
+        'operations-centre', 'cleaning', 'maintenance', 'roles', 'explainable-revenue',
         'channels', 'automation', 'supervised-ai',
       ]);
     }

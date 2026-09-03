@@ -13,7 +13,7 @@ export const PANEL_IDS = [
 
 export type PanelId = (typeof PANEL_IDS)[number];
 export type PanelPublicationStatus = 'published' | 'preparation';
-export type PanelPreviewKind = 'enquiries' | 'planning' | 'guests-arrivals' | 'preparation';
+export type PanelPreviewKind = 'enquiries' | 'planning' | 'guests-arrivals' | 'preparation' | 'operations-revenue' | 'copilot';
 
 interface LocalizedPanelCopy {
   slug: string;
@@ -141,34 +141,46 @@ const definitions: readonly PanelDefinition[] = [
     },
   },
   {
-    id: 'operations-revenue', number: '05', plan: 'inteligente', status: 'preparation',
-    capabilityIds: ['operations-centre', 'basic-reports', 'revenue'], evidenceCapabilityId: 'operations-centre', preview: null,
+    id: 'operations-revenue', number: '05', plan: 'inteligente', status: 'published',
+    capabilityIds: ['operations-centre', 'explainable-revenue', 'revenue'], evidenceCapabilityId: 'explainable-revenue', preview: 'operations-revenue',
     copy: {
       es: {
         slug: 'operacion-ingresos', title: 'Operación e ingresos',
-        summary: 'Ficha prevista para separar prioridades operativas, métricas explicables y previsión todavía no disponible.',
-        decision: 'Distinguir la señal que requiere atención de una predicción que la demo no puede sostener.', outcome: '', visiblePoints: [], flow: [],
+        summary: 'Un escenario de 28 días reúne ocupación, ingresos y fórmulas para entender la señal sin presentarla como previsión.',
+        decision: 'Explicar qué muestran las cifras ficticias y separar la lectura disponible de una previsión que aún no existe.',
+        outcome: 'El equipo contrasta cuatro semanas, fórmulas y libro; la demanda y el precio futuros permanecen en ruta.',
+        visiblePoints: ['96 habitaciones ficticias durante 28 días', '89 % de ocupación y €296.608 de ingresos simulados', 'ADR €124 y RevPAR €110 con fórmula', 'Previsión de demanda y precio no disponible'],
+        flow: ['El conjunto ficticio fija las noches disponibles', 'El libro semanal muestra ocupación e ingresos', 'Cada indicador expone su fórmula', 'Cualquier previsión futura queda fuera de la demo'],
       },
       en: {
         slug: 'operations-revenue', title: 'Operations and revenue',
-        summary: 'Planned page separating operating priorities, explainable metrics and forecasting that is not yet available.',
-        decision: 'Separate a signal needing attention from a prediction the demo cannot support.', outcome: '', visiblePoints: [], flow: [],
+        summary: 'A 28-day scenario brings occupancy, revenue and formulas together to explain the signal without presenting it as a forecast.',
+        decision: 'Explain what the fictitious figures show and separate the available reading from forecasting that does not yet exist.',
+        outcome: 'The team checks four weeks, formulas and ledger; future demand and pricing remain on the roadmap.',
+        visiblePoints: ['96 fictitious rooms over 28 days', '89% occupancy and €296,608 simulated revenue', '€124 ADR and €110 RevPAR with formulas', 'Demand and pricing forecasts unavailable'],
+        flow: ['The fictitious dataset fixes available room nights', 'The weekly ledger shows occupancy and revenue', 'Each indicator exposes its formula', 'Every future forecast remains outside the demo'],
       },
     },
   },
   {
-    id: 'copilot', number: '06', plan: 'inteligente', status: 'preparation',
-    capabilityIds: ['supervised-ai'], evidenceCapabilityId: 'supervised-ai', preview: null,
+    id: 'copilot', number: '06', plan: 'inteligente', status: 'published',
+    capabilityIds: ['supervised-ai', 'automation'], evidenceCapabilityId: 'supervised-ai', preview: 'copilot',
     copy: {
       es: {
         slug: 'copiloto-supervisado', title: 'Copiloto supervisado',
-        summary: 'Ficha prevista para mostrar edición, fuentes, versiones y revisión humana con envío bloqueado.',
-        decision: 'Revisar un borrador local sin confundirlo con una respuesta generada o enviada.', outcome: '', visiblePoints: [], flow: [],
+        summary: 'Un borrador de fixture mantiene fuentes, edición, versiones y revisión humana visibles mientras el envío permanece bloqueado.',
+        decision: 'Revisar y versionar un borrador con responsabilidad humana sin atribuirlo a un modelo ni presentarlo como enviado.',
+        outcome: 'Una persona edita, guarda y revisa en el navegador; no interviene ningún modelo, proveedor o canal externo.',
+        visiblePoints: ['Borrador ficticio para Marina Costa', 'Fuentes AUR-812, política de entrada y habitación 408', 'Versión local y revisión humana por rol', 'Envío externo bloqueado por diseño'],
+        flow: ['El fixture precarga el borrador', 'Las fuentes hacen visible el contexto', 'Una persona edita y guarda una versión local', 'La revisión humana termina con el envío bloqueado'],
       },
       en: {
         slug: 'supervised-copilot', title: 'Supervised copilot',
-        summary: 'Planned page showing editing, sources, versions and human review with delivery blocked.',
-        decision: 'Review a local draft without presenting it as generated or sent.', outcome: '', visiblePoints: [], flow: [],
+        summary: 'A fixture draft keeps sources, editing, versions and human review visible while delivery remains blocked.',
+        decision: 'Review and version a draft with human ownership without attributing it to a model or presenting it as sent.',
+        outcome: 'A person edits, saves and reviews in the browser; no model, provider or external channel is involved.',
+        visiblePoints: ['Fictitious draft for Marina Costa', 'AUR-812, arrival policy and room 408 sources', 'Local version and role-based human review', 'External delivery blocked by design'],
+        flow: ['The fixture preloads the draft', 'Sources make the context visible', 'A person edits and saves a local version', 'Human review ends with delivery blocked'],
       },
     },
   },

@@ -12,6 +12,8 @@ const commercialRoutes = [
   '/paneles/planning/', '/en/panels/planning/',
   '/paneles/huespedes-llegadas/', '/en/panels/guests-arrivals/',
   '/paneles/preparacion/', '/en/panels/preparation/',
+  '/paneles/operacion-ingresos/', '/en/panels/operations-revenue/',
+  '/paneles/copiloto-supervisado/', '/en/panels/supervised-copilot/',
   '/webs/linde/', '/en/webs/linde/',
   '/webs/cobalto/', '/en/webs/cobalto/',
   '/webs/oria/', '/en/webs/oria/',
