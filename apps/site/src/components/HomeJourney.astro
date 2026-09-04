@@ -9,27 +9,60 @@ const en = locale === 'en';
 
 <section id="recorrido" class="section home-journey" aria-labelledby="home-journey-title" data-home-journey>
   <div class="shell">
-    <div class="section-head home-journey-heading">
-      <p class="eyebrow">{en ? 'One connected journey' : 'Un recorrido conectado'}</p>
-      <h2 id="home-journey-title" class="heading">{en ? 'From the first search to the work behind a ready stay.' : 'De la primera búsqueda al trabajo que deja una estancia preparada.'}</h2>
-      <p>{en ? 'Seven moments show where context moves forward, where a human decides and where a real project would need validation.' : 'Siete momentos enseñan dónde avanza el contexto, dónde decide una persona y dónde un proyecto real necesitaría validación.'}</p>
-      <a class="pill" href={en ? '/en/journey/' : '/recorrido/'}>{en ? 'Start the three-minute guided journey' : 'Empezar el recorrido guiado de tres minutos'} <span aria-hidden="true">→</span></a>
+    <div class="home-journey-header">
+      <div class="section-head home-journey-heading">
+        <p class="eyebrow">{en ? 'Your operation, connected' : 'Tu operativa, conectada'}</p>
+        <h2 id="home-journey-title" class="heading">{en ? 'The whole journey of a stay, in one project.' : 'Todo el recorrido de una estancia, en un mismo proyecto.'}</h2>
+        <p>{en ? 'Seven moments show where context moves forward, where a person decides and where a live project would need validation.' : 'Siete momentos enseñan dónde avanza el contexto, dónde decide una persona y dónde un proyecto real necesitaría validación.'}</p>
+        <a class="pill" href={en ? '/en/journey/' : '/recorrido/'} data-estancia-tour-trigger aria-haspopup="dialog">{en ? 'Start the three-minute guided journey' : 'Empezar el recorrido guiado de tres minutos'} <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="home-journey-slider-controls" aria-label={en ? 'Journey steps' : 'Pasos del recorrido'}>
+        <button type="button" aria-label={en ? 'Show previous steps' : 'Ver pasos anteriores'} data-journey-previous disabled><span aria-hidden="true">←</span></button>
+        <button type="button" aria-label={en ? 'Show next steps' : 'Ver pasos siguientes'} data-journey-next><span aria-hidden="true">→</span></button>
+      </div>
     </div>
-    <ol class="home-journey-list">
-      {home.journey.map((moment) => (
-        <li class="home-journey-moment" data-flow-moment={moment.number}>
-          <div class="home-journey-top"><span>{moment.number}</span><i>{moment.phase}</i></div>
-          <h3>{moment.title}</h3>
-          <p>{moment.text}</p>
-          <dl>
-            <div><dt>{en ? 'Input' : 'Entrada'}</dt><dd>{moment.input}</dd></div>
-            <div><dt>{en ? 'Output' : 'Salida'}</dt><dd>{moment.output}</dd></div>
-          </dl>
-          <p class="home-journey-control"><span>{en ? 'Boundary' : 'Límite'}</span>{moment.control}</p>
-          <a href={moment.href}>{moment.cta} <span aria-hidden="true">→</span></a>
-        </li>
-      ))}
-    </ol>
+    <div class="home-journey-viewport" data-journey-viewport tabindex="0">
+      <ol class="home-journey-list">
+        {home.journey.map((moment) => (
+          <li class="home-journey-moment" data-flow-moment={moment.number}>
+            <div class="home-journey-top"><span>{moment.number}</span><i>{moment.phase}</i></div>
+            <h3>{moment.title}</h3>
+            <p>{moment.text}</p>
+            <dl>
+              <div><dt>{en ? 'Input' : 'Entrada'}</dt><dd>{moment.input}</dd></div>
+              <div><dt>{en ? 'Output' : 'Salida'}</dt><dd>{moment.output}</dd></div>
+            </dl>
+            <p class="home-journey-control"><span>{en ? 'Boundary' : 'Límite'}</span>{moment.control}</p>
+            <a href={moment.href}>{moment.cta} <span aria-hidden="true">→</span></a>
+          </li>
+        ))}
+      </ol>
+    </div>
     <p class="home-journey-note" role="note">{en ? 'Illustrative product journey · fictional data · no external effects' : 'Recorrido ilustrativo del producto · datos ficticios · sin efectos externos'}</p>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-home-journey]').forEach((journey) => {
+    const viewport = journey.querySelector<HTMLElement>('[data-journey-viewport]');
+    const previous = journey.querySelector<HTMLButtonElement>('[data-journey-previous]');
+    const next = journey.querySelector<HTMLButtonElement>('[data-journey-next]');
+    const card = journey.querySelector<HTMLElement>('[data-flow-moment]');
+    if (!viewport || !previous || !next || !card) return;
+    const update = () => {
+      const maximum = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+      previous.disabled = viewport.scrollLeft <= 2;
+      next.disabled = viewport.scrollLeft >= maximum - 2;
+    };
+    const move = (direction: number) => {
+      const track = viewport.querySelector<HTMLElement>('.home-journey-list');
+      const gap = track ? Number.parseFloat(getComputedStyle(track).columnGap) || 0 : 0;
+      viewport.scrollBy({ left: direction * (card.offsetWidth + gap), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    };
+    previous.addEventListener('click', () => move(-1));
+    next.addEventListener('click', () => move(1));
+    viewport.addEventListener('scroll', update, { passive: true });
+    new ResizeObserver(update).observe(viewport);
+    update();
+  });
+</script>

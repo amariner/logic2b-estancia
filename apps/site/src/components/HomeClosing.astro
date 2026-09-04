@@ -1,0 +1,60 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import PanelPreview from './PanelPreview.astro';
+
+const { locale } = Astro.props as { locale: Locale };
+const en = locale === 'en';
+const prefix = en ? '/en' : '';
+const copy = en ? {
+  kicker: 'Logic2B Stays · guided demonstration',
+  title: 'Ready to turn a fragmented journey into one clear project?',
+  body: 'See how your website, enquiries and daily operation could share context in a demonstration prepared around your accommodation business.',
+  cta: 'Request a demonstration',
+  badges: ['A website with your identity', 'A supervised workspace', 'A real team alongside you'],
+  visual: 'Fictitious Terrava planning preview next to a mobile operations summary',
+  phone: 'Local mobile view',
+  today: 'Today · fictional scenario',
+  arrivals: 'Arrivals to review',
+  preparation: 'Preparation',
+  noEffects: 'Local evidence · no live actions',
+} : {
+  kicker: 'Logic2B Estancias · demostración guiada',
+  title: '¿Listo para convertir un recorrido fragmentado en un proyecto claro?',
+  body: 'Descubre cómo podrían compartir contexto tu web, las solicitudes y la operativa diaria en una demostración preparada alrededor de tu alojamiento.',
+  cta: 'Solicitar una demostración',
+  badges: ['Web con tu identidad', 'Gestor supervisado', 'Un equipo real a tu lado'],
+  visual: 'Vista ficticia del planning de Terrava junto a un resumen operativo móvil',
+  phone: 'Vista móvil local',
+  today: 'Hoy · escenario ficticio',
+  arrivals: 'Llegadas a revisar',
+  preparation: 'Preparación',
+  noEffects: 'Evidencia local · sin acciones reales',
+};
+---
+
+<section class="home-closing" aria-labelledby="home-closing-title" data-home-closing data-commercial-actions>
+  <div class="home-closing-frame shell">
+    <div class="home-closing-copy">
+      <p class="eyebrow">{copy.kicker}</p>
+      <h2 id="home-closing-title">{copy.title}</h2>
+      <p>{copy.body}</p>
+      <a class="home-closing-action" href={`${prefix}/#contacto`} data-contact-trigger aria-haspopup="dialog">
+        <span>{copy.cta}</span><i aria-hidden="true">↗</i>
+      </a>
+      <ul aria-label={copy.kicker}>{copy.badges.map((badge) => <li><span aria-hidden="true">✓</span>{badge}</li>)}</ul>
+    </div>
+
+    <div class="home-closing-visual" role="img" aria-label={copy.visual}>
+      <img src="/media/remanso/hero.webp" alt="" width="1536" height="1024" loading="lazy" decoding="async" aria-hidden="true" />
+      <div class="home-closing-panel"><PanelPreview locale={locale} kind="planning" compact /></div>
+      <div class="home-closing-phone" aria-hidden="true">
+        <div class="home-closing-phone-status"><b>9:41</b><span></span></div>
+        <header><div><small>Logic2B Estancias</small><strong>{copy.phone}</strong></div><i>L2B</i></header>
+        <p class="home-closing-phone-date">{copy.today}</p>
+        <div class="home-closing-phone-metrics"><article><small>{copy.arrivals}</small><strong>3</strong><i style="--phone-value:62%"></i></article><article><small>{copy.preparation}</small><strong>14/18</strong><i style="--phone-value:78%"></i></article></div>
+        <div class="home-closing-phone-list"><span></span><span></span><span></span></div>
+        <div class="home-closing-phone-note">{copy.noEffects}</div>
+      </div>
+    </div>
+  </div>
+</section>

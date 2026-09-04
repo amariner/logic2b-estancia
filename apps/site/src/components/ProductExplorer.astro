@@ -2,14 +2,22 @@
 import type { Locale } from '@logic-estancia/config';
 import { getHomeContract } from '../home-contract';
 import { getPublishedPanels } from '../panel-portfolio';
+import PanelPreview from './PanelPreview.astro';
 
 const { locale } = Astro.props as { locale: Locale };
 const home = getHomeContract(locale);
 const en = locale === 'en';
 const panelCount = getPublishedPanels(locale).length;
+const previewByArea = {
+  solicitudes: 'enquiries',
+  planning: 'planning',
+  huespedes: 'guests-arrivals',
+  operacion: 'preparation',
+} as const;
 ---
 
-<section id="gestor" class="section product-explorer" aria-labelledby="product-explorer-title" data-product-explorer>
+<section id="producto" class="section product-explorer" aria-labelledby="product-explorer-title" data-product-explorer>
+  <span id="gestor" class="anchor-target" aria-hidden="true"></span>
   <div class="shell">
     <div class="section-head product-explorer-heading">
       <p class="eyebrow">{en ? 'Explore the product' : 'Explora el producto'}</p>
@@ -17,24 +25,75 @@ const panelCount = getPublishedPanels(locale).length;
       <p>{en ? 'Open each area to see the exact fictional evidence, its starting plan and the boundary that keeps the demo honest.' : 'Abre cada área para ver la evidencia ficticia exacta, su plan de partida y el límite que mantiene la demo honesta.'}</p>
       <a class="text-link" href={en ? '/en/panels/' : '/paneles/'}>{en ? `Explore ${panelCount} verified workspace pages` : `Explorar ${panelCount} fichas de panel verificadas`} <span aria-hidden="true">→</span></a>
     </div>
+    <div class="product-explorer-tabs" role="tablist" aria-label={en ? 'Logic2B Stays product areas' : 'Áreas del producto Logic2B Estancias'}>
+      {home.productAreas.map((area, index) => (
+        <button
+          id={`product-tab-${area.id}`}
+          type="button"
+          role="tab"
+          aria-selected={index === 0 ? 'true' : 'false'}
+          aria-controls={`product-panel-${area.id}`}
+          tabindex={index === 0 ? 0 : -1}
+          data-product-tab={area.id}
+        ><span>{area.number}</span>{area.title}</button>
+      ))}
+    </div>
     <div class="product-explorer-list">
       {home.productAreas.map((area, index) => (
-        <details class="product-explorer-item" data-product-area={area.id} open={index === 0}>
-          <summary>
-            <span>{area.number}</span>
-            <strong>{area.title}</strong>
-            <i aria-hidden="true">+</i>
-          </summary>
+        <article
+          id={`product-panel-${area.id}`}
+          class="product-explorer-item"
+          data-product-area={area.id}
+          role="tabpanel"
+          aria-labelledby={`product-tab-${area.id}`}
+          hidden={index !== 0}
+        >
           <div class="product-explorer-detail">
+            <span class="product-explorer-index">{area.number}</span>
+            <h3>{area.title}</h3>
             <p>{area.text}</p>
-            <dl>
-              <div><dt>{en ? 'Starting plan' : 'Plan de partida'}</dt><dd>{area.plan}</dd></div>
-              <div><dt>{en ? 'Boundary' : 'Límite'}</dt><dd>{area.boundary}</dd></div>
-            </dl>
+            <dl><div><dt>{en ? 'Starting plan' : 'Plan de partida'}</dt><dd>{area.plan}</dd></div><div><dt>{en ? 'Boundary' : 'Límite'}</dt><dd>{area.boundary}</dd></div></dl>
             <a class="text-link" href={area.href}>{area.cta} <span aria-hidden="true">→</span></a>
           </div>
-        </details>
+          <figure class="product-explorer-visual">
+            {area.id === 'web' ? (
+              <div class="product-web-preview" role="img" aria-label={en ? 'Fictitious Nivora website preview' : 'Vista ficticia de la web de Nivora'}>
+                <div><i></i><i></i><i></i><span>Nivora One</span></div>
+                <picture><source type="image/avif" srcset="/media/nivora/hero-640.avif 640w, /media/nivora/hero-960.avif 960w" sizes="(max-width: 800px) calc(100vw - 48px), 48vw" /><img src="/media/nivora/hero.webp" alt="" width="2016" height="1344" loading="lazy" decoding="async" /></picture>
+                <p>{en ? 'Brand website · no availability or booking' : 'Web de marca · sin disponibilidad ni reserva'}</p>
+              </div>
+            ) : (
+              <PanelPreview locale={locale} kind={previewByArea[area.id]} />
+            )}
+          </figure>
+        </article>
       ))}
     </div>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-product-explorer]').forEach((explorer) => {
+    const tabs = [...explorer.querySelectorAll<HTMLButtonElement>('[data-product-tab]')];
+    const panels = [...explorer.querySelectorAll<HTMLElement>('[data-product-area]')];
+    const select = (index: number, moveFocus = false) => {
+      tabs.forEach((tab, tabIndex) => {
+        const active = tabIndex === index;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && moveFocus) tab.focus();
+      });
+      panels.forEach((panel, panelIndex) => { panel.hidden = panelIndex !== index; });
+      tabs[index]?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest', inline: 'center' });
+    };
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => select(index));
+      tab.addEventListener('keydown', (event) => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const target = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        select(target, true);
+      });
+    });
+  });
+</script>

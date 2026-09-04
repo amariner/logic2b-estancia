@@ -1,0 +1,30 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { spanishResources } from '../resources';
+import ContextualGuides from './ContextualGuides.astro';
+import HumanService from './HumanService.astro';
+
+const { locale } = Astro.props as { locale: Locale };
+---
+
+<div class="home-aftercare shell" data-home-aftercare>
+  <HumanService locale={locale} ctaHref="#contacto" />
+  {locale === 'es' && (
+    <section class="resource-strip shell" aria-labelledby="home-resources-title" data-resource-strip>
+      <div class="resource-strip-intro">
+        <p class="eyebrow">Guías para decidir</p>
+        <h2 id="home-resources-title">Aclara qué debe compartir contexto antes de conectar herramientas.</h2>
+      </div>
+      <div class="resource-strip-links">
+        {spanishResources.map((resource, index) => (
+          <a href={resource.href} data-resource-link={resource.slug}>
+            <span>0{index + 1}</span>
+            <div><strong>{resource.title}</strong><p>{resource.homeSummary}</p></div>
+            <b aria-hidden="true">→</b>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+  <ContextualGuides locale={locale} contextId="home" />
+</div>

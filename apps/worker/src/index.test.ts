@@ -67,7 +67,30 @@ describe('worker runtime isolation', () => {
     expect(response.headers.get('content-security-policy')).toContain("form-action 'none'");
     expect(response.headers.get('content-security-policy')).toContain("connect-src 'none'");
     expect(response.headers.get('content-security-policy')).toContain("script-src 'self' 'unsafe-inline'");
+    expect(response.headers.get('content-security-policy')).toContain("frame-ancestors 'self'");
+    expect(response.headers.get('x-frame-options')).toBe('SAMEORIGIN');
     expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+  });
+
+  it('isolates explicit same-origin portfolio previews without weakening canonical pages', async () => {
+    const preview = await worker.fetch(new Request('https://test/webs/linde/?embed=theme'), demoEnv);
+    expect(preview.headers.get('content-security-policy')).toContain("connect-src 'none'");
+    expect(preview.headers.get('content-security-policy')).toContain("frame-ancestors 'self'");
+    expect(preview.headers.get('x-frame-options')).toBe('SAMEORIGIN');
+    expect(preview.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+
+    const canonical = await worker.fetch(new Request('https://test/webs/linde/'), {
+      ...demoEnv,
+      DEMO_MODE: 'false',
+      REAL_OPERATIONS_ENABLED: 'true',
+      EMAIL_PROVIDER_MODE: 'disabled',
+      ANALYTICS_PROVIDER_MODE: 'gtm',
+      LEADS_TRANSPORT: 'disabled',
+    });
+    expect(canonical.headers.get('content-security-policy')).toContain('https://www.googletagmanager.com');
+    expect(canonical.headers.get('content-security-policy')).toContain("frame-ancestors 'none'");
+    expect(canonical.headers.get('x-frame-options')).toBe('DENY');
+    expect(canonical.headers.get('x-robots-tag')).toBeNull();
   });
 
   it('keeps every public asset isolated when demo mode overrides provider-looking configuration', async () => {

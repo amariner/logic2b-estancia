@@ -9,9 +9,9 @@ const en = locale === 'en';
 const concepts = getWebPortfolio(locale);
 const sourcePath = en ? '/en/webs/' : '/webs/';
 const copy = en ? {
-  eyebrow: 'Web portfolio', title: 'A point of view for every kind of stay.', intro: 'Twelve navigable directions show how the same product can begin with very different identities: three canonical cases and nine original concepts. Each card states the visual intent, business problem, visible pages and evidence boundary.', collection: 'Four navigable collections', collectionNote: 'Every accommodation type now includes four directions and all three starting plans. The canonical cases prove the current product; original concepts demonstrate visual direction without pretending to operate the plan.', verticalLegend: 'Accommodation type', planLegend: 'Starting plan', all: 'All', rural: 'Rural stays', apartments: 'Apartments', hotels: 'Hotel', basic: 'Basic', management: 'Management', intelligent: 'Intelligent', result: 'Showing 12 navigable concepts', empty: 'No concept matches both filters. Choose another combination.', ctaEyebrow: 'A considered next step', ctaTitle: 'See which layer your operation needs first.', ctaBody: 'The assessment uses capabilities to suggest a starting point. Size helps scope implementation; it does not decide the plan.', cta: 'Start the assessment',
+  eyebrow: 'Web portfolio', title: 'A point of view for every kind of stay.', intro: 'Twelve navigable directions show how the same product can begin with very different identities: three canonical cases and nine original concepts. Each card states the visual intent, business problem, visible pages and evidence boundary.', collection: 'Four navigable collections', collectionNote: 'Every accommodation type now includes four directions and all three starting plans. The canonical cases prove the current product; original concepts demonstrate visual direction without pretending to operate the plan.', searchLegend: 'Search', searchPlaceholder: 'Name, style or business need', verticalLegend: 'Accommodation type', planLegend: 'Starting plan', all: 'All', rural: 'Rural stays', apartments: 'Apartments', hotels: 'Hotel', basic: 'Basic', management: 'Management', intelligent: 'Intelligent', result: 'Showing 12 navigable concepts', empty: 'No concept matches this search and filter combination. Try another term or selection.', ctaEyebrow: 'A considered next step', ctaTitle: 'See which layer your operation needs first.', ctaBody: 'The assessment uses capabilities to suggest a starting point. Size helps scope implementation; it does not decide the plan.', cta: 'Start the assessment',
 } : {
-  eyebrow: 'Portfolio web', title: 'Una dirección propia para cada tipo de estancia.', intro: 'Doce direcciones navegables muestran cómo un mismo producto puede empezar con identidades muy distintas: tres casos canónicos y nueve conceptos originales. Cada ficha explica la intención visual, el problema de negocio, las páginas visibles y el límite de la evidencia.', collection: 'Cuatro colecciones navegables', collectionNote: 'Cada tipo de alojamiento reúne ya cuatro direcciones y los tres planes de partida. Los casos canónicos demuestran el producto actual; los conceptos originales prueban dirección visual sin fingir que operan el plan.', verticalLegend: 'Tipo de alojamiento', planLegend: 'Plan de partida', all: 'Todos', rural: 'Casa rural', apartments: 'Apartamentos', hotels: 'Hotel', basic: 'Básico', management: 'Gestión', intelligent: 'Inteligente', result: 'Mostrando 12 conceptos navegables', empty: 'Ningún concepto coincide con ambos filtros. Elige otra combinación.', ctaEyebrow: 'Un siguiente paso con criterio', ctaTitle: 'Descubre qué capa necesita primero tu operación.', ctaBody: 'El diagnóstico recomienda un punto de partida por capacidades. El tamaño ayuda a dimensionar la implantación; no decide el plan.', cta: 'Empezar diagnóstico',
+  eyebrow: 'Portfolio web', title: 'Una dirección propia para cada tipo de estancia.', intro: 'Doce direcciones navegables muestran cómo un mismo producto puede empezar con identidades muy distintas: tres casos canónicos y nueve conceptos originales. Cada ficha explica la intención visual, el problema de negocio, las páginas visibles y el límite de la evidencia.', collection: 'Cuatro colecciones navegables', collectionNote: 'Cada tipo de alojamiento reúne ya cuatro direcciones y los tres planes de partida. Los casos canónicos demuestran el producto actual; los conceptos originales prueban dirección visual sin fingir que operan el plan.', searchLegend: 'Buscar', searchPlaceholder: 'Nombre, estilo o necesidad de negocio', verticalLegend: 'Tipo de alojamiento', planLegend: 'Plan de partida', all: 'Todos', rural: 'Casa rural', apartments: 'Apartamentos', hotels: 'Hotel', basic: 'Básico', management: 'Gestión', intelligent: 'Inteligente', result: 'Mostrando 12 conceptos navegables', empty: 'Ningún concepto coincide con la búsqueda y los filtros. Prueba otro término o selección.', ctaEyebrow: 'Un siguiente paso con criterio', ctaTitle: 'Descubre qué capa necesita primero tu operación.', ctaBody: 'El diagnóstico recomienda un punto de partida por capacidades. El tamaño ayuda a dimensionar la implantación; no decide el plan.', cta: 'Empezar diagnóstico',
 };
 ---
 <div data-web-portfolio>
@@ -20,6 +20,7 @@ const copy = en ? {
   <div class="shell">
     <div class="portfolio-catalog-heading"><div><p class="eyebrow">{copy.collection}</p><h2 id="portfolio-catalog-title" class="heading">{en ? 'See the evidence before you choose the scope.' : 'Mira la evidencia antes de elegir el alcance.'}</h2></div><p>{copy.collectionNote}</p></div>
     <div class="portfolio-filters" aria-label={en ? 'Filter portfolio concepts' : 'Filtrar conceptos del portfolio'}>
+      <fieldset class="portfolio-search"><legend>{copy.searchLegend}</legend><label class="sr-only" for="portfolio-search-input">{copy.searchPlaceholder}</label><input id="portfolio-search-input" type="search" placeholder={copy.searchPlaceholder} autocomplete="off" data-portfolio-search /></fieldset>
       <fieldset><legend>{copy.verticalLegend}</legend><div class="portfolio-filter-list">{[['all', copy.all], ['rural', copy.rural], ['apartments', copy.apartments], ['hotels', copy.hotels]].map(([value, label], index) => <button type="button" class={index === 0 ? 'is-active' : ''} aria-pressed={index === 0 ? 'true' : 'false'} data-portfolio-vertical-filter={value}>{label}</button>)}</div></fieldset>
       <fieldset><legend>{copy.planLegend}</legend><div class="portfolio-filter-list">{[['all', copy.all], ['basico', copy.basic], ['gestion', copy.management], ['inteligente', copy.intelligent]].map(([value, label], index) => <button type="button" class={index === 0 ? 'is-active' : ''} aria-pressed={index === 0 ? 'true' : 'false'} data-portfolio-plan-filter={value}>{label}</button>)}</div></fieldset>
     </div>
@@ -39,6 +40,20 @@ const copy = en ? {
   const empty = portfolio?.querySelector('[data-portfolio-filter-empty]');
   let activeVertical = 'all';
   let activePlan = 'all';
+  let activeSearch = '';
+  const refresh = () => {
+    let visible = 0;
+    cards.forEach((card) => {
+      const searchable = (card.textContent ?? '').toLocaleLowerCase(locale);
+      const matches = (activeVertical === 'all' || card.dataset.portfolioVertical === activeVertical)
+        && (activePlan === 'all' || card.dataset.portfolioPlan === activePlan)
+        && (!activeSearch || searchable.includes(activeSearch));
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    if (status) status.textContent = visible === cards.length ? result : `${visible} ${locale === 'en' ? 'navigable concepts shown' : 'conceptos navegables visibles'}`;
+    if (empty) empty.hidden = visible !== 0;
+  };
   const updateFilter = (kind, value) => {
     if (kind === 'vertical') activeVertical = value;
     else activePlan = value;
@@ -47,18 +62,15 @@ const copy = en ? {
       button.classList.toggle('is-active', selected);
       button.setAttribute('aria-pressed', String(selected));
     });
-    let visible = 0;
-    cards.forEach((card) => {
-      const matches = (activeVertical === 'all' || card.dataset.portfolioVertical === activeVertical) && (activePlan === 'all' || card.dataset.portfolioPlan === activePlan);
-      card.hidden = !matches;
-      if (matches) visible += 1;
-    });
-    if (status) status.textContent = visible === cards.length ? result : `${visible} ${locale === 'en' ? 'navigable concepts shown' : 'conceptos navegables visibles'}`;
-    if (empty) empty.hidden = visible !== 0;
+    refresh();
   };
   portfolio?.addEventListener('click', (event) => {
     const target = event.target instanceof Element ? event.target.closest('[data-portfolio-vertical-filter], [data-portfolio-plan-filter]') : null;
     if (!target) return;
     updateFilter(target.dataset.portfolioVerticalFilter ? 'vertical' : 'plan', target.dataset.portfolioVerticalFilter ?? target.dataset.portfolioPlanFilter ?? 'all');
+  });
+  portfolio?.querySelector('[data-portfolio-search]')?.addEventListener('input', (event) => {
+    activeSearch = event.target instanceof HTMLInputElement ? event.target.value.trim().toLocaleLowerCase(locale) : '';
+    refresh();
   });
 </script>

@@ -30,7 +30,7 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
         <header><div><span>{en ? 'Fictitious case' : 'Caso ficticio'}</span><strong>Marina Costa · 4 {en ? 'guests' : 'huéspedes'}</strong><small>{en ? '21–24 Aug' : '21–24 ago'} · Casa Aira</small></div><b>REQ-024</b></header>
         <p>{en ? 'Casa Aira has no fit for the first night.' : 'Casa Aira no encaja la primera noche.'}</p>
         <div class="panel-preview-comparison"><section><span>Casa Aira</span><strong>{en ? 'No fit' : 'Sin encaje'}</strong><small>{en ? 'First night occupied' : 'Primera noche ocupada'}</small></section><section><span>Casa Bruma</span><strong>€ 612</strong><small>{en ? 'Full stay available' : 'Estancia completa disponible'}</small></section></div>
-        <footer>{en ? 'Compare only · no booking or message' : 'Solo compara · sin reserva ni mensaje'}</footer>
+        <div class="panel-preview-footer">{en ? 'Compare only · no booking or message' : 'Solo compara · sin reserva ni mensaje'}</div>
       </div>
     ) : kind === 'planning' ? (
       <div class="panel-preview-content panel-preview-planning">
@@ -39,7 +39,7 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
           <div class="panel-preview-days"><span></span>{Array.from({ length: 10 }, (_, index) => <b>{18 + index}</b>)}</div>
           {properties.map((property, row) => <div class="panel-preview-row"><span>Casa {property}</span>{Array.from({ length: 10 }, (_, day) => <i class:list={{ occupied: day >= row % 4 && day < (row % 4) + 3, alternative: property === 'Bruma' && day === 6 }}></i>)}</div>)}
         </div>
-        <footer><strong>Marina Costa · Casa Bruma</strong><span>{en ? 'View only · no inventory changes' : 'Solo visualización · sin cambios de inventario'}</span></footer>
+        <div class="panel-preview-footer"><strong>Marina Costa · Casa Bruma</strong><span>{en ? 'View only · no inventory changes' : 'Solo visualización · sin cambios de inventario'}</span></div>
       </div>
     ) : kind === 'guests-arrivals' ? (
       <div class="panel-preview-content panel-preview-guests">
@@ -49,7 +49,7 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
           <div><strong>Marina Costa</strong><span>marina@example.test</span><span>{en ? 'Demo data' : 'Dato de la demo'}</span><b>{en ? 'Enquiry received' : 'Consulta recibida'}</b></div>
           <div><strong>M. Laurent</strong><span>laurent@example.test</span><span>{en ? 'France' : 'Francia'}</span><b>{en ? 'In house' : 'En casa'}</b></div>
         </div>
-        <footer><span>{en ? 'No profile, traveller report or message' : 'Sin perfil, registro de viajeros ni mensaje'}</span></footer>
+        <div class="panel-preview-footer"><span>{en ? 'No profile, traveller report or message' : 'Sin perfil, registro de viajeros ni mensaje'}</span></div>
       </div>
     ) : kind === 'preparation' ? (
       <div class="panel-preview-content panel-preview-preparation">
@@ -59,7 +59,7 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
           <p><i aria-hidden="true"></i><span><strong>{en ? 'Surfaces and minibar' : 'Superficies y minibar'}</strong><small>{en ? 'Housekeeping review' : 'Revisión de limpieza'}</small></span></p>
           <p><i aria-hidden="true"></i><span><strong>{en ? 'Reception validation' : 'Validación de recepción'}</strong><small>{en ? 'Human final check' : 'Comprobación humana final'}</small></span></p>
         </div>
-        <footer><span>{en ? 'Sample checklist · no assignment or room update' : 'Checklist de muestra · sin asignación ni cambio de habitación'}</span></footer>
+        <div class="panel-preview-footer"><span>{en ? 'Sample checklist · no assignment or room update' : 'Checklist de muestra · sin asignación ni cambio de habitación'}</span></div>
       </div>
     ) : kind === 'operations-revenue' ? (
       <div class="panel-preview-content panel-preview-revenue">
@@ -71,7 +71,7 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
           <p><span>RevPAR</span><strong>€110</strong></p>
         </div>
         <div class="panel-preview-weeks" aria-hidden="true"><i style="--bar: 88%"><span>88%</span></i><i style="--bar: 92%"><span>92%</span></i><i style="--bar: 86%"><span>86%</span></i><i style="--bar: 90%"><span>90%</span></i></div>
-        <footer><span>{en ? 'Formulas and sample ledger · no PMS, accounting or forecast' : 'Fórmulas y libro de muestra · sin PMS, contabilidad ni previsión'}</span></footer>
+        <div class="panel-preview-footer"><span>{en ? 'Formulas and sample ledger · no PMS, accounting or forecast' : 'Fórmulas y libro de muestra · sin PMS, contabilidad ni previsión'}</span></div>
       </div>
     ) : (
       <div class="panel-preview-content panel-preview-copilot">
@@ -79,7 +79,7 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
         <p class="panel-preview-draft">{en ? 'Hello Marina, your Terrace room will be ready from 15:00…' : 'Hola Marina, tu habitación Terrace estará lista a partir de las 15:00…'}</p>
         <div class="panel-preview-sources"><span>{en ? 'Fixture sources' : 'Fuentes fixture'}</span><b>AUR-812</b><b>{en ? 'Arrival policy' : 'Política de entrada'}</b><b>408 · {en ? 'pending' : 'pendiente'}</b></div>
         <div class="panel-preview-trace"><span class="done">✓ {en ? 'Fixture draft' : 'Borrador de fixture'}</span><span>○ {en ? 'Human review' : 'Revisión humana'}</span><span class="blocked">× {en ? 'Delivery blocked' : 'Envío bloqueado'}</span></div>
-        <footer><span>{en ? 'No model, provider, message or automation' : 'Sin modelo, proveedor, mensaje ni automatización'}</span></footer>
+        <div class="panel-preview-footer"><span>{en ? 'No model, provider, message or automation' : 'Sin modelo, proveedor, mensaje ni automatización'}</span></div>
       </div>
     )}
   </div>

@@ -6,7 +6,7 @@ export { LeadCoordinator } from './lead-coordinator';
 export interface Env extends LeadEnv { ASSETS: Fetcher; }
 
 const isolatedContentSecurityPolicy = "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data:; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; worker-src 'none'";
-const demoContentSecurityPolicy = "default-src 'self'; base-uri 'self'; connect-src 'none'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data:; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; worker-src 'none'";
+const previewContentSecurityPolicy = "default-src 'self'; base-uri 'self'; connect-src 'none'; font-src 'self'; form-action 'none'; frame-ancestors 'self'; img-src 'self' data:; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; worker-src 'none'";
 const analyticsContentSecurityPolicy = "default-src 'self'; base-uri 'self'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data: https://www.google-analytics.com https://*.google-analytics.com; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; worker-src 'none'";
 const commonSecurityHeaders = {
   'x-content-type-options': 'nosniff',
@@ -49,10 +49,15 @@ const worker = {
       ? analyticsContentSecurityPolicy
       : isolatedContentSecurityPolicy);
     headers.set('x-logic-runtime-mode', capabilities.mode);
+    if (isSameOriginPreviewRequest(url)) {
+      headers.set('x-frame-options', 'SAMEORIGIN');
+      headers.set('content-security-policy', previewContentSecurityPolicy);
+      headers.set('x-robots-tag', 'noindex, nofollow');
+    }
     if (isDemoPath(url.pathname)) {
       headers.set('x-robots-tag', 'noindex, nofollow');
       // Demo routes never inherit a provider-enabled policy, even in a real deployment.
-      headers.set('content-security-policy', demoContentSecurityPolicy);
+      headers.set('content-security-policy', previewContentSecurityPolicy);
     }
     return new Response(response.body, { status: response.status, headers });
   },
@@ -62,6 +67,11 @@ export default worker;
 
 function isJsonRequest(request: Request): boolean {
   return request.headers.get('content-type')?.split(';', 1)[0]?.trim().toLowerCase() === 'application/json';
+}
+
+function isSameOriginPreviewRequest(url: URL): boolean {
+  return isDemoPath(url.pathname)
+    || (/^\/(?:en\/)?webs\/[^/]+\/$/.test(url.pathname) && url.searchParams.get('embed') === 'theme');
 }
 
 function apiJson(

@@ -1,0 +1,161 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getWebPortfolio } from '../web-portfolio';
+
+const { locale } = Astro.props as { locale: Locale };
+const en = locale === 'en';
+const concepts = getWebPortfolio(locale);
+const prefix = en ? '/en' : '';
+const labels = en ? {
+  eyebrow: 'Twelve website directions',
+  title: 'Your stay should not look like anyone else’s.',
+  intro: 'Explore twelve navigable visual directions built with local fictional content. Open a preview here or continue to the full commercial page.',
+  all: 'See all twelve websites',
+  previous: 'Show previous website directions',
+  next: 'Show next website directions',
+  preview: 'Preview',
+  full: 'Open full page',
+  close: 'Close preview',
+  frame: 'Navigable preview',
+  note: 'Fictional visual direction. It checks no availability and sends no enquiry.',
+} : {
+  eyebrow: 'Doce direcciones web',
+  title: 'Tu alojamiento no tiene que parecerse a ningún otro.',
+  intro: 'Explora doce direcciones visuales navegables construidas con contenido local ficticio. Abre una vista previa aquí o continúa a la ficha comercial completa.',
+  all: 'Ver las doce webs',
+  previous: 'Ver direcciones web anteriores',
+  next: 'Ver direcciones web siguientes',
+  preview: 'Vista previa',
+  full: 'Abrir página completa',
+  close: 'Cerrar vista previa',
+  frame: 'Vista previa navegable',
+  note: 'Dirección visual ficticia. No consulta disponibilidad ni envía solicitudes.',
+};
+---
+
+<section id="demos" class="section home-theme-showcase" aria-labelledby="home-theme-showcase-title" data-theme-showcase>
+  <div class="shell">
+    <header class="home-showcase-heading">
+      <div>
+        <p class="eyebrow">{labels.eyebrow}</p>
+        <h2 id="home-theme-showcase-title" class="heading">{labels.title}</h2>
+      </div>
+      <div>
+        <p>{labels.intro}</p>
+        <a class="text-link demo-portfolio-link" href={`${prefix}/webs/`}>{labels.all} <span aria-hidden="true">→</span></a>
+      </div>
+    </header>
+
+    <div class="home-showcase-controls" aria-label={labels.eyebrow}>
+      <button type="button" aria-label={labels.previous} data-theme-previous disabled><span aria-hidden="true">←</span></button>
+      <button type="button" aria-label={labels.next} data-theme-next><span aria-hidden="true">→</span></button>
+    </div>
+
+    <div class="home-showcase-viewport" data-theme-track tabindex="0">
+      <div class="home-theme-track">
+        {concepts.map((concept) => (
+          <article class="home-theme-card" data-theme-card={concept.slug}>
+            <a
+              class="home-theme-card-visual"
+              href={concept.demoHref}
+              data-demo-card={concept.status === 'canonical' ? concept.slug : undefined}
+              aria-label={`${concept.brand}: ${concept.demoCta}`}
+            >
+              <picture>
+                <source type="image/avif" srcset={`/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w`} sizes="(max-width: 720px) 82vw, (max-width: 1100px) 44vw, 30vw" />
+                <img src={concept.image} alt="" width="2016" height="1344" loading="lazy" decoding="async" />
+              </picture>
+              <span class="home-theme-card-plan">{en ? 'Fictional case' : 'Caso ficticio'} · {concept.planLabel}</span>
+            </a>
+            <div class="home-theme-card-copy">
+              <span>{concept.number} · {concept.verticalLabel}</span>
+              <h3>{concept.brand}</h3>
+              <p>{concept.summary}</p>
+              <div>
+                <button type="button" data-theme-preview-open={`theme-preview-${concept.slug}`} aria-haspopup="dialog">{labels.preview} <span aria-hidden="true">↗</span></button>
+                <a href={`${prefix}/webs/${concept.slug}/`}>{labels.full} <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  {concepts.map((concept) => (
+    <dialog id={`theme-preview-${concept.slug}`} class="portfolio-preview-dialog" aria-labelledby={`theme-preview-title-${concept.slug}`} data-theme-preview-dialog>
+      <div class="portfolio-preview-layout">
+        <button class="portfolio-preview-close" type="button" data-theme-preview-close aria-label={labels.close}>×</button>
+        <div class="portfolio-preview-browser">
+          <div class="portfolio-preview-bar" aria-hidden="true"><i></i><i></i><i></i><span>estancia.logic2b.com</span></div>
+          <iframe
+            src="about:blank"
+            data-theme-preview-frame
+            data-theme-preview-src={`${concept.demoHref}?embed=theme`}
+            title={`${labels.frame}: ${concept.brand}`}
+            loading="lazy"
+            sandbox="allow-scripts"
+          ></iframe>
+        </div>
+        <aside class="portfolio-preview-side">
+          <p class="eyebrow">{concept.verticalLabel} · {concept.planLabel}</p>
+          <h2 id={`theme-preview-title-${concept.slug}`}>{concept.brand}</h2>
+          <p>{concept.visualIntent}</p>
+          <dl>
+            <div><dt>{concept.visibleLabel}</dt><dd>{concept.visiblePages.join(' · ')}</dd></div>
+            <div><dt>{concept.boundaryLabel}</dt><dd>{concept.boundary}</dd></div>
+          </dl>
+          <a class="pill" href={`${prefix}/webs/${concept.slug}/`}>{labels.full} <span aria-hidden="true">→</span></a>
+          <small>{labels.note}</small>
+        </aside>
+      </div>
+    </dialog>
+  ))}
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-theme-showcase]').forEach((showcase) => {
+    const viewport = showcase.querySelector<HTMLElement>('[data-theme-track]');
+    const previous = showcase.querySelector<HTMLButtonElement>('[data-theme-previous]');
+    const next = showcase.querySelector<HTMLButtonElement>('[data-theme-next]');
+    const firstCard = showcase.querySelector<HTMLElement>('[data-theme-card]');
+    if (!viewport || !previous || !next || !firstCard) return;
+
+    const update = () => {
+      const maximum = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+      previous.disabled = viewport.scrollLeft <= 2;
+      next.disabled = viewport.scrollLeft >= maximum - 2;
+    };
+    const move = (direction: number) => {
+      const gap = Number.parseFloat(getComputedStyle(viewport.firstElementChild as Element).columnGap) || 0;
+      const perPage = matchMedia('(min-width: 1280px)').matches ? 4 : matchMedia('(min-width: 720px)').matches ? 2 : 1;
+      viewport.scrollBy({ left: direction * (firstCard.offsetWidth + gap) * perPage, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    };
+    previous.addEventListener('click', () => move(-1));
+    next.addEventListener('click', () => move(1));
+    viewport.addEventListener('scroll', update, { passive: true });
+    new ResizeObserver(update).observe(viewport);
+    update();
+  });
+
+  let themeReturnTarget: HTMLElement | null = null;
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-preview-open]').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const id = trigger.dataset.themePreviewOpen;
+      const dialog = id ? document.getElementById(id) : null;
+      if (!(dialog instanceof HTMLDialogElement)) return;
+      const frame = dialog.querySelector<HTMLIFrameElement>('[data-theme-preview-frame]');
+      if (frame?.dataset.themePreviewSrc && frame.src === 'about:blank') frame.src = frame.dataset.themePreviewSrc;
+      themeReturnTarget = trigger;
+      dialog.showModal();
+    });
+  });
+  document.querySelectorAll<HTMLDialogElement>('[data-theme-preview-dialog]').forEach((dialog) => {
+    dialog.querySelector<HTMLButtonElement>('[data-theme-preview-close]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => {
+      if (themeReturnTarget?.isConnected) themeReturnTarget.focus();
+      themeReturnTarget = null;
+    });
+  });
+</script>

@@ -1,0 +1,216 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getPanelPortfolio, type PanelPortfolioItem, type PanelPreviewKind } from '../panel-portfolio';
+import PanelPreview from './PanelPreview.astro';
+
+const { locale } = Astro.props as { locale: Locale };
+const en = locale === 'en';
+const prefix = en ? '/en' : '';
+type NavigablePanel = PanelPortfolioItem & {
+  detailHref: string;
+  evidenceHref: string;
+  preview: PanelPreviewKind;
+};
+const panels = getPanelPortfolio(locale).filter((panel): panel is NavigablePanel => (
+  panel.detailHref !== null && panel.evidenceHref !== null && panel.preview !== null
+));
+if (panels.length !== 6) throw new Error(`home_panel_showcase_expected_six:${locale}:${panels.length}`);
+
+const labels = en ? {
+  eyebrow: 'Six verified workspaces',
+  title: 'See the decision before you see the software.',
+  intro: 'Explore six local, fictitious management surfaces. Each one makes its purpose, evidence and product boundary explicit before you open the full page.',
+  all: 'See all six workspaces',
+  previous: 'Show previous workspaces',
+  next: 'Show next workspaces',
+  preview: 'Open preview',
+  detail: 'Open workspace page',
+  close: 'Close workspace preview',
+  decision: 'Decision it supports',
+  boundary: 'Where the evidence stops',
+  exact: 'Open exact local evidence',
+  newTab: 'opens in a new tab',
+  note: 'Fictitious local evidence. It sends no message, booking, payment or external update.',
+  carousel: 'Verified workspace carousel',
+} : {
+  eyebrow: 'Seis paneles verificados',
+  title: 'Mira la decisión antes que el software.',
+  intro: 'Explora seis superficies de gestión locales y ficticias. Cada una hace explícitos su propósito, su evidencia y el límite del producto antes de abrir la ficha completa.',
+  all: 'Ver los seis paneles',
+  previous: 'Mostrar paneles anteriores',
+  next: 'Mostrar paneles siguientes',
+  preview: 'Abrir vista previa',
+  detail: 'Abrir ficha del panel',
+  close: 'Cerrar vista previa del panel',
+  decision: 'Decisión que acompaña',
+  boundary: 'Dónde termina la evidencia',
+  exact: 'Abrir evidencia local exacta',
+  newTab: 'se abre en otra pestaña',
+  note: 'Evidencia local ficticia. No envía mensajes, reservas, pagos ni actualizaciones externas.',
+  carousel: 'Carrusel de paneles verificados',
+};
+---
+
+<section id="paneles" class="home-panel-showcase section" aria-labelledby="home-panel-showcase-title" data-home-panel-showcase>
+  <div class="home-panel-shell shell">
+    <header class="home-panel-heading">
+      <div class="home-panel-heading-copy">
+        <p class="home-panel-eyebrow eyebrow">{labels.eyebrow}</p>
+        <h2 id="home-panel-showcase-title" class="home-panel-title heading">{labels.title}</h2>
+      </div>
+      <div class="home-panel-heading-intro">
+        <p>{labels.intro}</p>
+        <a class="home-panel-all-link text-link" href={`${prefix}/${en ? 'panels' : 'paneles'}/`}>{labels.all} <span aria-hidden="true">→</span></a>
+      </div>
+    </header>
+
+    <div class="home-panel-controls" aria-label={labels.carousel}>
+      <button class="home-panel-control home-panel-control-previous" type="button" aria-label={labels.previous} data-home-panel-previous disabled>
+        <span aria-hidden="true">←</span>
+      </button>
+      <button class="home-panel-control home-panel-control-next" type="button" aria-label={labels.next} data-home-panel-next>
+        <span aria-hidden="true">→</span>
+      </button>
+    </div>
+
+    <div class="home-panel-viewport" data-home-panel-viewport tabindex="0" role="region" aria-label={labels.carousel}>
+      <div class="home-panel-track" data-home-panel-track>
+        {panels.map((panel, index) => (
+          <article
+            class="home-panel-card"
+            data-home-panel-card={panel.id}
+            aria-label={`${index + 1} / ${panels.length}: ${panel.title}`}
+          >
+            <div class="home-panel-card-visual">
+              <PanelPreview locale={locale} kind={panel.preview} compact />
+              <span class="home-panel-card-plan">{panel.planLabel}</span>
+            </div>
+            <div class="home-panel-card-copy">
+              <p class="home-panel-card-meta">{panel.number} · {panel.statusLabel}</p>
+              <h3 class="home-panel-card-title">{panel.title}</h3>
+              <p class="home-panel-card-summary">{panel.summary}</p>
+              <div class="home-panel-card-actions">
+                <button
+                  class="home-panel-preview-button"
+                  type="button"
+                  aria-haspopup="dialog"
+                  aria-controls={`home-panel-dialog-${panel.id}`}
+                  data-home-panel-dialog-open={`home-panel-dialog-${panel.id}`}
+                >{labels.preview} <span aria-hidden="true">↗</span></button>
+                <a class="home-panel-detail-link" href={panel.detailHref}>{labels.detail} <span aria-hidden="true">→</span></a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  {panels.map((panel) => (
+    <dialog
+      id={`home-panel-dialog-${panel.id}`}
+      class="home-panel-dialog"
+      aria-labelledby={`home-panel-dialog-title-${panel.id}`}
+      aria-describedby={`home-panel-dialog-summary-${panel.id}`}
+      data-home-panel-dialog
+    >
+      <article class="home-panel-dialog-frame">
+        <header class="home-panel-dialog-header">
+          <div class="home-panel-dialog-heading">
+            <p class="home-panel-dialog-meta">{panel.number} · {panel.planLabel}</p>
+            <h2 id={`home-panel-dialog-title-${panel.id}`} class="home-panel-dialog-title">{panel.title}</h2>
+          </div>
+          <button class="home-panel-dialog-close" type="button" data-home-panel-dialog-close aria-label={`${labels.close}: ${panel.title}`}>
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+
+        <div class="home-panel-dialog-layout">
+          <div class="home-panel-dialog-preview">
+            <PanelPreview locale={locale} kind={panel.preview} />
+          </div>
+          <div class="home-panel-dialog-copy">
+            <p id={`home-panel-dialog-summary-${panel.id}`} class="home-panel-dialog-summary">{panel.summary}</p>
+            <dl class="home-panel-dialog-facts">
+              <div class="home-panel-dialog-fact">
+                <dt>{labels.decision}</dt>
+                <dd>{panel.decision}</dd>
+              </div>
+              <div class="home-panel-dialog-fact">
+                <dt>{labels.boundary}</dt>
+                <dd>{panel.evidenceCapability.evidence.boundary[locale]}</dd>
+              </div>
+            </dl>
+            <div class="home-panel-dialog-actions">
+              <a class="home-panel-dialog-detail" href={panel.detailHref}>{labels.detail} <span aria-hidden="true">→</span></a>
+              <a class="home-panel-dialog-evidence" href={panel.evidenceHref} target="_blank" rel="noopener noreferrer">
+                {labels.exact} <span class="home-panel-new-tab">({labels.newTab})</span><span aria-hidden="true">↗</span>
+              </a>
+            </div>
+            <p class="home-panel-dialog-note" role="note">{labels.note}</p>
+          </div>
+        </div>
+      </article>
+    </dialog>
+  ))}
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-home-panel-showcase]').forEach((showcase) => {
+    const viewport = showcase.querySelector<HTMLElement>('[data-home-panel-viewport]');
+    const track = showcase.querySelector<HTMLElement>('[data-home-panel-track]');
+    const previous = showcase.querySelector<HTMLButtonElement>('[data-home-panel-previous]');
+    const next = showcase.querySelector<HTMLButtonElement>('[data-home-panel-next]');
+    const firstCard = showcase.querySelector<HTMLElement>('[data-home-panel-card]');
+    if (!viewport || !track || !previous || !next || !firstCard) return;
+
+    const updateControls = () => {
+      const maximum = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+      previous.disabled = viewport.scrollLeft <= 2;
+      next.disabled = maximum <= 2 || viewport.scrollLeft >= maximum - 2;
+    };
+    const move = (direction: number) => {
+      const styles = getComputedStyle(track);
+      const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0;
+      viewport.scrollBy({
+        left: direction * (firstCard.offsetWidth + gap),
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
+    };
+
+    previous.addEventListener('click', () => move(-1));
+    next.addEventListener('click', () => move(1));
+    viewport.addEventListener('scroll', updateControls, { passive: true });
+    new ResizeObserver(updateControls).observe(viewport);
+    window.addEventListener('resize', updateControls, { passive: true });
+    updateControls();
+  });
+
+  let homePanelReturnTarget: HTMLElement | null = null;
+  document.querySelectorAll<HTMLButtonElement>('[data-home-panel-dialog-open]').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const dialogId = trigger.dataset.homePanelDialogOpen;
+      const dialog = dialogId ? document.getElementById(dialogId) : null;
+      if (!(dialog instanceof HTMLDialogElement) || typeof dialog.showModal !== 'function') return;
+      homePanelReturnTarget = trigger;
+      dialog.showModal();
+      queueMicrotask(() => dialog.querySelector<HTMLButtonElement>('[data-home-panel-dialog-close]')?.focus());
+    });
+  });
+
+  document.querySelectorAll<HTMLDialogElement>('[data-home-panel-dialog]').forEach((dialog) => {
+    dialog.querySelector<HTMLButtonElement>('[data-home-panel-dialog-close]')?.addEventListener('click', () => dialog.close('button'));
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close('backdrop');
+    });
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      dialog.close('escape');
+    });
+    dialog.addEventListener('close', () => {
+      const target = homePanelReturnTarget;
+      homePanelReturnTarget = null;
+      if (target?.isConnected) target.focus();
+    });
+  });
+</script>

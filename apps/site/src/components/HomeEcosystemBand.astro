@@ -1,0 +1,40 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getPublishedGuides } from '../guide-portfolio';
+import { getPublishedPanels } from '../panel-portfolio';
+import { getWebPortfolio } from '../web-portfolio';
+
+const { locale } = Astro.props as { locale: Locale };
+const en = locale === 'en';
+const prefix = en ? '/en' : '';
+const signals = en ? [
+  { value: `${getWebPortfolio(locale).length}/12`, label: 'Navigable website directions', href: `${prefix}/webs/` },
+  { value: `${getPublishedPanels(locale).length}/6`, label: 'Verified workspace pages', href: `${prefix}/panels/` },
+  { value: `${getPublishedGuides(locale).length}/5`, label: 'Published role guides', href: `${prefix}/docs/` },
+  { value: '0', label: 'Validated providers', href: '#conexiones' },
+  { value: '0', label: 'Live product activations', href: '#conexiones' },
+] : [
+  { value: `${getWebPortfolio(locale).length}/12`, label: 'Direcciones web navegables', href: `${prefix}/webs/` },
+  { value: `${getPublishedPanels(locale).length}/6`, label: 'Fichas de panel verificadas', href: `${prefix}/paneles/` },
+  { value: `${getPublishedGuides(locale).length}/5`, label: 'Guías por rol publicadas', href: `${prefix}/docs/` },
+  { value: '0', label: 'Proveedores validados', href: '#conexiones' },
+  { value: '0', label: 'Activaciones reales de producto', href: '#conexiones' },
+];
+---
+
+<section class="home-ecosystem-band" aria-label={en ? 'Current product evidence' : 'Evidencia actual del producto'} data-home-ecosystem>
+  <div class="shell home-ecosystem-inner">
+    <div class="home-ecosystem-intro">
+      <span aria-hidden="true">L2B</span>
+      <p>{en ? 'One project, from presence to supervised operations.' : 'Un mismo proyecto, desde la presencia hasta la operación supervisada.'}</p>
+    </div>
+    <nav class="home-ecosystem-signals" aria-label={en ? 'Explore current evidence' : 'Explorar evidencia actual'}>
+      {signals.map((signal) => (
+        <a href={signal.href}>
+          <strong>{signal.value}</strong>
+          <span>{signal.label}</span>
+        </a>
+      ))}
+    </nav>
+  </div>
+</section>

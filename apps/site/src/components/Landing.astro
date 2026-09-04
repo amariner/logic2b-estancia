@@ -1,22 +1,24 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { logic2bContact } from '@logic-estancia/config/contact';
-import { DEMO_PLANS, type PlanLevel } from '@logic-estancia/domain';
 import { content } from '../content';
-import { getBusinesses } from '../businesses';
-import { spanishResources } from '../resources';
 import { getHomeContract } from '../home-contract';
 import { getPlanCards } from '../plan-contract';
-import { getCanonicalWebPortfolio, getWebPortfolio } from '../web-portfolio';
+import { getWebPortfolio } from '../web-portfolio';
 import CapabilityBand from './CapabilityBand.astro';
-import ContextualGuides from './ContextualGuides.astro';
-import HumanService from './HumanService.astro';
+import HomeAftercare from './HomeAftercare.astro';
+import HomeClosing from './HomeClosing.astro';
+import HomeEcosystemBand from './HomeEcosystemBand.astro';
 import HomeJourney from './HomeJourney.astro';
+import HomePanelShowcase from './HomePanelShowcase.astro';
+import HomeThemeShowcase from './HomeThemeShowcase.astro';
+import HomeTourDialog from './HomeTourDialog.astro';
 import PlanCard from './PlanCard.astro';
 import ProductExplorer from './ProductExplorer.astro';
 const { locale } = Astro.props as { locale: Locale };
 const c = content[locale];
 const home = getHomeContract(locale);
+const heroConcepts = getWebPortfolio(locale);
 const planCards = getPlanCards(locale);
 const prefix = locale === 'en' ? '/en' : '';
 const heroShortcutHrefs = [
@@ -25,30 +27,6 @@ const heroShortcutHrefs = [
   `${prefix}/demos/terrava/gestion/?vista=home`,
 ] as const;
 const wa = logic2bContact(locale, 'commercial');
-const businesses = getBusinesses(locale);
-const demoPlanNames: Record<PlanLevel, string> = locale === 'es'
-  ? { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' }
-  : { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' };
-const demos = getCanonicalWebPortfolio(locale);
-const portfolioCount = getWebPortfolio(locale).length;
-const directionSignals = locale === 'es' ? [
-  ['01', 'Demanda y marca', 'Qué entiende el huésped, por qué te recuerda y dónde empieza la conversación directa.'],
-  ['02', 'Reservas y continuidad', 'Qué necesita cada solicitud para avanzar sin reconstruir su historia en varias herramientas.'],
-  ['03', 'Equipo y prioridades', 'Qué conviene revisar antes de que una llegada, una habitación o una incidencia marque el día.'],
-] : [
-  ['01', 'Demand and brand', 'What guests understand, why they remember you and where the direct conversation begins.'],
-  ['02', 'Bookings and continuity', 'What every enquiry needs to move forward without rebuilding its story across several tools.'],
-  ['03', 'Team and priorities', 'What is worth reviewing before an arrival, room or incident dictates the day.'],
-];
-const progressModes = locale === 'es' ? [
-  ['01', c.modes.mono[0], c.modes.mono[1]],
-  ['02', c.modes.multi[0], c.modes.multi[1]],
-  ['03', 'Decide con más contexto', 'Señales comprensibles ayudan a priorizar; las decisiones sensibles siguen bajo criterio humano.'],
-] : [
-  ['01', c.modes.mono[0], c.modes.mono[1]],
-  ['02', c.modes.multi[0], c.modes.multi[1]],
-  ['03', 'Decide with more context', 'Clear signals help prioritise; sensitive decisions remain under human judgement.'],
-];
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -115,12 +93,13 @@ const serviceSchema = {
       <div class="hero-case-gallery-top"><div><p class="eyebrow">{c.hero.rail}</p><h2 id="hero-case-gallery-title">{c.hero.railTitle}</h2></div><button type="button" class="hero-motion-toggle" data-hero-motion-toggle aria-pressed="false"><span data-hero-motion-label>{c.hero.pause}</span><span aria-hidden="true">Ⅱ</span></button></div>
       <div class="hero-case-rails" data-hero-rail>
         <div class="hero-case-rail"><div class="hero-case-track hero-case-track-up">
-          {[...home.heroCases, ...home.heroCases].map((demo, index) => index < home.heroCases.length ? <a class="hero-gallery-case" href={demo.href} data-hero-proof={demo.slug}><picture><source type="image/avif" srcset={`/media/${demo.slug}/hero-640.avif 640w, /media/${demo.slug}/hero-960.avif 960w`} sizes="(max-width: 640px) calc(100vw - 64px), 250px" /><img src={demo.image} alt="" width="2016" height="1344" loading="eager" decoding="async" /></picture><span>{demo.label} · {demo.planLabel}</span><strong>{demo.brand}</strong><b aria-hidden="true">↗</b></a> : <div class="hero-gallery-case" aria-hidden="true" data-hero-case-clone><img src={demo.image} alt="" width="2016" height="1344" loading="lazy" decoding="async" /><span>{demo.label} · {demo.planLabel}</span><strong>{demo.brand}</strong></div>)}
+          {[...heroConcepts, ...heroConcepts].map((concept, index) => index < heroConcepts.length ? <a class="hero-gallery-case" href={concept.demoHref} data-hero-proof={concept.status === 'canonical' ? concept.slug : undefined}><picture><source type="image/avif" srcset={`/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w`} sizes="(max-width: 640px) calc(100vw - 64px), 250px" /><img src={concept.image} alt="" width="2016" height="1344" loading={index < 2 ? 'eager' : 'lazy'} decoding="async" /></picture><span>{concept.verticalLabel} · {concept.planLabel}</span><strong>{concept.brand}</strong><b aria-hidden="true">↗</b></a> : <div class="hero-gallery-case" aria-hidden="true" data-hero-case-clone={concept.status === 'canonical' ? '' : undefined}><img src={concept.image} alt="" width="2016" height="1344" loading="lazy" decoding="async" /><span>{concept.verticalLabel} · {concept.planLabel}</span><strong>{concept.brand}</strong></div>)}
         </div></div>
         <div class="hero-case-rail hero-case-rail-secondary" aria-hidden="true"><div class="hero-case-track hero-case-track-down">
-          {[...home.heroCases].reverse().concat([...home.heroCases].reverse()).map((demo) => <div class="hero-gallery-case"><img src={demo.image} alt="" width="2016" height="1344" loading="lazy" decoding="async" /><span>{demo.label} · {demo.planLabel}</span><strong>{demo.brand}</strong></div>)}
+          {[...heroConcepts].reverse().concat([...heroConcepts].reverse()).map((concept) => <div class="hero-gallery-case"><img src={concept.image} alt="" width="2016" height="1344" loading="lazy" decoding="async" /><span>{concept.verticalLabel} · {concept.planLabel}</span><strong>{concept.brand}</strong></div>)}
         </div></div>
       </div>
+      <a class="hero-case-gallery-all" href={`${prefix}/webs/`}>{locale === 'es' ? 'Ver las doce direcciones web' : 'See all twelve website directions'} <span aria-hidden="true">↗</span></a>
     </aside>
   </div>
 </section>
@@ -139,101 +118,46 @@ const serviceSchema = {
   toggle?.addEventListener('click', () => setMotion(toggle.getAttribute('aria-pressed') !== 'true'));
 </script>
 
-<CapabilityBand locale={locale} />
+<HomeEcosystemBand locale={locale} />
 <HomeJourney locale={locale} />
 <ProductExplorer locale={locale} />
-<ContextualGuides locale={locale} contextId="home" />
-
-<section class="section tension-section">
-  <div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Dirigir con contexto' : 'Run with context'}</p><h2 class="heading">{locale === 'es' ? 'Dirigir no debería significar reconstruir cada historia.' : 'Running the business should not mean rebuilding every story.'}</h2><p>{locale === 'es' ? 'La fricción rara vez vive en una sola herramienta. Aparece cuando la información cambia de sitio y cada decisión empieza de nuevo.' : 'Friction rarely lives in one tool. It appears when information changes place and every decision starts again.'}</p></div><ol class="direction-list">{directionSignals.map(([number, title, text]) => <li><span>{number}</span><div><strong>{title}</strong><p>{text}</p></div></li>)}</ol></div>
-</section>
-
-<section id="negocio" class="section segment-section shell" aria-labelledby="segment-title">
-  <div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Empieza por tu realidad' : 'Start with your reality'}</p><h2 id="segment-title" class="heading">{locale === 'es' ? 'No todos los alojamientos venden igual. Tampoco deberían gestionarse igual.' : 'Not every stay sells the same way. It should not be managed the same way either.'}</h2><p>{locale === 'es' ? 'Elige el negocio que más se parece al tuyo. Cada recorrido parte de sus fricciones, su ritmo y el tipo de relación que necesita construir con el huésped.' : 'Choose the business closest to yours. Each journey begins with its friction, pace and the kind of guest relationship it needs to build.'}</p></div>
-  <div class="segment-grid">{businesses.map((business, index) => <a class="card" href={business.href}><span>0{index + 1}</span><h3>{business.homeTitle}</h3><p>{business.homeText}</p><b>{locale === 'es' ? `Ver solución para ${business.plural.toLowerCase()}` : `View solution for ${business.plural.toLowerCase()}`} →</b></a>)}</div>
-</section>
-
-{locale === 'es' && (
-  <section class="resource-strip shell" aria-labelledby="home-resources-title" data-resource-strip>
-    <div class="resource-strip-intro">
-      <p class="eyebrow">Guías para decidir</p>
-      <h2 id="home-resources-title">Aclara qué debe compartir contexto antes de conectar herramientas.</h2>
-    </div>
-    <div class="resource-strip-links">
-      {spanishResources.map((resource, index) => (
-        <a href={resource.href} data-resource-link={resource.slug}>
-          <span>0{index + 1}</span>
-          <div><strong>{resource.title}</strong><p>{resource.homeSummary}</p></div>
-          <b aria-hidden="true">→</b>
-        </a>
-      ))}
-    </div>
-  </section>
-)}
-
-<section id="producto" class="section shell">
-  <div class="section-head"><p class="eyebrow">{c.proof.eyebrow}</p><h2 class="heading">{c.proof.title}</h2><p>{c.proof.body}</p></div>
-  <div class="product-stage">
-    <ul class="feature-list">
-      <li><span>01</span><strong>{locale === 'es' ? 'Una lectura compartida' : 'One shared view'}</strong><span class="muted">{locale === 'es' ? 'La conversación, la reserva y la preparación dejan una historia que el siguiente paso puede entender.' : 'The conversation, booking and preparation leave a story the next step can understand.'}</span></li>
-      <li><span>02</span><strong>{locale === 'es' ? 'Responsabilidad visible' : 'Visible ownership'}</strong><span class="muted">{locale === 'es' ? 'El equipo distingue qué está preparado, qué espera respuesta y qué necesita revisión.' : 'The team can see what is ready, what awaits a reply and what needs review.'}</span></li>
-      <li><span>03</span><strong>{locale === 'es' ? 'Automatización supervisada' : 'Supervised automation'}</strong><span class="muted">{locale === 'es' ? 'Precios, cobros, canales y mensajes solo avanzan con las validaciones acordadas.' : 'Pricing, payments, channels and messages only move forward with the agreed checks.'}</span></li>
-    </ul>
-    <div class="product-window artifact" aria-label={locale === 'es' ? 'Vista simulada del gestor' : 'Simulated workspace view'}>
-      <div class="window-bar"><span class="window-brand"><i aria-hidden="true"></i>Aurem Hotel · {locale === 'es' ? 'Dirección' : 'Management'}</span><span>{locale === 'es' ? 'Escenario ficticio · Vista local' : 'Fictional scenario · Local view'}</span></div>
-      <div class="window-shell">
-        <ul class="window-nav" aria-label={locale === 'es' ? 'Áreas de la vista simulada' : 'Areas in the simulated view'}><li class="active">{locale === 'es' ? 'Resumen' : 'Overview'}</li><li>{locale === 'es' ? 'Llegadas' : 'Arrivals'}</li><li>{locale === 'es' ? 'Equipo' : 'Team'}</li><li>{locale === 'es' ? 'Ingresos' : 'Revenue'}</li></ul>
-        <div class="window-content"><div class="window-heading"><span>{locale === 'es' ? 'Prioridad del turno' : 'Shift priority'}</span><strong>{locale === 'es' ? 'Qué necesita revisión antes de las próximas llegadas.' : 'What needs review before the next arrivals.'}</strong></div><div class="window-grid"><article><span>{locale === 'es' ? 'Llegadas a revisar' : 'Arrivals to review'}</span><b>3</b><small class="muted">{locale === 'es' ? 'Limpieza · pago · asignación' : 'Cleaning · payment · assignment'}</small></article><article><span>{locale === 'es' ? 'Ocupación' : 'Occupancy'}</span><b>87%</b></article><article><span>{locale === 'es' ? 'Preparación' : 'Preparation'}</span><b>14/18</b></article><article><span>Canales</span><b>4</b><small class="muted">{locale === 'es' ? 'Demo · no conectados' : 'Demo · not connected'}</small></article></div></div>
-      </div>
-      <div class="window-footer"><span>{locale === 'es' ? 'Datos precargados · Ninguna acción real' : 'Preloaded data · No live actions'}</span><a href={`${prefix}/demos/aurem/gestion/?vista=home`}>{locale === 'es' ? 'Abrir vista ficticia' : 'Open fictional view'} <span aria-hidden="true">→</span></a></div>
-    </div>
-  </div>
-</section>
-
-<section class="section modes">
-  <div class="shell"><div class="section-head"><p class="eyebrow">{c.modes.eyebrow}</p><h2 class="heading">{c.modes.title}</h2></div><div class="mode-grid">{progressModes.map(([number, title, text]) => <article class="card"><span>{number}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div>
-</section>
-
-<section id="demos" class="section shell">
-  <div class="section-head"><p class="eyebrow">{c.demos.eyebrow}</p><h2 class="heading">{c.demos.title}</h2><p>{locale === 'es' ? 'Puedes recorrer cada caso sin registrarte. Todo lo que ocurre dentro es local, ficticio y está etiquetado para que la evidencia no se confunda con una promesa.' : 'Explore every case without registering. Everything inside is local, fictional and labelled so evidence is never confused with a promise.'}</p></div>
-  <div class="demo-grid">{demos.map((demo) => <a class="demo-card card" href={demo.demoHref} data-demo-card={demo.slug}><picture><source type="image/avif" srcset={`/media/${demo.slug}/hero-640.avif 640w, /media/${demo.slug}/hero-960.avif 960w`} sizes="(max-width: 760px) 100vw, 33vw" /><img src={demo.image} alt="" loading="lazy" width="2016" height="1344" /></picture><div><span class="eyebrow">{locale === 'es' ? 'Caso ficticio' : 'Fictional case'} · {demoPlanNames[DEMO_PLANS[demo.slug]]}</span><h3>{demo.brand}</h3><p>{demo.businessProblem}</p><span>{c.demos.open} →</span></div></a>)}</div>
-  <a class="text-link demo-portfolio-link" href={`${prefix}/webs/`}>{locale === 'es' ? `Ver las ${portfolioCount} direcciones web` : `See all ${portfolioCount} website directions`} <span aria-hidden="true">→</span></a>
-</section>
+<CapabilityBand locale={locale} />
 
 <section id="planes" class="section levels">
-  <div class="shell"><div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2><p>{locale === 'es' ? 'Cada punto de partida combina una web demostrable, un alcance explícito y un paso siguiente que puedes revisar.' : 'Each starting point combines a demonstrable website, a clear boundary and a next step you can review.'}</p></div><div class="plans-grid" data-plan-showcase>{planCards.map((plan, index) => <PlanCard locale={locale} plan={plan} sourcePath={locale === 'en' ? '/en/' : '/'} featured={index === 1} />)}</div><p class="level-note">{c.levels.note}</p><a class="text-link" href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{locale === 'es' ? 'Comparar los tres planes y sus límites' : 'Compare all three plans and their boundaries'} <span aria-hidden="true">→</span></a></div>
-</section>
-
-<section id="alcance" class="section scope-section">
   <div class="shell">
-    <div class="section-head"><p class="eyebrow">{c.scope.eyebrow}</p><h2 class="heading">{c.scope.title}</h2><p>{c.scope.body}</p></div>
-    <div class="scope-builder artifact" data-scope-estimator data-copy={JSON.stringify(c.scope)}>
-      <form class="scope-controls" data-scope-controls>
-        <div class="scope-counts">
-          <label>{c.scope.properties}<input name="scopeProperties" type="number" inputmode="numeric" min="1" max="10000" value="1" required /></label>
-          <label>{c.scope.units}<input name="scopeUnits" type="number" inputmode="numeric" min="1" max="100000" value="1" required /></label>
+    <div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2><p>{locale === 'es' ? 'Cada punto de partida combina una web demostrable, un alcance explícito y un siguiente paso que puedes revisar. No publicamos precios hasta completar la validación comercial prevista.' : 'Each starting point combines a demonstrable website, a clear boundary and a next step you can review. We do not publish prices before completing the planned commercial validation.'}</p></div>
+    <div class="plans-grid" data-plan-showcase>{planCards.map((plan, index) => <PlanCard locale={locale} plan={plan} sourcePath={locale === 'en' ? '/en/' : '/'} featured={index === 1} />)}</div>
+    <p class="level-note">{c.levels.note}</p>
+    <a class="text-link" href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{locale === 'es' ? 'Comparar los tres planes y sus límites' : 'Compare all three plans and their boundaries'} <span aria-hidden="true">→</span></a>
+
+    <div id="alcance" class="home-plan-assist" aria-labelledby="home-plan-assist-title">
+      <div class="section-head"><p class="eyebrow">{c.scope.eyebrow}</p><h3 id="home-plan-assist-title" class="heading">{c.scope.title}</h3><p>{c.scope.body}</p></div>
+      <div class="scope-builder artifact" data-scope-estimator data-copy={JSON.stringify(c.scope)}>
+        <form class="scope-controls" data-scope-controls>
+          <div class="scope-counts">
+            <label>{c.scope.properties}<input name="scopeProperties" type="number" inputmode="numeric" min="1" max="10000" value="1" required /></label>
+            <label>{c.scope.units}<input name="scopeUnits" type="number" inputmode="numeric" min="1" max="100000" value="1" required /></label>
+          </div>
+          <fieldset><legend>{c.scope.needs}</legend>
+            <label><input name="scopeBookings" type="checkbox" /><span>{c.scope.booking}</span></label>
+            <label><input name="scopeAutomation" type="checkbox" /><span>{c.scope.automation}</span></label>
+            <label><input name="scopeOperations" type="checkbox" /><span>{c.scope.operations}</span></label>
+          </fieldset>
+        </form>
+        <article class="scope-result" data-scope-result>
+          <div aria-live="polite" aria-atomic="true">
+            <span>{c.scope.result}</span><p class="scope-plan-code" data-scope-code>00</p><h3 data-scope-name>{c.scope.plans.basico[0]}</h3><p data-scope-description>{c.scope.plans.basico[1]}</p><ul data-scope-reasons><li>{c.scope.reasons.single}</li></ul>
+          </div>
+          <a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-use-scope>{c.scope.use}<span aria-hidden="true">→</span></a>
         </div>
-        <fieldset><legend>{c.scope.needs}</legend>
-          <label><input name="scopeBookings" type="checkbox" /><span>{c.scope.booking}</span></label>
-          <label><input name="scopeAutomation" type="checkbox" /><span>{c.scope.automation}</span></label>
-          <label><input name="scopeOperations" type="checkbox" /><span>{c.scope.operations}</span></label>
-        </fieldset>
-      </form>
-      <article class="scope-result" data-scope-result>
-        <div aria-live="polite" aria-atomic="true">
-          <span>{c.scope.result}</span>
-          <p class="scope-plan-code" data-scope-code>00</p>
-          <h3 data-scope-name>{c.scope.plans.basico[0]}</h3>
-          <p data-scope-description>{c.scope.plans.basico[1]}</p>
-          <ul data-scope-reasons><li>{c.scope.reasons.single}</li></ul>
-        </div>
-        <a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/`} data-use-scope>{c.scope.use}<span aria-hidden="true">→</span></a>
-      </article>
+      </div>
     </div>
   </div>
 </section>
 
-<HumanService locale={locale} ctaHref="#contacto" />
+<HomeThemeShowcase locale={locale} />
+<HomePanelShowcase locale={locale} />
+<HomeAftercare locale={locale} />
 
 <section class="section shell faq">
   <div class="section-head"><p class="eyebrow">{c.faq.eyebrow}</p><h2 class="heading">{c.faq.title}</h2></div>
@@ -241,6 +165,9 @@ const serviceSchema = {
 </section>
 <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
 <script is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)}></script>
+
+<HomeClosing locale={locale} />
+<HomeTourDialog locale={locale} />
 
 <div data-contact-origin>
 <section id="contacto" class="section shell" aria-labelledby="contact-dialog-title">

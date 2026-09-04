@@ -1,0 +1,240 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getCommercialTour } from '../commercial-tour';
+import PanelPreview from './PanelPreview.astro';
+
+const { locale } = Astro.props as { locale: Locale };
+const en = locale === 'en';
+const steps = getCommercialTour(locale);
+if (steps.length !== 5) throw new Error(`home_tour_expected_five:${locale}:${steps.length}`);
+
+const labels = en ? {
+  eyebrow: 'Three-minute product journey',
+  title: 'Follow one stay from its website to the decisions behind it.',
+  intro: 'Five verified moments connect Basic, Management and Intelligent through local, fictitious evidence.',
+  boundary: 'This journey makes no booking, payment, message, integration or external update.',
+  close: 'Close guided journey',
+  progress: 'Journey progress',
+  step: 'Step',
+  of: 'of',
+  decision: 'Decision in view',
+  outcome: 'What the evidence proves',
+  limit: 'Where the evidence stops',
+  detail: 'Open commercial context',
+  evidence: 'Open exact local evidence',
+  newTab: 'opens in a new tab',
+  evidenceNote: 'Evidence opens in a new tab. Return here to continue the journey.',
+  websiteEvidence: 'Website evidence',
+  workspaceEvidence: 'Workspace evidence',
+  previous: 'Previous step',
+  next: 'Next step',
+  complete: 'Complete journey',
+  free: 'Explore the full journey freely',
+} : {
+  eyebrow: 'Recorrido de producto en tres minutos',
+  title: 'Sigue una estancia desde su web hasta las decisiones que la preparan.',
+  intro: 'Cinco momentos verificados conectan Básico, Gestión e Inteligente mediante evidencia local y ficticia.',
+  boundary: 'Este recorrido no realiza reservas, pagos, mensajes, integraciones ni actualizaciones externas.',
+  close: 'Cerrar recorrido guiado',
+  progress: 'Progreso del recorrido',
+  step: 'Paso',
+  of: 'de',
+  decision: 'Decisión a la vista',
+  outcome: 'Qué demuestra la evidencia',
+  limit: 'Dónde termina la evidencia',
+  detail: 'Abrir contexto comercial',
+  evidence: 'Abrir evidencia local exacta',
+  newTab: 'se abre en otra pestaña',
+  evidenceNote: 'La evidencia se abre en otra pestaña. Vuelve aquí para continuar el recorrido.',
+  websiteEvidence: 'Evidencia web',
+  workspaceEvidence: 'Evidencia de gestión',
+  previous: 'Paso anterior',
+  next: 'Siguiente paso',
+  complete: 'Completar recorrido',
+  free: 'Explorar libremente el recorrido completo',
+};
+---
+
+<dialog
+  id="home-tour-dialog"
+  class="home-tour-dialog"
+  aria-labelledby="home-tour-dialog-title"
+  aria-describedby="home-tour-dialog-intro home-tour-dialog-boundary"
+  data-home-tour-dialog
+  data-home-tour-step-label={labels.step}
+  data-home-tour-of-label={labels.of}
+  data-home-tour-storage-key={`logic-estancia:home-tour:${locale}`}
+>
+  <article class="home-tour-frame">
+    <header class="home-tour-header">
+      <div class="home-tour-heading">
+        <p class="home-tour-eyebrow eyebrow">{labels.eyebrow}</p>
+        <h2 id="home-tour-dialog-title" class="home-tour-title">{labels.title}</h2>
+        <p id="home-tour-dialog-intro" class="home-tour-intro">{labels.intro}</p>
+        <p id="home-tour-dialog-boundary" class="home-tour-boundary" role="note">{labels.boundary}</p>
+      </div>
+      <button class="home-tour-close" type="button" data-home-tour-close aria-label={labels.close}>
+        <span aria-hidden="true">×</span>
+      </button>
+    </header>
+
+    <div class="home-tour-progress">
+      <div class="home-tour-progress-copy">
+        <span>{labels.progress}</span>
+        <strong data-home-tour-progress-text aria-live="polite">{labels.step} 1 {labels.of} {steps.length}</strong>
+      </div>
+      <progress
+        class="home-tour-progress-bar"
+        max={steps.length}
+        value="1"
+        aria-label={labels.progress}
+        data-home-tour-progress
+      >1 / {steps.length}</progress>
+    </div>
+
+    <div class="home-tour-step-list">
+      {steps.map((step, index) => (
+        <section
+          class="home-tour-step"
+          data-home-tour-step={step.id}
+          data-home-tour-step-index={index}
+          aria-labelledby={`home-tour-step-title-${step.id}`}
+          hidden={index !== 0}
+        >
+          <div class="home-tour-step-copy">
+            <p class="home-tour-step-meta">{step.number} · {step.phase} · {step.planLabel}</p>
+            <h3 id={`home-tour-step-title-${step.id}`} class="home-tour-step-title" tabindex="-1" data-home-tour-step-title>{step.title}</h3>
+            <p class="home-tour-step-summary">{step.summary}</p>
+            <dl class="home-tour-step-facts">
+              <div class="home-tour-step-fact">
+                <dt>{labels.decision}</dt>
+                <dd>{step.decision}</dd>
+              </div>
+              <div class="home-tour-step-fact">
+                <dt>{labels.outcome}</dt>
+                <dd>{step.outcome}</dd>
+              </div>
+              <div class="home-tour-step-fact">
+                <dt>{labels.limit}</dt>
+                <dd>{step.boundary}</dd>
+              </div>
+            </dl>
+            <div class="home-tour-step-links">
+              <a class="home-tour-detail-link" href={step.detailHref} target="_blank" rel="noopener noreferrer">
+                {labels.detail} <span class="home-tour-new-tab">({labels.newTab})</span><span aria-hidden="true">↗</span>
+              </a>
+              <a class="home-tour-evidence-link" href={step.evidenceHref} target="_blank" rel="noopener noreferrer">
+                {labels.evidence} <span class="home-tour-new-tab">({labels.newTab})</span><span aria-hidden="true">↗</span>
+              </a>
+            </div>
+            <p class="home-tour-evidence-note">{labels.evidenceNote}</p>
+          </div>
+
+          <div class="home-tour-step-visual">
+            <p class="home-tour-step-visual-label">
+              <span>{step.planLabel}</span>
+              <small>{step.kind === 'web' ? labels.websiteEvidence : labels.workspaceEvidence}</small>
+            </p>
+            {step.kind === 'web' ? (
+              <picture class="home-tour-picture">
+                <source
+                  type="image/avif"
+                  srcset="/media/nivora/hero-640.avif 640w, /media/nivora/hero-960.avif 960w"
+                  sizes="(max-width: 800px) calc(100vw - 48px), 48vw"
+                />
+                <img class="home-tour-image" src={step.image} alt={step.imageAlt} width="2016" height="1344" loading="lazy" decoding="async" />
+              </picture>
+            ) : (
+              <div class="home-tour-panel-preview"><PanelPreview locale={locale} kind={step.preview} /></div>
+            )}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <nav class="home-tour-controls" aria-label={labels.progress}>
+      <a class="home-tour-free" href={en ? '/en/journey/' : '/recorrido/'}>{labels.free} <span aria-hidden="true">↗</span></a>
+      <button class="home-tour-previous" type="button" data-home-tour-previous disabled>{labels.previous}</button>
+      <button class="home-tour-next" type="button" data-home-tour-next>{labels.next} <span aria-hidden="true">→</span></button>
+      <button class="home-tour-complete" type="button" data-home-tour-complete hidden>{labels.complete} <span aria-hidden="true">✓</span></button>
+    </nav>
+  </article>
+</dialog>
+
+<script>
+  const homeTourDialog = document.querySelector<HTMLDialogElement>('[data-home-tour-dialog]');
+  const homeTourSteps = [...(homeTourDialog?.querySelectorAll<HTMLElement>('[data-home-tour-step]') ?? [])];
+  const homeTourPrevious = homeTourDialog?.querySelector<HTMLButtonElement>('[data-home-tour-previous]');
+  const homeTourNext = homeTourDialog?.querySelector<HTMLButtonElement>('[data-home-tour-next]');
+  const homeTourComplete = homeTourDialog?.querySelector<HTMLButtonElement>('[data-home-tour-complete]');
+  const homeTourProgress = homeTourDialog?.querySelector<HTMLProgressElement>('[data-home-tour-progress]');
+  const homeTourProgressText = homeTourDialog?.querySelector<HTMLElement>('[data-home-tour-progress-text]');
+  let homeTourCurrentStep = 0;
+  let homeTourReturnTarget: HTMLElement | null = null;
+  const homeTourStorageKey = homeTourDialog?.dataset.homeTourStorageKey;
+
+  const readHomeTourStep = () => {
+    if (!homeTourStorageKey) return 0;
+    try {
+      const stored = Number.parseInt(sessionStorage.getItem(homeTourStorageKey) ?? '', 10);
+      return Number.isInteger(stored) && stored >= 0 && stored < homeTourSteps.length ? stored : 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  const showHomeTourStep = (requestedIndex: number, moveFocus = true) => {
+    if (!homeTourDialog || !homeTourPrevious || !homeTourNext || !homeTourComplete || !homeTourProgress || !homeTourProgressText || homeTourSteps.length === 0) return;
+    homeTourCurrentStep = Math.max(0, Math.min(homeTourSteps.length - 1, requestedIndex));
+    homeTourSteps.forEach((step, index) => { step.hidden = index !== homeTourCurrentStep; });
+    homeTourPrevious.disabled = homeTourCurrentStep === 0;
+    homeTourNext.hidden = homeTourCurrentStep === homeTourSteps.length - 1;
+    homeTourComplete.hidden = homeTourCurrentStep !== homeTourSteps.length - 1;
+    homeTourProgress.value = homeTourCurrentStep + 1;
+    const stepLabel = homeTourDialog.dataset.homeTourStepLabel ?? '';
+    const ofLabel = homeTourDialog.dataset.homeTourOfLabel ?? '';
+    homeTourProgressText.textContent = `${stepLabel} ${homeTourCurrentStep + 1} ${ofLabel} ${homeTourSteps.length}`;
+    if (homeTourStorageKey) {
+      try { sessionStorage.setItem(homeTourStorageKey, String(homeTourCurrentStep)); } catch { /* local progress is optional */ }
+    }
+    if (moveFocus) homeTourSteps[homeTourCurrentStep]?.querySelector<HTMLElement>('[data-home-tour-step-title]')?.focus();
+  };
+
+  document.addEventListener('click', (event) => {
+    const eventTarget = event.target instanceof Element ? event.target : null;
+    const trigger = eventTarget?.closest<HTMLElement>('[data-estancia-tour-trigger]');
+    if (!trigger || !homeTourDialog || typeof homeTourDialog.showModal !== 'function') return;
+    if (homeTourDialog.open) return;
+    homeTourReturnTarget = trigger;
+    showHomeTourStep(readHomeTourStep(), false);
+    try {
+      homeTourDialog.showModal();
+      event.preventDefault();
+      queueMicrotask(() => homeTourSteps[homeTourCurrentStep]?.querySelector<HTMLElement>('[data-home-tour-step-title]')?.focus());
+    } catch {
+      homeTourReturnTarget = null;
+    }
+  });
+
+  homeTourPrevious?.addEventListener('click', () => showHomeTourStep(homeTourCurrentStep - 1));
+  homeTourNext?.addEventListener('click', () => showHomeTourStep(homeTourCurrentStep + 1));
+  homeTourComplete?.addEventListener('click', () => {
+    if (homeTourStorageKey) {
+      try { sessionStorage.removeItem(homeTourStorageKey); } catch { /* local progress is optional */ }
+    }
+    homeTourDialog?.close('complete');
+  });
+  homeTourDialog?.querySelector<HTMLButtonElement>('[data-home-tour-close]')?.addEventListener('click', () => homeTourDialog.close('button'));
+  homeTourDialog?.addEventListener('click', (event) => {
+    if (event.target === homeTourDialog) homeTourDialog.close('backdrop');
+  });
+  homeTourDialog?.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    homeTourDialog.close('escape');
+  });
+  homeTourDialog?.addEventListener('close', () => {
+    const target = homeTourReturnTarget;
+    homeTourReturnTarget = null;
+    if (target?.isConnected) target.focus();
+  });
+</script>

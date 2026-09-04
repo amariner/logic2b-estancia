@@ -1,0 +1,580 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getPublishedPanels } from '../panel-portfolio';
+import { getSiteShell } from '../site-shell';
+import BrandLockup from './BrandLockup.astro';
+
+interface Props {
+  locale: Locale;
+  translated: boolean;
+  localeHref: string;
+  isHome: boolean;
+  whatsappHref: string;
+  whatsappPhone: string;
+}
+
+const { locale, translated, localeHref, isHome, whatsappHref, whatsappPhone } = Astro.props;
+const en = locale === 'en';
+const shell = getSiteShell(locale, isHome);
+const featuredPanel = getPublishedPanels(locale).find(({ id }) => id === 'operations-revenue');
+const panelsHref = `${en ? '/en' : ''}/${en ? 'panels' : 'paneles'}/`;
+---
+
+<footer class="site-footer" data-site-footer>
+  {featuredPanel && (
+    <section class="footer-panel-feature shell" aria-labelledby="footer-panel-title">
+      <div class="footer-panel-copy">
+        <p class="footer-kicker">{en ? 'Inside the workspace' : 'Dentro del gestor'}</p>
+        <h2 id="footer-panel-title">{en ? 'See the decision before choosing the plan.' : 'Mira la decisión antes de elegir el plan.'}</h2>
+        <p>{en
+          ? 'Six navigable pages show what the team can read, what remains under human review and what is still outside the project.'
+          : 'Seis fichas navegables enseñan qué puede leer el equipo, qué sigue bajo revisión humana y qué permanece fuera del proyecto.'}</p>
+        <div>
+          <a href={panelsHref}>{en ? 'Explore all workspace pages' : 'Explorar todos los paneles'}<span aria-hidden="true">→</span></a>
+          <span>{en ? 'Local demos · fictitious data' : 'Demos locales · datos ficticios'}</span>
+        </div>
+      </div>
+      <article class="footer-panel-card">
+        <div class="footer-panel-card-heading"><span>{featuredPanel.number}</span><div><small>{featuredPanel.planLabel}</small><strong>{featuredPanel.title}</strong></div></div>
+        <div class="footer-panel-preview" role="img" aria-label={en ? 'Explainable fictitious Aurem revenue scenario with forecasting unavailable' : 'Escenario ficticio explicable de ingresos de Aurem con previsión no disponible'}>
+          <div class="footer-panel-preview-bar"><strong>Aurem Hotel</strong><span>{en ? 'Local demo · read-only' : 'Demo local · solo lectura'}</span></div>
+          <div class="footer-panel-preview-shell">
+            <div class="footer-panel-preview-nav" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="footer-panel-preview-content">
+              <div class="footer-panel-preview-title"><div><span>{en ? 'Explainable local scenario' : 'Escenario local explicable'}</span><strong>{en ? 'Revenue · 28 days' : 'Ingresos · 28 días'}</strong></div><b>{en ? 'No forecast' : 'Sin previsión'}</b></div>
+              <div class="footer-panel-preview-metrics"><p><span>{en ? 'Simulated revenue' : 'Ingresos simulados'}</span><strong>{en ? '€296,608' : '€296.608'}</strong></p><p><span>{en ? 'Occupancy' : 'Ocupación'}</span><strong>89%</strong></p><p><span>ADR</span><strong>€124</strong></p><p><span>RevPAR</span><strong>€110</strong></p></div>
+              <div class="footer-panel-preview-chart" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <p class="footer-panel-preview-boundary">{en ? 'Fictitious formulas · no PMS, accounting or forecast' : 'Fórmulas ficticias · sin PMS, contabilidad ni previsión'}</p>
+            </div>
+          </div>
+        </div>
+        <a href={featuredPanel.detailHref ?? panelsHref}>{en ? 'Open the verified page' : 'Abrir la ficha verificada'}<span aria-hidden="true">↗</span></a>
+      </article>
+    </section>
+  )}
+
+  <div class="footer-main shell">
+    <section class="footer-brand" aria-labelledby="footer-brand-title">
+      <h2 id="footer-brand-title" class="sr-only">Logic2B Estancias</h2>
+      <BrandLockup locale={locale} />
+      <p>{en
+        ? 'Managed websites and accommodation workspaces, scoped and implemented with the Logic2B team.'
+        : 'Webs gestionadas y espacios de trabajo para estancias, definidos e implantados con el equipo de Logic2B.'}</p>
+      <a class="footer-brand-journey" href={shell.journey.href} data-estancia-tour-trigger={isHome ? '' : undefined} aria-haspopup={isHome ? 'dialog' : undefined}>
+        {shell.journey.label}<span aria-hidden="true">↗</span>
+      </a>
+    </section>
+
+    <nav class="footer-column" aria-label={en ? 'Product' : 'Producto'}>
+      <p>{en ? 'Product' : 'Producto'}</p>
+      {shell.footerProduct.map((item, index) => (
+        <a href={item.href} data-estancia-tour-trigger={isHome && index === shell.footerProduct.length - 1 ? '' : undefined} aria-haspopup={isHome && index === shell.footerProduct.length - 1 ? 'dialog' : undefined}>{item.label}</a>
+      ))}
+    </nav>
+
+    <nav class="footer-column" aria-label={en ? 'Explore' : 'Explora'}>
+      <p>{en ? 'Explore' : 'Explora'}</p>
+      {shell.solutions.map((item) => <a href={item.href}>{item.label}</a>)}
+      <a href={shell.guides.href}>{shell.guides.label}</a>
+    </nav>
+
+    <section class="footer-column footer-talk" aria-labelledby="footer-talk-title">
+      <p id="footer-talk-title">{en ? 'Let’s talk' : 'Hablemos'}</p>
+      <a href={shell.contact.href} data-contact-trigger aria-haspopup={isHome ? 'dialog' : undefined}>{shell.contact.label}</a>
+      <a href={shell.assessment.href}>{shell.assessment.label}</a>
+      <a href={whatsappHref} target="_blank" rel="noopener noreferrer">WhatsApp <span aria-hidden="true">↗</span></a>
+      <small>{whatsappPhone}</small>
+    </section>
+  </div>
+
+  <div class="footer-bar shell">
+    <p>© 2026 Logic2B · Castelló</p>
+    <nav class="footer-legal" aria-label={en ? 'Legal' : 'Legal'}>{shell.legal.map((item) => <a href={item.href}>{item.label}</a>)}</nav>
+    <nav class="footer-languages" aria-label={en ? 'Languages' : 'Idiomas'}>
+      {en ? (
+        <><a href={translated ? localeHref : '/'} lang="es" hreflang="es">ES</a><span aria-current="page">EN</span></>
+      ) : (
+        <><span aria-current="page">ES</span>{translated && <a href={localeHref} lang="en" hreflang="en">EN</a>}</>
+      )}
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    overflow: hidden;
+    color: rgb(255 255 255 / .78);
+    background: #17191c;
+  }
+
+  .footer-panel-feature {
+    display: grid;
+    grid-template-columns: minmax(0, .82fr) minmax(430px, 1.18fr);
+    gap: clamp(46px, 7vw, 108px);
+    align-items: center;
+    padding-top: clamp(72px, 9vw, 132px);
+    padding-bottom: clamp(68px, 8vw, 116px);
+  }
+
+  .footer-panel-copy {
+    max-width: 560px;
+  }
+
+  .footer-kicker,
+  .footer-column > p {
+    margin: 0;
+    color: #a9c0ad;
+    font-size: .59rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .footer-panel-copy h2 {
+    max-width: 620px;
+    margin: 18px 0 0;
+    color: white;
+    font-family: var(--serif);
+    font-size: clamp(2.6rem, 5vw, 5.6rem);
+    font-weight: 400;
+    line-height: .94;
+  }
+
+  .footer-panel-copy > p:not(.footer-kicker) {
+    max-width: 540px;
+    margin: 26px 0 0;
+    color: rgb(255 255 255 / .62);
+    font-size: .84rem;
+    line-height: 1.68;
+  }
+
+  .footer-panel-copy > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 24px;
+    align-items: center;
+    margin-top: 32px;
+  }
+
+  .footer-panel-copy a,
+  .footer-panel-card > a,
+  .footer-brand-journey {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    font-size: .7rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .footer-panel-copy > div > span {
+    color: rgb(255 255 255 / .46);
+    font-size: .61rem;
+  }
+
+  .footer-panel-card {
+    min-width: 0;
+    border: 1px solid rgb(255 255 255 / .15);
+    border-radius: 24px;
+    padding: clamp(16px, 2vw, 24px);
+    background: #eef1ee;
+    box-shadow: 0 38px 90px rgb(0 0 0 / .25);
+  }
+
+  .footer-panel-card-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 2px 15px;
+    color: #26382e;
+  }
+
+  .footer-panel-card-heading > span {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid #cbd4ce;
+    border-radius: 50%;
+    font-size: .58rem;
+  }
+
+  .footer-panel-card-heading small,
+  .footer-panel-card-heading strong {
+    display: block;
+  }
+
+  .footer-panel-card-heading small {
+    color: #607168;
+    font-size: .5rem;
+    text-transform: uppercase;
+  }
+
+  .footer-panel-card-heading strong {
+    margin-top: 3px;
+    font-size: .72rem;
+  }
+
+  .footer-panel-card > a {
+    justify-content: space-between;
+    margin-top: 12px;
+    color: #26382e;
+  }
+
+  .footer-panel-preview {
+    overflow: hidden;
+    border: 1px solid #d9ddda;
+    border-radius: 14px;
+    color: #1d2822;
+    background: #f4f6f4;
+  }
+
+  .footer-panel-preview-bar {
+    display: flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border-bottom: 1px solid #d9ddda;
+    padding: 0 11px;
+    color: #53635a;
+    background: #fbfcfb;
+    font-size: .51rem;
+  }
+
+  .footer-panel-preview-bar strong {
+    color: #26382e;
+  }
+
+  .footer-panel-preview-shell {
+    display: grid;
+    min-height: 245px;
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .footer-panel-preview-nav {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 14px 9px;
+    background: #1b2c23;
+  }
+
+  .footer-panel-preview-nav i {
+    display: block;
+    width: 15px;
+    height: 3px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / .34);
+  }
+
+  .footer-panel-preview-nav i:first-child {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: #a7c2ad;
+  }
+
+  .footer-panel-preview-content {
+    min-width: 0;
+    padding: 13px;
+  }
+
+  .footer-panel-preview-title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .footer-panel-preview-title span,
+  .footer-panel-preview-title strong {
+    display: block;
+  }
+
+  .footer-panel-preview-title span {
+    color: #4e5f56;
+    font-size: .48rem;
+  }
+
+  .footer-panel-preview-title strong {
+    margin-top: 4px;
+    font-size: .68rem;
+  }
+
+  .footer-panel-preview-title b {
+    border: 1px solid #cfd6d1;
+    border-radius: 999px;
+    padding: 5px 7px;
+    color: #45614f;
+    background: white;
+    font-size: .46rem;
+  }
+
+  .footer-panel-preview-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .footer-panel-preview-metrics p {
+    min-width: 0;
+    margin: 0;
+    border: 1px solid #dce1dd;
+    border-radius: 8px;
+    padding: 7px;
+    background: white;
+  }
+
+  .footer-panel-preview-metrics span,
+  .footer-panel-preview-metrics strong {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .footer-panel-preview-metrics span {
+    min-height: 2.6em;
+    color: #617068;
+    font-size: .4rem;
+    line-height: 1.3;
+  }
+
+  .footer-panel-preview-metrics strong {
+    margin-top: 7px;
+    font-family: var(--serif);
+    font-size: .82rem;
+    font-weight: 400;
+  }
+
+  .footer-panel-preview-chart {
+    display: flex;
+    height: 48px;
+    align-items: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+    border-bottom: 1px solid #bec7c1;
+    padding: 0 12px;
+  }
+
+  .footer-panel-preview-chart i {
+    display: block;
+    width: 25%;
+    border-radius: 4px 4px 0 0;
+    background: #536b5c;
+  }
+
+  .footer-panel-preview-chart i:nth-child(1) { height: 88%; }
+  .footer-panel-preview-chart i:nth-child(2) { height: 92%; }
+  .footer-panel-preview-chart i:nth-child(3) { height: 86%; }
+  .footer-panel-preview-chart i:nth-child(4) { height: 90%; }
+
+  .footer-panel-preview-boundary {
+    margin: 8px 0 0;
+    color: #65746c;
+    font-size: .45rem;
+    line-height: 1.35;
+  }
+
+  .footer-main {
+    display: grid;
+    grid-template-columns: minmax(250px, 1.45fr) repeat(3, minmax(130px, .65fr));
+    gap: clamp(34px, 5vw, 80px);
+    border-top: 1px solid rgb(255 255 255 / .13);
+    padding-top: clamp(54px, 7vw, 84px);
+    padding-bottom: clamp(56px, 7vw, 88px);
+  }
+
+  .footer-brand {
+    max-width: 390px;
+  }
+
+  .footer-brand :global(.wordmark) {
+    color: white;
+    font-size: 1.16rem;
+  }
+
+  .footer-brand :global(.wordmark-core strong) {
+    color: #d5d7d6;
+  }
+
+  .footer-brand :global(.wordmark-product) {
+    color: #a9c0ad;
+  }
+
+  .footer-brand > p {
+    margin: 24px 0 0;
+    color: rgb(255 255 255 / .56);
+    font-size: .76rem;
+    line-height: 1.68;
+  }
+
+  .footer-brand-journey {
+    margin-top: 20px;
+    color: #d9e5dc;
+  }
+
+  .footer-column {
+    display: grid;
+    align-content: start;
+    gap: 13px;
+  }
+
+  .footer-column > p {
+    margin-bottom: 10px;
+  }
+
+  .footer-column a {
+    display: inline-flex;
+    width: fit-content;
+    min-height: 32px;
+    align-items: center;
+    color: rgb(255 255 255 / .72);
+    font-size: .7rem;
+    text-decoration: none;
+  }
+
+  .footer-column a:hover,
+  .footer-column a:focus-visible,
+  .footer-brand-journey:hover,
+  .footer-panel-copy a:hover,
+  .footer-panel-card > a:hover {
+    color: white;
+  }
+
+  .footer-talk small {
+    color: rgb(255 255 255 / .64);
+    font-size: .58rem;
+  }
+
+  .footer-bar {
+    display: grid;
+    min-height: 76px;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 28px;
+    align-items: center;
+    border-top: 1px solid rgb(255 255 255 / .13);
+  }
+
+  .footer-bar p,
+  .footer-bar a,
+  .footer-bar span {
+    margin: 0;
+    color: rgb(255 255 255 / .48);
+    font-size: .58rem;
+    text-decoration: none;
+  }
+
+  .footer-legal,
+  .footer-languages {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .footer-languages {
+    gap: 7px;
+  }
+
+  .footer-languages a,
+  .footer-languages span {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 1px solid rgb(255 255 255 / .15);
+    border-radius: 50%;
+  }
+
+  .footer-languages [aria-current='page'] {
+    color: #17191c;
+    background: #a9c0ad;
+  }
+
+  .site-footer a:focus-visible {
+    outline: 3px solid #d58f70;
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 980px) {
+    .footer-panel-feature {
+      grid-template-columns: 1fr;
+    }
+
+    .footer-panel-copy {
+      max-width: 720px;
+    }
+
+    .footer-panel-card {
+      width: min(100%, 720px);
+    }
+
+    .footer-main {
+      grid-template-columns: minmax(240px, 1.2fr) repeat(3, minmax(110px, .7fr));
+      gap: 34px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .footer-main {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .footer-brand {
+      grid-column: 1 / -1;
+      margin-bottom: 14px;
+    }
+
+    .footer-bar {
+      grid-template-columns: 1fr auto;
+      padding-block: 22px;
+    }
+
+    .footer-legal {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .footer-panel-feature {
+      padding-top: 64px;
+      padding-bottom: 70px;
+    }
+
+    .footer-panel-copy h2 {
+      font-size: clamp(2.5rem, 13vw, 4rem);
+    }
+
+    .footer-panel-card {
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .footer-main {
+      grid-template-columns: 1fr 1fr;
+      gap: 38px 24px;
+    }
+
+    .footer-talk {
+      grid-column: 1 / -1;
+    }
+
+    .footer-bar {
+      grid-template-columns: 1fr;
+      gap: 17px;
+    }
+
+    .footer-languages {
+      grid-row: 2;
+    }
+
+    .footer-legal {
+      grid-row: 3;
+    }
+  }
+</style>

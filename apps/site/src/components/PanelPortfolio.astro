@@ -9,6 +9,13 @@ const en = locale === 'en';
 const prefix = en ? '/en' : '';
 const panels = getPanelPortfolio(locale);
 const publishedCount = getPublishedPanels(locale).length;
+const filters = en ? {
+  search: 'Search', placeholder: 'Panel, decision or responsibility', plan: 'Starting plan', all: 'All', management: 'Management', intelligent: 'Intelligent',
+  result: `Showing ${publishedCount} verified workspaces`, visible: 'verified workspaces shown', empty: 'No workspace matches this search and filter combination.',
+} : {
+  search: 'Buscar', placeholder: 'Panel, decisión o responsabilidad', plan: 'Plan de partida', all: 'Todos', management: 'Gestión', intelligent: 'Inteligente',
+  result: `Mostrando ${publishedCount} paneles verificados`, visible: 'paneles verificados visibles', empty: 'Ningún panel coincide con la búsqueda y el filtro.',
+};
 ---
 
 <div data-panel-portfolio>
@@ -31,9 +38,20 @@ const publishedCount = getPublishedPanels(locale).length;
         <div><p class="eyebrow">{en ? 'Evidence by responsibility' : 'Evidencia por responsabilidad'}</p><h2 id="panel-catalog-title" class="heading">{en ? 'Start with the surfaces that can already be checked.' : 'Empieza por las superficies que ya se pueden comprobar.'}</h2></div>
         <p>{en ? 'All six pages now open exact local evidence: three Management surfaces in Terrava and three Intelligent surfaces in Aurem. Their boundaries distinguish what is visible from what remains pending or on the roadmap.' : 'Las seis fichas ya abren evidencia local exacta: tres superficies de Gestión en Terrava y tres de Inteligente en Aurem. Sus límites distinguen lo visible de lo pendiente o en ruta.'}</p>
       </div>
+      <div class="portfolio-filters panel-portfolio-filters" aria-label={en ? 'Filter workspace pages' : 'Filtrar fichas de panel'}>
+        <fieldset class="portfolio-search"><legend>{filters.search}</legend><label class="sr-only" for="panel-portfolio-search">{filters.placeholder}</label><input id="panel-portfolio-search" type="search" placeholder={filters.placeholder} autocomplete="off" data-panel-search /></fieldset>
+        <fieldset><legend>{filters.plan}</legend><div class="portfolio-filter-list">
+          {[
+            ['all', filters.all],
+            ['gestion', filters.management],
+            ['inteligente', filters.intelligent],
+          ].map(([value, label], index) => <button type="button" class={index === 0 ? 'is-active' : ''} aria-pressed={index === 0 ? 'true' : 'false'} data-panel-plan-filter={value}>{label}</button>)}
+        </div></fieldset>
+      </div>
+      <p class="portfolio-filter-status" data-panel-filter-status aria-live="polite">{filters.result}</p>
       <div class="panel-portfolio-grid">
         {panels.map((panel) => (
-          <article class:list={['panel-portfolio-card', { 'is-published': panel.status === 'published' }]} data-panel-card={panel.id} data-panel-status={panel.status}>
+          <article class:list={['panel-portfolio-card', { 'is-published': panel.status === 'published' }]} data-panel-card={panel.id} data-panel-status={panel.status} data-panel-plan={panel.plan}>
             <header><span>{panel.number}</span><small>{panel.statusLabel}</small></header>
             <div class="panel-portfolio-card-title"><div><p>{panel.planLabel}</p><h2>{panel.title}</h2></div><span aria-hidden="true">{panel.status === 'published' ? '↗' : '·'}</span></div>
             <p>{panel.summary}</p>
@@ -45,6 +63,7 @@ const publishedCount = getPublishedPanels(locale).length;
           </article>
         ))}
       </div>
+      <p class="portfolio-filter-empty" data-panel-filter-empty hidden>{filters.empty}</p>
     </div>
   </section>
 
@@ -55,3 +74,38 @@ const publishedCount = getPublishedPanels(locale).length;
     <a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-track="cta_click" data-section="panel_portfolio">{en ? 'Find my starting point' : 'Ver mi punto de partida'} <span aria-hidden="true">→</span></a>
   </section>
 </div>
+
+<script is:inline define:vars={{ locale, result: filters.result, visibleLabel: filters.visible }}>
+  const panelPortfolio = document.querySelector('[data-panel-portfolio]');
+  const panelCards = panelPortfolio ? [...panelPortfolio.querySelectorAll('[data-panel-card]')] : [];
+  const panelStatus = panelPortfolio?.querySelector('[data-panel-filter-status]');
+  const panelEmpty = panelPortfolio?.querySelector('[data-panel-filter-empty]');
+  let panelPlan = 'all';
+  let panelSearch = '';
+  const refreshPanels = () => {
+    let visible = 0;
+    panelCards.forEach((card) => {
+      const searchable = (card.textContent ?? '').toLocaleLowerCase(locale);
+      const matches = (panelPlan === 'all' || card.dataset.panelPlan === panelPlan) && (!panelSearch || searchable.includes(panelSearch));
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    if (panelStatus) panelStatus.textContent = visible === panelCards.length ? result : `${visible} ${visibleLabel}`;
+    if (panelEmpty) panelEmpty.hidden = visible !== 0;
+  };
+  panelPortfolio?.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target.closest('[data-panel-plan-filter]') : null;
+    if (!(target instanceof HTMLButtonElement)) return;
+    panelPlan = target.dataset.panelPlanFilter ?? 'all';
+    panelPortfolio.querySelectorAll('[data-panel-plan-filter]').forEach((button) => {
+      const selected = button.dataset.panelPlanFilter === panelPlan;
+      button.classList.toggle('is-active', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+    refreshPanels();
+  });
+  panelPortfolio?.querySelector('[data-panel-search]')?.addEventListener('input', (event) => {
+    panelSearch = event.target instanceof HTMLInputElement ? event.target.value.trim().toLocaleLowerCase(locale) : '';
+    refreshPanels();
+  });
+</script>
