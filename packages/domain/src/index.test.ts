@@ -36,7 +36,7 @@ describe('domain', () => {
   it('states the current public evidence for every capability without overstating hidden views', () => {
     expect(Object.fromEntries(CAPABILITIES.map(({ id, status }) => [id, status]))).toEqual({
       'brand-web': 'demo_visual_disponible',
-      'email-enquiries': 'demo_visual_pendiente',
+      'email-enquiries': 'demo_visual_disponible',
       'enquiry-workspace': 'demo_visual_disponible',
       planning: 'demo_visual_disponible',
       'guest-context': 'demo_visual_disponible',

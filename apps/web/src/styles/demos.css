@@ -33,6 +33,7 @@
 .demo-editorial > div { padding: 10vw 8vw; }
 .demo-editorial div > p:not(.demo-eyebrow) { margin-top: 30px; }
 .demo-booking { display: grid; grid-template-columns: .8fr 1.2fr; gap: 8vw; padding: 130px max(5vw, calc((100vw - 1200px) / 2)); }
+.demo-booking > * { min-width: 0; }
 .demo-panel-preview { overflow: hidden; border: 1px solid color-mix(in srgb, var(--demo-ink) 18%, transparent); background: var(--demo-paper); }
 .demo-panel-preview > header { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid color-mix(in srgb, var(--demo-ink) 14%, transparent); padding: 18px 22px; }
 .demo-panel-preview > header span { color: color-mix(in srgb, var(--demo-ink) 68%, transparent); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
@@ -45,6 +46,28 @@
 .demo-panel-boundary { margin: 0; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 18px 22px; color: color-mix(in srgb, var(--demo-ink) 72%, transparent); font-size: .7rem; line-height: 1.55; }
 .demo-manager-next { display: flex; min-height: 48px; align-items: center; justify-content: space-between; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 0 22px; color: var(--demo-paper); background: var(--demo-ink); font-size: .72rem; text-decoration: none; }
 .demo-basic-note { display: block; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 18px 22px; color: var(--demo-accent); font-size: .7rem; line-height: 1.45; }
+.email-enquiry-demo { overflow: hidden; border: 1px solid color-mix(in srgb, var(--demo-ink) 18%, transparent); background: var(--demo-paper); }
+.email-enquiry-demo > header { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid color-mix(in srgb, var(--demo-ink) 14%, transparent); padding: 18px 22px; }
+.email-enquiry-demo > header span, .email-enquiry-preview > header span { color: color-mix(in srgb, var(--demo-ink) 68%, transparent); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.email-enquiry-demo > header strong { font-family: 'Source Serif 4 Variable', serif; font-size: 1.05rem; font-weight: 500; }
+.email-enquiry-picker { padding: 22px; }
+.email-enquiry-picker > p { max-width: 58ch; margin: 0 0 16px; font-size: .72rem; line-height: 1.55; }
+.email-enquiry-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.email-enquiry-choices button, .email-enquiry-demo > footer button { min-height: 44px; border: 1px solid color-mix(in srgb, var(--demo-ink) 28%, transparent); padding: 9px 13px; color: inherit; background: transparent; font: inherit; font-size: .68rem; cursor: pointer; }
+.email-enquiry-choices button[aria-pressed='true'] { color: var(--demo-paper); background: var(--demo-ink); }
+.email-enquiry-preview { margin: 0 22px; border: 1px solid color-mix(in srgb, var(--demo-ink) 16%, transparent); background: color-mix(in srgb, var(--demo-bg) 42%, var(--demo-paper)); }
+.email-enquiry-preview > header { display: grid; gap: 6px; border-bottom: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 15px 17px; }
+.email-enquiry-preview > header strong { overflow-wrap: anywhere; font-family: 'Source Serif 4 Variable', serif; font-size: 1rem; font-weight: 500; line-height: 1.3; }
+.email-enquiry-preview dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
+.email-enquiry-preview dl div { min-width: 0; border-bottom: 1px solid color-mix(in srgb, var(--demo-ink) 10%, transparent); padding: 12px 17px; }
+.email-enquiry-preview dl div:nth-child(odd) { border-right: 1px solid color-mix(in srgb, var(--demo-ink) 10%, transparent); }
+.email-enquiry-preview dl div:last-child { grid-column: 1 / -1; border-right: 0; }
+.email-enquiry-preview dt { color: color-mix(in srgb, var(--demo-ink) 65%, transparent); font-size: .56rem; letter-spacing: .06em; text-transform: uppercase; }
+.email-enquiry-preview dd { overflow-wrap: anywhere; margin: 5px 0 0; font-size: .69rem; line-height: 1.4; }
+.email-enquiry-preview > p { margin: 0; padding: 17px; font-family: 'Source Serif 4 Variable', serif; font-size: .92rem; line-height: 1.55; }
+.email-enquiry-boundary { margin: 20px 22px 0; color: color-mix(in srgb, var(--demo-ink) 74%, transparent); font-size: .67rem; line-height: 1.55; }
+.email-enquiry-demo > footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 16px 22px; }
+.email-enquiry-demo > footer span { overflow-wrap: anywhere; color: var(--demo-accent); font-size: .65rem; line-height: 1.45; text-align: right; }
 .demo-footer { display: grid; grid-template-columns: 1fr 1fr auto; align-items: center; gap: 30px; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 18%, transparent); padding: 34px 4vw; }
 .demo-footer span { font-family: 'Source Serif 4 Variable', serif; }
 .demo-footer small { color: color-mix(in srgb, var(--demo-ink) 75%, transparent); }
@@ -78,6 +101,11 @@
   .demo-panel-metrics { grid-template-columns: 1fr; }
   .demo-panel-metrics div { min-height: 92px; border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); }
   .demo-panel-metrics div:last-child { border-bottom: 0; }
+  .email-enquiry-preview dl { grid-template-columns: 1fr; }
+  .email-enquiry-preview dl div:nth-child(odd) { border-right: 0; }
+  .email-enquiry-preview dl div:last-child { grid-column: auto; }
+  .email-enquiry-demo > footer { align-items: stretch; flex-direction: column; }
+  .email-enquiry-demo > footer span { text-align: left; }
   .demo-booking .full { grid-column: auto; }
   .demo-footer { grid-template-columns: 1fr; }
 }

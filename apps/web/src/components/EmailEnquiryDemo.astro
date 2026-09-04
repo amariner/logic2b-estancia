@@ -1,0 +1,85 @@
+---
+import { EMAIL_ENQUIRY_DEFAULT_ID, getEmailEnquiryDemo, type EmailEnquiryLocale } from '../email-enquiry-demo';
+
+const { locale } = Astro.props as { locale: EmailEnquiryLocale };
+const copy = getEmailEnquiryDemo(locale);
+const initial = copy.scenarios.find(({ id }) => id === EMAIL_ENQUIRY_DEFAULT_ID)!;
+const scenarioLabelId = `email-enquiry-scenarios-${locale}`;
+---
+<article
+  class="email-enquiry-demo"
+  aria-label={copy.ariaLabel}
+  data-email-enquiry-demo
+  data-updated-status={copy.updatedStatus}
+  data-reset-status={copy.resetStatus}
+>
+  <header><span>{copy.mode}</span><strong>Nivora One</strong></header>
+  <div class="email-enquiry-picker">
+    <p id={scenarioLabelId}>{copy.intro}</p>
+    <div class="email-enquiry-choices" role="group" aria-labelledby={scenarioLabelId}>
+      {copy.scenarios.map((scenario) => (
+        <button
+          type="button"
+          aria-pressed={scenario.id === EMAIL_ENQUIRY_DEFAULT_ID ? 'true' : 'false'}
+          data-email-enquiry-choice
+          data-default={scenario.id === EMAIL_ENQUIRY_DEFAULT_ID ? 'true' : undefined}
+          data-subject={scenario.subject}
+          data-sender={scenario.sender}
+          data-dates={scenario.dates}
+          data-guests={scenario.guests}
+          data-message={scenario.message}
+        >{scenario.choice}</button>
+      ))}
+    </div>
+  </div>
+  <section class="email-enquiry-preview" aria-label={copy.previewLabel} data-email-enquiry-preview>
+    <header><span>{copy.previewLabel}</span><strong data-email-enquiry-subject>{initial.subject}</strong></header>
+    <dl>
+      <div><dt>{copy.recipientLabel}</dt><dd>{copy.recipient}</dd></div>
+      <div><dt>{copy.senderLabel}</dt><dd data-email-enquiry-sender>{initial.sender}</dd></div>
+      <div><dt>{copy.datesLabel}</dt><dd data-email-enquiry-dates>{initial.dates}</dd></div>
+      <div><dt>{copy.guestsLabel}</dt><dd data-email-enquiry-guests>{initial.guests}</dd></div>
+      <div><dt>{copy.stayLabel}</dt><dd>{copy.stay}</dd></div>
+    </dl>
+    <p data-email-enquiry-message>{initial.message}</p>
+  </section>
+  <p class="email-enquiry-boundary" role="note">{copy.boundary}</p>
+  <footer>
+    <button type="button" data-email-enquiry-reset>{copy.reset}</button>
+    <span role="status" aria-live="polite" data-email-enquiry-status>{copy.initialStatus}</span>
+  </footer>
+</article>
+
+<script>
+  const bindEmailEnquiryDemo = (root: HTMLElement) => {
+    if (root.dataset.bound === 'true') return;
+    root.dataset.bound = 'true';
+    const choices = [...root.querySelectorAll<HTMLButtonElement>('[data-email-enquiry-choice]')];
+    const preview = root.querySelector<HTMLElement>('[data-email-enquiry-preview]');
+    const subject = root.querySelector<HTMLElement>('[data-email-enquiry-subject]');
+    const sender = root.querySelector<HTMLElement>('[data-email-enquiry-sender]');
+    const dates = root.querySelector<HTMLElement>('[data-email-enquiry-dates]');
+    const guests = root.querySelector<HTMLElement>('[data-email-enquiry-guests]');
+    const message = root.querySelector<HTMLElement>('[data-email-enquiry-message]');
+    const status = root.querySelector<HTMLElement>('[data-email-enquiry-status]');
+    const reset = root.querySelector<HTMLButtonElement>('[data-email-enquiry-reset]');
+    const initial = choices.find((choice) => choice.dataset.default === 'true');
+    if (!preview || !subject || !sender || !dates || !guests || !message || !status || !reset || !initial) return;
+
+    const activate = (choice: HTMLButtonElement, announcement: string) => {
+      for (const candidate of choices) candidate.setAttribute('aria-pressed', String(candidate === choice));
+      subject.textContent = choice.dataset.subject ?? '';
+      sender.textContent = choice.dataset.sender ?? '';
+      dates.textContent = choice.dataset.dates ?? '';
+      guests.textContent = choice.dataset.guests ?? '';
+      message.textContent = choice.dataset.message ?? '';
+      preview.dataset.activeScenario = choice.dataset.subject ?? '';
+      status.textContent = announcement;
+    };
+
+    for (const choice of choices) choice.addEventListener('click', () => activate(choice, root.dataset.updatedStatus ?? ''));
+    reset.addEventListener('click', () => activate(initial, root.dataset.resetStatus ?? ''));
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-email-enquiry-demo]').forEach(bindEmailEnquiryDemo);
+</script>

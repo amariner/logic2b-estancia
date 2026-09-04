@@ -1,6 +1,7 @@
 ---
 import type { DemoLocale, DemoSlug } from '../data';
 import { demos } from '../data';
+import EmailEnquiryDemo from './EmailEnquiryDemo.astro';
 const { slug, locale } = Astro.props as { slug: DemoSlug; locale: DemoLocale };
 const demo = demos[slug]; const c = demo[locale]; const prefix = locale === 'en' ? '/en' : '';
 const planNames = locale === 'es'
@@ -12,14 +13,10 @@ const imageAlt = locale === 'es' ? `Interior y atmósfera de ${demo.brand}` : `$
 const detailAlt = locale === 'es' ? `Detalle de la experiencia ${demo.brand}` : `${demo.brand} experience detail`;
 const managerHref = `${prefix}/demos/${slug}/gestion/?vista=home`;
 const panelItems = locale === 'es'
-  ? slug === 'nivora'
-    ? [['Contenido', 'Web y guía local'], ['Alojamiento', '1 fixture ficticio'], ['Operación', 'Sin gestor ni altas']]
-    : slug === 'terrava'
+  ? slug === 'terrava'
       ? [['Propiedades', '8 ficticias'], ['Planning', 'Vista de ejemplo'], ['Solicitudes', 'Datos precargados']]
       : [['Habitaciones', '96 ficticias'], ['Operación', 'Estado de ejemplo'], ['Métricas', 'Escenario visual']]
-  : slug === 'nivora'
-    ? [['Content', 'Website and local guide'], ['Stay', '1 fictitious fixture'], ['Operations', 'No workspace or registration']]
-    : slug === 'terrava'
+  : slug === 'terrava'
       ? [['Properties', '8 fictitious'], ['Planning', 'Sample view'], ['Enquiries', 'Preloaded data']]
       : [['Rooms', '96 fictitious'], ['Operations', 'Sample status'], ['Metrics', 'Visual scenario']];
 ---
@@ -33,5 +30,5 @@ const panelItems = locale === 'es'
   <section class="demo-hero"><div class="demo-hero-copy"><p class="demo-eyebrow">{c.eyebrow}</p><h1>{c.title[0]} <em>{c.title[1]}</em></h1><p>{c.intro}</p><a href="#reserva">{c.cta}<span>→</span></a></div><figure><picture><source type="image/avif" srcset={`/media/${slug}/hero-640.avif 640w, /media/${slug}/hero-960.avif 960w, /media/${slug}/hero-1600.avif 1600w`} sizes="(max-width: 820px) 100vw, 55vw" /><img src={`/media/${slug}/hero.webp`} alt={imageAlt} width="2016" height="1344" fetchpriority="high" /></picture></figure></section>
   <section id="espacio" class="demo-intro"><div><p class="demo-eyebrow">{demo.kind}</p><h2>{c.section}</h2></div><div><p>{c.body}</p><ul>{c.detail.map((item) => <li>{item}</li>)}</ul></div></section>
   <section id="experiencia" class="demo-editorial"><figure><picture><source type="image/avif" srcset={`/media/${slug}/detail-640.avif 640w, /media/${slug}/detail-960.avif 960w, /media/${slug}/detail-1600.avif 1600w`} sizes="(max-width: 820px) 100vw, 50vw" /><img src={secondImage} alt={detailAlt} width="2016" height="1344" loading="lazy" /></picture></figure><div><p class="demo-eyebrow">{locale === 'es' ? 'Una estancia con contexto' : 'A stay with context'}</p><h2>{slug === 'nivora' ? (locale === 'es' ? 'Una guía que cabe en el bolsillo.' : 'A guide that fits in your pocket.') : slug === 'terrava' ? (locale === 'es' ? 'Caminar, cocinar, volver.' : 'Walk, cook, return.') : (locale === 'es' ? 'Servicio sin ruido.' : 'Service without noise.')}</h2><p>{slug === 'nivora' ? (locale === 'es' ? 'Mercado, café, arquitectura y rutas a pie seleccionadas desde la propia web.' : 'Markets, coffee, architecture and walks selected from the website.') : slug === 'terrava' ? (locale === 'es' ? 'Cada casa propone rutas y productores cercanos sin convertir el paisaje en un catálogo.' : 'Every home suggests nearby walks and makers without turning the landscape into a catalogue.') : (locale === 'es' ? 'Llegada preparada, habitación disponible y decisiones del equipo conectadas.' : 'Prepared arrival, available room and connected team decisions.')}</p></div></section>
-  <section id="reserva" class="demo-booking" data-demo-panel><div><p class="demo-eyebrow" data-demo-plan={demo.plan}>{planNames[demo.plan]} · Logic2B Estancias</p><h2>{c.panelTitle}</h2><p>{c.panelBody}</p></div><article class="demo-panel-preview" aria-label={locale === 'es' ? `Panel visual ficticio de ${demo.brand}` : `${demo.brand} fictitious visual panel`}><header><span>{locale === 'es' ? 'Solo visualización' : 'View only'}</span><strong>{demo.brand}</strong></header><div class="demo-panel-metrics">{panelItems.map(([label, value]) => <div><span>{label}</span><strong>{value}</strong></div>)}</div><p class="demo-panel-boundary" role="note">{locale === 'es' ? 'Todos los datos están precargados y son ficticios. Esta superficie no recoge datos ni ejecuta acciones.' : 'All data is preloaded and fictitious. This surface collects no data and performs no actions.'}</p>{hasManager ? <a class="demo-manager-next" href={managerHref}>{locale === 'es' ? 'Abrir panel visual' : 'Open visual panel'} <span>→</span></a> : <span class="demo-basic-note">{locale === 'es' ? 'Básico muestra la web y la guía local; no incluye gestor.' : 'Basic shows the website and local guide; it has no workspace.'}</span>}</article></section>
+  <section id="reserva" class="demo-booking" data-demo-panel><div><p class="demo-eyebrow" data-demo-plan={demo.plan}>{planNames[demo.plan]} · Logic2B Estancias</p><h2>{c.panelTitle}</h2><p>{c.panelBody}</p></div>{slug === 'nivora' ? <EmailEnquiryDemo locale={locale} /> : <article class="demo-panel-preview" aria-label={locale === 'es' ? `Panel visual ficticio de ${demo.brand}` : `${demo.brand} fictitious visual panel`}><header><span>{locale === 'es' ? 'Solo visualización' : 'View only'}</span><strong>{demo.brand}</strong></header><div class="demo-panel-metrics">{panelItems.map(([label, value]) => <div><span>{label}</span><strong>{value}</strong></div>)}</div><p class="demo-panel-boundary" role="note">{locale === 'es' ? 'Todos los datos están precargados y son ficticios. Esta superficie no recoge datos ni ejecuta acciones.' : 'All data is preloaded and fictitious. This surface collects no data and performs no actions.'}</p><a class="demo-manager-next" href={managerHref}>{locale === 'es' ? 'Abrir panel visual' : 'Open visual panel'} <span>→</span></a></article>}</section>
 </main>

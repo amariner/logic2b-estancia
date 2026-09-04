@@ -25,10 +25,10 @@ const paths = [
 ];
 
 const demoLandingCases = [
-  { path: '/demos/nivora/', managerHref: null, panelName: 'Panel visual ficticio de Nivora One' },
+  { path: '/demos/nivora/', managerHref: null, panelName: 'Simulación local de una solicitud por email para Nivora One' },
   { path: '/demos/terrava/', managerHref: '/demos/terrava/gestion/?vista=home', panelName: 'Panel visual ficticio de Terrava Collection' },
   { path: '/demos/aurem/', managerHref: '/demos/aurem/gestion/?vista=home', panelName: 'Panel visual ficticio de Aurem Hotel' },
-  { path: '/en/demos/nivora/', managerHref: null, panelName: 'Nivora One fictitious visual panel' },
+  { path: '/en/demos/nivora/', managerHref: null, panelName: 'Local email enquiry simulation for Nivora One' },
   { path: '/en/demos/terrava/', managerHref: '/en/demos/terrava/gestion/?vista=home', panelName: 'Terrava Collection fictitious visual panel' },
   { path: '/en/demos/aurem/', managerHref: '/en/demos/aurem/gestion/?vista=home', panelName: 'Aurem Hotel fictitious visual panel' },
 ] as const;
@@ -78,7 +78,7 @@ test('public routes are complete and demos remain isolated', async ({ page }) =>
 
 test('capability maps expose truthful evidence and exact localized targets', async ({ page, request }) => {
   await page.goto('/soluciones/casas-rurales/');
-  await expect(page.locator('[data-capability-evidence]')).toHaveCount(5);
+  await expect(page.locator('[data-capability-evidence]')).toHaveCount(6);
   const planning = page.locator('[data-capability="planning"]');
   await expect(planning).toContainText('Desde Gestión');
   await expect(planning).toContainText('Calendario ficticio de solo lectura');
@@ -92,14 +92,14 @@ test('capability maps expose truthful evidence and exact localized targets', asy
 
   await page.goto('/en/plans/');
   const evidenceLinks = page.locator('[data-capability-evidence]');
-  await expect(evidenceLinks).toHaveCount(12);
+  await expect(evidenceLinks).toHaveCount(13);
   await expect(page.locator('[data-capability-evidence="explainable-revenue"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=reports');
   await expect(page.locator('[data-capability="supervised-ai"]')).toContainText('Visible in the demo');
   await expect(page.locator('[data-capability-evidence="supervised-ai"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=automation');
   await expect(page.locator('[data-capability="revenue"]')).toContainText('Starting plan: Intelligent');
   await expect(page.locator('[data-capability="revenue"]')).toContainText('On the roadmap');
   await expect(page.locator('[data-capability-evidence-unavailable="revenue"]')).toBeVisible();
-  await expect(page.locator('[data-capability-evidence-unavailable="email-enquiries"]')).toBeVisible();
+  await expect(page.locator('[data-capability-evidence="email-enquiries"]')).toHaveAttribute('href', '/en/demos/nivora/#reserva');
 
   for (const href of await evidenceLinks.evaluateAll((links) => links.map((link) => link.getAttribute('href')).filter(Boolean) as string[])) {
     expect((await request.get(href)).status(), href).toBe(200);
@@ -399,14 +399,14 @@ test('capability evidence opens the exact fictitious flow without external write
   await expect(page.getByRole('note')).toContainText('0 canales conectados');
 
   await page.goto('/planes/');
-  await expect(page.locator('[data-capability-evidence-unavailable="email-enquiries"]')).toContainText('Sin demo visual pública');
+  await expect(page.locator('[data-capability-evidence="email-enquiries"]')).toHaveAttribute('href', '/demos/nivora/#reserva');
   expect(externalWrites).toEqual([]);
 });
 
 for (const width of [320, 375, 430, 1366]) {
   test(`core experiences fit ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width < 500 ? 860 : 900 });
-    for (const path of ['/', '/webs/linde/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/']) await expectCleanPage(page, path);
+    for (const path of ['/', '/webs/linde/', '/diagnostico/', '/demos/nivora/', '/demos/terrava/', '/demos/aurem/gestion/']) await expectCleanPage(page, path);
   });
 }
 
@@ -450,6 +450,42 @@ test('all ten demo routes are non-operational and the landing panels collect no 
   expect((await request.get('/en/demos/nivora/gestion/')).status()).toBe(404);
   expect(externalWrites).toEqual([]);
   expect([...externalOrigins]).toEqual([]);
+});
+
+test('Nivora email enquiries stay fictitious, local and reversible in both languages', async ({ page }) => {
+  const writes: string[] = [];
+  const leadRequests: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) writes.push(request.url());
+    if (new URL(request.url()).pathname === '/api/leads') leadRequests.push(request.url());
+  });
+
+  for (const [path, family, initialSubject, updatedSubject, updatedStatus] of [
+    ['/demos/nivora/', 'Viaje en familia', 'Consulta ficticia · escapada de 3 noches', 'Consulta ficticia · estancia familiar', 'Vista previa actualizada localmente. Nada se ha enviado.'],
+    ['/en/demos/nivora/', 'Family trip', 'Fictitious enquiry · 3-night city break', 'Fictitious enquiry · family stay', 'Preview updated locally. Nothing was sent.'],
+  ] as const) {
+    await page.goto(path);
+    const demo = page.locator('[data-email-enquiry-demo]');
+    await expect(demo).toBeVisible();
+    await expect(demo.locator('[data-email-enquiry-subject]')).toHaveText(initialSubject);
+    await expect(demo).toContainText(path.startsWith('/en') ? 'collects no personal data, sends no email' : 'No recoge datos personales, no envía ningún email');
+    const storageBefore = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }));
+
+    await demo.getByRole('button', { name: family }).click();
+    await expect(demo.getByRole('button', { name: family })).toHaveAttribute('aria-pressed', 'true');
+    await expect(demo.locator('[data-email-enquiry-subject]')).toHaveText(updatedSubject);
+    await expect(demo.locator('[data-email-enquiry-status]')).toHaveText(updatedStatus);
+    expect(await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))).toEqual(storageBefore);
+
+    await demo.getByRole('button', { name: path.startsWith('/en') ? 'Restore example' : 'Restaurar ejemplo' }).click();
+    await expect(demo.locator('[data-email-enquiry-subject]')).toHaveText(initialSubject);
+    await demo.getByRole('button', { name: family }).click();
+    await page.reload();
+    await expect(page.locator('[data-email-enquiry-subject]')).toHaveText(initialSubject);
+  }
+
+  expect(writes).toEqual([]);
+  expect(leadRequests).toEqual([]);
 });
 
 test('the lead endpoint rejects every commercial payload before parsing when its allowlist is absent', async ({ request }) => {

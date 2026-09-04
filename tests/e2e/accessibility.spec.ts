@@ -150,7 +150,7 @@ test('every audited route reflows without page-level horizontal scrolling at 320
 
 test('representative families tolerate text resized to 200 percent', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  for (const path of ['/', '/planes/', '/paneles/solicitudes/', '/webs/linde/', '/diagnostico/', '/demos/terrava/', '/demos/aurem/gestion/?vista=reports']) {
+  for (const path of ['/', '/planes/', '/paneles/solicitudes/', '/webs/linde/', '/diagnostico/', '/demos/nivora/', '/demos/terrava/', '/demos/aurem/gestion/?vista=reports']) {
     await gotoStable(page, path);
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
     const reflow = await page.evaluate(() => ({
@@ -163,6 +163,17 @@ test('representative families tolerate text resized to 200 percent', async ({ pa
     }));
     expect(reflow.pageScrollWidth <= reflow.viewportWidth, `${path}: ${JSON.stringify(reflow)}`).toBe(true);
   }
+});
+
+test('Nivora enquiry interaction remains accessible and reflows at 320px', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await gotoStable(page, '/demos/nivora/');
+  const demo = page.locator('[data-email-enquiry-demo]');
+  await demo.getByRole('button', { name: 'Viaje en familia' }).click();
+  await expect(demo.locator('[data-email-enquiry-status]')).toBeVisible();
+  const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(formatViolations('Nivora email enquiry', result.violations)).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });
 
 test('diagnostic step and result changes move focus to the new context', async ({ page }) => {
