@@ -104,7 +104,7 @@ El rechazo no debe crear una cuota de rate limit, referencia durable, alarma, lo
 | Planning y tarifas | Calendario y cifras ficticias | Cambios de unidad, disponibilidad o precio | Sin escritura ni PMS/canal conectado | Proveedor verificado, reconciliación, ownership y rollback |
 | Pagos | Explicación o recorrido visual | Crear sesión, autorización, captura o devolución | Endpoint ausente (`404`) y proveedor `disabled` | Contrato de pagos, secretos aislados, webhooks, conciliación y smoke |
 | Email y mensajería de producto | Nivora representa tres solicitudes ficticias y su vista previa local | Email, SMS o mensajería externa | Sin campos personales, destinatarios reales, envío o proveedor; la interacción vive en memoria | Consentimiento/base jurídica, proveedor, plantillas, idempotencia y trazabilidad |
-| Publicación web | Vista previa ficticia | Escritura en CMS o despliegue | Sin CMS ni credencial; publicación real ausente | Repositorio/entorno aislado, permisos, preview y rollback probado |
+| Publicación web | Terrava permite editar, descartar y aprobar localmente un titular ficticio | Escritura en CMS o despliegue | Estado solo en memoria, aprobación limitada a Dirección; sin CMS, repositorio, proveedor o HTTP | Repositorio/entorno aislado, permisos, preview y rollback probado |
 | Canales | Matriz de cobertura con cero conexiones | Inventario, tarifas, reservas o mensajes | Sin OAuth, webhook o adaptador; proveedor `disabled` | Contrato por canal, mapeo, deduplicación, reconciliación y recuperación |
 | Automatizaciones y jobs | Sin superficie pública de demo | Jobs, colas, reglas o notificaciones | `jobs=false`; sin consumidor externo | Flag específico, observabilidad, reintentos, límites y kill switch |
 | IA supervisada | Copiloto ficticio editable, versionado y revisable por rol | Inferencia o envío a un modelo | Sin modelo ni proveedor; estado en memoria, envío deshabilitado y restauración al recargar | Proveedor, política de datos, fuentes, evaluación, revisión y fallback |
@@ -129,7 +129,7 @@ Inventario comercial vigente:
 | Solicitudes por email | `demo_visual_disponible` | Tres escenarios ficticios muestran el contexto que podría reunir un email | No recoge datos personales, no envía email, no consulta inventario y no crea reservas; recargar restaura el fixture |
 | Solicitudes y reservas | `demo_visual_disponible` | Continuidad visual entre consulta, alternativa y reserva ficticia | No crea reserva, inventario, cobro o comunicación |
 | Planning y tarifas | `demo_visual_disponible` | Calendario común, unidad, estancia y tarifa de muestra | No cambia PMS, canal, disponibilidad o precio real |
-| Editor web supervisado | `demo_visual_pendiente` | Existe una base de vista previa | No debe comunicarse como flujo demostrable hasta recuperar una ruta coherente y sus pruebas |
+| Editor web supervisado | `demo_visual_disponible` | Edición, borrador, descarte y aprobación humana local en Terrava | Solo Dirección aprueba; no hay CMS, repositorio, despliegue, proveedor o escritura HTTP y recargar restaura el fixture |
 | Informes básicos | `demo_visual_disponible` | Ocupación e ingresos calculados desde fixtures | No usa contabilidad, pagos o datos operativos |
 | Centro operativo | `demo_visual_disponible` | Priorización visual de llegadas y riesgos | No decide ni ejecuta acciones autónomas |
 | Limpieza y preparación | `demo_visual_disponible` | Estados y responsabilidades ficticias | No asigna personas ni modifica habitaciones |

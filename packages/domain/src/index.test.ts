@@ -40,7 +40,7 @@ describe('domain', () => {
       'enquiry-workspace': 'demo_visual_disponible',
       planning: 'demo_visual_disponible',
       'guest-context': 'demo_visual_disponible',
-      'website-editor': 'demo_visual_pendiente',
+      'website-editor': 'demo_visual_disponible',
       'basic-reports': 'demo_visual_disponible',
       'explainable-revenue': 'demo_visual_disponible',
       'operations-centre': 'demo_visual_disponible',
@@ -52,7 +52,7 @@ describe('domain', () => {
       'supervised-ai': 'demo_visual_disponible',
       revenue: 'en_ruta',
     });
-    const exposedWorkspaceViews = new Set(['home', 'enquiries', 'planning', 'bookings', 'guests', 'cleaning', 'maintenance', 'channels', 'automation', 'control', 'reports']);
+    const exposedWorkspaceViews = new Set(['home', 'enquiries', 'planning', 'bookings', 'guests', 'cleaning', 'maintenance', 'website', 'channels', 'automation', 'control', 'reports']);
     expect(CAPABILITIES.filter(({ evidence }) => evidence.surface === 'workspace').every(({ evidence }) => evidence.surface === 'workspace' && exposedWorkspaceViews.has(evidence.view))).toBe(true);
   });
   it.each([

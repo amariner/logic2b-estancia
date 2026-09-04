@@ -138,6 +138,7 @@ const viewsFor = (scenario: Scenario): View[] =>
         "planning",
         "bookings",
         "guests",
+        "website",
         "reports",
       ]
     : [
@@ -653,7 +654,7 @@ export function DashboardDemo({
               ))}
             </select>
           </label>
-          {scenario === "aurem" && (
+          {(scenario === "aurem" || view === "website") && (
             <label className="role-select">
               <span className="sr-only">{locale === "es" ? "Rol" : "Role"}</span>
               <select
@@ -666,9 +667,11 @@ export function DashboardDemo({
                 <option value="reception">
                   {locale === "es" ? "Recepción" : "Reception"}
                 </option>
-                <option value="cleaning">
-                  {locale === "es" ? "Limpieza" : "Cleaning"}
-                </option>
+                {scenario === "aurem" && (
+                  <option value="cleaning">
+                    {locale === "es" ? "Limpieza" : "Cleaning"}
+                  </option>
+                )}
               </select>
             </label>
           )}
@@ -697,9 +700,13 @@ export function DashboardDemo({
               : "SAFE DEMO MODE"}
           </strong>
           <span>
-            {locale === "es"
-              ? "Panel de solo lectura con datos ficticios. No da de alta alojamientos ni ejecuta cobros, reservas, mensajes, publicaciones o sincronizaciones."
-              : "Read-only panel with fictitious data. It does not register stays or perform payments, bookings, messages, publishing or synchronisation."}
+            {view === "website"
+              ? locale === "es"
+                ? "Editor supervisado y local con contenido ficticio. Los cambios viven en memoria; no hay CMS, despliegue ni publicación real."
+                : "Supervised local editor with fictitious content. Changes live in memory; there is no CMS, deployment or live publishing."
+              : locale === "es"
+                ? "Panel de solo lectura con datos ficticios. No da de alta alojamientos ni ejecuta cobros, reservas, mensajes, publicaciones o sincronizaciones."
+                : "Read-only panel with fictitious data. It does not register stays or perform payments, bookings, messages, publishing or synchronisation."}
           </span>
         </div>
         <section className="dash-content">
@@ -745,6 +752,25 @@ export function DashboardDemo({
             patch={patch}
             go={go}
           />
+          {view === "website" && (
+            <a
+              className="website-diagnostic"
+              href={assessmentHref}
+              onClick={() =>
+                track("demo_cta", {
+                  locale,
+                  demo: scenario,
+                  plan: "gestion",
+                  source_section: "website_editor",
+                })
+              }
+            >
+              {locale === "es"
+                ? "Terminar la revisión y abrir diagnóstico"
+                : "Finish the review and open assessment"}{" "}
+              <ChevronRight size={16} />
+            </a>
+          )}
         </section>
       </main>
       {state.tourMode === "unset" && (
@@ -861,21 +887,23 @@ export function DashboardDemo({
           </div>
         </div>
       )}
-      <a
-        className="demo-conversion"
-        href={assessmentHref}
-        onClick={() =>
-          track("demo_cta", {
-            locale,
-            demo: scenario,
-            plan: scenario === "aurem" ? "inteligente" : "gestion",
-            source_section: "persistent",
-          })
-        }
-      >
-        {locale === "es" ? "Abrir diagnóstico" : "Open assessment"}{" "}
-        →
-      </a>
+      {view !== "website" && (
+        <a
+          className="demo-conversion"
+          href={assessmentHref}
+          onClick={() =>
+            track("demo_cta", {
+              locale,
+              demo: scenario,
+              plan: scenario === "aurem" ? "inteligente" : "gestion",
+              source_section: "persistent",
+            })
+          }
+        >
+          {locale === "es" ? "Abrir diagnóstico" : "Open assessment"}{" "}
+          →
+        </a>
+      )}
       {utility && (
         <>
           <button
@@ -1705,6 +1733,7 @@ function WebsiteEditor({
   state: DemoState;
   patch: (n: Partial<DemoState>) => void;
 }) {
+  const allowedToApprove = canOperate(state.role, "website");
   const updateDraft = (draftTitle: string) =>
     patch({
       website: {
@@ -1713,7 +1742,8 @@ function WebsiteEditor({
         status: draftTitle === state.website.publishedTitle ? "clean" : "draft",
       },
     });
-  const publish = () => {
+  const approve = () => {
+    if (!allowedToApprove) return;
     patch({
       website: {
         publishedTitle: state.website.draftTitle,
@@ -1744,24 +1774,35 @@ function WebsiteEditor({
             <span className={`tag ${state.website.status}`}>
               {state.website.status === "draft"
                 ? locale === "es"
-                  ? "Borrador"
-                  : "Draft"
+                  ? "Borrador pendiente"
+                  : "Draft pending"
                 : state.website.status === "published"
                   ? locale === "es"
-                    ? "Publicada en esta demo"
-                    : "Published in this demo"
+                    ? "Aprobada en esta demo"
+                    : "Approved in this demo"
                   : locale === "es"
-                    ? "Sin cambios"
-                    : "No changes"}
+                    ? "Versión inicial"
+                    : "Initial version"}
             </span>
             <h2>
               {locale === "es"
-                ? "Portada · titular principal"
-                : "Homepage · main headline"}
+                ? "Portada · titular en revisión"
+                : "Homepage · headline under review"}
             </h2>
           </div>
           <PanelsTopLeft size={25} />
         </div>
+        <ol className="editor-workflow" aria-label={locale === "es" ? "Flujo de revisión" : "Review flow"}>
+          <li aria-current={state.website.status === "clean" ? "step" : undefined}>
+            <span>01</span>{locale === "es" ? "Edición local" : "Local edit"}
+          </li>
+          <li aria-current={state.website.status === "draft" ? "step" : undefined}>
+            <span>02</span>{locale === "es" ? "Borrador" : "Draft"}
+          </li>
+          <li aria-current={state.website.status === "published" ? "step" : undefined}>
+            <span>03</span>{locale === "es" ? "Aprobación humana" : "Human approval"}
+          </li>
+        </ol>
         <label>
           {locale === "es" ? "Texto del hero" : "Hero copy"}
           <textarea
@@ -1773,25 +1814,35 @@ function WebsiteEditor({
         </label>
         <div className="actions">
           <button onClick={revert} disabled={state.website.status !== "draft"}>
-            {locale === "es" ? "Descartar" : "Discard"}
+            {locale === "es" ? "Descartar borrador" : "Discard draft"}
           </button>
           <button
             className="primary"
-            onClick={publish}
+            onClick={approve}
             disabled={
+              !allowedToApprove ||
               state.website.status !== "draft" ||
               !state.website.draftTitle.trim()
             }
           >
             {locale === "es"
-              ? "Publicar cambio simulado"
-              : "Publish simulated change"}
+              ? "Aprobar vista local"
+              : "Approve local preview"}
           </button>
         </div>
-        <p className="permission-note">
+        <p className="permission-note" role="note">
+          {allowedToApprove
+            ? locale === "es"
+              ? "Dirección puede aprobar esta vista ficticia. La aprobación solo cambia la memoria temporal de esta visita."
+              : "Direction can approve this fictitious preview. Approval only changes this visit’s temporary memory."
+            : locale === "es"
+              ? "Recepción puede preparar el borrador; Dirección debe aprobarlo. Nada sale de esta visita."
+              : "Reception can prepare the draft; Direction must approve it. Nothing leaves this visit."}
+        </p>
+        <p className="website-boundary">
           {locale === "es"
-            ? "La publicación solo cambiaría la memoria temporal de esta visita. No existe CMS ni despliegue conectado."
-            : "Publishing would only change this visit’s temporary in-memory state. No CMS or deployment is connected."}
+            ? "Sin CMS, repositorio, despliegue, proveedor ni escritura HTTP. Recargar restaura el fixture."
+            : "No CMS, repository, deployment, provider or HTTP write. Reloading restores the fixture."}
         </p>
       </article>
       <article className={`website-preview ${scenario}`}>
@@ -1801,11 +1852,11 @@ function WebsiteEditor({
         <div>
           <small>{locale === "es" ? "Vista previa" : "Preview"}</small>
           <h2>{state.website.draftTitle}</h2>
-          <button>
+          <span className="website-preview-cta">
             {locale === "es"
-              ? "Consultar disponibilidad"
-              : "Check availability"}
-          </button>
+              ? "Consulta de ejemplo · sin acción"
+              : "Sample enquiry · no action"}
+          </span>
         </div>
       </article>
     </div>

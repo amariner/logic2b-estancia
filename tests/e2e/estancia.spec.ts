@@ -78,7 +78,7 @@ test('public routes are complete and demos remain isolated', async ({ page }) =>
 
 test('capability maps expose truthful evidence and exact localized targets', async ({ page, request }) => {
   await page.goto('/soluciones/casas-rurales/');
-  await expect(page.locator('[data-capability-evidence]')).toHaveCount(6);
+  await expect(page.locator('[data-capability-evidence]')).toHaveCount(7);
   const planning = page.locator('[data-capability="planning"]');
   await expect(planning).toContainText('Desde Gestión');
   await expect(planning).toContainText('Calendario ficticio de solo lectura');
@@ -92,7 +92,7 @@ test('capability maps expose truthful evidence and exact localized targets', asy
 
   await page.goto('/en/plans/');
   const evidenceLinks = page.locator('[data-capability-evidence]');
-  await expect(evidenceLinks).toHaveCount(13);
+  await expect(evidenceLinks).toHaveCount(14);
   await expect(page.locator('[data-capability-evidence="explainable-revenue"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=reports');
   await expect(page.locator('[data-capability="supervised-ai"]')).toContainText('Visible in the demo');
   await expect(page.locator('[data-capability-evidence="supervised-ai"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=automation');
@@ -100,6 +100,7 @@ test('capability maps expose truthful evidence and exact localized targets', asy
   await expect(page.locator('[data-capability="revenue"]')).toContainText('On the roadmap');
   await expect(page.locator('[data-capability-evidence-unavailable="revenue"]')).toBeVisible();
   await expect(page.locator('[data-capability-evidence="email-enquiries"]')).toHaveAttribute('href', '/en/demos/nivora/#reserva');
+  await expect(page.locator('[data-capability-evidence="website-editor"]')).toHaveAttribute('href', '/en/demos/terrava/gestion/?vista=website');
 
   for (const href of await evidenceLinks.evaluateAll((links) => links.map((link) => link.getAttribute('href')).filter(Boolean) as string[])) {
     expect((await request.get(href)).status(), href).toBe(200);
@@ -486,6 +487,55 @@ test('Nivora email enquiries stay fictitious, local and reversible in both langu
 
   expect(writes).toEqual([]);
   expect(leadRequests).toEqual([]);
+});
+
+test('Terrava website editing is supervised, local and reversible in both languages', async ({ page }) => {
+  const writes: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) writes.push(request.url());
+  });
+
+  for (const [path, heading, roleLabel, reception, direction, fieldLabel, draft, discard, approve, approved] of [
+    ['/demos/terrava/gestion/?vista=website', 'Mi web', 'Rol', 'reception', 'direction', 'Texto del hero', 'Cada estancia empieza antes de llegar.', 'Descartar borrador', 'Aprobar vista local', 'Aprobada en esta demo'],
+    ['/en/demos/terrava/gestion/?vista=website', 'My website', 'Role', 'reception', 'direction', 'Hero copy', 'Every stay begins before arrival.', 'Discard draft', 'Approve local preview', 'Approved in this demo'],
+  ] as const) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+    await expect(page.locator('.demo-banner')).toContainText(path.startsWith('/en') ? 'Changes live in memory' : 'Los cambios viven en memoria');
+    const storageBefore = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }));
+    const role = page.getByLabel(roleLabel);
+    await expect(role).toHaveValue(reception);
+    const field = page.getByLabel(fieldLabel);
+    const original = await field.inputValue();
+    const approveButton = page.getByRole('button', { name: approve });
+
+    await field.fill(draft);
+    await expect(page.locator('.editor-workflow [aria-current="step"]')).toContainText(path.startsWith('/en') ? 'Draft' : 'Borrador');
+    await expect(approveButton).toBeDisabled();
+    await expect(page.getByRole('note')).toContainText(path.startsWith('/en') ? 'Direction must approve it' : 'Dirección debe aprobarlo');
+    await page.getByRole('button', { name: discard }).click();
+    await expect(field).toHaveValue(original);
+
+    await field.fill(draft);
+    await role.selectOption(direction);
+    await expect(approveButton).toBeEnabled();
+    await approveButton.click();
+    await expect(page.locator('.editor-controls .tag')).toHaveText(approved);
+    await expect(page.locator('.editor-workflow [aria-current="step"]')).toContainText(path.startsWith('/en') ? 'Human approval' : 'Aprobación humana');
+    await expect(page.locator('.website-preview h2')).toHaveText(draft);
+    await expect(page.locator('.website-preview button, .website-preview a')).toHaveCount(0);
+    await expect(page.locator('.website-boundary')).toContainText(path.startsWith('/en') ? 'No CMS, repository, deployment, provider or HTTP write' : 'Sin CMS, repositorio, despliegue, proveedor ni escritura HTTP');
+    await expect(page.locator('.demo-conversion')).toHaveCount(0);
+    await expect(page.locator('.website-diagnostic')).toHaveAttribute('href', path.startsWith('/en') ? '/en/assessment/?segment=managers&plan=gestion&demo=terrava' : '/diagnostico/?segment=managers&plan=gestion&demo=terrava');
+    expect(await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))).toEqual(storageBefore);
+
+    await page.reload();
+    await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+    await expect(page.getByLabel(fieldLabel)).toHaveValue(original);
+    await expect(page.getByLabel(roleLabel)).toHaveValue(reception);
+  }
+
+  expect(writes).toEqual([]);
 });
 
 test('the lead endpoint rejects every commercial payload before parsing when its allowlist is absent', async ({ request }) => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialState, TOUR_STEP_COUNTS, type Scenario } from "./state";
+import { canOperate, initialState, TOUR_STEP_COUNTS, type Scenario } from "./state";
 
 describe("read-only demo fixtures", () => {
   it.each([
@@ -30,5 +30,11 @@ describe("read-only demo fixtures", () => {
 
   it("keeps guided journey counts aligned with the visible read-only milestones", () => {
     expect(TOUR_STEP_COUNTS).toEqual({ terrava: 3, aurem: 7 });
+  });
+
+  it("reserves local website approval for Direction", () => {
+    expect(canOperate("direction", "website")).toBe(true);
+    expect(canOperate("reception", "website")).toBe(false);
+    expect(canOperate("cleaning", "website")).toBe(false);
   });
 });
