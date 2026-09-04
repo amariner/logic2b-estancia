@@ -2,7 +2,7 @@
 
 Última revisión de la referencia: 2026-09-02
 
-Estado de ejecución: P0, P1, P2, P3 y P4 cerrados; 12/12 direcciones web, 6/6 fichas de panel y 5/5 guías por rol navegables y enlazadas contextualmente. P5–P6 permanecen pendientes.
+Estado de ejecución: P0, P1, P2, P3 y P4 cerrados; 12/12 direcciones web, 6/6 fichas de panel y 5/5 guías por rol navegables y enlazadas contextualmente. P5 está en curso con solicitudes por email cerrada, 1/3 capacidades visuales pendientes resueltas; P6 permanece pendiente.
 
 Referencia: [camp.logic2b.com](https://camp.logic2b.com/)
 
@@ -184,6 +184,8 @@ Orden de trabajo:
 4. Mantener pagos, canales, mensajería, PMS y registro de viajeros fuera de demos ejecutables hasta autorización y pruebas específicas.
 5. Tratar forecasting como pendiente mientras no exista modelo, datos y validación; los cálculos actuales de revenue no son previsión.
 
+Estado al 2026-09-04: **P5 en curso, 1/3 capacidades visuales pendientes cerradas**. `email-enquiries` dispone ya de una evidencia ES/EN exacta en Nivora: tres solicitudes ficticias actualizan una vista previa solo en memoria, sin campos personales, formulario, destinatario real, email, inventario, reserva, almacenamiento o escritura. Básico conserva cero dashboard y las rutas de gestor de Nivora siguen ausentes. El editor web supervisado y las automatizaciones continúan como `demo_visual_pendiente`.
+
 ### P6 · Medición y optimización
 
 Objetivo: mejorar conversión con datos reales una vez completado el primer arco de paridad.
@@ -228,4 +230,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Comenzar **P5 · Conectividad demostrable y madurez real** por `email-enquiries`, la primera capacidad visual pendiente y el límite más temprano del plan Básico. Nivora incorporará una representación ES/EN completamente local e inerte de una solicitud por email: estado y datos inequívocamente ficticios, interacción solo en memoria si existe, confirmación visible de que nada se envía, cero inventario o reserva y restauración al recargar. No se añadirá otro formulario comercial, `/api/leads`, proveedor ni dashboard a Básico. El contrato solo pasará a `demo_visual_disponible` después de verificar evidencia exacta, límites, cero escrituras, teclado, reflow y texto al 200 %; después se abordarán el editor web supervisado y las automatizaciones inertes.
+Continuar **P5 · Conectividad demostrable y madurez real** por `website-editor`. El componente interno existente debe hacerse accesible únicamente desde Terrava/Gestión mediante la vista localizada `website`, corrigiendo antes cualquier semántica que confunda una aprobación ficticia con publicación real. El flujo demostrable será edición → borrador → revisión/aprobación humana local, con permisos visibles, descarte y restauración al recargar. No conectará CMS, repositorio, despliegue, proveedor o escritura HTTP. El contrato solo pasará a `demo_visual_disponible` y enlazará `?vista=website` después de verificar límites, roles, cero efectos, teclado, reflow, texto al 200 % y QA visual; automatizaciones permanecerá pendiente.
