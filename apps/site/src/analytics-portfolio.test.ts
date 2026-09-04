@@ -48,4 +48,17 @@ describe('portfolio analytics contract', () => {
       for (const panel of getPublishedPanels(locale)) expect(safe.has(panel.detailHref ?? '')).toBe(true);
     }
   });
+
+  it('keeps the guided journey explicit, closed and outside demo analytics', () => {
+    for (const event of ['tour_start', 'tour_complete'] as const) {
+      expect(analyticsContract.eventShapes[event]).toEqual({
+        required: ['locale', 'flow', 'source_section'],
+        allowed: ['locale', 'flow', 'source_section'],
+        values: { flow: ['guided'], source_section: ['guided_tour'] },
+      });
+      expect(analyticsContract.surfaces.site).toContain(event);
+      expect(analyticsContract.surfaces.demo).not.toContain(event);
+    }
+    expect(ANALYTICS_SAFE_PATHS).toEqual(expect.arrayContaining(['/recorrido/', '/en/journey/']));
+  });
 });

@@ -27,6 +27,7 @@ const commercialRoutes = [
   '/webs/solerna/', '/en/webs/solerna/',
   '/webs/cendra/', '/en/webs/cendra/',
   '/diagnostico/', '/en/assessment/',
+  '/recorrido/', '/en/journey/',
   '/docs/', '/en/docs/',
   '/docs/direccion-propiedad/', '/en/docs/ownership-direction/',
   '/docs/reservas-recepcion/', '/en/docs/reservations-reception/',
@@ -89,7 +90,7 @@ async function gotoStable(page: Page, path: string) {
 }
 
 test('representative ES/EN routes have no automated WCAG 2.2 AA violations', async ({ page }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(240_000);
   const violations = [];
   for (const path of [...auditedRoutes, ...deepStateRoutes]) {
     await gotoStable(page, path);
@@ -157,7 +158,7 @@ test('every audited route reflows without page-level horizontal scrolling at 320
 
 test('representative families tolerate text resized to 200 percent', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  for (const path of ['/', '/planes/', '/paneles/solicitudes/', '/webs/linde/', '/diagnostico/', '/demos/nivora/', '/demos/terrava/', '/demos/terrava/gestion/?vista=website', '/demos/aurem/gestion/?vista=channels', '/demos/aurem/gestion/?vista=automations', '/demos/aurem/gestion/?vista=reports']) {
+  for (const path of ['/', '/planes/', '/recorrido/', '/paneles/solicitudes/', '/webs/linde/', '/diagnostico/', '/demos/nivora/', '/demos/terrava/', '/demos/terrava/gestion/?vista=website', '/demos/aurem/gestion/?vista=channels', '/demos/aurem/gestion/?vista=automations', '/demos/aurem/gestion/?vista=reports']) {
     await gotoStable(page, path);
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
     const reflow = await page.evaluate(() => ({

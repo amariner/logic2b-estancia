@@ -1,5 +1,5 @@
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "containerId": "GTM-TVDWZ9LC",
   "events": [
     "solution_view",
@@ -7,6 +7,8 @@
     "panel_view",
     "web_handoff",
     "panel_handoff",
+    "tour_start",
+    "tour_complete",
     "plan_select",
     "assessment_start",
     "assessment_step",
@@ -114,6 +116,16 @@
         { "panel": "copilot", "plan": "inteligente" }
       ]
     },
+    "tour_start": {
+      "required": ["locale", "flow", "source_section"],
+      "allowed": ["locale", "flow", "source_section"],
+      "values": { "flow": ["guided"], "source_section": ["guided_tour"] }
+    },
+    "tour_complete": {
+      "required": ["locale", "flow", "source_section"],
+      "allowed": ["locale", "flow", "source_section"],
+      "values": { "flow": ["guided"], "source_section": ["guided_tour"] }
+    },
     "assessment_start": {
       "required": ["locale", "segment", "source_section"],
       "allowed": ["locale", "segment", "source_section"],
@@ -146,7 +158,7 @@
     }
   },
   "surfaces": {
-    "site": ["solution_view", "web_view", "panel_view", "web_handoff", "panel_handoff", "plan_select", "assessment_start", "assessment_step", "assessment_complete", "assessment_submit", "demo_open", "demo_mode_select", "demo_step_complete", "demo_flow_complete", "demo_cta", "lead_submit", "meeting_click", "cta_click"],
+    "site": ["solution_view", "web_view", "panel_view", "web_handoff", "panel_handoff", "tour_start", "tour_complete", "plan_select", "assessment_start", "assessment_step", "assessment_complete", "assessment_submit", "demo_open", "demo_mode_select", "demo_step_complete", "demo_flow_complete", "demo_cta", "lead_submit", "meeting_click", "cta_click"],
     "demo": ["demo_open", "demo_mode_select", "demo_step_complete", "demo_flow_complete", "demo_cta"]
   }
 }

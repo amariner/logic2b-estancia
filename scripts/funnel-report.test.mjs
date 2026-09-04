@@ -23,7 +23,7 @@ describe('funnel report', () => {
   it('documents the versioned aggregate-only contract', async () => {
     const result = await runFunnelReport({ args: ['--validate'] });
     expect(result.exitCode).toBe(0);
-    expect(JSON.parse(result.output)).toMatchObject({ ok: true, contractVersion: '2.2.0', privacy: 'aggregated-allowlist-only' });
+    expect(JSON.parse(result.output)).toMatchObject({ ok: true, contractVersion: '2.3.0', privacy: 'aggregated-allowlist-only' });
   });
 
   it('calculates stable directional rates without user attribution', () => {
@@ -69,6 +69,11 @@ describe('funnel report', () => {
       { id: 'planning', plan: 'gestion', handoff: 'demo', es: 4, en: 0, total: 4 },
       { id: 'copilot', plan: 'inteligente', handoff: 'contact', es: 0, en: 2, total: 2 },
     ]);
+    expect(report.guidedTour).toEqual([
+      { locale: 'es', starts: 10, completes: 6, completionRate: 60 },
+      { locale: 'en', starts: 4, completes: 3, completionRate: 75 },
+      { locale: 'total', starts: 14, completes: 9, completionRate: 64.3 },
+    ]);
   });
 
   it('rejects identifiers, text dimensions and unknown values', () => {
@@ -113,6 +118,12 @@ describe('funnel report', () => {
     expect(() => validateDataset({ ...dataset, rows: [
       { event: 'panel_handoff', count: 1, locale: 'es', panel: 'copilot', plan: 'inteligente', handoff: 'private-route', source_section: 'panel_portfolio' },
     ] })).toThrow(/handoff no está allowlisted/);
+    expect(() => validateDataset({ ...dataset, rows: [
+      { event: 'tour_start', count: 1, locale: 'es', flow: 'free', source_section: 'guided_tour' },
+    ] })).toThrow(/flow no es canónico/);
+    expect(() => validateDataset({ ...dataset, rows: [
+      { event: 'tour_complete', count: 1, locale: 'es', flow: 'guided', source_section: 'hero' },
+    ] })).toThrow(/source_section no es canónico/);
   });
 
   it('flags downstream counts instead of hiding a non-cohort comparison', () => {
@@ -171,6 +182,30 @@ describe('funnel report', () => {
       { id: 'preparation', plan: 'inteligente', handoff: 'assessment', es: 4, en: 0, total: 4 },
     ]);
     expect(report.stages.every(({ count }) => count === 0)).toBe(true);
+  });
+
+  it('accepts tour-only aggregates and keeps abandonment visible without attribution', () => {
+    const report = buildReport(validateDataset({ ...dataset, rows: [
+      { event: 'tour_start', count: 12, locale: 'es', flow: 'guided', source_section: 'guided_tour' },
+      { event: 'tour_complete', count: 7, locale: 'es', flow: 'guided', source_section: 'guided_tour' },
+      { event: 'tour_start', count: 3, locale: 'en', flow: 'guided', source_section: 'guided_tour' },
+    ] }));
+    expect(report.guidedTour).toEqual([
+      { locale: 'es', starts: 12, completes: 7, completionRate: 58.3 },
+      { locale: 'en', starts: 3, completes: 0, completionRate: 0 },
+      { locale: 'total', starts: 15, completes: 7, completionRate: 46.7 },
+    ]);
+    expect(report.eventTotals).toEqual({ tour_complete: 7, tour_start: 15 });
+    expect(report.stages.every(({ count }) => count === 0)).toBe(true);
+  });
+
+  it('flags impossible localized tour direction without hiding the aggregate', () => {
+    const report = buildReport(validateDataset({ ...dataset, rows: [
+      { event: 'tour_start', count: 2, locale: 'en', flow: 'guided', source_section: 'guided_tour' },
+      { event: 'tour_complete', count: 3, locale: 'en', flow: 'guided', source_section: 'guided_tour' },
+    ] }));
+    expect(report.guidedTour.at(-1)).toEqual({ locale: 'total', starts: 2, completes: 3, completionRate: 150 });
+    expect(report.warnings).toContain('tour_complete supera a tour_start en en; revisa cambios de instrumentación o periodos incompletos.');
   });
 
   it('accepts pnpm separators and rejects malformed input', async () => {

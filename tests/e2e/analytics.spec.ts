@@ -97,6 +97,8 @@ const trackedEventNames = [
   'panel_view',
   'web_handoff',
   'panel_handoff',
+  'tour_start',
+  'tour_complete',
   'plan_select',
   'assessment_start',
   'assessment_step',
@@ -298,6 +300,81 @@ test('published demo and contact handoffs emit exact synchronous commercial even
   ]);
 });
 
+test('guided journeys emit one explicit localized start and completion only after the fifth step', async ({ page }) => {
+  await seedConsent(page, true);
+  await routeRuntime(page, liveAnalyticsManifest);
+
+  for (const item of [
+    { path: '/recorrido/', locale: 'es', start: 'Empezar el recorrido guiado', next: 'Siguiente paso', complete: 'Completar el recorrido', review: 'Revisar el recorrido de nuevo' },
+    { path: '/en/journey/', locale: 'en', start: 'Start the guided journey', next: 'Next step', complete: 'Complete the journey', review: 'Review the journey again' },
+  ] as const) {
+    await page.goto(item.path);
+    await waitForRuntime(page);
+    expect(await eventsNamed(page, 'tour_start')).toEqual([]);
+    expect(await eventsNamed(page, 'tour_complete')).toEqual([]);
+
+    await page.getByRole('button', { name: item.start }).click();
+    expect(await eventsNamed(page, 'tour_start')).toEqual([
+      { event: 'tour_start', locale: item.locale, flow: 'guided', source_section: 'guided_tour' },
+    ]);
+    expect(await eventsNamed(page, 'tour_complete')).toEqual([]);
+
+    for (let index = 0; index < 4; index += 1) {
+      await page.getByRole('button', { name: item.next }).click();
+      expect(await eventsNamed(page, 'tour_complete')).toEqual([]);
+    }
+    await page.getByRole('button', { name: item.complete }).click();
+    expect(await eventsNamed(page, 'tour_complete')).toEqual([
+      { event: 'tour_complete', locale: item.locale, flow: 'guided', source_section: 'guided_tour' },
+    ]);
+
+    await page.getByRole('button', { name: item.review }).click();
+    for (let index = 0; index < 4; index += 1) await page.getByRole('button', { name: item.next }).click();
+    await page.getByRole('button', { name: item.complete }).click();
+    expect(await eventsNamed(page, 'tour_start')).toHaveLength(1);
+    expect(await eventsNamed(page, 'tour_complete')).toHaveLength(1);
+  }
+});
+
+test('guided journey waits for an in-page consent choice before recording a real start', async ({ page }) => {
+  await routeRuntime(page, liveAnalyticsManifest);
+  await page.goto('/recorrido/');
+  await waitForRuntime(page);
+
+  expect(await eventsNamed(page, 'tour_start')).toEqual([]);
+  const banner = page.getByRole('dialog', { name: 'Configuración de cookies' });
+  await banner.getByRole('button', { name: 'Aceptar', exact: true }).click();
+  expect(await eventsNamed(page, 'tour_start')).toEqual([]);
+  await page.getByRole('button', { name: 'Empezar el recorrido guiado' }).click();
+  expect(await eventsNamed(page, 'tour_start')).toEqual([
+    { event: 'tour_start', locale: 'es', flow: 'guided', source_section: 'guided_tour' },
+  ]);
+});
+
+test('revoking consent while the guided journey runtime is pending drops start and completion', async ({ page }) => {
+  await seedConsent(page, true);
+  let releaseRuntime = () => {};
+  const runtimeGate = new Promise<void>((resolve) => { releaseRuntime = resolve; });
+  await page.route('**/api/capabilities', async (route) => {
+    await runtimeGate;
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(liveAnalyticsManifest) });
+  });
+  await page.route('https://www.googletagmanager.com/**', (route) => route.fulfill({
+    contentType: 'application/javascript', body: '/* provider must remain unloaded */',
+  }));
+  await page.goto('/en/journey/');
+  await page.getByRole('button', { name: 'Start the guided journey' }).click();
+  for (let index = 0; index < 4; index += 1) await page.getByRole('button', { name: 'Next step' }).click();
+  await page.getByRole('button', { name: 'Complete the journey' }).click();
+  await page.evaluate((key) => localStorage.removeItem(key), consentKey);
+  releaseRuntime();
+  await waitForRuntime(page);
+
+  await expect.poll(() => eventsNamed(page, 'tour_start')).toEqual([]);
+  await expect.poll(() => eventsNamed(page, 'tour_complete')).toEqual([]);
+  await expect(page.locator('script[data-gtm]')).toHaveCount(0);
+});
+
 test('portfolio views wait for in-page consent and remain idempotent', async ({ page }) => {
   await routeRuntime(page, liveAnalyticsManifest);
   await page.goto('/webs/linde/');
@@ -359,6 +436,8 @@ test('canonical demos remain analytics-free even with stored consent', async ({ 
     expect(await eventsNamed(page, 'web_view')).toEqual([]);
     expect(await eventsNamed(page, 'web_handoff')).toEqual([]);
     expect(await eventsNamed(page, 'panel_handoff')).toEqual([]);
+    expect(await eventsNamed(page, 'tour_start')).toEqual([]);
+    expect(await eventsNamed(page, 'tour_complete')).toEqual([]);
     await expect(page.locator('script[data-gtm]')).toHaveCount(0);
   }
   expect(capabilityRequests).toBe(0);
@@ -603,6 +682,17 @@ test('the live dataLayer strips PII and drops incomplete or non-canonical events
       handoff: 'contact',
       source_section: 'panel_portfolio',
     });
+    window.estanciaTrack?.('tour_start', {
+      locale: 'es',
+      flow: 'free',
+      source_section: 'guided_tour',
+      page_location: 'https://example.test/private-tour',
+    });
+    window.estanciaTrack?.('tour_complete', {
+      locale: 'es',
+      flow: 'guided',
+      source_section: 'hero',
+    });
     window.estanciaTrack?.('invented_event', {
       locale: 'es',
       segment: 'hotels',
@@ -624,11 +714,13 @@ test('the live dataLayer strips PII and drops incomplete or non-canonical events
   expect(await eventsNamed(page, 'panel_view')).toEqual([]);
   expect(await eventsNamed(page, 'web_handoff')).toEqual([]);
   expect(await eventsNamed(page, 'panel_handoff')).toEqual([]);
+  expect(await eventsNamed(page, 'tour_start')).toEqual([]);
+  expect(await eventsNamed(page, 'tour_complete')).toEqual([]);
   const dataLayer = await page.evaluate(() => window.dataLayer ?? []);
   const serialized = JSON.stringify(dataLayer);
   for (const privateValue of [
     'enterprise', 'private-client', 'secret-flow', 'buyer@example.test',
     'Ada Lovelace', '+34 600 000 000', 'Necesito ayuda con mi hotel',
-    'https://example.test/private', 'private-panel', 'private-route', 'https://example.test/private-handoff',
+    'https://example.test/private', 'private-panel', 'private-route', 'https://example.test/private-handoff', 'https://example.test/private-tour',
   ]) expect(serialized).not.toContain(privateValue);
 });

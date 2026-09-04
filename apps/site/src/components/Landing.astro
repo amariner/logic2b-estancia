@@ -21,7 +21,7 @@ const planCards = getPlanCards(locale);
 const prefix = locale === 'en' ? '/en' : '';
 const heroShortcutHrefs = [
   home.heroCases[0]?.href,
-  '#recorrido',
+  `${prefix}/${locale === 'es' ? 'recorrido' : 'journey'}/`,
   `${prefix}/demos/terrava/gestion/?vista=home`,
 ] as const;
 const wa = logic2bContact(locale, 'commercial');

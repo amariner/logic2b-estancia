@@ -73,7 +73,7 @@ const spanish: Omit<HomeContract, 'locale'> = {
     { key: 'webs', label: 'Webs', href: '/webs/' },
     { key: 'gestor', label: 'Gestor', href: '/paneles/' },
     { key: 'planes', label: 'Planes', href: '#planes' },
-    { key: 'recorrido', label: 'Ver recorrido', href: '#recorrido' },
+    { key: 'recorrido', label: 'Ver recorrido', href: '/recorrido/' },
   ],
   heroCases: [
     { slug: 'nivora', brand: 'Nivora One', label: 'Web de marca', text: 'Una presencia propia que abre la conversación directa.', plan: 'basico', planLabel: 'Básico', href: '/demos/nivora/', image: '/media/nivora/hero.webp' },
@@ -116,7 +116,7 @@ const english: Omit<HomeContract, 'locale'> = {
     { key: 'webs', label: 'Websites', href: '/webs/' },
     { key: 'gestor', label: 'Workspace', href: '/panels/' },
     { key: 'planes', label: 'Plans', href: '#planes' },
-    { key: 'recorrido', label: 'See the journey', href: '#recorrido' },
+    { key: 'recorrido', label: 'See the journey', href: '/journey/' },
   ],
   heroCases: [
     { slug: 'nivora', brand: 'Nivora One', label: 'Brand website', text: 'An owned presence that opens a direct conversation.', plan: 'basico', planLabel: 'Basic', href: '/en/demos/nivora/', image: '/media/nivora/hero.webp' },

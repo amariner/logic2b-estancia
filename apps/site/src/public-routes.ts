@@ -20,6 +20,7 @@ export const INDEXABLE_PATHS = [
   '/soluciones/apartamentos/', '/en/solutions/apartments/',
   '/soluciones/hoteles/', '/en/solutions/hotels/',
   '/planes/', '/en/plans/', '/webs/', '/en/webs/', '/diagnostico/', '/en/assessment/',
+  '/recorrido/', '/en/journey/',
   ...portfolioRoutes,
   ...publishedPanelRoutes,
   ...publishedGuideRoutes,

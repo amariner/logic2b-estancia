@@ -37,6 +37,7 @@ const translatedPairs = [
   ['/webs/solerna/', '/en/webs/solerna/'],
   ['/webs/cendra/', '/en/webs/cendra/'],
   ['/diagnostico/', '/en/assessment/'],
+  ['/recorrido/', '/en/journey/'],
 ] as const;
 const spanishOnly = [
   '/recursos/gestor-reservas-apartamentos-turisticos/',
@@ -168,7 +169,7 @@ test('commercial search surfaces use specific, unique metadata and people-first 
     '/soluciones/casas-rurales/', '/en/solutions/rural-stays/',
     '/soluciones/apartamentos/', '/en/solutions/apartments/',
     '/soluciones/hoteles/', '/en/solutions/hotels/',
-    '/diagnostico/', '/en/assessment/',
+    '/diagnostico/', '/en/assessment/', '/recorrido/', '/en/journey/',
   ];
   const titles = new Set<string>();
   const descriptions = new Set<string>();

@@ -149,12 +149,14 @@ GTM is disabled unconditionally in demo mode, even when a browser retains prior 
 
 Only configure the allowlisted events emitted by the site:
 
-- `solution_view`, `plan_select`
+- `solution_view`, `web_view`, `panel_view`
+- `web_handoff`, `panel_handoff`, `tour_start`, `tour_complete`
+- `plan_select`
 - `assessment_start`, `assessment_step`, `assessment_submit`, `assessment_complete`
 - `demo_open`, `demo_mode_select`, `demo_step_complete`, `demo_flow_complete`, `demo_cta`
 - `lead_submit`, `meeting_click`, `cta_click`
 
-Allowed parameters are locale, segment, plan, demo, flow, step index and source section. Names, emails, phone numbers, dates, amounts, messages and demo state must never be sent.
+Allowed parameters are locale, segment, plan, web, panel, handoff, demo, flow, step index and source section, always restricted by the exact event shape in the canonical contract. Names, emails, phone numbers, dates, amounts, messages, URLs, titles, user or session identifiers and demo state must never be sent. `tour_start` and `tour_complete` represent only the explicit controls of the guided journey; never infer them from scrolling, elapsed time or ordinary navigation.
 
 Before activation, configure Estancia-specific tags, triggers and parameter mappings inside the shared `GTM-TVDWZ9LC` container without changing Camp. Browser emission and the offline report consume the same canonical event shapes from `packages/config/src/analytics-contract.json`; incomplete events or event-incompatible dimensions are discarded or rejected. Deploying the current build and changing runtime gates both require explicit rollout approval, followed by a production check of the capability manifest, consent, CSP and exact `dataLayer` shapes before the baseline period begins.
 

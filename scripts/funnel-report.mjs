@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const CONTRACT_VERSION = '2.2.0';
+export const CONTRACT_VERSION = '2.3.0';
 const SCRIPT_DIRECTORY = dirname(fileURLToPath(import.meta.url));
 const analyticsContract = JSON.parse(await readFile(resolve(SCRIPT_DIRECTORY, '../packages/config/src/analytics-contract.json'), 'utf8'));
 const FUNNEL = [
@@ -48,6 +48,10 @@ const EXAMPLE = {
     { event: 'web_handoff', count: 3, locale: 'en', web: 'cobalto', plan: 'inteligente', handoff: 'contact', source_section: 'web_portfolio' },
     { event: 'panel_handoff', count: 4, locale: 'es', panel: 'planning', plan: 'gestion', handoff: 'demo', source_section: 'panel_portfolio' },
     { event: 'panel_handoff', count: 2, locale: 'en', panel: 'copilot', plan: 'inteligente', handoff: 'contact', source_section: 'panel_portfolio' },
+    { event: 'tour_start', count: 10, locale: 'es', flow: 'guided', source_section: 'guided_tour' },
+    { event: 'tour_complete', count: 6, locale: 'es', flow: 'guided', source_section: 'guided_tour' },
+    { event: 'tour_start', count: 4, locale: 'en', flow: 'guided', source_section: 'guided_tour' },
+    { event: 'tour_complete', count: 3, locale: 'en', flow: 'guided', source_section: 'guided_tour' },
   ],
 };
 
@@ -90,7 +94,7 @@ export function validateDataset(dataset) {
   if (start > end) throw new Error('period.start no puede ser posterior a period.end.');
   if (!Array.isArray(dataset.rows) || dataset.rows.length === 0) throw new Error('rows debe contener al menos una fila agregada.');
   const rows = dataset.rows.map((row, index) => validateRow(row, index));
-  if (!rows.some((row) => FUNNEL.some((stage) => matchesStage(row, stage)) || isCanonicalEvidenceEvent(row))) throw new Error('El dataset debe contener al menos un evento canónico del embudo o de evidencia web/panel.');
+  if (!rows.some((row) => FUNNEL.some((stage) => matchesStage(row, stage)) || isCanonicalMeasuredEvent(row))) throw new Error('El dataset debe contener al menos un evento canónico del embudo, recorrido o evidencia web/panel.');
   return { contractVersion: CONTRACT_VERSION, period: { start: dataset.period.start, end: dataset.period.end }, consentMode: dataset.consentMode, rows };
 }
 
@@ -139,6 +143,10 @@ export function buildReport(validDataset) {
   const panelViewsBySurface = buildEvidenceViewBreakdown(validDataset.rows, 'panel_view', 'panel', 'panel_portfolio');
   const webHandoffsByConcept = buildHandoffBreakdown(validDataset.rows, 'web_handoff', 'web', 'web_portfolio');
   const panelHandoffsBySurface = buildHandoffBreakdown(validDataset.rows, 'panel_handoff', 'panel', 'panel_portfolio');
+  const guidedTour = buildGuidedTour(validDataset.rows);
+  for (const row of guidedTour.filter(({ locale }) => locale !== 'total')) {
+    if (row.completes > row.starts) warnings.push(`tour_complete supera a tour_start en ${row.locale}; revisa cambios de instrumentación o periodos incompletos.`);
+  }
   return {
     contractVersion: validDataset.contractVersion,
     period: validDataset.period,
@@ -151,6 +159,7 @@ export function buildReport(validDataset) {
     panelViewsBySurface,
     webHandoffsByConcept,
     panelHandoffsBySurface,
+    guidedTour,
     warnings,
     notes,
     excludedOutcomes: ['proposals', 'won_projects', 'lost_projects', 'revenue', 'objections'],
@@ -219,6 +228,14 @@ export function renderMarkdown(report) {
       ...report.panelHandoffsBySurface.map(({ id, plan, handoff, es, en, total }) => `| ${id} | ${plan} | ${handoff} | ${es} | ${en} | ${total} |`),
     ] : ['Sin `panel_handoff` canónicos en el periodo.']),
     '',
+    '## Recorrido guiado',
+    '',
+    ...(report.guidedTour.length ? [
+      '| Idioma | Inicios | Finales explícitos | Finalización |',
+      '| --- | ---: | ---: | ---: |',
+      ...report.guidedTour.map(({ locale, starts, completes, completionRate }) => `| ${locale} | ${starts} | ${completes} | ${completionRate === null ? 'N/D' : `${formatPercent(completionRate)} %`} |`),
+    ] : ['Sin `tour_start` o `tour_complete` canónicos en el periodo.']),
+    '',
     '## Totales de eventos observados',
     '',
     '| Evento | Recuento |',
@@ -231,7 +248,7 @@ export function renderMarkdown(report) {
     ...report.notes.map((note) => `- Contexto: ${note}`),
     '- Propuestas, proyectos ganados/perdidos, ingresos y objeciones quedan fuera: requieren evidencia comercial separada.',
     '- No interpretar este informe como tráfico total: la analítica solo se activa tras consentimiento explícito.',
-    '- Las vistas son cargas agregadas de evidencia, no personas ni usuarios únicos.',
+    '- Las vistas, inicios y finales son interacciones agregadas, no personas ni usuarios únicos.',
   ];
   return `${lines.join('\n')}\n`;
 }
@@ -292,11 +309,13 @@ function validateEventShape(row, label) {
   }
 }
 function matchesStage(row, stage) { return row.event === stage.event && row.source_section === stage.sourceSection; }
-function isCanonicalEvidenceEvent(row) {
+function isCanonicalMeasuredEvent(row) {
   return (row.event === 'web_view' && row.source_section === 'web_portfolio')
     || (row.event === 'panel_view' && row.source_section === 'panel_portfolio')
     || (row.event === 'web_handoff' && row.source_section === 'web_portfolio')
-    || (row.event === 'panel_handoff' && row.source_section === 'panel_portfolio');
+    || (row.event === 'panel_handoff' && row.source_section === 'panel_portfolio')
+    || (row.event === 'tour_start' && row.source_section === 'guided_tour')
+    || (row.event === 'tour_complete' && row.source_section === 'guided_tour');
 }
 function buildEvidenceViewBreakdown(rows, event, dimension, sourceSection) {
   const canonicalPlans = new Map((EVENT_SHAPES[event]?.combinations ?? []).map((combination) => [combination[dimension], combination.plan]));
@@ -318,6 +337,19 @@ function buildHandoffBreakdown(rows, event, dimension, sourceSection) {
     const en = sum(selected.filter((row) => row.locale === 'en'));
     return { id, plan, handoff, es, en, total: es + en };
   })).filter(({ total }) => total > 0);
+}
+function buildGuidedTour(rows) {
+  const matching = rows.filter((row) => ['tour_start', 'tour_complete'].includes(row.event) && row.flow === 'guided' && row.source_section === 'guided_tour');
+  const localized = ['es', 'en'].map((locale) => {
+    const starts = sum(matching.filter((row) => row.locale === locale && row.event === 'tour_start'));
+    const completes = sum(matching.filter((row) => row.locale === locale && row.event === 'tour_complete'));
+    return { locale, starts, completes, completionRate: starts === 0 ? null : round((completes / starts) * 100) };
+  }).filter(({ starts, completes }) => starts > 0 || completes > 0);
+  const starts = sum(matching.filter((row) => row.event === 'tour_start'));
+  const completes = sum(matching.filter((row) => row.event === 'tour_complete'));
+  return starts > 0 || completes > 0
+    ? [...localized, { locale: 'total', starts, completes, completionRate: starts === 0 ? null : round((completes / starts) * 100) }]
+    : [];
 }
 function sum(rows) { return rows.reduce((total, row) => total + row.count, 0); }
 function round(value) { return Math.round(value * 10) / 10; }

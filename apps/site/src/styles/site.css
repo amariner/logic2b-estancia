@@ -748,6 +748,7 @@
 .home-journey .eyebrow { color: #d6d7da; }
 .home-journey .section-head > p:last-child { color: #c8cad0; }
 .home-journey-heading { max-width: 860px; }
+.home-journey-heading .pill { margin-top: 26px; color: var(--ink); background: white; }
 .home-journey-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: 10px; margin: 54px 0 0; padding: 0; list-style: none; }
 .home-journey-moment { display: flex; min-width: 0; min-height: 402px; flex-direction: column; border: 1px solid rgb(255 255 255 / .14); border-radius: 18px; padding: 17px; color: var(--ink); background: var(--paper); box-shadow: 0 16px 34px rgb(0 0 0 / .14); }
 .home-journey-top { display: flex; min-height: 32px; align-items: flex-start; justify-content: space-between; gap: 8px; }
@@ -763,6 +764,59 @@
 .home-journey-control > span { display: block; margin-bottom: 3px; }
 .home-journey-moment > a { display: inline-flex; min-height: 38px; align-items: center; align-self: flex-start; gap: 5px; margin-top: 12px; border-bottom: 1px solid currentColor; color: var(--ink); font-size: .66rem; font-weight: 650; text-decoration: none; }
 .home-journey-note { margin: 18px 0 0; color: #858991; font-size: .68rem; }
+.commercial-tour { background: #fff; }
+.commercial-tour-hero { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(320px, .72fr); gap: 76px; align-items: center; background: radial-gradient(circle at 6% 15%, #f7ddd1 0, transparent 28%), radial-gradient(circle at 92% 8%, #e2ece4 0, transparent 27%); }
+.commercial-tour-hero .display { max-width: 880px; margin-top: 18px; font-size: clamp(3.6rem, 7.2vw, 7.7rem); }
+.commercial-tour-hero > div > p:not(.eyebrow, .commercial-tour-boundary) { max-width: 720px; margin: 27px 0 0; color: var(--slate); font-size: 1rem; line-height: 1.7; }
+.commercial-tour-start { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 30px; }
+.commercial-tour-start .pill { border: 0; cursor: pointer; }
+.commercial-tour-start > span { color: var(--ash); font-size: .68rem; }
+.commercial-tour-boundary { max-width: 720px; margin: 22px 0 0; border-left: 2px solid #527458; padding-left: 12px; color: var(--ash); font-size: .67rem; line-height: 1.5; }
+.commercial-tour-hero aside { border-radius: 26px; padding: 30px; color: white; background: var(--ink); box-shadow: 0 26px 64px rgb(18 24 20 / .16); }
+.commercial-tour-hero aside > p { margin: 0; color: #bfc3c8; font-size: .62rem; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+.commercial-tour-hero aside ol { display: grid; gap: 0; margin: 25px 0 0; padding: 0; list-style: none; }
+.commercial-tour-hero aside li { display: grid; min-width: 0; grid-template-columns: 34px 1fr; gap: 13px; align-items: center; border-top: 1px solid rgb(255 255 255 / .14); padding: 14px 0; }
+.commercial-tour-hero aside li > span { color: #9da1a8; font-size: .58rem; }
+.commercial-tour-hero aside li div { display: grid; min-width: 0; gap: 4px; }
+.commercial-tour-hero aside strong { font-family: var(--serif); font-size: 1.28rem; font-weight: 400; }
+.commercial-tour-hero aside small { overflow: hidden; color: #bfc3c8; font-size: .61rem; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.commercial-tour-noscript { margin-block: 28px; border-left: 2px solid var(--sienna); padding-left: 14px; color: var(--slate); font-size: .76rem; line-height: 1.6; }
+.commercial-tour [hidden] { display: none; }
+.commercial-tour-workspace { background: var(--paper); }
+.commercial-tour-progress { display: grid; grid-template-columns: auto minmax(220px, 1fr); gap: 34px; align-items: end; margin-bottom: 46px; }
+.commercial-tour-progress p { margin: 0; color: var(--ash); font-size: .58rem; letter-spacing: .08em; text-transform: uppercase; }
+.commercial-tour-progress strong { display: block; margin-top: 5px; font-family: var(--serif); font-size: 1.45rem; font-weight: 400; }
+.commercial-tour-progress-track { position: relative; height: 3px; overflow: hidden; border-radius: 99px; background: #d8d8d4; }
+.commercial-tour-progress-track i { position: absolute; inset: 0 auto 0 0; width: var(--tour-progress, 20%); border-radius: inherit; background: #31543f; transition: width 260ms var(--ease-out); }
+.commercial-tour-step-list { display: grid; }
+.commercial-tour-step { display: grid; min-width: 0; grid-template-columns: minmax(0, .86fr) minmax(360px, 1.14fr); gap: 66px; align-items: center; }
+.commercial-tour:not([data-enhanced='true']) .commercial-tour-step { border-top: 1px solid var(--line); padding-block: 70px; }
+.commercial-tour:not([data-enhanced='true']) .commercial-tour-progress, .commercial-tour:not([data-enhanced='true']) .commercial-tour-controls { display: none; }
+.commercial-tour-step-copy .heading { max-width: 650px; margin-top: 16px; }
+.commercial-tour-summary { max-width: 620px; margin: 22px 0 0; color: var(--slate); font-size: .88rem; line-height: 1.65; }
+.commercial-tour-step dl { display: grid; gap: 0; margin: 34px 0 0; }
+.commercial-tour-step dl div { display: grid; grid-template-columns: minmax(120px, .38fr) minmax(0, 1fr); gap: 18px; border-top: 1px solid var(--line); padding: 13px 0; }
+.commercial-tour-step dt { color: var(--ash); font-size: .56rem; letter-spacing: .07em; line-height: 1.4; text-transform: uppercase; }
+.commercial-tour-step dd { margin: 0; color: var(--slate); font-size: .7rem; line-height: 1.55; }
+.commercial-tour-evidence { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 25px; }
+.commercial-tour-evidence .text-link { margin: 0; }
+.commercial-tour-evidence-note { margin: 12px 0 0; color: var(--ash); font-size: .61rem; line-height: 1.45; }
+.commercial-tour-step-visual { min-width: 0; overflow: hidden; border: 1px solid rgb(23 25 28 / .11); border-radius: 28px; padding: 20px; background: #fff; box-shadow: 0 24px 56px rgb(19 25 21 / .12); }
+.commercial-tour-step-visual > p { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 16px; }
+.commercial-tour-step-visual > p span { border-radius: 99px; padding: 6px 9px; color: #31543f; background: #e5eee7; font-size: .58rem; font-weight: 650; }
+.commercial-tour-step-visual > p small { color: var(--ash); font-size: .58rem; }
+.commercial-tour-step-visual picture, .commercial-tour-step-visual picture img { display: block; width: 100%; }
+.commercial-tour-step-visual picture { overflow: hidden; border-radius: 18px; background: #243128; }
+.commercial-tour-step-visual picture img { height: clamp(310px, 41vw, 520px); object-fit: cover; }
+.commercial-tour-step-visual .panel-preview { min-height: 460px; }
+.commercial-tour-controls { display: flex; justify-content: space-between; gap: 14px; margin-top: 48px; border-top: 1px solid var(--line); padding-top: 25px; }
+.commercial-tour-controls button, .commercial-tour-complete-actions button { min-height: 44px; border: 0; padding: 10px 0; color: var(--ink); background: transparent; font: inherit; font-size: .7rem; font-weight: 650; cursor: pointer; }
+.commercial-tour-controls .pill { margin-left: auto; padding-inline: 20px; color: white; background: var(--ink); }
+.commercial-tour-complete { display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, .72fr); gap: 70px; align-items: end; border-top: 1px solid var(--line); }
+.commercial-tour-complete > div:first-child > p:last-child { max-width: 720px; margin: 24px 0 0; color: var(--slate); font-size: .88rem; line-height: 1.7; }
+.commercial-tour-complete-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 18px; }
+.commercial-tour-complete-actions .text-link { margin: 0; }
+.commercial-tour-complete-actions button { width: 100%; color: var(--ash); text-align: right; text-decoration: underline; text-underline-offset: 4px; }
 .product-explorer { background: var(--paper); }
 .product-explorer .section-head { max-width: 820px; }
 .product-explorer-list { max-width: 980px; margin-top: 52px; border-top: 1px solid var(--line); }
@@ -1175,6 +1229,11 @@
   .guide-card:last-child { grid-column: 1 / -1; }
   .guide-detail-hero aside { border-top: 1px solid var(--line); border-left: 0; padding: 28px 0 0; }
   .guide-detail-actions .pill { justify-self: start; }
+  .commercial-tour-hero, .commercial-tour-step, .commercial-tour-complete { grid-template-columns: minmax(0, 1fr); gap: 42px; }
+  .commercial-tour-hero aside { max-width: 680px; }
+  .commercial-tour-step-visual { grid-row: 1; }
+  .commercial-tour-complete-actions { justify-content: flex-start; }
+  .commercial-tour-complete-actions button { text-align: left; }
 }
 
 @media (max-width: 640px) {
@@ -1275,10 +1334,25 @@
   .guide-handoff li p { margin-top: 58px; }
   .guide-capabilities li { align-items: flex-start; flex-direction: column; }
   .guide-detail-next { min-height: 190px; align-items: flex-start; flex-direction: column; justify-content: center; gap: 24px; }
+  .commercial-tour-hero { padding-top: 74px; }
+  .commercial-tour-hero .display { font-size: clamp(3.15rem, 15vw, 4.65rem); }
+  .commercial-tour-hero aside, .commercial-tour-step-visual { border-radius: 20px; padding: 16px; }
+  .commercial-tour-hero aside small { white-space: normal; }
+  .commercial-tour-progress { grid-template-columns: 1fr; gap: 18px; }
+  .commercial-tour-step { gap: 34px; }
+  .commercial-tour-step dl div { grid-template-columns: 1fr; gap: 6px; }
+  .commercial-tour-evidence { align-items: flex-start; flex-direction: column; }
+  .commercial-tour-step-visual picture img { height: 285px; }
+  .commercial-tour-step-visual .panel-preview { min-height: 390px; }
+  .commercial-tour-controls { align-items: stretch; flex-direction: column-reverse; }
+  .commercial-tour-controls button, .commercial-tour-controls .pill { width: 100%; margin: 0; justify-content: center; }
+  .commercial-tour-complete-actions { align-items: flex-start; flex-direction: column; }
+  .commercial-tour-complete-actions button { width: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-word, .hero-case-track { animation: none; }
   .hero-word:not(:first-child) { display: none; }
   .hero-gallery-case img, .portfolio-card-media img, .product-explorer-item summary > i { transition: none; }
+  .commercial-tour-progress-track i { transition: none; }
 }

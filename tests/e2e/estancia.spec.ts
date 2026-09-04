@@ -10,9 +10,9 @@ const paths = [
   '/en/docs/ownership-direction/', '/en/docs/reservations-reception/',
   '/docs/operaciones/', '/en/docs/operations/',
   '/docs/marketing-ingresos/', '/en/docs/marketing-revenue/',
-  '/soluciones/casas-rurales/', '/soluciones/apartamentos/', '/soluciones/hoteles/', '/planes/', '/webs/', '/diagnostico/',
+  '/soluciones/casas-rurales/', '/soluciones/apartamentos/', '/soluciones/hoteles/', '/planes/', '/webs/', '/diagnostico/', '/recorrido/',
   '/paneles/', '/paneles/solicitudes/', '/paneles/planning/', '/paneles/huespedes-llegadas/', '/paneles/preparacion/', '/paneles/operacion-ingresos/', '/paneles/copiloto-supervisado/',
-  '/en/solutions/rural-stays/', '/en/solutions/apartments/', '/en/solutions/hotels/', '/en/plans/', '/en/webs/', '/en/assessment/',
+  '/en/solutions/rural-stays/', '/en/solutions/apartments/', '/en/solutions/hotels/', '/en/plans/', '/en/webs/', '/en/assessment/', '/en/journey/',
   '/en/panels/', '/en/panels/enquiries/', '/en/panels/planning/', '/en/panels/guests-arrivals/', '/en/panels/preparation/', '/en/panels/operations-revenue/', '/en/panels/supervised-copilot/',
   ...webPaths,
   '/recursos/gestor-reservas-apartamentos-turisticos/', '/recursos/web-hotel-reservas-directas-operacion/',
@@ -151,7 +151,7 @@ test('home exposes the connected product spine in both languages', async ({ page
     await expect(header.getByRole('link', { name: labels.webs, exact: true })).toHaveAttribute('href', `${prefix}/webs/`);
     await expect(header.getByRole('link', { name: labels.gestor, exact: true })).toHaveAttribute('href', labels.panels);
     await expect(header.getByRole('link', { name: labels.plans, exact: true })).toHaveAttribute('href', '#planes');
-    await expect(header.getByRole('link', { name: labels.recorrido, exact: true })).toHaveAttribute('href', '#recorrido');
+    await expect(header.getByRole('link', { name: labels.recorrido, exact: true })).toHaveAttribute('href', path === '/' ? '/recorrido/' : '/en/journey/');
 
     await expect(page.locator('[data-hero-proof]')).toHaveCount(3);
     await expect(page.locator('[data-hero-proof="nivora"]')).toContainText(/Nivora One/);
@@ -230,7 +230,78 @@ test('home exposes the connected product spine in both languages', async ({ page
     await expect(header.getByRole('link', { name: labels.webs, exact: true })).toHaveAttribute('href', `${prefix}/webs/`);
     await expect(header.getByRole('link', { name: labels.gestor, exact: true })).toHaveAttribute('href', labels.panels);
     await expect(header.getByRole('link', { name: labels.plans, exact: true })).toHaveAttribute('href', `${prefix}/#planes`);
-    await expect(header.getByRole('link', { name: labels.recorrido, exact: true })).toHaveAttribute('href', `${prefix}/#recorrido`);
+    await expect(header.getByRole('link', { name: labels.recorrido, exact: true })).toHaveAttribute('href', prefix ? '/en/journey/' : '/recorrido/');
+  }
+  expect(writes).toEqual([]);
+});
+
+test('guided commercial journey has explicit start, five verified steps and explicit completion', async ({ page, request }) => {
+  const writes: string[] = [];
+  page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
+
+  for (const item of [
+    {
+      path: '/recorrido/',
+      steps: ['brand-web', 'enquiries', 'planning', 'preparation', 'operations'],
+      start: 'Empezar el recorrido guiado',
+      previous: 'Paso anterior',
+      next: 'Siguiente paso',
+      complete: 'Completar el recorrido',
+      plans: '/planes/',
+      assessment: '/diagnostico/',
+      contact: '/#contacto',
+    },
+    {
+      path: '/en/journey/',
+      steps: ['brand-web', 'enquiries', 'planning', 'preparation', 'operations'],
+      start: 'Start the guided journey',
+      previous: 'Previous step',
+      next: 'Next step',
+      complete: 'Complete the journey',
+      plans: '/en/plans/',
+      assessment: '/en/assessment/',
+      contact: '/en/#contacto',
+    },
+  ] as const) {
+    await expectCleanPage(page, item.path);
+    const tour = page.locator('[data-commercial-tour]');
+    await expect(tour).toHaveAttribute('data-state', 'ready');
+    await expect(tour.locator('[data-tour-step]')).toHaveCount(5);
+    await expect(tour.locator('[data-tour-workspace]')).toBeHidden();
+    await expect(tour.locator('[data-tour-completion]')).toBeHidden();
+    const storageBefore = await page.evaluate(() => JSON.stringify({
+      local: Object.fromEntries(Object.keys(localStorage).sort().map((key) => [key, localStorage.getItem(key)])),
+      session: Object.fromEntries(Object.keys(sessionStorage).sort().map((key) => [key, sessionStorage.getItem(key)])),
+    }));
+
+    await tour.getByRole('button', { name: item.start }).click();
+    await expect(tour).toHaveAttribute('data-state', 'active');
+    const progress = tour.getByRole('progressbar');
+    await expect(progress).toHaveAttribute('aria-valuemax', '5');
+
+    for (const [index, stepId] of item.steps.entries()) {
+      await expect(progress).toHaveAttribute('aria-valuenow', String(index + 1));
+      const step = tour.locator(`[data-tour-step="${stepId}"]`);
+      await expect(step).toBeVisible();
+      const links = await step.locator('a[target="_blank"]').evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute('href')).filter(Boolean) as string[]);
+      expect(links).toHaveLength(2);
+      for (const href of links) expect((await request.get(href)).status(), href).toBe(200);
+      if (index < item.steps.length - 1) await tour.getByRole('button', { name: item.next }).click();
+    }
+
+    await expect(tour.getByRole('button', { name: item.previous })).toBeVisible();
+    await tour.getByRole('button', { name: item.complete }).click();
+    await expect(tour).toHaveAttribute('data-state', 'complete');
+    await expect(tour.locator('[data-tour-workspace]')).toBeHidden();
+    const completion = tour.locator('[data-tour-completion]');
+    await expect(completion).toBeVisible();
+    await expect(completion.getByRole('link', { name: /(?:Comparar planes|Compare plans)/ })).toHaveAttribute('href', item.plans);
+    await expect(completion.getByRole('link', { name: /(?:Empezar el diagnóstico|Start the assessment)/ })).toHaveAttribute('href', item.assessment);
+    await expect(completion.getByRole('link', { name: /(?:Hablar con Logic2B|Talk to Logic2B)/ })).toHaveAttribute('href', item.contact);
+    expect(await page.evaluate(() => JSON.stringify({
+      local: Object.fromEntries(Object.keys(localStorage).sort().map((key) => [key, localStorage.getItem(key)])),
+      session: Object.fromEntries(Object.keys(sessionStorage).sort().map((key) => [key, sessionStorage.getItem(key)])),
+    }))).toBe(storageBefore);
   }
   expect(writes).toEqual([]);
 });

@@ -1,6 +1,6 @@
 # Informe reproducible del embudo digital
 
-El informe `2.2.0` transforma recuentos agregados de eventos consentidos en una lectura estable del embudo, la evidencia comercial consultada y sus siguientes pasos. Conserva el embudo estricto y las vistas de `2.1.0`, y añade `web_handoff` y `panel_handoff` para distinguir salidas reales hacia demo, diagnóstico o contacto. No consulta GA4, no modifica etiquetas, no escribe archivos y no acepta identificadores de usuario, sesión, dispositivo o contacto.
+El informe `2.3.0` transforma recuentos agregados de eventos consentidos en una lectura estable del embudo, la evidencia comercial consultada, sus siguientes pasos y el recorrido guiado. Conserva vistas y handoffs de `2.2.0`, y añade `tour_start` y `tour_complete` para distinguir un inicio y un final explícitos. No consulta GA4, no modifica etiquetas, no escribe archivos y no acepta identificadores de usuario, sesión, dispositivo o contacto.
 
 ## Qué mide
 
@@ -22,13 +22,15 @@ Las vistas de evidencia tampoco representan personas únicas. Cada carga consent
 
 Los handoffs solo se emiten ante un clic real en una salida comercial publicada. `demo` abre la evidencia local exacta, `assessment` abre el diagnóstico con contexto allowlisted y `contact` conduce al único formulario real de la portada. La navegación no se bloquea ni espera a una etiqueta; el tracker registra sincrónicamente cuando el runtime ya está validado y, en cualquier otro caso, vuelve a comprobar consentimiento y runtime antes de aceptar el evento. No se conserva el `href`, la URL de origen, el texto del enlace ni ninguna respuesta del usuario.
 
+El recorrido guiado vive en `/recorrido/` y `/en/journey/`. `tour_start` solo corresponde al botón que inicia sus cinco pasos y `tour_complete` al control final que aparece después del quinto. Abrir la ruta, hacer scroll, esperar, cambiar de paso o abandonar no genera ninguno de los dos eventos. Ambos usan únicamente idioma, `flow=guided` y `source_section=guided_tour`; el informe muestra inicios, finales y una tasa direccional agregada por idioma, sin unir interacciones en perfiles individuales.
+
 ## Contrato de entrada
 
 La entrada es un objeto JSON agregado:
 
 ```json
 {
-  "contractVersion": "2.2.0",
+  "contractVersion": "2.3.0",
   "period": { "start": "2026-08-01", "end": "2026-08-31" },
   "consentMode": "analytics-consent-only",
   "rows": [
@@ -43,7 +45,7 @@ La entrada es un objeto JSON agregado:
 }
 ```
 
-Cada fila admite exclusivamente `event`, `count`, `locale`, `segment`, `plan`, `web`, `panel`, `handoff`, `demo`, `flow`, `step_index` y `source_section`. Son las dimensiones allowlisted en el contrato único `packages/config/src/analytics-contract.json`, consumido también por la landing y las demos. Sus valores se validan contra los valores emitidos por el producto; no se aceptan dimensiones libres. Las etapas medidas exigen además su forma canónica: por ejemplo, `assessment_submit` requiere idioma, segmento, plan y `source_section=assessment`, mientras que `solution_view` exige idioma, uno de los tres segmentos publicados y `source_section=solution`. Vistas y handoffs requieren además que identificador y plan formen una de las dieciocho combinaciones publicadas; los handoffs solo aceptan `demo`, `assessment` o `contact`. Mezclar Linde con Inteligente, Copiloto con Gestión o cualquier destino libre se rechaza aunque los valores restantes existan por separado.
+Cada fila admite exclusivamente `event`, `count`, `locale`, `segment`, `plan`, `web`, `panel`, `handoff`, `demo`, `flow`, `step_index` y `source_section`. Son las dimensiones allowlisted en el contrato único `packages/config/src/analytics-contract.json`, consumido también por la landing y las demos. Sus valores se validan contra los valores emitidos por el producto; no se aceptan dimensiones libres. Las etapas medidas exigen además su forma canónica: por ejemplo, `assessment_submit` requiere idioma, segmento, plan y `source_section=assessment`, mientras que `solution_view` exige idioma, uno de los tres segmentos publicados y `source_section=solution`. Vistas y handoffs requieren además que identificador y plan formen una de las dieciocho combinaciones publicadas; los handoffs solo aceptan `demo`, `assessment` o `contact`. Los dos eventos del recorrido exigen `flow=guided` y `source_section=guided_tour`. Mezclar Linde con Inteligente, Copiloto con Gestión, otro flujo o cualquier destino libre se rechaza aunque los valores restantes existan por separado.
 
 Para preparar el JSON, agrega en la fuente por evento y dimensiones permitidas. No exportes `user_pseudo_id`, session ID, URL completa, títulos libres, términos de búsqueda, datos del formulario ni ningún valor personalizado. La CLI rechazará cualquier clave desconocida, aunque el origen la considere inocua.
 
@@ -63,7 +65,7 @@ Genera el informe desde un archivo temporal autorizado:
 pnpm funnel:report -- < /ruta/segura/recuentos-agregados.json
 ```
 
-La salida Markdown incluye periodo, cobertura, tabla de etapas, tasas respecto a la etapa anterior, totales por evento, desglose de las etapas por idioma, vistas de solución por segmento, vistas web por concepto/plan, vistas de panel por superficie/plan y handoffs por origen/destino/idioma, además de advertencias de calidad y notas de contexto. La salida JSON ofrece los mismos cálculos para revisión automatizada. `assessment_complete` con `source_section=homepage_scope` es una forma válida: queda fuera de las tasas y se presenta como contexto, no como incidencia. Un dataset puede contener solo vistas o handoffs canónicos; las combinaciones incompletas o no canónicas se rechazan antes de calcular el informe.
+La salida Markdown incluye periodo, cobertura, tabla de etapas, tasas respecto a la etapa anterior, totales por evento, desglose de las etapas por idioma, vistas de solución por segmento, vistas web por concepto/plan, vistas de panel por superficie/plan, handoffs por origen/destino/idioma e inicio/final del recorrido por idioma, además de advertencias de calidad y notas de contexto. La salida JSON ofrece los mismos cálculos para revisión automatizada. `assessment_complete` con `source_section=homepage_scope` es una forma válida: queda fuera de las tasas y se presenta como contexto, no como incidencia. Un dataset puede contener solo vistas, handoffs o recorrido canónicos; las combinaciones incompletas o no canónicas se rechazan antes de calcular el informe. Si los finales superan los inicios en un idioma, se conserva el dato y se emite una advertencia de calidad en vez de ocultarlo.
 
 ## Interpretación y puerta de decisión
 
