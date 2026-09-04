@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const CONTRACT_VERSION = '2.3.0';
+export const CONTRACT_VERSION = '2.4.0';
 const SCRIPT_DIRECTORY = dirname(fileURLToPath(import.meta.url));
 const analyticsContract = JSON.parse(await readFile(resolve(SCRIPT_DIRECTORY, '../packages/config/src/analytics-contract.json'), 'utf8'));
 const FUNNEL = [

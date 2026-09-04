@@ -18,6 +18,7 @@
     "smoke:resend": "pnpm --filter @logic-estancia/worker smoke:resend",
     "commercial:template": "node scripts/commercial-template.mjs",
     "funnel:report": "node scripts/funnel-report.mjs",
+    "gtm:dossier": "node scripts/gtm-activation-dossier.mjs",
     "deploy": "pnpm --filter @logic-estancia/worker deploy"
   },
   "devDependencies": {

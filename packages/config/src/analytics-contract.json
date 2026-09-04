@@ -1,5 +1,5 @@
 {
-  "version": "2.3.0",
+  "version": "2.4.0",
   "containerId": "GTM-TVDWZ9LC",
   "events": [
     "solution_view",
@@ -126,6 +126,14 @@
       "allowed": ["locale", "flow", "source_section"],
       "values": { "flow": ["guided"], "source_section": ["guided_tour"] }
     },
+    "plan_select": {
+      "required": ["locale", "plan", "source_section"],
+      "allowed": ["locale", "plan", "source_section"],
+      "values": {
+        "plan": ["basico", "gestion", "inteligente"],
+        "source_section": ["homepage_plans", "plans_grid"]
+      }
+    },
     "assessment_start": {
       "required": ["locale", "segment", "source_section"],
       "allowed": ["locale", "segment", "source_section"],
@@ -155,10 +163,19 @@
       "required": ["locale", "source_section"],
       "allowed": ["locale", "source_section"],
       "values": { "source_section": ["homepage_contact"] }
+    },
+    "cta_click": {
+      "required": ["locale", "source_section"],
+      "allowed": ["locale", "segment", "flow", "source_section"],
+      "values": {
+        "segment": ["rural", "apartments", "hotels"],
+        "flow": ["guided"],
+        "source_section": ["guided_tour", "header", "hero", "panel_portfolio", "plans_hero", "resource", "solution_footer", "solution_hero", "web_portfolio"]
+      }
     }
   },
   "surfaces": {
-    "site": ["solution_view", "web_view", "panel_view", "web_handoff", "panel_handoff", "tour_start", "tour_complete", "plan_select", "assessment_start", "assessment_step", "assessment_complete", "assessment_submit", "demo_open", "demo_mode_select", "demo_step_complete", "demo_flow_complete", "demo_cta", "lead_submit", "meeting_click", "cta_click"],
+    "site": ["solution_view", "web_view", "panel_view", "web_handoff", "panel_handoff", "tour_start", "tour_complete", "plan_select", "assessment_start", "assessment_step", "assessment_complete", "assessment_submit", "lead_submit", "meeting_click", "cta_click"],
     "demo": ["demo_open", "demo_mode_select", "demo_step_complete", "demo_flow_complete", "demo_cta"]
   }
 }

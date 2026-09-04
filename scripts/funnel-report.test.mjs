@@ -23,7 +23,7 @@ describe('funnel report', () => {
   it('documents the versioned aggregate-only contract', async () => {
     const result = await runFunnelReport({ args: ['--validate'] });
     expect(result.exitCode).toBe(0);
-    expect(JSON.parse(result.output)).toMatchObject({ ok: true, contractVersion: '2.3.0', privacy: 'aggregated-allowlist-only' });
+    expect(JSON.parse(result.output)).toMatchObject({ ok: true, contractVersion: '2.4.0', privacy: 'aggregated-allowlist-only' });
   });
 
   it('calculates stable directional rates without user attribution', () => {

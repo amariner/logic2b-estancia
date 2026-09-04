@@ -1,6 +1,6 @@
 # Informe reproducible del embudo digital
 
-El informe `2.3.0` transforma recuentos agregados de eventos consentidos en una lectura estable del embudo, la evidencia comercial consultada, sus siguientes pasos y el recorrido guiado. Conserva vistas y handoffs de `2.2.0`, y añade `tour_start` y `tour_complete` para distinguir un inicio y un final explícitos. No consulta GA4, no modifica etiquetas, no escribe archivos y no acepta identificadores de usuario, sesión, dispositivo o contacto.
+El informe `2.4.0` transforma recuentos agregados de eventos consentidos en una lectura estable del embudo, la evidencia comercial consultada, sus siguientes pasos y el recorrido guiado. Conserva vistas, handoffs e inicio/final explícitos de `2.3.0`, y completa las formas de `plan_select` y `cta_click` para que todos los eventos del sitio tengan parámetros cerrados. Los cinco eventos de demo quedan expresamente en la superficie local y fuera del proveedor. No consulta GA4, no modifica etiquetas, no escribe archivos y no acepta identificadores de usuario, sesión, dispositivo o contacto.
 
 ## Qué mide
 
@@ -30,7 +30,7 @@ La entrada es un objeto JSON agregado:
 
 ```json
 {
-  "contractVersion": "2.3.0",
+  "contractVersion": "2.4.0",
   "period": { "start": "2026-08-01", "end": "2026-08-31" },
   "consentMode": "analytics-consent-only",
   "rows": [

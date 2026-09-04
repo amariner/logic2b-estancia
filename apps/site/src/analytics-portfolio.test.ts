@@ -61,4 +61,18 @@ describe('portfolio analytics contract', () => {
     }
     expect(ANALYTICS_SAFE_PATHS).toEqual(expect.arrayContaining(['/recorrido/', '/en/journey/']));
   });
+
+  it('gives every provider event an exact shape and keeps demo events local', () => {
+    expect(analyticsContract.version).toBe('2.4.0');
+    expect(analyticsContract.surfaces.site).toHaveLength(15);
+    expect(analyticsContract.surfaces.demo).toHaveLength(5);
+    expect(analyticsContract.surfaces.site.every((event) => Object.hasOwn(analyticsContract.eventShapes, event))).toBe(true);
+    expect(analyticsContract.surfaces.demo.some((event) => analyticsContract.surfaces.site.includes(event))).toBe(false);
+    expect(analyticsContract.eventShapes.plan_select).toEqual({
+      required: ['locale', 'plan', 'source_section'],
+      allowed: ['locale', 'plan', 'source_section'],
+      values: { plan: ['basico', 'gestion', 'inteligente'], source_section: ['homepage_plans', 'plans_grid'] },
+    });
+    expect(analyticsContract.eventShapes.cta_click.values.source_section).toEqual(expect.arrayContaining(['web_portfolio', 'panel_portfolio']));
+  });
 });
