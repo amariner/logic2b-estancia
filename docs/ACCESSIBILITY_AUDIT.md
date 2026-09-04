@@ -8,17 +8,17 @@ Baseline automatizada WCAG 2.2 AA en verde. Esto no constituye una certificació
 
 ## Alcance automatizado
 
-La suite `tests/e2e/accessibility.spec.ts` audita las 30 rutas públicas en Chromium con axe-core y las etiquetas `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` y `wcag22aa`:
+La suite `tests/e2e/accessibility.spec.ts` audita 82 rutas públicas en Chromium con axe-core y las etiquetas `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` y `wcag22aa`, además de 14 estados profundos de dashboard:
 
 - Landing, soluciones, planes, diagnóstico, documentación y recursos comerciales.
 - Aviso legal, privacidad y cookies.
-- Nivora, Terrava y Aurem en ES/EN, incluidos los gestores de Terrava y Aurem.
+- Las doce fichas comerciales web ES/EN, incluidos los casos canónicos de Nivora, Terrava y Aurem; sus demos y los gestores de Terrava y Aurem permanecen en el alcance separado de producto ficticio.
 - La interacción y el expediente de entrega 0/13 de Nivora, los estados profundos ES/EN del editor y expediente de publicación de Terrava, además de ingresos, preparación de canales, automatizaciones inertes y Copiloto supervisado de Aurem, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. La portada incorpora un registro de cinco expedientes con una puerta desplegable de diez evidencias, además de pagos 0/15 y datos/PMS 0/16; los tres disclosures están cerrados por defecto. Publicación y canales exponen doce requisitos sin validar; `automations` y `automation` son superficies deliberadamente distintas.
 
 Además comprueba:
 
 - Un único landmark `main` y un único `h1` por ruta.
-- Reflow sin scroll horizontal de página en las 30 rutas a 320 CSS px, equivalente al viewport de referencia de WCAG a 400 %.
+- Reflow sin scroll horizontal de página en las 82 rutas y 14 estados profundos a 320 CSS px, equivalente al viewport de referencia de WCAG a 400 %.
 - Texto al 200 % sin provocar scroll horizontal de página en las cinco familias representativas.
 - Indicador de foco visible en la web comercial, una web demo y un gestor.
 - Supresión de transiciones, animaciones y scroll suave con `prefers-reduced-motion: reduce` en esas tres familias.
@@ -46,7 +46,7 @@ La segunda pasada de interacción y reflow detectó y corrigió:
 - Diagnóstico permanente del selector y geometría responsables cuando una futura ruta vuelva a desbordar.
 - Anchura intrínseca del editor de IA y cabecera larga de Automatización a 320 px, manteniendo textarea, acciones y trazabilidad dentro del viewport.
 
-Después de las correcciones, axe no reporta violaciones en ninguna de las 30 rutas ni en los estados profundos cubiertos. El QA visual responsive más reciente de automatizaciones a 1440 × 1000 y 390 × 844, junto con la matriz de reflow a 320 px y texto al 200 %, confirmó ausencia de overflow y regresiones visibles; el Copiloto conserva su propia ruta y sus pruebas independientes.
+Después de las correcciones, axe no reporta violaciones en ninguna de las 82 rutas ni en los 14 estados profundos cubiertos. El QA visual responsive más reciente añadió las fichas canónicas de Nivora, Terrava y Aurem ES/EN a 1440 × 1000 y 390 × 844: las doce capturas conservaron jerarquía y límites visibles, imágenes responsivas correctas, cero overflow, cero recursos rotos y cero errores de consola. La matriz de reflow a 320 px y texto al 200 % continúa verde; Automatizaciones y Copiloto conservan rutas y pruebas independientes.
 
 ## Evidencia reproducible
 
@@ -57,7 +57,7 @@ pnpm e2e
 pnpm peers check
 ```
 
-Resultado verificado el 2026-09-04: la puerta global pasa 106/106 E2E, incluida la cobertura axe, landmarks, reflow a 320 px y texto al 200 % de Canales, `automations` y `automation`. La primera ampliación al 200 % detectó 83 px de desbordamiento en el grid de Canales; la composición adaptativa lo corrigió y el barrido final completo quedó verde. `pnpm check` completa 7/7 tareas de lint y 21/21 tareas de typecheck, pruebas y build.
+Resultado verificado el 2026-09-04: la puerta global pasa 112/112 E2E, incluida la cobertura axe, landmarks, reflow a 320 px y texto al 200 % de Canales, `automations`, `automation` y las doce fichas web. La ampliación de P6 detectó una precarga inexistente de 1280 px en los tres casos canónicos; se alineó con sus assets 640/960/1600 antes del barrido final. `pnpm check` completa 7/7 tareas de lint, 21/21 tareas de typecheck/pruebas/build, 18/18 pruebas del site, 79/79 del Worker y 18/18 pruebas operativas.
 
 ## Deuda y siguiente revisión
 

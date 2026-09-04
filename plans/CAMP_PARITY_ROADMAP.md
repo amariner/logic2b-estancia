@@ -197,6 +197,8 @@ Entregables:
 3. Medir descubrimiento → evidencia → diagnóstico → lead → agenda con periodos fechados; no mezclar la home anterior con la nueva.
 4. Ejecutar un solo experimento principal cada vez y no declarar ganador sin evidencia suficiente.
 
+Estado al 2026-09-04: **P6 en curso; `web_view` y `panel_view` cerrados**. Las doce direcciones web y las seis fichas de panel disponen de rutas comerciales ES/EN allowlisted que emiten una sola vista por carga únicamente tras consentimiento explícito y runtime analítico `live`. Identificador, plan, idioma y origen forman combinaciones cerradas; URL, título, texto, usuario, sesión y PII se rechazan. El informe `2.1.0` admite periodos formados solo por evidencia y desglosa cargas agregadas por concepto/superficie e idioma. Las demos canónicas conservan CSP `connect-src 'none'`, no leen consentimiento, no consultan capacidades y no cargan GTM; no se relajó su aislamiento para medirlas. GTM, línea base y experimentos continúan bloqueados como actividades externas.
+
 ## Definición de paridad conseguida
 
 La paridad se considera alcanzada cuando:
@@ -230,4 +232,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Comenzar **P6 · Medición y optimización** con los eventos canónicos consentidos `web_view` y `panel_view`. El contrato debe permitir solo los identificadores cerrados de las 12 direcciones y 6 paneles, idioma, plan y sección de origen; cada vista se emitirá una sola vez por carga, únicamente en rutas allowlisted, tras consentimiento analítico explícito y con el runtime analítico en `live`. El informe reproducible aceptará y desglosará exclusivamente recuentos agregados sin URL, título, texto libre, identificador de usuario o PII. `tour_start`, `tour_complete` y handoffs quedarán para el incremento posterior; GTM, línea base y experimentos siguen bloqueados hasta autorización externa.
+Continuar **P6 · Medición y optimización** con handoffs canónicos consentidos en las superficies comerciales: salida de ficha web o panel hacia evidencia exacta, diagnóstico y contacto. El evento debe usar únicamente identificadores y destinos cerrados, idioma, plan y origen; no aceptará URL, título, texto libre, usuario, sesión o PII y se emitirá solo por una interacción real, tras consentimiento y runtime `live`. Antes de instrumentar `tour_start` y `tour_complete`, definir una superficie comercial verificable que permita empezar y terminar explícitamente el recorrido; no reinterpretar un simple scroll ni relajar el CSP de las demos, cuyos eventos locales existentes permanecen sin proveedor. Actualizar el informe con desgloses agregados y cubrir navegación, revocación, idempotencia y combinaciones adversarias. GTM, línea base y experimentos siguen bloqueados hasta autorización externa.
