@@ -2,9 +2,11 @@
 import type { Locale } from '@logic-estancia/config';
 import { CAPABILITIES } from '@logic-estancia/domain';
 import { capabilityStatusDetail, capabilityStatusLabel } from '../capability-evidence';
+import { guideContextForPanel } from '../guide-context';
 import { getPublishedPanels, type PanelPortfolioItem } from '../panel-portfolio';
 import { getPlanCards, planHandoffHref } from '../plan-contract';
 import PanelPreview from './PanelPreview.astro';
+import ContextualGuides from './ContextualGuides.astro';
 
 const { locale, panel } = Astro.props as { locale: Locale; panel: PanelPortfolioItem };
 const en = locale === 'en';
@@ -86,6 +88,8 @@ const relatedCapabilities = panel.capabilityIds.map((id) => {
       </div>
     </div>
   </section>
+
+  <ContextualGuides locale={locale} contextId={guideContextForPanel(panel.id)} />
 
   <section class="section shell panel-detail-actions" data-commercial-actions>
     <div><p class="eyebrow">{en ? 'Check the source' : 'Comprueba la fuente'}</p><h2 class="heading">{en ? `Open the exact ${demoName} view or assess the starting plan.` : `Abre la vista exacta de ${demoName} o evalúa el plan de partida.`}</h2><p>{en ? 'The demo opens without registration and resets to its fictitious fixture. The assessment keeps only allowlisted project context and collects no personal data.' : 'La demo abre sin registro y vuelve a su fixture ficticio. El diagnóstico conserva solo contexto de proyecto permitido y no recoge datos personales.'}</p></div>

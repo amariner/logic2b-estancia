@@ -2,6 +2,7 @@
 import type { Locale } from '@logic-estancia/config';
 import { getPlanCards, planHandoffHref } from '../plan-contract';
 import { getWebPortfolio, type OriginalWebPortfolioConcept } from '../web-portfolio';
+import ContextualGuides from './ContextualGuides.astro';
 
 const { locale, concept } = Astro.props as { locale: Locale; concept: OriginalWebPortfolioConcept };
 const en = locale === 'en';
@@ -61,6 +62,8 @@ const sourceSet = `/media/${concept.slug}/hero-640.avif 640w, /media/${concept.s
     <div><p class="eyebrow">{concept.boundaryLabel}</p><h2 id="web-concept-boundary-title">{en ? 'A visual concept is evidence of direction, not live operations.' : 'Un concepto visual demuestra dirección, no operaciones reales.'}</h2></div>
     <div><p>{concept.boundary}</p><p>{en ? `The ${concept.planLabel} starting point is based on required capabilities. This route adds no provider, booking, message, payment or external write.` : `El punto de partida ${concept.planLabel} responde a las capacidades necesarias. Esta ruta no añade proveedor, reserva, mensaje, pago ni escritura externa.`}</p></div>
   </section>
+
+  <ContextualGuides locale={locale} contextId="webs" />
 
   <footer class="web-concept-next shell">
     <div><p class="eyebrow">{en ? 'Continue with evidence' : 'Continúa con evidencia'}</p><h2>{en ? 'Compare this direction with the full portfolio.' : 'Compara esta dirección con el portfolio completo.'}</h2></div>

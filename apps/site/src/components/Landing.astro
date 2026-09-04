@@ -9,6 +9,7 @@ import { getHomeContract } from '../home-contract';
 import { getPlanCards } from '../plan-contract';
 import { getCanonicalWebPortfolio, getWebPortfolio } from '../web-portfolio';
 import CapabilityBand from './CapabilityBand.astro';
+import ContextualGuides from './ContextualGuides.astro';
 import HumanService from './HumanService.astro';
 import HomeJourney from './HomeJourney.astro';
 import PlanCard from './PlanCard.astro';
@@ -141,6 +142,7 @@ const serviceSchema = {
 <CapabilityBand locale={locale} />
 <HomeJourney locale={locale} />
 <ProductExplorer locale={locale} />
+<ContextualGuides locale={locale} contextId="home" />
 
 <section class="section tension-section">
   <div class="shell commercial-columns"><div class="section-head"><p class="eyebrow">{locale === 'es' ? 'Dirigir con contexto' : 'Run with context'}</p><h2 class="heading">{locale === 'es' ? 'Dirigir no debería significar reconstruir cada historia.' : 'Running the business should not mean rebuilding every story.'}</h2><p>{locale === 'es' ? 'La fricción rara vez vive en una sola herramienta. Aparece cuando la información cambia de sitio y cada decisión empieza de nuevo.' : 'Friction rarely lives in one tool. It appears when information changes place and every decision starts again.'}</p></div><ol class="direction-list">{directionSignals.map(([number, title, text]) => <li><span>{number}</span><div><strong>{title}</strong><p>{text}</p></div></li>)}</ol></div>

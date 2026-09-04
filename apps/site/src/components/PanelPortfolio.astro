@@ -2,6 +2,7 @@
 import type { Locale } from '@logic-estancia/config';
 import { getPanelPortfolio, getPublishedPanels } from '../panel-portfolio';
 import PanelPreview from './PanelPreview.astro';
+import ContextualGuides from './ContextualGuides.astro';
 
 const { locale } = Astro.props as { locale: Locale };
 const en = locale === 'en';
@@ -46,6 +47,8 @@ const publishedCount = getPublishedPanels(locale).length;
       </div>
     </div>
   </section>
+
+  <ContextualGuides locale={locale} contextId="panels" />
 
   <section class="section shell panel-index-cta" data-commercial-actions>
     <div><p class="eyebrow">{en ? 'Choose by capability' : 'Elige por capacidad'}</p><h2 class="heading">{en ? 'The plan follows the problem you need to solve.' : 'El plan sigue el problema que necesitas resolver.'}</h2><p>{en ? 'Management begins with continuity for enquiries and planning. Intelligent adds operating coordination only when the required capabilities justify it.' : 'Gestión empieza con continuidad para solicitudes y planning. Inteligente añade coordinación operativa solo cuando las capacidades necesarias lo justifican.'}</p></div>

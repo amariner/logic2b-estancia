@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { getWebPortfolio } from '../web-portfolio';
+import ContextualGuides from './ContextualGuides.astro';
 import WebPortfolioCard from './WebPortfolioCard.astro';
 
 const { locale } = Astro.props as { locale: Locale };
@@ -27,6 +28,7 @@ const copy = en ? {
     <p class="portfolio-filter-empty" data-portfolio-filter-empty hidden>{copy.empty}</p>
   </div>
 </section>
+<ContextualGuides locale={locale} contextId="webs" />
 <section class="section shell final-cta portfolio-final"><p class="eyebrow">{copy.ctaEyebrow}</p><h2 class="heading">{copy.ctaTitle}</h2><p>{copy.ctaBody}</p><a class="pill" href={`${en ? '/en' : ''}/${en ? 'assessment' : 'diagnostico'}/`} data-track="cta_click" data-section="portfolio">{copy.cta} <span aria-hidden="true">→</span></a></section>
 </div>
 

@@ -1,0 +1,27 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getGuideContext, type GuideContextId } from '../guide-context';
+
+const { locale, contextId } = Astro.props as { locale: Locale; contextId: GuideContextId };
+const context = getGuideContext(contextId, locale);
+const en = locale === 'en';
+---
+
+<section class:list={['contextual-guides', 'section', { 'is-collection': context.guides.length > 3, 'is-compact': context.guides.length <= 2 }]} data-guide-context={context.id} data-guide-context-count={context.guides.length}>
+  <div class="shell contextual-guides-layout">
+    <header>
+      <div><p class="eyebrow">{context.eyebrow}</p><h2 class="heading">{context.title}</h2></div>
+      <p>{context.body}</p>
+    </header>
+    <nav class="contextual-guide-list" aria-label={en ? 'Related role guides' : 'Guías por rol relacionadas'}>
+      {context.guides.map((guide) => (
+        <a href={guide.detailHref} data-guide-context-link={guide.id}>
+          <span>{guide.number} · {guide.role}</span>
+          <strong>{guide.title}</strong>
+          <small>{guide.question}</small>
+          <b aria-hidden="true">→</b>
+        </a>
+      ))}
+    </nav>
+  </div>
+</section>

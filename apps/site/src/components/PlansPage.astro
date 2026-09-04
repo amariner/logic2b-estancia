@@ -10,6 +10,7 @@ import {
 } from '../capability-evidence';
 import { getPlanCards } from '../plan-contract';
 import HumanService from './HumanService.astro';
+import ContextualGuides from './ContextualGuides.astro';
 import PlanCard from './PlanCard.astro';
 const { locale } = Astro.props as { locale: Locale };
 const en = locale === 'en'; const prefix = en ? '/en' : '';
@@ -20,6 +21,7 @@ const sourcePath = en ? '/en/plans/' : '/planes/';
 <section class="commercial-hero shell"><p class="eyebrow">{en ? 'Three starting points · one path forward' : 'Tres puntos de partida · un camino para avanzar'}</p><h1 class="display">{en ? 'Pay for the problem you need to solve. Not for the suite you might need one day.' : 'Paga por el problema que necesitas resolver. No por la suite que quizá uses algún día.'}</h1><p>{en ? 'Every plan combines personalised implementation, configuration by the Logic2B team and a subscription. Basic improves attraction, Management gives bookings continuity and Intelligent helps teams anticipate operations.' : 'Cada plan combina implantación personalizada, configuración por el equipo de Logic2B y una suscripción. Básico mejora la captación, Gestión da continuidad a las reservas e Inteligente ayuda a anticipar la operación.'}</p><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-track="cta_click" data-section="plans_hero">{en ? 'Find my starting point' : 'Ver mi punto de partida'} →</a></section>
 <section class="section shell"><div class="plans-grid" data-plan-showcase>{plans.map((plan, index) => <PlanCard locale={locale} plan={plan} sourcePath={sourcePath} featured={index === 1} />)}</div><p class="pricing-note">{en ? 'All plans include hosting, technical maintenance, security and base support. Domain, migrations, integrations, advanced branding and extended support are scoped separately.' : 'Todos incluyen hosting, mantenimiento técnico, seguridad y soporte base. Dominio, migraciones, integraciones, branding avanzado y soporte extendido se presupuestan aparte.'}</p></section>
 <HumanService locale={locale} ctaHref={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} />
+<ContextualGuides locale={locale} contextId="plans" />
 <section class="section soft">
   <div class="shell">
     <div class="section-head">

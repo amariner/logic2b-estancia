@@ -977,6 +977,21 @@
 .web-concept-next .text-link { color: var(--concept-ink); }
 .web-concept-next .pill { color: white; background: var(--concept-ink); }
 
+.contextual-guides { border-block: 1px solid var(--line); background: #f5f6f2; }
+.contextual-guides-layout { display: grid; gap: 46px; }
+.contextual-guides header { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .66fr); gap: 52px; align-items: end; }
+.contextual-guides header .heading { max-width: 780px; margin-top: 14px; overflow-wrap: anywhere; }
+.contextual-guides header > p { margin: 0; color: var(--slate); font-size: .82rem; line-height: 1.65; }
+.contextual-guide-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.contextual-guide-list a { position: relative; display: flex; min-width: 0; min-height: 208px; flex-direction: column; border: 1px solid var(--line); border-radius: 18px; padding: 20px; color: var(--ink); background: rgb(255 255 255 / .76); text-decoration: none; }
+.contextual-guide-list a:hover { border-color: rgb(82 116 88 / .45); background: white; }
+.contextual-guide-list a > span { overflow-wrap: anywhere; color: #527458; font-size: .59rem; font-weight: 650; letter-spacing: .07em; text-transform: uppercase; }
+.contextual-guide-list a > strong { margin-top: 24px; overflow-wrap: anywhere; font-family: var(--serif); font-size: 1.47rem; font-weight: 400; line-height: 1.05; }
+.contextual-guide-list a > small { margin-top: auto; padding-top: 24px; overflow-wrap: anywhere; color: var(--slate); font-size: .67rem; line-height: 1.48; }
+.contextual-guide-list a > b { position: absolute; top: 18px; right: 20px; font-size: .82rem; }
+.contextual-guides.is-compact .contextual-guide-list { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.contextual-guides.is-compact .contextual-guide-list a { min-height: 180px; }
+
 .guide-hero { padding: 104px 0 92px; background: radial-gradient(circle at 86% 12%, #e8eee5 0, transparent 30%), radial-gradient(circle at 12% 88%, #f5e2d5 0, transparent 27%), linear-gradient(135deg, #fff, var(--paper)); }
 .guide-hero-grid, .guide-section-heading, .guide-detail-hero-grid, .guide-responsibilities, .guide-evidence, .guide-detail-actions { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(310px, .7fr); gap: 68px; align-items: end; }
 .guide-hero .display { max-width: 920px; margin-top: 18px; }
@@ -1076,6 +1091,7 @@
 }
 
 @media (max-width: 900px) {
+  .contextual-guides header { grid-template-columns: 1fr; gap: 20px; }
   .home-journey-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-journey-moment { min-height: 350px; }
   .product-explorer-detail { grid-template-columns: 1fr 1fr; padding-left: 78px; }
@@ -1097,6 +1113,10 @@
 }
 
 @media (max-width: 640px) {
+  .contextual-guides-layout { gap: 34px; }
+  .contextual-guide-list, .contextual-guides.is-compact .contextual-guide-list { grid-template-columns: 1fr; }
+  .contextual-guide-list a, .contextual-guides.is-compact .contextual-guide-list a { min-height: 0; }
+  .contextual-guide-list a > small { margin-top: 30px; }
   .capability-band-grid { grid-template-columns: 1fr; margin-top: 38px; }
   .capability-band-card > p { min-height: 0; }
   .home-journey-list { grid-template-columns: 1fr; margin-top: 38px; }

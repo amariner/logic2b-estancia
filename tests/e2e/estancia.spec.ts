@@ -292,6 +292,61 @@ test('role guides publish five complete journeys with truthful capability maturi
   expect(writes).toEqual([]);
 });
 
+test('contextual role guides connect every commercial family to its accountable journey', async ({ page, request }) => {
+  const writes: string[] = [];
+  page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
+  const cases = [
+    ['/', 'home', [
+      ['direction', '/docs/direccion-propiedad/'], ['reception', '/docs/reservas-recepcion/'], ['operations', '/docs/operaciones/'],
+      ['marketing-revenue', '/docs/marketing-ingresos/'], ['technical-privacy', '/docs/tecnica-privacidad/'],
+    ]],
+    ['/en/', 'home', [
+      ['direction', '/en/docs/ownership-direction/'], ['reception', '/en/docs/reservations-reception/'], ['operations', '/en/docs/operations/'],
+      ['marketing-revenue', '/en/docs/marketing-revenue/'], ['technical-privacy', '/en/docs/technical-privacy/'],
+    ]],
+    ['/planes/', 'plans', [['direction', '/docs/direccion-propiedad/'], ['technical-privacy', '/docs/tecnica-privacidad/']]],
+    ['/en/plans/', 'plans', [['direction', '/en/docs/ownership-direction/'], ['technical-privacy', '/en/docs/technical-privacy/']]],
+    ['/soluciones/casas-rurales/', 'solution-rural', [['reception', '/docs/reservas-recepcion/']]],
+    ['/en/solutions/rural-stays/', 'solution-rural', [['reception', '/en/docs/reservations-reception/']]],
+    ['/soluciones/apartamentos/', 'solution-apartments', [['reception', '/docs/reservas-recepcion/']]],
+    ['/en/solutions/apartments/', 'solution-apartments', [['reception', '/en/docs/reservations-reception/']]],
+    ['/soluciones/hoteles/', 'solution-hotels', [['operations', '/docs/operaciones/']]],
+    ['/en/solutions/hotels/', 'solution-hotels', [['operations', '/en/docs/operations/']]],
+    ['/webs/', 'webs', [['marketing-revenue', '/docs/marketing-ingresos/']]],
+    ['/en/webs/', 'webs', [['marketing-revenue', '/en/docs/marketing-revenue/']]],
+    ['/webs/linde/', 'webs', [['marketing-revenue', '/docs/marketing-ingresos/']]],
+    ['/en/webs/linde/', 'webs', [['marketing-revenue', '/en/docs/marketing-revenue/']]],
+    ['/paneles/', 'panels', [['reception', '/docs/reservas-recepcion/'], ['operations', '/docs/operaciones/'], ['technical-privacy', '/docs/tecnica-privacidad/']]],
+    ['/en/panels/', 'panels', [['reception', '/en/docs/reservations-reception/'], ['operations', '/en/docs/operations/'], ['technical-privacy', '/en/docs/technical-privacy/']]],
+    ['/paneles/solicitudes/', 'panel-enquiries', [['reception', '/docs/reservas-recepcion/']]],
+    ['/en/panels/enquiries/', 'panel-enquiries', [['reception', '/en/docs/reservations-reception/']]],
+    ['/paneles/planning/', 'panel-planning', [['reception', '/docs/reservas-recepcion/']]],
+    ['/en/panels/planning/', 'panel-planning', [['reception', '/en/docs/reservations-reception/']]],
+    ['/paneles/huespedes-llegadas/', 'panel-guests-arrivals', [['reception', '/docs/reservas-recepcion/']]],
+    ['/en/panels/guests-arrivals/', 'panel-guests-arrivals', [['reception', '/en/docs/reservations-reception/']]],
+    ['/paneles/preparacion/', 'panel-preparation', [['operations', '/docs/operaciones/']]],
+    ['/en/panels/preparation/', 'panel-preparation', [['operations', '/en/docs/operations/']]],
+    ['/paneles/operacion-ingresos/', 'panel-operations-revenue', [['marketing-revenue', '/docs/marketing-ingresos/']]],
+    ['/en/panels/operations-revenue/', 'panel-operations-revenue', [['marketing-revenue', '/en/docs/marketing-revenue/']]],
+    ['/paneles/copiloto-supervisado/', 'panel-copilot', [['technical-privacy', '/docs/tecnica-privacidad/']]],
+    ['/en/panels/supervised-copilot/', 'panel-copilot', [['technical-privacy', '/en/docs/technical-privacy/']]],
+  ] as const;
+
+  for (const [path, contextId, expectedLinks] of cases) {
+    await expectCleanPage(page, path);
+    const context = page.locator(`[data-guide-context="${contextId}"]`);
+    await expect(context, path).toBeVisible();
+    await expect(context.locator('[data-guide-context-link]')).toHaveCount(expectedLinks.length);
+    await expect(context.locator('form, input, textarea, select')).toHaveCount(0);
+    for (const [guideId, href] of expectedLinks) {
+      const link = context.locator(`[data-guide-context-link="${guideId}"]`);
+      await expect(link).toHaveAttribute('href', href);
+      expect((await request.get(href)).status(), `${path} -> ${href}`).toBe(200);
+    }
+  }
+  expect(writes).toEqual([]);
+});
+
 test('portfolio exposes twelve truthful navigable directions in both languages', async ({ page, request }) => {
   for (const [path, prefix] of [['/webs/', ''], ['/en/webs/', '/en']] as const) {
     await page.goto(path);
@@ -824,6 +879,10 @@ test('WhatsApp contact follows the Camp pattern without covering the footer', as
     background: 'rgba(19, 122, 59, 0.1)',
     color: 'rgb(19, 122, 59)',
   });
+
+  await page.locator('[data-guide-context="home"]').scrollIntoViewIfNeeded();
+  await expect(contact).toHaveAttribute('data-visible', 'false');
+  await expect(contact).toHaveAttribute('tabindex', '-1');
 
   await page.locator('#contacto').scrollIntoViewIfNeeded();
   await expect(contact).toHaveAttribute('data-visible', 'false');

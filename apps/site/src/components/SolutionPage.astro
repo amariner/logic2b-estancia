@@ -8,8 +8,10 @@ import {
   capabilityStatusLabel,
 } from '../capability-evidence';
 import { getBusiness, type BusinessSegment } from '../businesses';
+import { guideContextForSolution } from '../guide-context';
 import { getSpanishResourceForSegment } from '../resources';
 import BusinessWorkflow from './BusinessWorkflow.astro';
+import ContextualGuides from './ContextualGuides.astro';
 import HumanService from './HumanService.astro';
 
 const { locale, segment } = Astro.props as { locale: Locale; segment: BusinessSegment };
@@ -135,6 +137,8 @@ const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEn
     </div>
   </div>
 </section>
+
+<ContextualGuides locale={locale} contextId={guideContextForSolution(segment)} />
 
 {relatedResource && (
   <aside class="related-resource shell" aria-labelledby={`related-resource-${segment}`} data-related-resource={segment}>
