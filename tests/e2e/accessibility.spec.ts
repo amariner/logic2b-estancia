@@ -169,6 +169,27 @@ test('representative families tolerate text resized to 200 percent', async ({ pa
   }
 });
 
+test('home payment readiness remains accessible and reflows when expanded', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await gotoStable(page, '/');
+  const readiness = page.locator('[data-payment-readiness]');
+  await readiness.getByText('Revisar las quince condiciones', { exact: true }).click();
+  await expect(readiness.locator('[data-payment-readiness-field]')).toHaveCount(15);
+  expect(await page.locator('[data-whatsapp]').evaluate((element) => ({
+    opacity: getComputedStyle(element).opacity,
+    pointerEvents: getComputedStyle(element).pointerEvents,
+  }))).toEqual({ opacity: '0', pointerEvents: 'none' });
+  const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(formatViolations('home payment readiness', result.violations)).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoStable(page, '/en/');
+  await page.locator('[data-payment-readiness]').getByText('Review the fifteen conditions', { exact: true }).click();
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 test('Nivora enquiry interaction remains accessible and reflows at 320px', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 900 });
   await gotoStable(page, '/demos/nivora/');

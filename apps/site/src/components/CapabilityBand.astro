@@ -1,6 +1,6 @@
 ---
 import type { Locale } from '@logic-estancia/config';
-import { CAPABILITIES, type Capability, type PlanLevel } from '@logic-estancia/domain';
+import { CAPABILITIES, PAYMENT_READINESS, PAYMENT_READINESS_FIELDS, type Capability, type PlanLevel } from '@logic-estancia/domain';
 import {
   capabilityEvidenceHref,
   capabilityEvidenceLabel,
@@ -53,6 +53,41 @@ function getCapability(id: string): Capability | undefined {
         </article>
       ))}
     </div>
+    <section id="payment-readiness" class="payment-readiness" aria-labelledby="payment-readiness-title" data-payment-readiness>
+      <header class="payment-readiness-heading">
+        <div>
+          <p class="eyebrow">{en ? 'Separate integration scope' : 'Alcance de integración separado'}</p>
+          <h3 id="payment-readiness-title">{PAYMENT_READINESS.title[locale]}</h3>
+          <p>{PAYMENT_READINESS.summary[locale]}</p>
+        </div>
+        <div class="payment-readiness-zero" aria-label={en ? 'Zero of fifteen payment conditions validated' : 'Cero de quince condiciones de pago validadas'}>
+          <span>{en ? 'Readiness' : 'Preparación'}</span>
+          <strong>0 / {PAYMENT_READINESS_FIELDS.length}</strong>
+          <small>{en ? 'Not validated · charging unavailable' : 'Sin validar · cobro no disponible'}</small>
+        </div>
+      </header>
+      <details data-payment-readiness-details>
+        <summary>
+          <span>{en ? 'Review the fifteen conditions' : 'Revisar las quince condiciones'}</span>
+          <span aria-hidden="true">+</span>
+        </summary>
+        <ol>
+          {PAYMENT_READINESS_FIELDS.map((field, index) => (
+            <li data-payment-readiness-field={field}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <div>
+                <strong>{PAYMENT_READINESS.labels[field][locale]}</strong>
+                <p>{PAYMENT_READINESS.requirements[field][locale]}</p>
+                <small>{en ? 'Not validated' : 'Sin validar'}</small>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </details>
+      <p class="payment-readiness-boundary" role="note">{en
+        ? 'This file creates no checkout, card field, session, authorisation, capture, refund, provider call, webhook, persistence or external write.'
+        : 'Este expediente no crea checkout, campo de tarjeta, sesión, autorización, captura, devolución, llamada a proveedor, webhook, persistencia ni escritura externa.'}</p>
+    </section>
     <p class="capability-band-footnote" role="note">{en ? 'Demo status is not production activation. Connections require a validated project, provider and agreed scope.' : 'El estado de demo no equivale a activación en producción. Las conexiones requieren proyecto, proveedor y alcance validados.'}</p>
   </div>
 </section>

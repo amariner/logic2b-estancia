@@ -329,6 +329,7 @@ const definitions: readonly GuideDefinition[] = [
         boundaries: [
           'Los roles de Aurem son una representación local: no crean cuentas, permisos o datos de producción. La aprobación de la vista local de Terrava valida 0/12 condiciones de publicación: no conoce repositorio, cuenta, secreto, CMS o despliegue y no escribe fuera de la visita.',
           'La matriz muestra cuatro categorías genéricas, cero canales conectados y doce condiciones de preparación sin validar; no contiene marcas, cuentas o credenciales, no sincroniza ni publica y cada proveedor exige validación propia.',
+          'El expediente de pagos de la portada conserva 0/15 condiciones validadas: no contiene checkout, tarjeta, cuenta, proveedor, secreto, endpoint o webhook y no inicia sesiones, cobros o devoluciones.',
           'Las reglas de automatización no inician jobs, colas, cron, webhooks, mensajes o proveedores; el copiloto no usa modelo ni envía nada. Esta guía tampoco sustituye asesoría jurídica, evaluación de seguridad o certificación de cumplimiento.',
         ],
       },
@@ -353,6 +354,7 @@ const definitions: readonly GuideDefinition[] = [
         boundaries: [
           'Aurem roles are a local representation: they create no live account, permission or production data. Approving Terrava’s local preview validates 0/12 publication conditions: it knows no repository, account, secret, CMS or deployment and writes nothing outside the visit.',
           'The matrix shows four generic categories, zero connected channels and twelve unvalidated readiness conditions; it holds no brands, accounts or credentials, synchronises or publishes nothing, and every provider needs its own validation.',
+          'The payment file on the home page retains 0/15 validated conditions: it holds no checkout, card, account, provider, secret, endpoint or webhook and starts no session, charge or refund.',
           'Automation rules start no jobs, queues, cron, webhooks, messages or providers; the copilot uses no model and sends nothing. This guide also replaces no legal advice, security assessment or compliance certification.',
         ],
       },

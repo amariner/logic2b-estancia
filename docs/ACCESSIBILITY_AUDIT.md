@@ -13,7 +13,7 @@ La suite `tests/e2e/accessibility.spec.ts` audita las 30 rutas públicas en Chro
 - Landing, soluciones, planes, diagnóstico, documentación y recursos comerciales.
 - Aviso legal, privacidad y cookies.
 - Nivora, Terrava y Aurem en ES/EN, incluidos los gestores de Terrava y Aurem.
-- La interacción y el expediente de entrega 0/13 de Nivora, los estados profundos ES/EN del editor y expediente de publicación de Terrava, además de ingresos, preparación de canales, automatizaciones inertes y Copiloto supervisado de Aurem, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. Publicación y canales exponen doce requisitos sin validar; `automations` y `automation` son superficies deliberadamente distintas.
+- La interacción y el expediente de entrega 0/13 de Nivora, los estados profundos ES/EN del editor y expediente de publicación de Terrava, además de ingresos, preparación de canales, automatizaciones inertes y Copiloto supervisado de Aurem, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. La portada incorpora el expediente desplegable de pagos 0/15. Publicación y canales exponen doce requisitos sin validar; `automations` y `automation` son superficies deliberadamente distintas.
 
 Además comprueba:
 
@@ -23,7 +23,7 @@ Además comprueba:
 - Indicador de foco visible en la web comercial, una web demo y un gestor.
 - Supresión de transiciones, animaciones y scroll suave con `prefers-reduced-motion: reduce` en esas tres familias.
 - Foco contextual al avanzar, retroceder, obtener y editar el resultado del diagnóstico.
-- Foco al entrar y volver de preferencias de cookies, y al abrir/cerrar validaciones, pago ficticio, visita guiada y paneles del gestor.
+- Foco al entrar y volver de preferencias de cookies, y al abrir/cerrar validaciones, el expediente informativo de pagos, la visita guiada y paneles del gestor.
 - Mensajes de error y estado dinámico anunciados mediante regiones semánticas ya cubiertas por axe y recorridos E2E.
 
 ## Hallazgos y correcciones

@@ -413,6 +413,142 @@ export const EMAIL_DELIVERY_READINESS = {
   requirements: Record<EmailDeliveryReadinessField, LocalizedText>;
 };
 
+export type PaymentReadinessField =
+  | 'ownerScope'
+  | 'permissions'
+  | 'providerCategory'
+  | 'configurationReference'
+  | 'testEnvironment'
+  | 'currenciesAmounts'
+  | 'paymentLifecycle'
+  | 'idempotency'
+  | 'webhooks'
+  | 'reconciliation'
+  | 'failureRecovery'
+  | 'audit'
+  | 'acceptance'
+  | 'killSwitch'
+  | 'rollback';
+
+export const PAYMENT_READINESS_FIELDS = [
+  'ownerScope',
+  'permissions',
+  'providerCategory',
+  'configurationReference',
+  'testEnvironment',
+  'currenciesAmounts',
+  'paymentLifecycle',
+  'idempotency',
+  'webhooks',
+  'reconciliation',
+  'failureRecovery',
+  'audit',
+  'acceptance',
+  'killSwitch',
+  'rollback',
+] as const satisfies readonly PaymentReadinessField[];
+
+export const PAYMENT_READINESS = {
+  scopeState: 'separate_project_scope',
+  readinessState: 'not_validated',
+  executionState: 'unavailable',
+  title: {
+    es: 'Pagos: qué debe estar validado antes de cobrar',
+    en: 'Payments: what must be validated before charging',
+  },
+  summary: {
+    es: 'El cobro se define como un alcance separado. Este expediente explica las decisiones y pruebas necesarias; no representa un checkout ni un proveedor conectado.',
+    en: 'Charging is scoped separately. This file explains the decisions and tests required; it represents neither a checkout nor a connected provider.',
+  },
+  labels: {
+    ownerScope: { es: 'Responsable y alcance', en: 'Owner and scope' },
+    permissions: { es: 'Permisos', en: 'Permissions' },
+    providerCategory: { es: 'Categoría de proveedor', en: 'Provider category' },
+    configurationReference: { es: 'Referencia de configuración', en: 'Configuration reference' },
+    testEnvironment: { es: 'Entorno de prueba', en: 'Test environment' },
+    currenciesAmounts: { es: 'Monedas e importes', en: 'Currencies and amounts' },
+    paymentLifecycle: { es: 'Ciclo del pago', en: 'Payment lifecycle' },
+    idempotency: { es: 'Idempotencia', en: 'Idempotency' },
+    webhooks: { es: 'Eventos y webhooks', en: 'Events and webhooks' },
+    reconciliation: { es: 'Conciliación', en: 'Reconciliation' },
+    failureRecovery: { es: 'Fallos y recuperación', en: 'Failures and recovery' },
+    audit: { es: 'Auditoría', en: 'Audit' },
+    acceptance: { es: 'Aceptación', en: 'Acceptance' },
+    killSwitch: { es: 'Kill switch', en: 'Kill switch' },
+    rollback: { es: 'Reversión y compensación', en: 'Rollback and compensation' },
+  },
+  requirements: {
+    ownerScope: {
+      es: 'Dirección acepta cuándo se cobra, qué conceptos cubre y quién responde operativa y técnicamente de cada incidencia.',
+      en: 'Direction accepts when charging occurs, what it covers and who is operationally and technically accountable for each incident.',
+    },
+    permissions: {
+      es: 'Configuración, autorización, captura, devolución y conciliación usan permisos separados, revocables y de mínimo privilegio.',
+      en: 'Configuration, authorisation, capture, refund and reconciliation use separate, revocable least-privilege access.',
+    },
+    providerCategory: {
+      es: 'La categoría de servicio de pagos debe validarse por proyecto; no hay marca, cuenta o proveedor seleccionado.',
+      en: 'The payment-service category must be validated per project; no brand, account or provider is selected.',
+    },
+    configurationReference: {
+      es: 'Referencia opaca por definir fuera del navegador; la web contiene cero claves, cuentas de comercio, endpoints o secretos.',
+      en: 'Opaque reference to be defined outside the browser; the website contains zero keys, merchant accounts, endpoints or secrets.',
+    },
+    testEnvironment: {
+      es: 'Las pruebas requieren un entorno aislado, sin movimiento de dinero y con instrumentos de prueba; nunca se usan datos de tarjeta reales.',
+      en: 'Tests require an isolated environment, no movement of money and test instruments; real card data is never used.',
+    },
+    currenciesAmounts: {
+      es: 'Moneda, impuestos, tasas, redondeo e importes total, parcial y reembolsable necesitan reglas y ejemplos aceptados.',
+      en: 'Currency, tax, fees, rounding and total, partial and refundable amounts need accepted rules and examples.',
+    },
+    paymentLifecycle: {
+      es: 'Autorización, captura, rechazo, cancelación, devolución parcial o total y disputa se prueban como estados distintos.',
+      en: 'Authorisation, capture, decline, cancellation, partial or full refund and dispute are tested as distinct states.',
+    },
+    idempotency: {
+      es: 'Una referencia estable representa una sola intención y permite repetir llamadas sin duplicar autorizaciones, capturas o devoluciones.',
+      en: 'A stable reference represents one intent and allows calls to be replayed without duplicating authorisations, captures or refunds.',
+    },
+    webhooks: {
+      es: 'Firma, orden, repetición, retraso y evento desconocido se verifican en pruebas; aquí no existe webhook configurado.',
+      en: 'Signature, order, replay, delay and unknown events are verified in tests; no webhook is configured here.',
+    },
+    reconciliation: {
+      es: 'Intento, resultado, devolución, disputa y liquidación se contrastan con una fuente de verdad y diferencias explicables.',
+      en: 'Intent, outcome, refund, dispute and settlement are checked against a source of truth with explainable differences.',
+    },
+    failureRecovery: {
+      es: 'Timeout, rechazo, resultado incierto, cuota y fallo parcial requieren límites, reintentos seguros, escalado y recuperación manual.',
+      en: 'Timeout, decline, uncertain outcome, quota and partial failure require limits, safe retries, escalation and manual recovery.',
+    },
+    audit: {
+      es: 'Referencia, actor, versión, transición y resultado se registran sin número de tarjeta, código de seguridad, PII, clave o secreto.',
+      en: 'Reference, actor, version, transition and outcome are recorded without card number, security code, PII, key or secret.',
+    },
+    acceptance: {
+      es: 'Dirección y la persona responsable de cobros aceptan importes, rechazos, duplicados, devoluciones, conciliación y fallos antes de activar.',
+      en: 'Direction and the payments owner accept amounts, declines, duplicates, refunds, reconciliation and failures before activation.',
+    },
+    killSwitch: {
+      es: 'Un control independiente bloquea nuevas sesiones, autorizaciones y capturas sin borrar evidencia o impedir la conciliación.',
+      en: 'An independent control blocks new sessions, authorisations and captures without deleting evidence or preventing reconciliation.',
+    },
+    rollback: {
+      es: 'La configuración aceptada puede restaurarse; operaciones en curso o inciertas se concilian y compensan, nunca se revierten a ciegas.',
+      en: 'Accepted configuration can be restored; in-flight or uncertain operations are reconciled and compensated, never blindly reversed.',
+    },
+  },
+} as const satisfies {
+  scopeState: 'separate_project_scope';
+  readinessState: 'not_validated';
+  executionState: 'unavailable';
+  title: LocalizedText;
+  summary: LocalizedText;
+  labels: Record<PaymentReadinessField, LocalizedText>;
+  requirements: Record<PaymentReadinessField, LocalizedText>;
+};
+
 export type AssignMode = 'specific-unit' | 'unit-type';
 
 export interface ReservableUnit {

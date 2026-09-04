@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAPABILITIES, CAPABILITY_STATUSES, CHANNEL_READINESS_CONTRACTS, CHANNEL_READINESS_FIELDS, DEMO_PLANS, EMAIL_DELIVERY_READINESS, EMAIL_DELIVERY_READINESS_FIELDS, WEBSITE_PUBLICATION_READINESS, WEBSITE_PUBLICATION_READINESS_FIELDS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
+import { CAPABILITIES, CAPABILITY_STATUSES, CHANNEL_READINESS_CONTRACTS, CHANNEL_READINESS_FIELDS, DEMO_PLANS, EMAIL_DELIVERY_READINESS, EMAIL_DELIVERY_READINESS_FIELDS, PAYMENT_READINESS, PAYMENT_READINESS_FIELDS, WEBSITE_PUBLICATION_READINESS, WEBSITE_PUBLICATION_READINESS_FIELDS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
 
 const mono: StayOrganization = {
   id: 'org-nivora', name: 'Nivora One', vertical: 'apartment', mode: 'mono', currency: 'EUR',
@@ -99,6 +99,23 @@ describe('domain', () => {
     expect(Object.values(EMAIL_DELIVERY_READINESS.labels).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
     expect(Object.values(EMAIL_DELIVERY_READINESS.requirements).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
     expect(JSON.stringify(EMAIL_DELIVERY_READINESS)).not.toMatch(/https?:\/\/|@[a-z0-9.-]+\.(?!example\b)[a-z]{2,}|api[_-]?key[=:]|token[=:]|secret[=:]/i);
+  });
+  it('keeps payment readiness complete, generic and unable to charge', () => {
+    expect(PAYMENT_READINESS).toMatchObject({
+      scopeState: 'separate_project_scope',
+      readinessState: 'not_validated',
+      executionState: 'unavailable',
+    });
+    expect(PAYMENT_READINESS_FIELDS).toEqual([
+      'ownerScope', 'permissions', 'providerCategory', 'configurationReference', 'testEnvironment',
+      'currenciesAmounts', 'paymentLifecycle', 'idempotency', 'webhooks', 'reconciliation',
+      'failureRecovery', 'audit', 'acceptance', 'killSwitch', 'rollback',
+    ]);
+    expect(Object.keys(PAYMENT_READINESS.labels)).toEqual([...PAYMENT_READINESS_FIELDS]);
+    expect(Object.keys(PAYMENT_READINESS.requirements)).toEqual([...PAYMENT_READINESS_FIELDS]);
+    expect(Object.values(PAYMENT_READINESS.labels).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
+    expect(Object.values(PAYMENT_READINESS.requirements).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
+    expect(JSON.stringify(PAYMENT_READINESS)).not.toMatch(/https?:\/\/|stripe|adyen|paypal|merchant[_-]?id[=:]|api[_-]?key[=:]|token[=:]|secret[=:]|\b\d{13,19}\b/i);
   });
   it.each([
     [{ propertyCount: 1, unitCount: 1, wantsBookings: false, wantsAutomation: false, wantsOperations: false }, 'basico'],
