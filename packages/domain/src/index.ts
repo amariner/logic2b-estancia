@@ -692,6 +692,201 @@ export const DATA_SOURCE_READINESS = {
   requirements: Record<DataSourceReadinessField, LocalizedText>;
 };
 
+export type IntegrationReadinessId =
+  | 'channels'
+  | 'website-publication'
+  | 'product-email'
+  | 'payments'
+  | 'data-pms';
+
+export interface IntegrationReadinessRecord {
+  id: IntegrationReadinessId;
+  label: LocalizedText;
+  evidenceHref: LocalizedText;
+  candidateCount: number;
+  conditionCount: number;
+  validatedConditionCount: 0;
+  readinessState: 'not_validated';
+  providerValidationState: 'not_started';
+  validatedProviderCount: 0;
+  activationState: 'unavailable';
+}
+
+export const INTEGRATION_READINESS_REGISTRY = [
+  {
+    id: 'channels',
+    label: { es: 'Canales e inventario', en: 'Channels and inventory' },
+    evidenceHref: { es: '/demos/aurem/gestion/?vista=channels', en: '/en/demos/aurem/gestion/?vista=channels' },
+    candidateCount: CHANNEL_READINESS_CONTRACTS.length,
+    conditionCount: CHANNEL_READINESS_FIELDS.length,
+    validatedConditionCount: 0,
+    readinessState: 'not_validated',
+    providerValidationState: 'not_started',
+    validatedProviderCount: 0,
+    activationState: 'unavailable',
+  },
+  {
+    id: 'website-publication',
+    label: { es: 'Publicación web', en: 'Website publication' },
+    evidenceHref: { es: '/demos/terrava/gestion/?vista=website', en: '/en/demos/terrava/gestion/?vista=website' },
+    candidateCount: 1,
+    conditionCount: WEBSITE_PUBLICATION_READINESS_FIELDS.length,
+    validatedConditionCount: 0,
+    readinessState: 'not_validated',
+    providerValidationState: 'not_started',
+    validatedProviderCount: 0,
+    activationState: 'unavailable',
+  },
+  {
+    id: 'product-email',
+    label: { es: 'Email de producto', en: 'Product email' },
+    evidenceHref: { es: '/demos/nivora/#reserva', en: '/en/demos/nivora/#reserva' },
+    candidateCount: 1,
+    conditionCount: EMAIL_DELIVERY_READINESS_FIELDS.length,
+    validatedConditionCount: 0,
+    readinessState: 'not_validated',
+    providerValidationState: 'not_started',
+    validatedProviderCount: 0,
+    activationState: 'unavailable',
+  },
+  {
+    id: 'payments',
+    label: { es: 'Pagos', en: 'Payments' },
+    evidenceHref: { es: '#payments-readiness', en: '#payments-readiness' },
+    candidateCount: 1,
+    conditionCount: PAYMENT_READINESS_FIELDS.length,
+    validatedConditionCount: 0,
+    readinessState: 'not_validated',
+    providerValidationState: 'not_started',
+    validatedProviderCount: 0,
+    activationState: 'unavailable',
+  },
+  {
+    id: 'data-pms',
+    label: { es: 'Datos y PMS', en: 'Data and PMS' },
+    evidenceHref: { es: '#data-pms-readiness', en: '#data-pms-readiness' },
+    candidateCount: 1,
+    conditionCount: DATA_SOURCE_READINESS_FIELDS.length,
+    validatedConditionCount: 0,
+    readinessState: 'not_validated',
+    providerValidationState: 'not_started',
+    validatedProviderCount: 0,
+    activationState: 'unavailable',
+  },
+] as const satisfies readonly IntegrationReadinessRecord[];
+
+export type ProviderValidationField =
+  | 'contract'
+  | 'owner'
+  | 'permissions'
+  | 'configurationReference'
+  | 'isolatedTests'
+  | 'failureRecovery'
+  | 'audit'
+  | 'acceptance'
+  | 'killSwitch'
+  | 'rollback';
+
+export const PROVIDER_VALIDATION_FIELDS = [
+  'contract',
+  'owner',
+  'permissions',
+  'configurationReference',
+  'isolatedTests',
+  'failureRecovery',
+  'audit',
+  'acceptance',
+  'killSwitch',
+  'rollback',
+] as const satisfies readonly ProviderValidationField[];
+
+export const PROVIDER_VALIDATION_GATE = {
+  title: {
+    es: 'Cinco expedientes. Cero proveedores validados.',
+    en: 'Five readiness files. Zero validated providers.',
+  },
+  summary: {
+    es: 'El registro reúne la evidencia ya visible sin convertir preparación en activación. Una marca solo puede evaluarse después de completar esta puerta y recibir autorización separada.',
+    en: 'The registry brings together evidence already in view without turning readiness into activation. A brand can only be assessed after completing this gate and receiving separate authorisation.',
+  },
+  labels: {
+    contract: { es: 'Contrato y alcance', en: 'Contract and scope' },
+    owner: { es: 'Responsables', en: 'Owners' },
+    permissions: { es: 'Permisos', en: 'Permissions' },
+    configurationReference: { es: 'Configuración opaca', en: 'Opaque configuration' },
+    isolatedTests: { es: 'Pruebas aisladas', en: 'Isolated tests' },
+    failureRecovery: { es: 'Fallos y recuperación', en: 'Failures and recovery' },
+    audit: { es: 'Auditoría', en: 'Audit' },
+    acceptance: { es: 'Aceptación', en: 'Acceptance' },
+    killSwitch: { es: 'Kill switch', en: 'Kill switch' },
+    rollback: { es: 'Reversión', en: 'Rollback' },
+  },
+  requirements: {
+    contract: {
+      es: 'Contrato, finalidad, alcance, jurisdicción y encargado aplicable quedan aceptados para ese proveedor concreto.',
+      en: 'Contract, purpose, scope, jurisdiction and applicable processor terms are accepted for that specific provider.',
+    },
+    owner: {
+      es: 'Dirección nombra responsables comercial, operativo, de datos y técnico con escalado acordado.',
+      en: 'Direction names commercial, operational, data and technical owners with an agreed escalation path.',
+    },
+    permissions: {
+      es: 'Lectura, escritura, administración y aprobación se separan, revocan y limitan al mínimo privilegio.',
+      en: 'Read, write, administration and approval are separate, revocable and limited to least privilege.',
+    },
+    configurationReference: {
+      es: 'Cuenta, entorno, endpoint y secretos usan referencias opacas fuera del navegador y nunca aparecen en esta web.',
+      en: 'Account, environment, endpoint and secrets use opaque references outside the browser and never appear on this website.',
+    },
+    isolatedTests: {
+      es: 'Casos principales, límites y datos sintéticos pasan en un entorno aislado sin efecto real.',
+      en: 'Main cases, boundaries and synthetic data pass in an isolated environment with no live effect.',
+    },
+    failureRecovery: {
+      es: 'Timeout, cuota, revocación, fallo parcial y resultado incierto tienen parada, reintento seguro y recuperación manual.',
+      en: 'Timeout, quota, revocation, partial failure and uncertain outcome have stop, safe retry and manual recovery paths.',
+    },
+    audit: {
+      es: 'Versión, actor, correlación y resultado quedan trazables sin PII, contenido, credencial o secreto.',
+      en: 'Version, actor, correlation and outcome are traceable without PII, content, credential or secret.',
+    },
+    acceptance: {
+      es: 'Dirección y las personas responsables aceptan casos, diferencias, fallos, evidencia y criterio de salida.',
+      en: 'Direction and accountable owners accept cases, differences, failures, evidence and exit criteria.',
+    },
+    killSwitch: {
+      es: 'Un control independiente detiene cada lectura o escritura sin impedir revisión y conciliación.',
+      en: 'An independent control stops each read or write without preventing review and reconciliation.',
+    },
+    rollback: {
+      es: 'La última configuración aceptada se restaura y cualquier efecto incierto se reconcilia antes de cerrar.',
+      en: 'The last accepted configuration is restored and every uncertain effect is reconciled before closure.',
+    },
+  },
+} as const satisfies {
+  title: LocalizedText;
+  summary: LocalizedText;
+  labels: Record<ProviderValidationField, LocalizedText>;
+  requirements: Record<ProviderValidationField, LocalizedText>;
+};
+
+export type ProviderValidationEvidence = Partial<Record<ProviderValidationField, 'validated'>>;
+
+export function evaluateProviderValidation(evidence: ProviderValidationEvidence) {
+  const validated = PROVIDER_VALIDATION_FIELDS.every((field) => evidence[field] === 'validated');
+  return validated
+    ? {
+      providerValidationState: 'validated',
+      brandState: 'eligible_after_authorization',
+      activationState: 'eligible_after_authorization',
+    } as const
+    : {
+      providerValidationState: 'not_validated',
+      brandState: 'hidden',
+      activationState: 'unavailable',
+    } as const;
+}
+
 export type AssignMode = 'specific-unit' | 'unit-type';
 
 export interface ReservableUnit {

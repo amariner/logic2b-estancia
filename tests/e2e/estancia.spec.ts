@@ -143,8 +143,8 @@ test('home exposes the connected product spine in both languages', async ({ page
   const writes: string[] = [];
   page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
   for (const [path, prefix, labels] of [
-    ['/', '', { webs: 'Webs', panels: '/paneles/', gestor: 'Gestor', plans: 'Planes', recorrido: 'Ver recorrido', evidence: 'Evidencia', paymentTitle: 'Pagos: qué debe estar validado antes de cobrar', paymentReview: 'Revisar las quince condiciones', paymentProvider: 'no hay marca, cuenta o proveedor seleccionado', paymentBoundary: 'no crea checkout, campo de tarjeta, sesión, autorización, captura, devolución', dataTitle: 'Datos y PMS: qué debe conservar la fuente de verdad', dataReview: 'Revisar las dieciséis condiciones', dataProvider: 'no hay marca, cuenta o proveedor seleccionado', dataBoundary: 'no crea proveedor, cuenta, credencial, conexión PMS, API, webhook' }],
-    ['/en/', '/en', { webs: 'Websites', panels: '/en/panels/', gestor: 'Workspace', plans: 'Plans', recorrido: 'See the journey', evidence: 'Evidence', paymentTitle: 'Payments: what must be validated before charging', paymentReview: 'Review the fifteen conditions', paymentProvider: 'no brand, account or provider is selected', paymentBoundary: 'creates no checkout, card field, session, authorisation, capture, refund', dataTitle: 'Data and PMS: what the source of truth must preserve', dataReview: 'Review the sixteen conditions', dataProvider: 'no brand, account or provider is selected', dataBoundary: 'creates no provider, account, credential, PMS connection, API, webhook' }],
+    ['/', '', { webs: 'Webs', panels: '/paneles/', gestor: 'Gestor', plans: 'Planes', recorrido: 'Ver recorrido', evidence: 'Evidencia', gateTitle: 'Cinco expedientes. Cero proveedores validados.', gateReview: 'Revisar las diez puertas de validación', gateBoundary: 'no revela una marca, concede autorización ni activa una conexión', paymentTitle: 'Pagos: qué debe estar validado antes de cobrar', paymentReview: 'Revisar las quince condiciones', paymentProvider: 'no hay marca, cuenta o proveedor seleccionado', paymentBoundary: 'no crea checkout, campo de tarjeta, sesión, autorización, captura, devolución', dataTitle: 'Datos y PMS: qué debe conservar la fuente de verdad', dataReview: 'Revisar las dieciséis condiciones', dataProvider: 'no hay marca, cuenta o proveedor seleccionado', dataBoundary: 'no crea proveedor, cuenta, credencial, conexión PMS, API, webhook' }],
+    ['/en/', '/en', { webs: 'Websites', panels: '/en/panels/', gestor: 'Workspace', plans: 'Plans', recorrido: 'See the journey', evidence: 'Evidence', gateTitle: 'Five readiness files. Zero validated providers.', gateReview: 'Review the ten validation gates', gateBoundary: 'does not reveal a brand, grant authorisation or activate a connection', paymentTitle: 'Payments: what must be validated before charging', paymentReview: 'Review the fifteen conditions', paymentProvider: 'no brand, account or provider is selected', paymentBoundary: 'creates no checkout, card field, session, authorisation, capture, refund', dataTitle: 'Data and PMS: what the source of truth must preserve', dataReview: 'Review the sixteen conditions', dataProvider: 'no brand, account or provider is selected', dataBoundary: 'creates no provider, account, credential, PMS connection, API, webhook' }],
   ] as const) {
     await page.goto(path);
     const header = page.locator('.site-header');
@@ -167,6 +167,35 @@ test('home exposes the connected product spine in both languages', async ({ page
     for (const href of new Set(deepLinks)) expect((await request.get(href)).status(), href).toBe(200);
     await expect(page.locator('[data-capability-band]')).toContainText(labels.evidence);
 
+    const providerGate = page.locator('[data-provider-validation-gate]');
+    await expect(providerGate.getByRole('heading', { name: labels.gateTitle })).toBeVisible();
+    await expect(providerGate.locator('[data-readiness-registry-item]')).toHaveCount(5);
+    await expect(providerGate.locator('[data-readiness-registry-item="channels"]')).toContainText('0 / 12');
+    await expect(providerGate.locator('[data-readiness-registry-item="website-publication"]')).toContainText('0 / 12');
+    await expect(providerGate.locator('[data-readiness-registry-item="product-email"]')).toContainText('0 / 13');
+    await expect(providerGate.locator('[data-readiness-registry-item="payments"]')).toContainText('0 / 15');
+    await expect(providerGate.locator('[data-readiness-registry-item="data-pms"]')).toContainText('0 / 16');
+    await expect(providerGate.locator('[data-readiness-registry-item="channels"] a')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=channels`);
+    await expect(providerGate.locator('[data-readiness-registry-item="website-publication"] a')).toHaveAttribute('href', `${prefix}/demos/terrava/gestion/?vista=website`);
+    await expect(providerGate.locator('[data-readiness-registry-item="product-email"] a')).toHaveAttribute('href', `${prefix}/demos/nivora/#reserva`);
+    await expect(providerGate.locator('[data-readiness-registry-item="payments"] a')).toHaveAttribute('href', '#payments-readiness');
+    await expect(providerGate.locator('[data-readiness-registry-item="data-pms"] a')).toHaveAttribute('href', '#data-pms-readiness');
+    await expect(providerGate.locator('[data-validated-provider-count]')).toHaveText('0');
+    await expect(providerGate.locator('[data-activation-count]')).toHaveText('0');
+    const providerDisclosure = providerGate.locator('[data-provider-validation-details]');
+    await expect(providerDisclosure).not.toHaveAttribute('open', '');
+    const storageBefore = await page.evaluate(() => JSON.stringify({
+      local: Object.fromEntries(Object.keys(localStorage).sort().map((key) => [key, localStorage.getItem(key)])),
+      session: Object.fromEntries(Object.keys(sessionStorage).sort().map((key) => [key, sessionStorage.getItem(key)])),
+    }));
+    await providerGate.getByText(labels.gateReview, { exact: true }).click();
+    await expect(providerDisclosure).toHaveAttribute('open', '');
+    await expect(providerGate.locator('[data-provider-validation-field]')).toHaveCount(10);
+    await expect(providerGate.locator('.provider-validation-boundary')).toContainText(labels.gateBoundary);
+    await expect(providerGate.locator('form, input, textarea, select, button')).toHaveCount(0);
+    await expect(providerGate).not.toContainText(/\b(?:Stripe|Adyen|PayPal|Cloudbeds|Mews|Opera|RoomRaccoon|SiteMinder)\b/i);
+    await providerGate.getByText(labels.gateReview, { exact: true }).click();
+
     const paymentReadiness = page.locator('[data-readiness-file="payments"]');
     const dataReadiness = page.locator('[data-readiness-file="data-pms"]');
     await expect(paymentReadiness.getByRole('heading', { name: labels.paymentTitle })).toBeVisible();
@@ -177,10 +206,6 @@ test('home exposes the connected product spine in both languages', async ({ page
     const dataDisclosure = dataReadiness.locator('[data-readiness-file-details="data-pms"]');
     await expect(paymentDisclosure).not.toHaveAttribute('open', '');
     await expect(dataDisclosure).not.toHaveAttribute('open', '');
-    const storageBefore = await page.evaluate(() => JSON.stringify({
-      local: Object.fromEntries(Object.keys(localStorage).sort().map((key) => [key, localStorage.getItem(key)])),
-      session: Object.fromEntries(Object.keys(sessionStorage).sort().map((key) => [key, sessionStorage.getItem(key)])),
-    }));
     await paymentReadiness.getByText(labels.paymentReview, { exact: true }).click();
     await expect(paymentDisclosure).toHaveAttribute('open', '');
     await expect(paymentReadiness.locator('[data-readiness-file-field]')).toHaveCount(15);

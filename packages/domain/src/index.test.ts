@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAPABILITIES, CAPABILITY_STATUSES, CHANNEL_READINESS_CONTRACTS, CHANNEL_READINESS_FIELDS, DATA_SOURCE_READINESS, DATA_SOURCE_READINESS_FIELDS, DEMO_PLANS, EMAIL_DELIVERY_READINESS, EMAIL_DELIVERY_READINESS_FIELDS, PAYMENT_READINESS, PAYMENT_READINESS_FIELDS, WEBSITE_PUBLICATION_READINESS, WEBSITE_PUBLICATION_READINESS_FIELDS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
+import { CAPABILITIES, CAPABILITY_STATUSES, CHANNEL_READINESS_CONTRACTS, CHANNEL_READINESS_FIELDS, DATA_SOURCE_READINESS, DATA_SOURCE_READINESS_FIELDS, DEMO_PLANS, EMAIL_DELIVERY_READINESS, EMAIL_DELIVERY_READINESS_FIELDS, INTEGRATION_READINESS_REGISTRY, PAYMENT_READINESS, PAYMENT_READINESS_FIELDS, PROVIDER_VALIDATION_FIELDS, PROVIDER_VALIDATION_GATE, WEBSITE_PUBLICATION_READINESS, WEBSITE_PUBLICATION_READINESS_FIELDS, evaluateProviderValidation, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type ProviderValidationEvidence, type StayOrganization } from './index';
 
 const mono: StayOrganization = {
   id: 'org-nivora', name: 'Nivora One', vertical: 'apartment', mode: 'mono', currency: 'EUR',
@@ -133,6 +133,46 @@ describe('domain', () => {
     expect(Object.values(DATA_SOURCE_READINESS.labels).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
     expect(Object.values(DATA_SOURCE_READINESS.requirements).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
     expect(JSON.stringify(DATA_SOURCE_READINESS)).not.toMatch(/https?:\/\/|\b(?:cloudbeds|mews|opera|roomraccoon|siteminder)\b|api[_-]?key[=:]|token[=:]|secret[=:]|@[a-z0-9.-]+\.\w+|\b\d{8,}\b/i);
+  });
+  it('derives one closed readiness registry from the five existing integration contracts', () => {
+    expect(INTEGRATION_READINESS_REGISTRY.map(({ id }) => id)).toEqual([
+      'channels', 'website-publication', 'product-email', 'payments', 'data-pms',
+    ]);
+    expect(INTEGRATION_READINESS_REGISTRY.map(({ conditionCount }) => conditionCount)).toEqual([
+      CHANNEL_READINESS_FIELDS.length,
+      WEBSITE_PUBLICATION_READINESS_FIELDS.length,
+      EMAIL_DELIVERY_READINESS_FIELDS.length,
+      PAYMENT_READINESS_FIELDS.length,
+      DATA_SOURCE_READINESS_FIELDS.length,
+    ]);
+    expect(INTEGRATION_READINESS_REGISTRY[0]?.candidateCount).toBe(CHANNEL_READINESS_CONTRACTS.length);
+    expect(INTEGRATION_READINESS_REGISTRY.every((record) => record.validatedConditionCount === 0
+      && record.readinessState === 'not_validated'
+      && record.providerValidationState === 'not_started'
+      && record.validatedProviderCount === 0
+      && record.activationState === 'unavailable')).toBe(true);
+    expect(JSON.stringify(INTEGRATION_READINESS_REGISTRY)).not.toMatch(/\b(?:stripe|adyen|paypal|cloudbeds|mews|opera|roomraccoon|siteminder)\b|https?:\/\/|api[_-]?key[=:]|token[=:]|secret[=:]/i);
+  });
+  it('keeps brand and activation unavailable until every provider gate is validated', () => {
+    expect(PROVIDER_VALIDATION_FIELDS).toEqual([
+      'contract', 'owner', 'permissions', 'configurationReference', 'isolatedTests',
+      'failureRecovery', 'audit', 'acceptance', 'killSwitch', 'rollback',
+    ]);
+    expect(Object.keys(PROVIDER_VALIDATION_GATE.labels)).toEqual([...PROVIDER_VALIDATION_FIELDS]);
+    expect(Object.keys(PROVIDER_VALIDATION_GATE.requirements)).toEqual([...PROVIDER_VALIDATION_FIELDS]);
+    expect(evaluateProviderValidation({})).toEqual({
+      providerValidationState: 'not_validated', brandState: 'hidden', activationState: 'unavailable',
+    });
+    expect(evaluateProviderValidation({ contract: 'validated', owner: 'validated' })).toEqual({
+      providerValidationState: 'not_validated', brandState: 'hidden', activationState: 'unavailable',
+    });
+    const completeEvidence = Object.fromEntries(PROVIDER_VALIDATION_FIELDS.map((field) => [field, 'validated'])) as ProviderValidationEvidence;
+    expect(evaluateProviderValidation(completeEvidence)).toEqual({
+      providerValidationState: 'validated',
+      brandState: 'eligible_after_authorization',
+      activationState: 'eligible_after_authorization',
+    });
+    expect(JSON.stringify(PROVIDER_VALIDATION_GATE)).not.toMatch(/\b(?:stripe|adyen|paypal|cloudbeds|mews|opera|roomraccoon|siteminder)\b|https?:\/\/|api[_-]?key[=:]|token[=:]|secret[=:]/i);
   });
   it.each([
     [{ propertyCount: 1, unitCount: 1, wantsBookings: false, wantsAutomation: false, wantsOperations: false }, 'basico'],

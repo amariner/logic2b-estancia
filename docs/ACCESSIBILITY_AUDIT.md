@@ -13,7 +13,7 @@ La suite `tests/e2e/accessibility.spec.ts` audita las 30 rutas públicas en Chro
 - Landing, soluciones, planes, diagnóstico, documentación y recursos comerciales.
 - Aviso legal, privacidad y cookies.
 - Nivora, Terrava y Aurem en ES/EN, incluidos los gestores de Terrava y Aurem.
-- La interacción y el expediente de entrega 0/13 de Nivora, los estados profundos ES/EN del editor y expediente de publicación de Terrava, además de ingresos, preparación de canales, automatizaciones inertes y Copiloto supervisado de Aurem, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. La portada incorpora dos expedientes desplegables y cerrados por defecto: pagos 0/15 y datos/PMS 0/16. Publicación y canales exponen doce requisitos sin validar; `automations` y `automation` son superficies deliberadamente distintas.
+- La interacción y el expediente de entrega 0/13 de Nivora, los estados profundos ES/EN del editor y expediente de publicación de Terrava, además de ingresos, preparación de canales, automatizaciones inertes y Copiloto supervisado de Aurem, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. La portada incorpora un registro de cinco expedientes con una puerta desplegable de diez evidencias, además de pagos 0/15 y datos/PMS 0/16; los tres disclosures están cerrados por defecto. Publicación y canales exponen doce requisitos sin validar; `automations` y `automation` son superficies deliberadamente distintas.
 
 Además comprueba:
 

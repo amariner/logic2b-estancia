@@ -8,6 +8,7 @@ import {
   capabilityStatusLabel,
 } from '../capability-evidence';
 import { getHomeContract } from '../home-contract';
+import ProviderValidationGate from './ProviderValidationGate.astro';
 import ReadinessFile from './ReadinessFile.astro';
 
 const { locale } = Astro.props as { locale: Locale };
@@ -65,6 +66,7 @@ const dataSourceItems = DATA_SOURCE_READINESS_FIELDS.map((field) => ({
         </article>
       ))}
     </div>
+    <ProviderValidationGate locale={locale} />
     <div class="connection-readiness-files" data-connection-readiness-files>
       <ReadinessFile
         id="payments"

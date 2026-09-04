@@ -1,0 +1,57 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { INTEGRATION_READINESS_REGISTRY, PROVIDER_VALIDATION_FIELDS, PROVIDER_VALIDATION_GATE } from '@logic-estancia/domain';
+
+const { locale } = Astro.props as { locale: Locale };
+const en = locale === 'en';
+---
+
+<section class="provider-validation-gate" aria-labelledby="provider-validation-title" data-provider-validation-gate>
+  <header class="provider-validation-heading">
+    <div>
+      <p class="eyebrow">{en ? 'Readiness registry' : 'Registro de preparación'}</p>
+      <h3 id="provider-validation-title">{PROVIDER_VALIDATION_GATE.title[locale]}</h3>
+      <p>{PROVIDER_VALIDATION_GATE.summary[locale]}</p>
+    </div>
+    <dl aria-label={en ? 'Current provider validation state' : 'Estado actual de validación de proveedores'}>
+      <div><dt>{en ? 'Validated providers' : 'Proveedores validados'}</dt><dd data-validated-provider-count>0</dd></div>
+      <div><dt>{en ? 'Activations' : 'Activaciones'}</dt><dd data-activation-count>0</dd></div>
+    </dl>
+  </header>
+
+  <ul class="provider-readiness-registry">
+    {INTEGRATION_READINESS_REGISTRY.map((record) => (
+      <li data-readiness-registry-item={record.id}>
+        <a href={record.evidenceHref[locale]}>
+          <strong>{record.label[locale]}</strong>
+          <span>{record.candidateCount > 1
+            ? (en ? `${record.candidateCount} categories · ${record.validatedConditionCount} / ${record.conditionCount} each` : `${record.candidateCount} categorías · ${record.validatedConditionCount} / ${record.conditionCount} cada una`)
+            : `${record.validatedConditionCount} / ${record.conditionCount}`}</span>
+        </a>
+        <small>{en ? 'No validated provider · unavailable' : 'Sin proveedor validado · no disponible'}</small>
+      </li>
+    ))}
+  </ul>
+
+  <details data-provider-validation-details data-connectivity-disclosure>
+    <summary>
+      <span>{en ? 'Review the ten validation gates' : 'Revisar las diez puertas de validación'}</span>
+      <span aria-hidden="true">+</span>
+    </summary>
+    <ol>
+      {PROVIDER_VALIDATION_FIELDS.map((field, index) => (
+        <li data-provider-validation-field={field}>
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <div>
+            <strong>{PROVIDER_VALIDATION_GATE.labels[field][locale]}</strong>
+            <p>{PROVIDER_VALIDATION_GATE.requirements[field][locale]}</p>
+            <small>{en ? 'Not validated' : 'Sin validar'}</small>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </details>
+  <p class="provider-validation-boundary" role="note">{en
+    ? 'Passing all ten gates makes a provider eligible for separate review; it does not reveal a brand, grant authorisation or activate a connection.'
+    : 'Superar las diez puertas solo hace elegible un proveedor para revisión separada; no revela una marca, concede autorización ni activa una conexión.'}</p>
+</section>
