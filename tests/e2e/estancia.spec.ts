@@ -143,8 +143,8 @@ test('home exposes the connected product spine in both languages', async ({ page
   const writes: string[] = [];
   page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
   for (const [path, prefix, labels] of [
-    ['/', '', { webs: 'Webs', panels: '/paneles/', gestor: 'Gestor', plans: 'Planes', recorrido: 'Ver recorrido', evidence: 'Evidencia', paymentTitle: 'Pagos: qué debe estar validado antes de cobrar', review: 'Revisar las quince condiciones', provider: 'no hay marca, cuenta o proveedor seleccionado', boundary: 'no crea checkout, campo de tarjeta, sesión, autorización, captura, devolución' }],
-    ['/en/', '/en', { webs: 'Websites', panels: '/en/panels/', gestor: 'Workspace', plans: 'Plans', recorrido: 'See the journey', evidence: 'Evidence', paymentTitle: 'Payments: what must be validated before charging', review: 'Review the fifteen conditions', provider: 'no brand, account or provider is selected', boundary: 'creates no checkout, card field, session, authorisation, capture, refund' }],
+    ['/', '', { webs: 'Webs', panels: '/paneles/', gestor: 'Gestor', plans: 'Planes', recorrido: 'Ver recorrido', evidence: 'Evidencia', paymentTitle: 'Pagos: qué debe estar validado antes de cobrar', paymentReview: 'Revisar las quince condiciones', paymentProvider: 'no hay marca, cuenta o proveedor seleccionado', paymentBoundary: 'no crea checkout, campo de tarjeta, sesión, autorización, captura, devolución', dataTitle: 'Datos y PMS: qué debe conservar la fuente de verdad', dataReview: 'Revisar las dieciséis condiciones', dataProvider: 'no hay marca, cuenta o proveedor seleccionado', dataBoundary: 'no crea proveedor, cuenta, credencial, conexión PMS, API, webhook' }],
+    ['/en/', '/en', { webs: 'Websites', panels: '/en/panels/', gestor: 'Workspace', plans: 'Plans', recorrido: 'See the journey', evidence: 'Evidence', paymentTitle: 'Payments: what must be validated before charging', paymentReview: 'Review the fifteen conditions', paymentProvider: 'no brand, account or provider is selected', paymentBoundary: 'creates no checkout, card field, session, authorisation, capture, refund', dataTitle: 'Data and PMS: what the source of truth must preserve', dataReview: 'Review the sixteen conditions', dataProvider: 'no brand, account or provider is selected', dataBoundary: 'creates no provider, account, credential, PMS connection, API, webhook' }],
   ] as const) {
     await page.goto(path);
     const header = page.locator('.site-header');
@@ -167,22 +167,35 @@ test('home exposes the connected product spine in both languages', async ({ page
     for (const href of new Set(deepLinks)) expect((await request.get(href)).status(), href).toBe(200);
     await expect(page.locator('[data-capability-band]')).toContainText(labels.evidence);
 
-    const readiness = page.locator('[data-payment-readiness]');
-    await expect(readiness.getByRole('heading', { name: labels.paymentTitle })).toBeVisible();
-    await expect(readiness.locator('.payment-readiness-zero')).toContainText('0 / 15');
-    const disclosure = readiness.locator('[data-payment-readiness-details]');
-    await expect(disclosure).not.toHaveAttribute('open', '');
+    const paymentReadiness = page.locator('[data-readiness-file="payments"]');
+    const dataReadiness = page.locator('[data-readiness-file="data-pms"]');
+    await expect(paymentReadiness.getByRole('heading', { name: labels.paymentTitle })).toBeVisible();
+    await expect(paymentReadiness.locator('.integration-readiness-zero')).toContainText('0 / 15');
+    await expect(dataReadiness.getByRole('heading', { name: labels.dataTitle })).toBeVisible();
+    await expect(dataReadiness.locator('.integration-readiness-zero')).toContainText('0 / 16');
+    const paymentDisclosure = paymentReadiness.locator('[data-readiness-file-details="payments"]');
+    const dataDisclosure = dataReadiness.locator('[data-readiness-file-details="data-pms"]');
+    await expect(paymentDisclosure).not.toHaveAttribute('open', '');
+    await expect(dataDisclosure).not.toHaveAttribute('open', '');
     const storageBefore = await page.evaluate(() => JSON.stringify({
       local: Object.fromEntries(Object.keys(localStorage).sort().map((key) => [key, localStorage.getItem(key)])),
       session: Object.fromEntries(Object.keys(sessionStorage).sort().map((key) => [key, sessionStorage.getItem(key)])),
     }));
-    await readiness.getByText(labels.review, { exact: true }).click();
-    await expect(disclosure).toHaveAttribute('open', '');
-    await expect(readiness.locator('[data-payment-readiness-field]')).toHaveCount(15);
-    await expect(readiness.locator('[data-payment-readiness-field="providerCategory"]')).toContainText(labels.provider);
-    await expect(readiness.locator('.payment-readiness-boundary')).toContainText(labels.boundary);
-    await expect(readiness.locator('form, input, textarea, select, button, a')).toHaveCount(0);
-    await expect(readiness).not.toContainText(/Stripe|Adyen|PayPal/i);
+    await paymentReadiness.getByText(labels.paymentReview, { exact: true }).click();
+    await expect(paymentDisclosure).toHaveAttribute('open', '');
+    await expect(paymentReadiness.locator('[data-readiness-file-field]')).toHaveCount(15);
+    await expect(paymentReadiness.locator('[data-readiness-file-field="providerCategory"]')).toContainText(labels.paymentProvider);
+    await expect(paymentReadiness.locator('.integration-readiness-boundary')).toContainText(labels.paymentBoundary);
+    await expect(paymentReadiness.locator('form, input, textarea, select, button, a')).toHaveCount(0);
+    await expect(paymentReadiness).not.toContainText(/Stripe|Adyen|PayPal/i);
+    await paymentReadiness.getByText(labels.paymentReview, { exact: true }).click();
+    await dataReadiness.getByText(labels.dataReview, { exact: true }).click();
+    await expect(dataDisclosure).toHaveAttribute('open', '');
+    await expect(dataReadiness.locator('[data-readiness-file-field]')).toHaveCount(16);
+    await expect(dataReadiness.locator('[data-readiness-file-field="providerCategory"]')).toContainText(labels.dataProvider);
+    await expect(dataReadiness.locator('.integration-readiness-boundary')).toContainText(labels.dataBoundary);
+    await expect(dataReadiness.locator('form, input, textarea, select, button, a')).toHaveCount(0);
+    await expect(dataReadiness).not.toContainText(/\b(?:Cloudbeds|Mews|Opera|RoomRaccoon|SiteMinder)\b/i);
     expect(await page.evaluate(() => JSON.stringify({
       local: Object.fromEntries(Object.keys(localStorage).sort().map((key) => [key, localStorage.getItem(key)])),
       session: Object.fromEntries(Object.keys(sessionStorage).sort().map((key) => [key, sessionStorage.getItem(key)])),

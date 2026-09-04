@@ -1,6 +1,6 @@
 ---
 import type { Locale } from '@logic-estancia/config';
-import { CAPABILITIES, PAYMENT_READINESS, PAYMENT_READINESS_FIELDS, type Capability, type PlanLevel } from '@logic-estancia/domain';
+import { CAPABILITIES, DATA_SOURCE_READINESS, DATA_SOURCE_READINESS_FIELDS, PAYMENT_READINESS, PAYMENT_READINESS_FIELDS, type Capability, type PlanLevel } from '@logic-estancia/domain';
 import {
   capabilityEvidenceHref,
   capabilityEvidenceLabel,
@@ -8,6 +8,7 @@ import {
   capabilityStatusLabel,
 } from '../capability-evidence';
 import { getHomeContract } from '../home-contract';
+import ReadinessFile from './ReadinessFile.astro';
 
 const { locale } = Astro.props as { locale: Locale };
 const home = getHomeContract(locale);
@@ -20,6 +21,17 @@ const capabilities = new Map(CAPABILITIES.map((capability) => [capability.id, ca
 function getCapability(id: string): Capability | undefined {
   return capabilities.get(id);
 }
+
+const paymentItems = PAYMENT_READINESS_FIELDS.map((field) => ({
+  id: field,
+  label: PAYMENT_READINESS.labels[field][locale],
+  requirement: PAYMENT_READINESS.requirements[field][locale],
+}));
+const dataSourceItems = DATA_SOURCE_READINESS_FIELDS.map((field) => ({
+  id: field,
+  label: DATA_SOURCE_READINESS.labels[field][locale],
+  requirement: DATA_SOURCE_READINESS.requirements[field][locale],
+}));
 ---
 
 <section id="conexiones" class="section capability-band" aria-labelledby="capability-band-title" data-capability-band>
@@ -53,41 +65,38 @@ function getCapability(id: string): Capability | undefined {
         </article>
       ))}
     </div>
-    <section id="payment-readiness" class="payment-readiness" aria-labelledby="payment-readiness-title" data-payment-readiness>
-      <header class="payment-readiness-heading">
-        <div>
-          <p class="eyebrow">{en ? 'Separate integration scope' : 'Alcance de integración separado'}</p>
-          <h3 id="payment-readiness-title">{PAYMENT_READINESS.title[locale]}</h3>
-          <p>{PAYMENT_READINESS.summary[locale]}</p>
-        </div>
-        <div class="payment-readiness-zero" aria-label={en ? 'Zero of fifteen payment conditions validated' : 'Cero de quince condiciones de pago validadas'}>
-          <span>{en ? 'Readiness' : 'Preparación'}</span>
-          <strong>0 / {PAYMENT_READINESS_FIELDS.length}</strong>
-          <small>{en ? 'Not validated · charging unavailable' : 'Sin validar · cobro no disponible'}</small>
-        </div>
-      </header>
-      <details data-payment-readiness-details>
-        <summary>
-          <span>{en ? 'Review the fifteen conditions' : 'Revisar las quince condiciones'}</span>
-          <span aria-hidden="true">+</span>
-        </summary>
-        <ol>
-          {PAYMENT_READINESS_FIELDS.map((field, index) => (
-            <li data-payment-readiness-field={field}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <div>
-                <strong>{PAYMENT_READINESS.labels[field][locale]}</strong>
-                <p>{PAYMENT_READINESS.requirements[field][locale]}</p>
-                <small>{en ? 'Not validated' : 'Sin validar'}</small>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </details>
-      <p class="payment-readiness-boundary" role="note">{en
-        ? 'This file creates no checkout, card field, session, authorisation, capture, refund, provider call, webhook, persistence or external write.'
-        : 'Este expediente no crea checkout, campo de tarjeta, sesión, autorización, captura, devolución, llamada a proveedor, webhook, persistencia ni escritura externa.'}</p>
-    </section>
+    <div class="connection-readiness-files" data-connection-readiness-files>
+      <ReadinessFile
+        id="payments"
+        title={PAYMENT_READINESS.title[locale]}
+        summary={PAYMENT_READINESS.summary[locale]}
+        items={paymentItems}
+        eyebrow={en ? 'Separate integration scope' : 'Alcance de integración separado'}
+        readinessLabel={en ? 'Readiness' : 'Preparación'}
+        status={en ? 'Not validated · charging unavailable' : 'Sin validar · cobro no disponible'}
+        disclosure={en ? 'Review the fifteen conditions' : 'Revisar las quince condiciones'}
+        boundary={en
+          ? 'This file creates no checkout, card field, session, authorisation, capture, refund, provider call, webhook, persistence or external write.'
+          : 'Este expediente no crea checkout, campo de tarjeta, sesión, autorización, captura, devolución, llamada a proveedor, webhook, persistencia ni escritura externa.'}
+        countLabel={en ? 'Zero of fifteen payment conditions validated' : 'Cero de quince condiciones de pago validadas'}
+        itemStatus={en ? 'Not validated' : 'Sin validar'}
+      />
+      <ReadinessFile
+        id="data-pms"
+        title={DATA_SOURCE_READINESS.title[locale]}
+        summary={DATA_SOURCE_READINESS.summary[locale]}
+        items={dataSourceItems}
+        eyebrow={en ? 'Separate data scope' : 'Alcance de datos separado'}
+        readinessLabel={en ? 'Readiness' : 'Preparación'}
+        status={en ? 'Not validated · synchronisation unavailable' : 'Sin validar · sincronización no disponible'}
+        disclosure={en ? 'Review the sixteen conditions' : 'Revisar las dieciséis condiciones'}
+        boundary={en
+          ? 'This file creates no provider, account, credential, PMS connection, API, webhook, live guest or traveller record, migration, persistence, synchronisation or external write.'
+          : 'Este expediente no crea proveedor, cuenta, credencial, conexión PMS, API, webhook, huésped o registro de viajeros real, migración, persistencia, sincronización ni escritura externa.'}
+        countLabel={en ? 'Zero of sixteen data and PMS conditions validated' : 'Cero de dieciséis condiciones de datos y PMS validadas'}
+        itemStatus={en ? 'Not validated' : 'Sin validar'}
+      />
+    </div>
     <p class="capability-band-footnote" role="note">{en ? 'Demo status is not production activation. Connections require a validated project, provider and agreed scope.' : 'El estado de demo no equivale a activación en producción. Las conexiones requieren proyecto, proveedor y alcance validados.'}</p>
   </div>
 </section>

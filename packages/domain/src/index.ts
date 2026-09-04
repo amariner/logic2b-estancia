@@ -549,6 +549,149 @@ export const PAYMENT_READINESS = {
   requirements: Record<PaymentReadinessField, LocalizedText>;
 };
 
+export type DataSourceReadinessField =
+  | 'ownerSource'
+  | 'purposeMinimization'
+  | 'permissions'
+  | 'providerCategory'
+  | 'configurationReference'
+  | 'entitiesFields'
+  | 'identifiersMatching'
+  | 'baselineMigration'
+  | 'isolatedCases'
+  | 'idempotency'
+  | 'reconciliation'
+  | 'failureRecovery'
+  | 'audit'
+  | 'acceptance'
+  | 'killSwitch'
+  | 'rollback';
+
+export const DATA_SOURCE_READINESS_FIELDS = [
+  'ownerSource',
+  'purposeMinimization',
+  'permissions',
+  'providerCategory',
+  'configurationReference',
+  'entitiesFields',
+  'identifiersMatching',
+  'baselineMigration',
+  'isolatedCases',
+  'idempotency',
+  'reconciliation',
+  'failureRecovery',
+  'audit',
+  'acceptance',
+  'killSwitch',
+  'rollback',
+] as const satisfies readonly DataSourceReadinessField[];
+
+export const DATA_SOURCE_READINESS = {
+  scopeState: 'separate_project_scope',
+  readinessState: 'not_validated',
+  executionState: 'unavailable',
+  title: {
+    es: 'Datos y PMS: qué debe conservar la fuente de verdad',
+    en: 'Data and PMS: what the source of truth must preserve',
+  },
+  summary: {
+    es: 'Mantener, migrar o conectar una fuente se define por proyecto. Este expediente ordena decisiones y pruebas; no representa un PMS conectado ni una sincronización activa.',
+    en: 'Keeping, migrating or connecting a source is scoped per project. This file organises decisions and tests; it represents neither a connected PMS nor live synchronisation.',
+  },
+  labels: {
+    ownerSource: { es: 'Responsable y sistema fuente', en: 'Owner and source system' },
+    purposeMinimization: { es: 'Finalidad y minimización', en: 'Purpose and minimisation' },
+    permissions: { es: 'Permisos', en: 'Permissions' },
+    providerCategory: { es: 'Categoría de proveedor', en: 'Provider category' },
+    configurationReference: { es: 'Referencia de configuración', en: 'Configuration reference' },
+    entitiesFields: { es: 'Entidades y campos', en: 'Entities and fields' },
+    identifiersMatching: { es: 'Identificadores y matching', en: 'Identifiers and matching' },
+    baselineMigration: { es: 'Baseline y migración', en: 'Baseline and migration' },
+    isolatedCases: { es: 'Casos aislados', en: 'Isolated cases' },
+    idempotency: { es: 'Idempotencia', en: 'Idempotency' },
+    reconciliation: { es: 'Reconciliación', en: 'Reconciliation' },
+    failureRecovery: { es: 'Fallos y recuperación', en: 'Failures and recovery' },
+    audit: { es: 'Auditoría', en: 'Audit' },
+    acceptance: { es: 'Aceptación', en: 'Acceptance' },
+    killSwitch: { es: 'Kill switch', en: 'Kill switch' },
+    rollback: { es: 'Reversión', en: 'Rollback' },
+  },
+  requirements: {
+    ownerSource: {
+      es: 'Dirección identifica la fuente de verdad y las personas responsables operativa, de datos y técnicamente de cada cambio.',
+      en: 'Direction identifies the source of truth and the operational, data and technical owners accountable for every change.',
+    },
+    purposeMinimization: {
+      es: 'Finalidad, base aplicable, campos mínimos, conservación y eliminación se acuerdan antes de acceder o mover datos.',
+      en: 'Purpose, applicable basis, minimum fields, retention and deletion are agreed before data is accessed or moved.',
+    },
+    permissions: {
+      es: 'Lectura, escritura, exportación y administración usan permisos separados, revocables y de mínimo privilegio.',
+      en: 'Read, write, export and administration use separate, revocable least-privilege access.',
+    },
+    providerCategory: {
+      es: 'La categoría de gestión de propiedades o reservas se valida por proyecto; no hay marca, cuenta o proveedor seleccionado.',
+      en: 'The property- or booking-management category is validated per project; no brand, account or provider is selected.',
+    },
+    configurationReference: {
+      es: 'Referencia opaca por definir fuera del navegador; la web contiene cero URL privadas, cuentas, claves, endpoints o secretos.',
+      en: 'Opaque reference to be defined outside the browser; the website contains zero private URLs, accounts, keys, endpoints or secrets.',
+    },
+    entitiesFields: {
+      es: 'Alojamientos, unidades o tipos, estancias, huéspedes, tarifas y estados requieren un mapa aceptado; campos opcionales o sensibles se excluyen por defecto.',
+      en: 'Properties, units or types, stays, guests, rates and statuses need an accepted map; optional or sensitive fields are excluded by default.',
+    },
+    identifiersMatching: {
+      es: 'Identificadores estables, namespace, duplicados y fusiones se definen sin hacer matching difuso de datos personales.',
+      en: 'Stable identifiers, namespace, duplicates and merges are defined without fuzzy matching personal data.',
+    },
+    baselineMigration: {
+      es: 'Corte, versión, recuentos y huellas de muestra forman una baseline aceptada; esta web no ejecuta una migración real.',
+      en: 'Cut-off, version, counts and sample hashes form an accepted baseline; this website runs no live migration.',
+    },
+    isolatedCases: {
+      es: 'Alta, cambio, cancelación, no-show, cambio de unidad, llegada tardía y evento inválido o atrasado se prueban solo con datos sintéticos.',
+      en: 'Creation, change, cancellation, no-show, unit move, late arrival and invalid or stale events are tested with synthetic data only.',
+    },
+    idempotency: {
+      es: 'Una referencia y versión estables permiten repetir cada caso sin duplicar estancias, huéspedes, tareas o cambios.',
+      en: 'A stable reference and version allow each case to be replayed without duplicating stays, guests, tasks or changes.',
+    },
+    reconciliation: {
+      es: 'Recuentos, versiones y diferencias entre fuente y destino se comparan y cada desviación queda explicada.',
+      en: 'Counts, versions and differences between source and target are compared and every deviation is explained.',
+    },
+    failureRecovery: {
+      es: 'Timeout, parcial, cambio de esquema, permiso revocado y eventos fuera de orden tienen límites, reintentos seguros y recuperación manual.',
+      en: 'Timeout, partial failure, schema drift, revoked access and out-of-order events have limits, safe retries and manual recovery.',
+    },
+    audit: {
+      es: 'Referencia, actor, versión de esquema, resultado y correlación se registran sin huésped, perfil, texto libre, PII o secreto.',
+      en: 'Reference, actor, schema version, outcome and correlation are recorded without guest, profile, free text, PII or secret.',
+    },
+    acceptance: {
+      es: 'Dirección y la persona responsable de datos aceptan mapeos, recuentos, diferencias, fallos y recuperación antes de activar.',
+      en: 'Direction and the data owner accept mappings, counts, differences, failures and recovery before activation.',
+    },
+    killSwitch: {
+      es: 'Controles independientes detienen entrada y publicación sin borrar la evidencia de solo lectura necesaria para revisar.',
+      en: 'Independent controls stop intake and publication without deleting the read-only evidence needed for review.',
+    },
+    rollback: {
+      es: 'La última configuración y baseline aceptadas se restauran; eventos afectados se reconcilian o compensan y la fuente nunca se borra.',
+      en: 'The last accepted configuration and baseline are restored; affected events are reconciled or compensated and the source is never deleted.',
+    },
+  },
+} as const satisfies {
+  scopeState: 'separate_project_scope';
+  readinessState: 'not_validated';
+  executionState: 'unavailable';
+  title: LocalizedText;
+  summary: LocalizedText;
+  labels: Record<DataSourceReadinessField, LocalizedText>;
+  requirements: Record<DataSourceReadinessField, LocalizedText>;
+};
+
 export type AssignMode = 'specific-unit' | 'unit-type';
 
 export interface ReservableUnit {

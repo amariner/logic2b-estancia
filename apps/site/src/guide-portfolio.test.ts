@@ -18,7 +18,7 @@ describe('guide portfolio contract', () => {
           expect(guide.responsibilities).toHaveLength(4);
           expect(guide.handoff).toHaveLength(4);
           expect(guide.validations).toHaveLength(4);
-          expect(guide.boundaries).toHaveLength(guide.id === 'technical-privacy' ? 4 : 3);
+          expect(guide.boundaries).toHaveLength(guide.id === 'technical-privacy' ? 5 : 3);
           expect(guide.panelLinks.length + guide.capabilityLinks.length).toBeGreaterThanOrEqual(2);
           if (guide.id === 'reception') expect(guide.capabilityLinks.map(({ id }) => id)).toEqual(['email-enquiries']);
           if (guide.id === 'operations') expect(guide.capabilityLinks).toHaveLength(3);

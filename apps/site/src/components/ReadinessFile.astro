@@ -1,0 +1,58 @@
+---
+interface ReadinessItem {
+  id: string;
+  label: string;
+  requirement: string;
+}
+
+interface Props {
+  id: 'payments' | 'data-pms';
+  title: string;
+  summary: string;
+  items: readonly ReadinessItem[];
+  eyebrow: string;
+  readinessLabel: string;
+  status: string;
+  disclosure: string;
+  boundary: string;
+  countLabel: string;
+  itemStatus: string;
+}
+
+const { id, title, summary, items, eyebrow, readinessLabel, status, disclosure, boundary, countLabel, itemStatus } = Astro.props;
+const titleId = `${id}-readiness-title`;
+---
+
+<section id={`${id}-readiness`} class="integration-readiness" aria-labelledby={titleId} data-readiness-file={id}>
+  <header class="integration-readiness-heading">
+    <div>
+      <p class="eyebrow">{eyebrow}</p>
+      <h3 id={titleId}>{title}</h3>
+      <p>{summary}</p>
+    </div>
+    <div class="integration-readiness-zero" aria-label={countLabel}>
+      <span>{readinessLabel}</span>
+      <strong>0 / {items.length}</strong>
+      <small>{status}</small>
+    </div>
+  </header>
+  <details data-readiness-file-details={id}>
+    <summary>
+      <span>{disclosure}</span>
+      <span aria-hidden="true">+</span>
+    </summary>
+    <ol>
+      {items.map((item, index) => (
+        <li data-readiness-file-field={item.id}>
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <div>
+            <strong>{item.label}</strong>
+            <p>{item.requirement}</p>
+            <small>{itemStatus}</small>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </details>
+  <p class="integration-readiness-boundary" role="note">{boundary}</p>
+</section>
