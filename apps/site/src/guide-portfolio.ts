@@ -293,12 +293,13 @@ const definitions: readonly GuideDefinition[] = [
     },
   },
   {
-    id: 'technical-privacy', number: '05', status: 'published', capabilityIds: ['roles', 'channels', 'supervised-ai', 'automation'],
+    id: 'technical-privacy', number: '05', status: 'published', capabilityIds: ['roles', 'website-editor', 'channels', 'supervised-ai', 'automation'],
     panels: [
       { id: 'copilot', label: { es: 'Copiloto supervisado', en: 'Supervised copilot' } },
     ],
     capabilityEvidence: [
       { id: 'roles', label: { es: 'Abrir representación de roles en Aurem', en: 'Open the role representation in Aurem' } },
+      { id: 'website-editor', label: { es: 'Abrir expediente de publicación en Terrava', en: 'Open publication readiness in Terrava' } },
       { id: 'channels', label: { es: 'Abrir requisitos de canales en Aurem', en: 'Open channel requirements in Aurem' } },
       { id: 'supervised-ai', label: { es: 'Abrir revisión supervisada en Aurem', en: 'Open supervised review in Aurem' } },
       { id: 'automation', label: { es: 'Abrir reglas inertes en Aurem', en: 'Open inert rules in Aurem' } },
@@ -323,7 +324,7 @@ const definitions: readonly GuideDefinition[] = [
           'Qué fixture, recorridos, fallos, seguridad, accesibilidad, aceptación, observación y reversión deben superarse antes y después del cambio.',
         ],
         boundaries: [
-          'Los roles de Aurem son una representación local: no crean cuentas, permisos o datos de producción.',
+          'Los roles de Aurem son una representación local: no crean cuentas, permisos o datos de producción. La aprobación de la vista local de Terrava valida 0/12 condiciones de publicación: no conoce repositorio, cuenta, secreto, CMS o despliegue y no escribe fuera de la visita.',
           'La matriz muestra cuatro categorías genéricas, cero canales conectados y doce condiciones de preparación sin validar; no contiene marcas, cuentas o credenciales, no sincroniza ni publica y cada proveedor exige validación propia.',
           'Las reglas de automatización no inician jobs, colas, cron, webhooks, mensajes o proveedores; el copiloto no usa modelo ni envía nada. Esta guía tampoco sustituye asesoría jurídica, evaluación de seguridad o certificación de cumplimiento.',
         ],
@@ -347,7 +348,7 @@ const definitions: readonly GuideDefinition[] = [
           'Which fixture, journeys, failures, security, accessibility, acceptance, observation and rollback must pass before and after the change.',
         ],
         boundaries: [
-          'Aurem roles are a local representation: they create no live account, permission or production data.',
+          'Aurem roles are a local representation: they create no live account, permission or production data. Approving Terrava’s local preview validates 0/12 publication conditions: it knows no repository, account, secret, CMS or deployment and writes nothing outside the visit.',
           'The matrix shows four generic categories, zero connected channels and twelve unvalidated readiness conditions; it holds no brands, accounts or credentials, synchronises or publishes nothing, and every provider needs its own validation.',
           'Automation rules start no jobs, queues, cron, webhooks, messages or providers; the copilot uses no model and sends nothing. This guide also replaces no legal advice, security assessment or compliance certification.',
         ],

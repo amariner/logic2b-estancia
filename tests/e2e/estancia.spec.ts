@@ -234,14 +234,14 @@ test('role guides publish five complete journeys with truthful capability maturi
       ['reception', '/docs/reservas-recepcion/', 3, 0],
       ['operations', '/docs/operaciones/', 2, 3],
       ['marketing-revenue', '/docs/marketing-ingresos/', 1, 2],
-      ['technical-privacy', '/docs/tecnica-privacidad/', 1, 4],
+      ['technical-privacy', '/docs/tecnica-privacidad/', 1, 5],
     ]],
     ['/en/docs/', [
       ['direction', '/en/docs/ownership-direction/', 2, 0],
       ['reception', '/en/docs/reservations-reception/', 3, 0],
       ['operations', '/en/docs/operations/', 2, 3],
       ['marketing-revenue', '/en/docs/marketing-revenue/', 1, 2],
-      ['technical-privacy', '/en/docs/technical-privacy/', 1, 4],
+      ['technical-privacy', '/en/docs/technical-privacy/', 1, 5],
     ]],
   ] as const) {
     await expectCleanPage(page, indexPath);
@@ -499,9 +499,9 @@ test('Terrava website editing is supervised, local and reversible in both langua
     if (operationalMethods.has(request.method())) writes.push(request.url());
   });
 
-  for (const [path, heading, roleLabel, reception, direction, fieldLabel, draft, discard, approve, approved] of [
-    ['/demos/terrava/gestion/?vista=website', 'Mi web', 'Rol', 'reception', 'direction', 'Texto del hero', 'Cada estancia empieza antes de llegar.', 'Descartar borrador', 'Aprobar vista local', 'Aprobada en esta demo'],
-    ['/en/demos/terrava/gestion/?vista=website', 'My website', 'Role', 'reception', 'direction', 'Hero copy', 'Every stay begins before arrival.', 'Discard draft', 'Approve local preview', 'Approved in this demo'],
+  for (const [path, heading, roleLabel, reception, direction, fieldLabel, draft, discard, approve, approved, readinessHeading, notValidated, repositoryCopy] of [
+    ['/demos/terrava/gestion/?vista=website', 'Mi web', 'Rol', 'reception', 'direction', 'Texto del hero', 'Cada estancia empieza antes de llegar.', 'Descartar borrador', 'Aprobar vista local', 'Aprobada en esta demo', 'Expediente antes de publicar', 'Por validar', 'Referencia opaca de repositorio y entorno'],
+    ['/en/demos/terrava/gestion/?vista=website', 'My website', 'Role', 'reception', 'direction', 'Hero copy', 'Every stay begins before arrival.', 'Discard draft', 'Approve local preview', 'Approved in this demo', 'File required before publishing', 'Not validated', 'Opaque repository and environment reference'],
   ] as const) {
     await page.goto(path);
     await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
@@ -512,6 +512,14 @@ test('Terrava website editing is supervised, local and reversible in both langua
     const field = page.getByLabel(fieldLabel);
     const original = await field.inputValue();
     const approveButton = page.getByRole('button', { name: approve });
+    const readiness = page.locator('[data-website-publication-readiness]');
+
+    await expect(readiness.getByRole('heading', { name: readinessHeading })).toBeVisible();
+    await expect(readiness.locator('[data-publication-readiness-field]')).toHaveCount(12);
+    await expect(readiness.locator('li small')).toHaveText(Array(12).fill(notValidated));
+    await expect(readiness.locator('.website-readiness-zero')).toContainText('0 / 12');
+    await expect(readiness.locator('[data-publication-readiness-field="repositoryReference"]')).toContainText(repositoryCopy);
+    await expect(readiness.locator('form, textarea, input, select, button')).toHaveCount(0);
 
     await field.fill(draft);
     await expect(page.locator('.editor-workflow [aria-current="step"]')).toContainText(path.startsWith('/en') ? 'Draft' : 'Borrador');
@@ -526,6 +534,8 @@ test('Terrava website editing is supervised, local and reversible in both langua
     await approveButton.click();
     await expect(page.locator('.editor-controls .tag')).toHaveText(approved);
     await expect(page.locator('.editor-workflow [aria-current="step"]')).toContainText(path.startsWith('/en') ? 'Human approval' : 'Aprobación humana');
+    await expect(readiness.locator('.website-readiness-zero')).toContainText('0 / 12');
+    await expect(readiness.locator('li small')).toHaveText(Array(12).fill(notValidated));
     await expect(page.locator('.website-preview h2')).toHaveText(draft);
     await expect(page.locator('.website-preview button, .website-preview a')).toHaveCount(0);
     await expect(page.locator('.website-boundary')).toContainText(path.startsWith('/en') ? 'No CMS, repository, deployment, provider or HTTP write' : 'Sin CMS, repositorio, despliegue, proveedor ni escritura HTTP');

@@ -26,9 +26,12 @@ import {
 import {
   CHANNEL_READINESS_CONTRACTS,
   CHANNEL_READINESS_FIELDS,
+  WEBSITE_PUBLICATION_READINESS,
+  WEBSITE_PUBLICATION_READINESS_FIELDS,
   type ChannelReadinessCandidateId,
   type ChannelReadinessField,
   type DemoRole,
+  type WebsitePublicationReadinessField,
 } from "@logic-estancia/domain";
 import {
   canOperate,
@@ -1773,6 +1776,29 @@ function WebsiteEditor({
   patch: (n: Partial<DemoState>) => void;
 }) {
   const allowedToApprove = canOperate(state.role, "website");
+  const readinessLabels: Record<
+    WebsitePublicationReadinessField,
+    { es: string; en: string }
+  > = {
+    owner: { es: "Propietario", en: "Owner" },
+    permissions: { es: "Permisos", en: "Permissions" },
+    repositoryReference: {
+      es: "Referencia de repositorio y entorno",
+      en: "Repository and environment reference",
+    },
+    version: { es: "Rama o versión", en: "Branch or version" },
+    isolatedPreview: { es: "Preview aislada", en: "Isolated preview" },
+    contentValidation: {
+      es: "Validación de contenido",
+      en: "Content validation",
+    },
+    failureCases: { es: "Casos de fallo", en: "Failure cases" },
+    audit: { es: "Auditoría", en: "Audit" },
+    acceptance: { es: "Aceptación", en: "Acceptance" },
+    changeWindow: { es: "Ventana de cambio", en: "Change window" },
+    killSwitch: { es: "Kill switch", en: "Kill switch" },
+    rollback: { es: "Reversión", en: "Rollback" },
+  };
   const updateDraft = (draftTitle: string) =>
     patch({
       website: {
@@ -1806,98 +1832,145 @@ function WebsiteEditor({
       },
     });
   return (
-    <div className="website-editor">
-      <article className="panel editor-controls">
-        <div className="panel-head">
-          <div>
-            <span className={`tag ${state.website.status}`}>
-              {state.website.status === "draft"
-                ? locale === "es"
-                  ? "Borrador pendiente"
-                  : "Draft pending"
-                : state.website.status === "published"
+    <div className="website-experience">
+      <div className="website-editor">
+        <article className="panel editor-controls">
+          <div className="panel-head">
+            <div>
+              <span className={`tag ${state.website.status}`}>
+                {state.website.status === "draft"
                   ? locale === "es"
-                    ? "Aprobada en esta demo"
-                    : "Approved in this demo"
-                  : locale === "es"
-                    ? "Versión inicial"
-                    : "Initial version"}
-            </span>
-            <h2>
-              {locale === "es"
-                ? "Portada · titular en revisión"
-                : "Homepage · headline under review"}
-            </h2>
+                    ? "Borrador pendiente"
+                    : "Draft pending"
+                  : state.website.status === "published"
+                    ? locale === "es"
+                      ? "Aprobada en esta demo"
+                      : "Approved in this demo"
+                    : locale === "es"
+                      ? "Versión inicial"
+                      : "Initial version"}
+              </span>
+              <h2>
+                {locale === "es"
+                  ? "Portada · titular en revisión"
+                  : "Homepage · headline under review"}
+              </h2>
+            </div>
+            <PanelsTopLeft size={25} />
           </div>
-          <PanelsTopLeft size={25} />
-        </div>
-        <ol className="editor-workflow" aria-label={locale === "es" ? "Flujo de revisión" : "Review flow"}>
-          <li aria-current={state.website.status === "clean" ? "step" : undefined}>
-            <span>01</span>{locale === "es" ? "Edición local" : "Local edit"}
-          </li>
-          <li aria-current={state.website.status === "draft" ? "step" : undefined}>
-            <span>02</span>{locale === "es" ? "Borrador" : "Draft"}
-          </li>
-          <li aria-current={state.website.status === "published" ? "step" : undefined}>
-            <span>03</span>{locale === "es" ? "Aprobación humana" : "Human approval"}
-          </li>
-        </ol>
-        <label>
-          {locale === "es" ? "Texto del hero" : "Hero copy"}
-          <textarea
-            value={state.website.draftTitle}
-            maxLength={100}
-            rows={3}
-            onChange={(event) => updateDraft(event.target.value)}
-          />
-        </label>
-        <div className="actions">
-          <button onClick={revert} disabled={state.website.status !== "draft"}>
-            {locale === "es" ? "Descartar borrador" : "Discard draft"}
-          </button>
-          <button
-            className="primary"
-            onClick={approve}
-            disabled={
-              !allowedToApprove ||
-              state.website.status !== "draft" ||
-              !state.website.draftTitle.trim()
-            }
-          >
+          <ol className="editor-workflow" aria-label={locale === "es" ? "Flujo de revisión" : "Review flow"}>
+            <li aria-current={state.website.status === "clean" ? "step" : undefined}>
+              <span>01</span>{locale === "es" ? "Edición local" : "Local edit"}
+            </li>
+            <li aria-current={state.website.status === "draft" ? "step" : undefined}>
+              <span>02</span>{locale === "es" ? "Borrador" : "Draft"}
+            </li>
+            <li aria-current={state.website.status === "published" ? "step" : undefined}>
+              <span>03</span>{locale === "es" ? "Aprobación humana" : "Human approval"}
+            </li>
+          </ol>
+          <label>
+            {locale === "es" ? "Texto del hero" : "Hero copy"}
+            <textarea
+              value={state.website.draftTitle}
+              maxLength={100}
+              rows={3}
+              onChange={(event) => updateDraft(event.target.value)}
+            />
+          </label>
+          <div className="actions">
+            <button onClick={revert} disabled={state.website.status !== "draft"}>
+              {locale === "es" ? "Descartar borrador" : "Discard draft"}
+            </button>
+            <button
+              className="primary"
+              onClick={approve}
+              disabled={
+                !allowedToApprove ||
+                state.website.status !== "draft" ||
+                !state.website.draftTitle.trim()
+              }
+            >
+              {locale === "es"
+                ? "Aprobar vista local"
+                : "Approve local preview"}
+            </button>
+          </div>
+          <p className="permission-note" role="note">
+            {allowedToApprove
+              ? locale === "es"
+                ? "Dirección puede aprobar esta vista ficticia. La aprobación solo cambia la memoria temporal de esta visita."
+                : "Direction can approve this fictitious preview. Approval only changes this visit’s temporary memory."
+              : locale === "es"
+                ? "Recepción puede preparar el borrador; Dirección debe aprobarlo. Nada sale de esta visita."
+                : "Reception can prepare the draft; Direction must approve it. Nothing leaves this visit."}
+          </p>
+          <p className="website-boundary">
             {locale === "es"
-              ? "Aprobar vista local"
-              : "Approve local preview"}
-          </button>
-        </div>
-        <p className="permission-note" role="note">
-          {allowedToApprove
-            ? locale === "es"
-              ? "Dirección puede aprobar esta vista ficticia. La aprobación solo cambia la memoria temporal de esta visita."
-              : "Direction can approve this fictitious preview. Approval only changes this visit’s temporary memory."
-            : locale === "es"
-              ? "Recepción puede preparar el borrador; Dirección debe aprobarlo. Nada sale de esta visita."
-              : "Reception can prepare the draft; Direction must approve it. Nothing leaves this visit."}
-        </p>
-        <p className="website-boundary">
-          {locale === "es"
-            ? "Sin CMS, repositorio, despliegue, proveedor ni escritura HTTP. Recargar restaura el fixture."
-            : "No CMS, repository, deployment, provider or HTTP write. Reloading restores the fixture."}
-        </p>
-      </article>
-      <article className={`website-preview ${scenario}`}>
-        <span>
-          {scenario === "aurem" ? "Aurem Hotel" : "Terrava Collection"}
-        </span>
-        <div>
-          <small>{locale === "es" ? "Vista previa" : "Preview"}</small>
-          <h2>{state.website.draftTitle}</h2>
-          <span className="website-preview-cta">
-            {locale === "es"
-              ? "Consulta de ejemplo · sin acción"
-              : "Sample enquiry · no action"}
+              ? "Sin CMS, repositorio, despliegue, proveedor ni escritura HTTP. Recargar restaura el fixture."
+              : "No CMS, repository, deployment, provider or HTTP write. Reloading restores the fixture."}
+          </p>
+        </article>
+        <article className={`website-preview ${scenario}`}>
+          <span>
+            {scenario === "aurem" ? "Aurem Hotel" : "Terrava Collection"}
           </span>
+          <div>
+            <small>{locale === "es" ? "Vista previa" : "Preview"}</small>
+            <h2>{state.website.draftTitle}</h2>
+            <span className="website-preview-cta">
+              {locale === "es"
+                ? "Consulta de ejemplo · sin acción"
+                : "Sample enquiry · no action"}
+            </span>
+          </div>
+        </article>
+      </div>
+      <section
+        className="panel website-readiness"
+        aria-labelledby="website-readiness-title"
+        data-website-publication-readiness
+      >
+        <div className="website-readiness-intro">
+          <span className="tag">
+            {locale === "es"
+              ? "Contrato de preparación"
+              : "Readiness contract"}
+          </span>
+          <h2 id="website-readiness-title">
+            {locale === "es"
+              ? "Expediente antes de publicar"
+              : "File required before publishing"}
+          </h2>
+          <p>
+            {locale === "es"
+              ? "Aprobar la vista local de arriba no valida ninguna condición de publicación. Las doce requieren infraestructura, pruebas y aceptación separadas."
+              : "Approving the local preview above validates no publication condition. All twelve require separate infrastructure, tests and acceptance."}
+          </p>
+          <div className="website-readiness-zero">
+            <span>
+              {locale === "es"
+                ? "Condiciones validadas"
+                : "Validated conditions"}
+            </span>
+            <strong>0 / {WEBSITE_PUBLICATION_READINESS_FIELDS.length}</strong>
+          </div>
         </div>
-      </article>
+        <ol>
+          {WEBSITE_PUBLICATION_READINESS_FIELDS.map((field, index) => (
+            <li key={field} data-publication-readiness-field={field}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <strong>{readinessLabels[field][locale]}</strong>
+                <p>
+                  {WEBSITE_PUBLICATION_READINESS.requirements[field][locale]}
+                </p>
+                <small>{locale === "es" ? "Por validar" : "Not validated"}</small>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
     </div>
   );
 }

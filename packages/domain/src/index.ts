@@ -211,6 +211,96 @@ export const CHANNEL_READINESS_CONTRACTS: readonly ChannelReadinessContract[] = 
   },
 ] as const;
 
+export type WebsitePublicationReadinessField =
+  | 'owner'
+  | 'permissions'
+  | 'repositoryReference'
+  | 'version'
+  | 'isolatedPreview'
+  | 'contentValidation'
+  | 'failureCases'
+  | 'audit'
+  | 'acceptance'
+  | 'changeWindow'
+  | 'killSwitch'
+  | 'rollback';
+
+export const WEBSITE_PUBLICATION_READINESS_FIELDS = [
+  'owner',
+  'permissions',
+  'repositoryReference',
+  'version',
+  'isolatedPreview',
+  'contentValidation',
+  'failureCases',
+  'audit',
+  'acceptance',
+  'changeWindow',
+  'killSwitch',
+  'rollback',
+] as const satisfies readonly WebsitePublicationReadinessField[];
+
+export const WEBSITE_PUBLICATION_READINESS = {
+  demo: 'terrava',
+  minimumPlan: 'gestion',
+  readinessState: 'not_validated',
+  requirements: {
+    owner: {
+      es: 'Dirección acepta el cambio y una persona técnica responde del proceso de publicación.',
+      en: 'Direction accepts the change and a technical owner is accountable for the publication process.',
+    },
+    permissions: {
+      es: 'Edición, aprobación y publicación usan permisos separados y revocables con mínimo privilegio.',
+      en: 'Editing, approval and publishing use separate, revocable permissions with least privilege.',
+    },
+    repositoryReference: {
+      es: 'Referencia opaca de repositorio y entorno por definir fuera del navegador; sin URL, cuenta o secreto en la demo.',
+      en: 'Opaque repository and environment reference to be defined outside the browser; no URL, account or secret in the demo.',
+    },
+    version: {
+      es: 'Cada candidato debe fijar una rama o versión inmutable y el contenido exacto que contiene.',
+      en: 'Every candidate must pin an immutable branch or version and the exact content it contains.',
+    },
+    isolatedPreview: {
+      es: 'La revisión necesita una preview aislada, privada y distinta del dominio de producción.',
+      en: 'Review needs an isolated, private preview that is separate from the production domain.',
+    },
+    contentValidation: {
+      es: 'Enlaces, imágenes, idiomas, formularios, metadata, accesibilidad y límites comerciales deben pasar antes de publicar.',
+      en: 'Links, images, languages, forms, metadata, accessibility and commercial boundaries must pass before publishing.',
+    },
+    failureCases: {
+      es: 'Build fallido, preview inaccesible, asset ausente, enlace roto y publicación parcial necesitan casos reproducibles.',
+      en: 'Failed build, inaccessible preview, missing asset, broken link and partial publication need reproducible cases.',
+    },
+    audit: {
+      es: 'Versión, solicitante, aprobador, pruebas y resultado deben quedar registrados sin tokens ni contenido personal.',
+      en: 'Version, requester, approver, tests and outcome must be recorded without tokens or personal content.',
+    },
+    acceptance: {
+      es: 'Dirección acepta la preview exacta y el resultado de pruebas antes de autorizar una publicación.',
+      en: 'Direction accepts the exact preview and test outcome before authorising a publication.',
+    },
+    changeWindow: {
+      es: 'La ventana define responsable, observación, criterio de parada y comunicación de incidencia.',
+      en: 'The window defines owner, observation, stop criteria and incident communication.',
+    },
+    killSwitch: {
+      es: 'Un control independiente debe impedir nuevos despliegues sin borrar versiones o evidencia.',
+      en: 'An independent control must prevent new deployments without deleting versions or evidence.',
+    },
+    rollback: {
+      es: 'La última versión aceptada debe poder restaurarse y verificarse antes de cerrar la ventana.',
+      en: 'The last accepted version must be restorable and verifiable before closing the window.',
+    },
+  },
+} as const satisfies {
+  demo: 'terrava';
+  minimumPlan: 'gestion';
+  readinessState: 'not_validated';
+  requirements: Record<WebsitePublicationReadinessField, LocalizedText>;
+};
+
 export type AssignMode = 'specific-unit' | 'unit-type';
 
 export interface ReservableUnit {
@@ -290,7 +380,7 @@ export const CAPABILITIES: readonly Capability[] = [
   { id: 'enquiry-workspace', category: 'reservations', minimumPlan: 'gestion', status: 'demo_visual_disponible', evidence: { demo: 'terrava', surface: 'workspace', view: 'enquiries', proof: { es: 'Caso ficticio precargado que conserva el contexto y compara una alternativa en solo lectura.', en: 'Preloaded fictitious case that keeps context and compares an alternative in read-only mode.' }, boundary: { es: 'No crea, convierte ni confirma reservas y no envía comunicaciones.', en: 'It does not create, convert or confirm bookings and sends no communication.' } }, label: { es: 'Solicitudes y reservas', en: 'Enquiries and bookings' }, description: { es: 'Representa una consulta y su alternativa con contexto compartido.', en: 'Represents an enquiry and its alternative with shared context.' } },
   { id: 'planning', category: 'reservations', minimumPlan: 'gestion', status: 'demo_visual_disponible', evidence: { demo: 'terrava', surface: 'workspace', view: 'planning', proof: { es: 'Calendario ficticio de solo lectura con unidades, estancias y una alternativa ya preparada.', en: 'Read-only fictitious calendar with units, stays and a prepared alternative.' }, boundary: { es: 'No cambia inventario o tarifas ni conecta PMS, disponibilidad o pagos.', en: 'It changes no inventory or rates and connects no PMS, availability or payments.' } }, label: { es: 'Planning y tarifas', en: 'Planning and rates' }, description: { es: 'Representa estancias, unidades, huéspedes y precios en un calendario común.', en: 'Represents stays, units, guests and pricing in a shared calendar.' } },
   { id: 'guest-context', category: 'reservations', minimumPlan: 'gestion', status: 'demo_visual_disponible', evidence: { demo: 'terrava', surface: 'workspace', view: 'guests', proof: { es: 'Tabla ficticia de solo lectura con dos huéspedes de muestra, origen y estado.', en: 'Read-only fictitious table with two sample guests, source and status.' }, boundary: { es: 'No crea perfiles, registra viajeros, guarda datos de visitantes ni envía comunicaciones.', en: 'It creates no profile, reports no traveller, stores no visitor data and sends no communication.' } }, label: { es: 'Huéspedes y llegadas', en: 'Guests and arrivals' }, description: { es: 'Contexto ficticio de la estancia disponible para preparar una llegada.', en: 'Fictitious stay context available to prepare an arrival.' } },
-  { id: 'website-editor', category: 'web', minimumPlan: 'gestion', status: 'demo_visual_disponible', evidence: { demo: 'terrava', surface: 'workspace', view: 'website', proof: { es: 'Terrava permite editar un titular ficticio, descartar el borrador y aprobar una vista local solo desde Dirección.', en: 'Terrava lets users edit a fictitious headline, discard the draft and approve a local preview only from Direction.' }, boundary: { es: 'El estado solo vive durante la visita: no existe CMS, repositorio, despliegue, proveedor ni escritura HTTP, y recargar restaura el fixture.', en: 'State only lasts for the visit: there is no CMS, repository, deployment, provider or HTTP write, and reloading restores the fixture.' } }, label: { es: 'Editor web supervisado', en: 'Supervised website editor' }, description: { es: 'Edición visual de un borrador ficticio con aprobación humana local.', en: 'Visual editing of a fictitious draft with local human approval.' } },
+  { id: 'website-editor', category: 'web', minimumPlan: 'gestion', status: 'demo_visual_disponible', evidence: { demo: 'terrava', surface: 'workspace', view: 'website', proof: { es: 'Terrava permite editar un titular ficticio, descartar el borrador, aprobar una vista local solo desde Dirección y revisar doce condiciones de publicación sin validar.', en: 'Terrava lets users edit a fictitious headline, discard the draft, approve a local preview only from Direction and review twelve unvalidated publication conditions.' }, boundary: { es: 'El estado solo vive durante la visita y la aprobación local valida 0/12 condiciones: no existe CMS, repositorio, despliegue, proveedor ni escritura HTTP, y recargar restaura el fixture.', en: 'State only lasts for the visit and local approval validates 0/12 conditions: there is no CMS, repository, deployment, provider or HTTP write, and reloading restores the fixture.' } }, label: { es: 'Editor web supervisado', en: 'Supervised website editor' }, description: { es: 'Edición visual de un borrador ficticio con aprobación humana local.', en: 'Visual editing of a fictitious draft with local human approval.' } },
   { id: 'basic-reports', category: 'revenue', minimumPlan: 'gestion', status: 'demo_visual_disponible', evidence: { demo: 'terrava', surface: 'workspace', view: 'reports', proof: { es: 'Lectura visual de ocupación e ingresos con un conjunto de muestra.', en: 'Visual reading of occupancy and revenue from a sample dataset.' }, boundary: { es: 'No usa contabilidad, pagos ni datos operativos reales.', en: 'It uses no live accounting, payment or operational data.' } }, label: { es: 'Informes básicos', en: 'Basic reports' }, description: { es: 'Lectura de reservas, ocupación e ingresos con datos de muestra.', en: 'Booking, occupancy and revenue reading with sample data.' } },
   { id: 'explainable-revenue', category: 'revenue', minimumPlan: 'inteligente', status: 'demo_visual_disponible', evidence: { demo: 'aurem', surface: 'workspace', view: 'reports', proof: { es: 'Escenario ficticio de 28 días con ocupación, ADR, RevPAR, ingresos, fórmulas y libro semanal.', en: 'Fictitious 28-day scenario with occupancy, ADR, RevPAR, revenue, formulas and a weekly ledger.' }, boundary: { es: 'No usa PMS, canales, contabilidad o pagos reales y no predice demanda ni precio.', en: 'It uses no live PMS, channel, accounting or payment data and predicts no demand or price.' } }, label: { es: 'Métricas de ingresos explicables', en: 'Explainable revenue metrics' }, description: { es: 'Cifras ficticias contrastables con sus fórmulas y conjunto de muestra.', en: 'Fictitious figures that can be checked against formulas and their sample dataset.' } },
   { id: 'operations-centre', category: 'operations', minimumPlan: 'inteligente', status: 'demo_visual_disponible', evidence: { demo: 'aurem', surface: 'workspace', view: 'control', proof: { es: 'Llegadas, preparación e incidencias ficticias reunidas en una vista de solo lectura.', en: 'Fictitious arrivals, readiness and incidents brought together in a read-only view.' }, boundary: { es: 'No toma decisiones ni ejecuta acciones de forma autónoma.', en: 'It makes no autonomous decision and executes no live action.' } }, label: { es: 'Centro operativo', en: 'Operations centre' }, description: { es: 'Muestra llegadas en riesgo y la coordinación ficticia de la respuesta del equipo.', en: 'Shows at-risk arrivals and a fictional coordination scenario for the team response.' } },

@@ -187,6 +187,8 @@ test('Terrava supervised editor remains accessible after local approval at 320px
   await page.getByLabel('Rol').selectOption('direction');
   await page.getByRole('button', { name: 'Aprobar vista local' }).click();
   await expect(page.locator('.editor-controls .tag')).toHaveText('Aprobada en esta demo');
+  await expect(page.locator('[data-publication-readiness-field]')).toHaveCount(12);
+  await expect(page.locator('.website-readiness-zero')).toContainText('0 / 12');
   const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
   expect(formatViolations('Terrava website editor', result.violations)).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);

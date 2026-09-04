@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAPABILITIES, CAPABILITY_STATUSES, CHANNEL_READINESS_CONTRACTS, CHANNEL_READINESS_FIELDS, DEMO_PLANS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
+import { CAPABILITIES, CAPABILITY_STATUSES, CHANNEL_READINESS_CONTRACTS, CHANNEL_READINESS_FIELDS, DEMO_PLANS, WEBSITE_PUBLICATION_READINESS, WEBSITE_PUBLICATION_READINESS_FIELDS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
 
 const mono: StayOrganization = {
   id: 'org-nivora', name: 'Nivora One', vertical: 'apartment', mode: 'mono', currency: 'EUR',
@@ -69,6 +69,20 @@ describe('domain', () => {
       expect(Object.values(contract.requirements).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
     }
     expect(JSON.stringify(CHANNEL_READINESS_CONTRACTS)).not.toMatch(/booking\.com|airbnb|expedia/i);
+  });
+  it('keeps supervised website publication readiness complete and disconnected from live infrastructure', () => {
+    expect(WEBSITE_PUBLICATION_READINESS).toMatchObject({
+      demo: 'terrava',
+      minimumPlan: 'gestion',
+      readinessState: 'not_validated',
+    });
+    expect(WEBSITE_PUBLICATION_READINESS_FIELDS).toEqual([
+      'owner', 'permissions', 'repositoryReference', 'version', 'isolatedPreview', 'contentValidation',
+      'failureCases', 'audit', 'acceptance', 'changeWindow', 'killSwitch', 'rollback',
+    ]);
+    expect(Object.keys(WEBSITE_PUBLICATION_READINESS.requirements)).toEqual([...WEBSITE_PUBLICATION_READINESS_FIELDS]);
+    expect(Object.values(WEBSITE_PUBLICATION_READINESS.requirements).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
+    expect(JSON.stringify(WEBSITE_PUBLICATION_READINESS)).not.toMatch(/https?:\/\/|token[=:]|secret[=:]/i);
   });
   it.each([
     [{ propertyCount: 1, unitCount: 1, wantsBookings: false, wantsAutomation: false, wantsOperations: false }, 'basico'],

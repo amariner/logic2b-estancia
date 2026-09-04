@@ -13,7 +13,7 @@ La suite `tests/e2e/accessibility.spec.ts` audita las 30 rutas públicas en Chro
 - Landing, soluciones, planes, diagnóstico, documentación y recursos comerciales.
 - Aviso legal, privacidad y cookies.
 - Nivora, Terrava y Aurem en ES/EN, incluidos los gestores de Terrava y Aurem.
-- Los estados profundos ES/EN de ingresos, preparación de canales, automatizaciones inertes y Copiloto supervisado de Aurem, abiertos mediante `?vista=reports`, `?vista=channels`, `?vista=automations` y `?vista=automation`, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. Canales incluye selección dinámica de categoría y doce requisitos; `automations` y `automation` son superficies deliberadamente distintas.
+- Los estados profundos ES/EN del editor y expediente de publicación de Terrava, además de ingresos, preparación de canales, automatizaciones inertes y Copiloto supervisado de Aurem, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. Publicación y canales exponen doce requisitos sin validar; `automations` y `automation` son superficies deliberadamente distintas.
 
 Además comprueba:
 
