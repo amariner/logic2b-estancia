@@ -301,6 +301,118 @@ export const WEBSITE_PUBLICATION_READINESS = {
   requirements: Record<WebsitePublicationReadinessField, LocalizedText>;
 };
 
+export type EmailDeliveryReadinessField =
+  | 'owner'
+  | 'lawfulBasis'
+  | 'permissions'
+  | 'providerCategory'
+  | 'configurationReference'
+  | 'templates'
+  | 'routing'
+  | 'idempotency'
+  | 'failureRecovery'
+  | 'audit'
+  | 'acceptance'
+  | 'killSwitch'
+  | 'rollback';
+
+export const EMAIL_DELIVERY_READINESS_FIELDS = [
+  'owner',
+  'lawfulBasis',
+  'permissions',
+  'providerCategory',
+  'configurationReference',
+  'templates',
+  'routing',
+  'idempotency',
+  'failureRecovery',
+  'audit',
+  'acceptance',
+  'killSwitch',
+  'rollback',
+] as const satisfies readonly EmailDeliveryReadinessField[];
+
+export const EMAIL_DELIVERY_READINESS = {
+  demo: 'nivora',
+  minimumPlan: 'basico',
+  readinessState: 'not_validated',
+  labels: {
+    owner: { es: 'Responsable', en: 'Owner' },
+    lawfulBasis: { es: 'Base jurídica y finalidad', en: 'Lawful basis and purpose' },
+    permissions: { es: 'Permisos', en: 'Permissions' },
+    providerCategory: { es: 'Categoría de proveedor', en: 'Provider category' },
+    configurationReference: { es: 'Referencia de configuración', en: 'Configuration reference' },
+    templates: { es: 'Plantillas', en: 'Templates' },
+    routing: { es: 'Enrutado', en: 'Routing' },
+    idempotency: { es: 'Idempotencia', en: 'Idempotency' },
+    failureRecovery: { es: 'Fallos y reintentos', en: 'Failures and retries' },
+    audit: { es: 'Auditoría', en: 'Audit' },
+    acceptance: { es: 'Aceptación', en: 'Acceptance' },
+    killSwitch: { es: 'Kill switch', en: 'Kill switch' },
+    rollback: { es: 'Reversión', en: 'Rollback' },
+  },
+  requirements: {
+    owner: {
+      es: 'Dirección acepta el alcance y una persona responsable responde de contenido, entrega e incidencias.',
+      en: 'Direction accepts scope and an accountable owner is responsible for content, delivery and incidents.',
+    },
+    lawfulBasis: {
+      es: 'Finalidad, base jurídica o consentimiento aplicable, datos mínimos y conservación se acuerdan antes de recoger información.',
+      en: 'Purpose, applicable lawful basis or consent, minimum data and retention are agreed before collecting information.',
+    },
+    permissions: {
+      es: 'Plantillas, configuración, envío y auditoría usan accesos separados, revocables y de mínimo privilegio.',
+      en: 'Templates, configuration, delivery and audit use separate, revocable least-privilege access.',
+    },
+    providerCategory: {
+      es: 'La categoría de email transaccional debe validarse por proyecto; no hay marca, cuenta o proveedor seleccionado.',
+      en: 'The transactional email category must be validated per project; no brand, account or provider is selected.',
+    },
+    configurationReference: {
+      es: 'Referencia opaca por definir fuera del navegador; la demo contiene cero claves, dominios, cuentas, direcciones reales o secretos.',
+      en: 'Opaque reference to be defined outside the browser; the demo contains zero keys, domains, accounts, live addresses or secrets.',
+    },
+    templates: {
+      es: 'Asunto, cuerpo, idiomas, identidad remitente, límites y textos legales necesitan versión y revisión humana.',
+      en: 'Subject, body, languages, sender identity, boundaries and legal copy need versioning and human review.',
+    },
+    routing: {
+      es: 'Origen, destino, respuesta y escalado se verifican con rutas de prueba; aquí solo aparecen direcciones reservadas `.example`.',
+      en: 'Origin, destination, reply and escalation are verified with test routes; only reserved `.example` addresses appear here.',
+    },
+    idempotency: {
+      es: 'Una referencia estable debe representar una única entrega lógica y permitir reintentos sin duplicados.',
+      en: 'A stable reference must represent one logical delivery and allow retries without duplicates.',
+    },
+    failureRecovery: {
+      es: 'Timeout, rechazo, cuota, degradación y resultado incierto requieren límites, reintentos acotados y recuperación manual.',
+      en: 'Timeout, rejection, quota, degradation and uncertain outcome require limits, bounded retries and manual recovery.',
+    },
+    audit: {
+      es: 'Referencia, versión de plantilla, actor, resultado y correlación se registran sin PII, mensaje, dirección, clave o secreto.',
+      en: 'Reference, template version, actor, outcome and correlation are recorded without PII, message, address, key or secret.',
+    },
+    acceptance: {
+      es: 'Dirección acepta contenido, idiomas, rutas de prueba, fallos y evidencia de recepción antes de autorizar entregas.',
+      en: 'Direction accepts content, languages, test routes, failures and receipt evidence before authorising delivery.',
+    },
+    killSwitch: {
+      es: 'Un control independiente bloquea nuevas entregas de producto sin afectar la captación comercial separada.',
+      en: 'An independent control blocks new product deliveries without affecting the separate commercial lead intake.',
+    },
+    rollback: {
+      es: 'La última plantilla y configuración aceptadas deben poder restaurarse y los resultados inciertos reconciliarse.',
+      en: 'The last accepted template and configuration must be restorable and uncertain outcomes reconciled.',
+    },
+  },
+} as const satisfies {
+  demo: 'nivora';
+  minimumPlan: 'basico';
+  readinessState: 'not_validated';
+  labels: Record<EmailDeliveryReadinessField, LocalizedText>;
+  requirements: Record<EmailDeliveryReadinessField, LocalizedText>;
+};
+
 export type AssignMode = 'specific-unit' | 'unit-type';
 
 export interface ReservableUnit {
@@ -376,7 +488,7 @@ export const LEVELS: Record<PlanLevel, { rank: number; capabilities: string[] }>
 
 export const CAPABILITIES: readonly Capability[] = [
   { id: 'brand-web', category: 'web', minimumPlan: 'basico', status: 'demo_visual_disponible', evidence: { demo: 'nivora', surface: 'demo-site', anchor: 'espacio', proof: { es: 'Web editorial responsive con contenido y navegación sobre una marca ficticia.', en: 'Responsive editorial website with content and navigation for a fictitious brand.' }, boundary: { es: 'No recoge solicitudes, consulta inventario ni incluye dashboard o edición pública.', en: 'It collects no enquiries, queries no inventory and includes no workspace or live editing.' } }, label: { es: 'Web modular de marca', en: 'Modular brand website' }, description: { es: 'Diseño, contenido y fundamentos SEO adaptables al alojamiento.', en: 'Design, content and SEO foundations adaptable to the stay.' } },
-  { id: 'email-enquiries', category: 'reservations', minimumPlan: 'basico', status: 'demo_visual_disponible', evidence: { demo: 'nivora', surface: 'demo-site', anchor: 'reserva', proof: { es: 'Tres consultas ficticias muestran en la web de Nivora el contexto que podría reunir un email.', en: 'Three fictitious enquiries show on the Nivora website the context an email could contain.' }, boundary: { es: 'Solo cambia una vista previa en memoria: no recoge datos personales, no envía emails, no consulta ni bloquea inventario y no crea reservas; recargar restaura el fixture.', en: 'It only changes an in-memory preview: it collects no personal data, sends no email, does not query or hold inventory and creates no booking; reloading restores the fixture.' } }, label: { es: 'Solicitudes por email', en: 'Email enquiries' }, description: { es: 'Representación visual del contexto que podría recibir el alojamiento en una consulta directa.', en: 'Visual representation of the context a property could receive in a direct enquiry.' } },
+  { id: 'email-enquiries', category: 'reservations', minimumPlan: 'basico', status: 'demo_visual_disponible', evidence: { demo: 'nivora', surface: 'demo-site', anchor: 'reserva', proof: { es: 'Tres consultas ficticias muestran el contexto que podría reunir un email y trece condiciones de entrega todavía sin validar.', en: 'Three fictitious enquiries show the context an email could contain and thirteen delivery conditions that remain unvalidated.' }, boundary: { es: 'Solo cambia una vista previa en memoria y conserva 0/13 condiciones validadas: no recoge datos personales, no envía emails, no consulta ni bloquea inventario y no crea reservas; recargar restaura el fixture.', en: 'It only changes an in-memory preview and retains 0/13 validated conditions: it collects no personal data, sends no email, does not query or hold inventory and creates no booking; reloading restores the fixture.' } }, label: { es: 'Solicitudes por email', en: 'Email enquiries' }, description: { es: 'Representación visual del contexto que podría recibir el alojamiento en una consulta directa.', en: 'Visual representation of the context a property could receive in a direct enquiry.' } },
   { id: 'enquiry-workspace', category: 'reservations', minimumPlan: 'gestion', status: 'demo_visual_disponible', evidence: { demo: 'terrava', surface: 'workspace', view: 'enquiries', proof: { es: 'Caso ficticio precargado que conserva el contexto y compara una alternativa en solo lectura.', en: 'Preloaded fictitious case that keeps context and compares an alternative in read-only mode.' }, boundary: { es: 'No crea, convierte ni confirma reservas y no envía comunicaciones.', en: 'It does not create, convert or confirm bookings and sends no communication.' } }, label: { es: 'Solicitudes y reservas', en: 'Enquiries and bookings' }, description: { es: 'Representa una consulta y su alternativa con contexto compartido.', en: 'Represents an enquiry and its alternative with shared context.' } },
   { id: 'planning', category: 'reservations', minimumPlan: 'gestion', status: 'demo_visual_disponible', evidence: { demo: 'terrava', surface: 'workspace', view: 'planning', proof: { es: 'Calendario ficticio de solo lectura con unidades, estancias y una alternativa ya preparada.', en: 'Read-only fictitious calendar with units, stays and a prepared alternative.' }, boundary: { es: 'No cambia inventario o tarifas ni conecta PMS, disponibilidad o pagos.', en: 'It changes no inventory or rates and connects no PMS, availability or payments.' } }, label: { es: 'Planning y tarifas', en: 'Planning and rates' }, description: { es: 'Representa estancias, unidades, huéspedes y precios en un calendario común.', en: 'Represents stays, units, guests and pricing in a shared calendar.' } },
   { id: 'guest-context', category: 'reservations', minimumPlan: 'gestion', status: 'demo_visual_disponible', evidence: { demo: 'terrava', surface: 'workspace', view: 'guests', proof: { es: 'Tabla ficticia de solo lectura con dos huéspedes de muestra, origen y estado.', en: 'Read-only fictitious table with two sample guests, source and status.' }, boundary: { es: 'No crea perfiles, registra viajeros, guarda datos de visitantes ni envía comunicaciones.', en: 'It creates no profile, reports no traveller, stores no visitor data and sends no communication.' } }, label: { es: 'Huéspedes y llegadas', en: 'Guests and arrivals' }, description: { es: 'Contexto ficticio de la estancia disponible para preparar una llegada.', en: 'Fictitious stay context available to prepare an arrival.' } },

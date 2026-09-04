@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAPABILITIES, CAPABILITY_STATUSES, CHANNEL_READINESS_CONTRACTS, CHANNEL_READINESS_FIELDS, DEMO_PLANS, WEBSITE_PUBLICATION_READINESS, WEBSITE_PUBLICATION_READINESS_FIELDS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
+import { CAPABILITIES, CAPABILITY_STATUSES, CHANNEL_READINESS_CONTRACTS, CHANNEL_READINESS_FIELDS, DEMO_PLANS, EMAIL_DELIVERY_READINESS, EMAIL_DELIVERY_READINESS_FIELDS, WEBSITE_PUBLICATION_READINESS, WEBSITE_PUBLICATION_READINESS_FIELDS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
 
 const mono: StayOrganization = {
   id: 'org-nivora', name: 'Nivora One', vertical: 'apartment', mode: 'mono', currency: 'EUR',
@@ -83,6 +83,22 @@ describe('domain', () => {
     expect(Object.keys(WEBSITE_PUBLICATION_READINESS.requirements)).toEqual([...WEBSITE_PUBLICATION_READINESS_FIELDS]);
     expect(Object.values(WEBSITE_PUBLICATION_READINESS.requirements).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
     expect(JSON.stringify(WEBSITE_PUBLICATION_READINESS)).not.toMatch(/https?:\/\/|token[=:]|secret[=:]/i);
+  });
+  it('keeps product email delivery readiness complete and separate from commercial lead intake', () => {
+    expect(EMAIL_DELIVERY_READINESS).toMatchObject({
+      demo: 'nivora',
+      minimumPlan: 'basico',
+      readinessState: 'not_validated',
+    });
+    expect(EMAIL_DELIVERY_READINESS_FIELDS).toEqual([
+      'owner', 'lawfulBasis', 'permissions', 'providerCategory', 'configurationReference', 'templates',
+      'routing', 'idempotency', 'failureRecovery', 'audit', 'acceptance', 'killSwitch', 'rollback',
+    ]);
+    expect(Object.keys(EMAIL_DELIVERY_READINESS.labels)).toEqual([...EMAIL_DELIVERY_READINESS_FIELDS]);
+    expect(Object.keys(EMAIL_DELIVERY_READINESS.requirements)).toEqual([...EMAIL_DELIVERY_READINESS_FIELDS]);
+    expect(Object.values(EMAIL_DELIVERY_READINESS.labels).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
+    expect(Object.values(EMAIL_DELIVERY_READINESS.requirements).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
+    expect(JSON.stringify(EMAIL_DELIVERY_READINESS)).not.toMatch(/https?:\/\/|@[a-z0-9.-]+\.(?!example\b)[a-z]{2,}|api[_-]?key[=:]|token[=:]|secret[=:]/i);
   });
   it.each([
     [{ propertyCount: 1, unitCount: 1, wantsBookings: false, wantsAutomation: false, wantsOperations: false }, 'basico'],

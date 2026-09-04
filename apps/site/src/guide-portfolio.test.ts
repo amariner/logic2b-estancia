@@ -20,6 +20,7 @@ describe('guide portfolio contract', () => {
           expect(guide.validations).toHaveLength(4);
           expect(guide.boundaries).toHaveLength(3);
           expect(guide.panelLinks.length + guide.capabilityLinks.length).toBeGreaterThanOrEqual(2);
+          if (guide.id === 'reception') expect(guide.capabilityLinks.map(({ id }) => id)).toEqual(['email-enquiries']);
           if (guide.id === 'operations') expect(guide.capabilityLinks).toHaveLength(3);
           if (guide.id === 'marketing-revenue') expect(guide.capabilityLinks).toHaveLength(2);
           if (guide.id === 'technical-privacy') expect(guide.capabilityLinks.map(({ id }) => id)).toEqual(['roles', 'website-editor', 'channels', 'supervised-ai', 'automation']);

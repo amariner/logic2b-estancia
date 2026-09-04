@@ -113,11 +113,14 @@ const definitions: readonly GuideDefinition[] = [
   },
   {
     id: 'reception', number: '02', status: 'published',
-    capabilityIds: ['enquiry-workspace', 'planning', 'guest-context'],
+    capabilityIds: ['email-enquiries', 'enquiry-workspace', 'planning', 'guest-context'],
     panels: [
       { id: 'enquiries', label: { es: 'Solicitudes', en: 'Enquiries' } },
       { id: 'planning', label: { es: 'Planning', en: 'Planning' } },
       { id: 'guests-arrivals', label: { es: 'Huéspedes y llegadas', en: 'Guests and arrivals' } },
+    ],
+    capabilityEvidence: [
+      { id: 'email-enquiries', label: { es: 'Abrir preparación de entrega en Nivora', en: 'Open delivery readiness in Nivora' } },
     ],
     copy: {
       es: {
@@ -140,7 +143,7 @@ const definitions: readonly GuideDefinition[] = [
         ],
         boundaries: [
           'Terrava muestra datos ficticios de solo lectura y no confirma ni modifica reservas.',
-          'No envía email o mensajería, no cobra y no sincroniza inventario o tarifas.',
+          'Nivora muestra 0/13 condiciones de entrega validadas y Terrava no envía email o mensajería, no cobra y no sincroniza inventario o tarifas.',
           'No realiza registro de viajeros; ese flujo exige validación legal, proveedor y aceptación separadas.',
         ],
       },
@@ -164,7 +167,7 @@ const definitions: readonly GuideDefinition[] = [
         ],
         boundaries: [
           'Terrava shows fictitious read-only data and confirms or changes no booking.',
-          'It sends no email or message, takes no payment and synchronises no inventory or rate.',
+          'Nivora shows 0/13 validated delivery conditions and Terrava sends no email or message, takes no payment and synchronises no inventory or rate.',
           'It performs no guest reporting; that flow needs separate legal, provider and acceptance validation.',
         ],
       },

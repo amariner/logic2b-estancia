@@ -231,14 +231,14 @@ test('role guides publish five complete journeys with truthful capability maturi
   for (const [indexPath, published] of [
     ['/docs/', [
       ['direction', '/docs/direccion-propiedad/', 2, 0],
-      ['reception', '/docs/reservas-recepcion/', 3, 0],
+      ['reception', '/docs/reservas-recepcion/', 3, 1],
       ['operations', '/docs/operaciones/', 2, 3],
       ['marketing-revenue', '/docs/marketing-ingresos/', 1, 2],
       ['technical-privacy', '/docs/tecnica-privacidad/', 1, 5],
     ]],
     ['/en/docs/', [
       ['direction', '/en/docs/ownership-direction/', 2, 0],
-      ['reception', '/en/docs/reservations-reception/', 3, 0],
+      ['reception', '/en/docs/reservations-reception/', 3, 1],
       ['operations', '/en/docs/operations/', 2, 3],
       ['marketing-revenue', '/en/docs/marketing-revenue/', 1, 2],
       ['technical-privacy', '/en/docs/technical-privacy/', 1, 5],
@@ -275,6 +275,10 @@ test('role guides publish five complete journeys with truthful capability maturi
         await expect(detail.locator('[data-guide-capability-evidence="operations-centre"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=control`);
         await expect(detail.locator('[data-guide-capability-evidence="cleaning"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=cleaning`);
         await expect(detail.locator('[data-guide-capability-evidence="maintenance"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=maintenance`);
+      }
+      if (id === 'reception') {
+        const prefix = indexPath.startsWith('/en') ? '/en' : '';
+        await expect(detail.locator('[data-guide-capability-evidence="email-enquiries"]')).toHaveAttribute('href', `${prefix}/demos/nivora/#reserva`);
       }
       if (id === 'marketing-revenue') {
         const prefix = indexPath.startsWith('/en') ? '/en' : '';
@@ -465,21 +469,31 @@ test('Nivora email enquiries stay fictitious, local and reversible in both langu
     if (new URL(request.url()).pathname === '/api/leads') leadRequests.push(request.url());
   });
 
-  for (const [path, family, initialSubject, updatedSubject, updatedStatus] of [
-    ['/demos/nivora/', 'Viaje en familia', 'Consulta ficticia · escapada de 3 noches', 'Consulta ficticia · estancia familiar', 'Vista previa actualizada localmente. Nada se ha enviado.'],
-    ['/en/demos/nivora/', 'Family trip', 'Fictitious enquiry · 3-night city break', 'Fictitious enquiry · family stay', 'Preview updated locally. Nothing was sent.'],
+  for (const [path, family, initialSubject, updatedSubject, updatedStatus, readinessHeading, notValidated, providerCopy] of [
+    ['/demos/nivora/', 'Viaje en familia', 'Consulta ficticia · escapada de 3 noches', 'Consulta ficticia · estancia familiar', 'Vista previa actualizada localmente. Nada se ha enviado.', 'Expediente antes del envío', 'Por validar', 'no hay marca, cuenta o proveedor seleccionado'],
+    ['/en/demos/nivora/', 'Family trip', 'Fictitious enquiry · 3-night city break', 'Fictitious enquiry · family stay', 'Preview updated locally. Nothing was sent.', 'File required before delivery', 'Not validated', 'no brand, account or provider is selected'],
   ] as const) {
     await page.goto(path);
     const demo = page.locator('[data-email-enquiry-demo]');
     await expect(demo).toBeVisible();
     await expect(demo.locator('[data-email-enquiry-subject]')).toHaveText(initialSubject);
     await expect(demo).toContainText(path.startsWith('/en') ? 'collects no personal data, sends no email' : 'No recoge datos personales, no envía ningún email');
+    const readiness = page.locator('[data-email-delivery-readiness]');
+    await expect(readiness.getByRole('heading', { name: readinessHeading })).toBeVisible();
+    await expect(readiness.locator('[data-email-delivery-readiness-field]')).toHaveCount(13);
+    await expect(readiness.locator('li small')).toHaveText(Array(13).fill(notValidated));
+    await expect(readiness.locator('.email-delivery-readiness-zero')).toContainText('0 / 13');
+    await expect(readiness.locator('[data-email-delivery-readiness-field="providerCategory"]')).toContainText(providerCopy);
+    await expect(readiness.locator('[data-email-delivery-readiness-field="configurationReference"]')).toContainText(path.startsWith('/en') ? 'zero keys, domains, accounts, live addresses or secrets' : 'cero claves, dominios, cuentas, direcciones reales o secretos');
+    await expect(readiness.locator('form, input, textarea, select, button, a')).toHaveCount(0);
     const storageBefore = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }));
 
     await demo.getByRole('button', { name: family }).click();
     await expect(demo.getByRole('button', { name: family })).toHaveAttribute('aria-pressed', 'true');
     await expect(demo.locator('[data-email-enquiry-subject]')).toHaveText(updatedSubject);
     await expect(demo.locator('[data-email-enquiry-status]')).toHaveText(updatedStatus);
+    await expect(readiness.locator('.email-delivery-readiness-zero')).toContainText('0 / 13');
+    await expect(readiness.locator('li small')).toHaveText(Array(13).fill(notValidated));
     expect(await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))).toEqual(storageBefore);
 
     await demo.getByRole('button', { name: path.startsWith('/en') ? 'Restore example' : 'Restaurar ejemplo' }).click();
@@ -487,6 +501,8 @@ test('Nivora email enquiries stay fictitious, local and reversible in both langu
     await demo.getByRole('button', { name: family }).click();
     await page.reload();
     await expect(page.locator('[data-email-enquiry-subject]')).toHaveText(initialSubject);
+    await expect(page.locator('[data-email-delivery-readiness-field]')).toHaveCount(13);
+    await expect(page.locator('.email-delivery-readiness-zero')).toContainText('0 / 13');
   }
 
   expect(writes).toEqual([]);

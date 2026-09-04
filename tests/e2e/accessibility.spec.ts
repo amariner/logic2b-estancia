@@ -175,6 +175,8 @@ test('Nivora enquiry interaction remains accessible and reflows at 320px', async
   const demo = page.locator('[data-email-enquiry-demo]');
   await demo.getByRole('button', { name: 'Viaje en familia' }).click();
   await expect(demo.locator('[data-email-enquiry-status]')).toBeVisible();
+  await expect(page.locator('[data-email-delivery-readiness-field]')).toHaveCount(13);
+  await expect(page.locator('.email-delivery-readiness-zero')).toContainText('0 / 13');
   const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
   expect(formatViolations('Nivora email enquiry', result.violations)).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);

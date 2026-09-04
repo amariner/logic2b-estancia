@@ -68,6 +68,20 @@
 .email-enquiry-boundary { margin: 20px 22px 0; color: color-mix(in srgb, var(--demo-ink) 74%, transparent); font-size: .67rem; line-height: 1.55; }
 .email-enquiry-demo > footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 16px 22px; }
 .email-enquiry-demo > footer span { overflow-wrap: anywhere; color: var(--demo-accent); font-size: .65rem; line-height: 1.45; text-align: right; }
+.email-delivery-readiness { grid-column: 1 / -1; border: 1px solid color-mix(in srgb, var(--demo-ink) 18%, transparent); padding: 28px; background: var(--demo-paper); }
+.email-delivery-readiness > header > span { color: color-mix(in srgb, var(--demo-ink) 68%, transparent); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.email-delivery-readiness h3 { margin: 16px 0 10px; font-family: 'Source Serif 4 Variable', serif; font-size: clamp(1.9rem, 3vw, 2.7rem); font-weight: 400; letter-spacing: -.03em; line-height: 1; }
+.email-delivery-readiness > header > p { margin: 0; color: color-mix(in srgb, var(--demo-ink) 76%, transparent); font-size: .69rem; line-height: 1.6; }
+.email-delivery-readiness-zero { display: grid; gap: 7px; margin: 18px 0 4px; padding: 14px; background: var(--demo-bg); }
+.email-delivery-readiness-zero span { color: color-mix(in srgb, var(--demo-ink) 68%, transparent); font-size: .6rem; }
+.email-delivery-readiness-zero strong { font-family: 'Source Serif 4 Variable', serif; font-size: 1.45rem; font-weight: 400; }
+.email-delivery-readiness ol { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; margin: 18px 0 0; padding: 0; list-style: none; }
+.email-delivery-readiness li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 12%, transparent); padding: 14px 0; }
+.email-delivery-readiness li > span { color: color-mix(in srgb, var(--demo-ink) 86%, transparent); font-size: .57rem; font-weight: 600; }
+.email-delivery-readiness li div { display: grid; min-width: 0; gap: 5px; }
+.email-delivery-readiness li strong { overflow-wrap: anywhere; font-size: .69rem; font-weight: 600; }
+.email-delivery-readiness li p { overflow-wrap: anywhere; margin: 0; color: color-mix(in srgb, var(--demo-ink) 72%, transparent); font-size: .63rem; line-height: 1.5; }
+.email-delivery-readiness li small { width: fit-content; padding: 4px 7px; color: var(--demo-accent); background: var(--demo-bg); font-size: .56rem; }
 .demo-footer { display: grid; grid-template-columns: 1fr 1fr auto; align-items: center; gap: 30px; border-top: 1px solid color-mix(in srgb, var(--demo-ink) 18%, transparent); padding: 34px 4vw; }
 .demo-footer span { font-family: 'Source Serif 4 Variable', serif; }
 .demo-footer small { color: color-mix(in srgb, var(--demo-ink) 75%, transparent); }
@@ -83,6 +97,10 @@
   .demo-intro, .demo-booking { grid-template-columns: 1fr; }
   .demo-editorial { grid-template-columns: 1fr; }
   .demo-editorial figure { min-height: 500px; }
+}
+
+@media (max-width: 1300px) {
+  .email-delivery-readiness ol { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
@@ -106,6 +124,7 @@
   .email-enquiry-preview dl div:last-child { grid-column: auto; }
   .email-enquiry-demo > footer { align-items: stretch; flex-direction: column; }
   .email-enquiry-demo > footer span { text-align: left; }
+  .email-delivery-readiness { padding: 18px; }
   .demo-booking .full { grid-column: auto; }
   .demo-footer { grid-template-columns: 1fr; }
 }

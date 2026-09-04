@@ -1,54 +1,85 @@
 ---
+import { EMAIL_DELIVERY_READINESS, EMAIL_DELIVERY_READINESS_FIELDS } from '@logic-estancia/domain';
 import { EMAIL_ENQUIRY_DEFAULT_ID, getEmailEnquiryDemo, type EmailEnquiryLocale } from '../email-enquiry-demo';
 
 const { locale } = Astro.props as { locale: EmailEnquiryLocale };
 const copy = getEmailEnquiryDemo(locale);
 const initial = copy.scenarios.find(({ id }) => id === EMAIL_ENQUIRY_DEFAULT_ID)!;
 const scenarioLabelId = `email-enquiry-scenarios-${locale}`;
+const readinessTitleId = `email-delivery-readiness-${locale}`;
 ---
 <article
-  class="email-enquiry-demo"
-  aria-label={copy.ariaLabel}
-  data-email-enquiry-demo
-  data-updated-status={copy.updatedStatus}
-  data-reset-status={copy.resetStatus}
->
-  <header><span>{copy.mode}</span><strong>Nivora One</strong></header>
-  <div class="email-enquiry-picker">
-    <p id={scenarioLabelId}>{copy.intro}</p>
-    <div class="email-enquiry-choices" role="group" aria-labelledby={scenarioLabelId}>
-      {copy.scenarios.map((scenario) => (
-        <button
-          type="button"
-          aria-pressed={scenario.id === EMAIL_ENQUIRY_DEFAULT_ID ? 'true' : 'false'}
-          data-email-enquiry-choice
-          data-default={scenario.id === EMAIL_ENQUIRY_DEFAULT_ID ? 'true' : undefined}
-          data-subject={scenario.subject}
-          data-sender={scenario.sender}
-          data-dates={scenario.dates}
-          data-guests={scenario.guests}
-          data-message={scenario.message}
-        >{scenario.choice}</button>
-      ))}
+    class="email-enquiry-demo"
+    aria-label={copy.ariaLabel}
+    data-email-enquiry-demo
+    data-updated-status={copy.updatedStatus}
+    data-reset-status={copy.resetStatus}
+  >
+    <header><span>{copy.mode}</span><strong>Nivora One</strong></header>
+    <div class="email-enquiry-picker">
+      <p id={scenarioLabelId}>{copy.intro}</p>
+      <div class="email-enquiry-choices" role="group" aria-labelledby={scenarioLabelId}>
+        {copy.scenarios.map((scenario) => (
+          <button
+            type="button"
+            aria-pressed={scenario.id === EMAIL_ENQUIRY_DEFAULT_ID ? 'true' : 'false'}
+            data-email-enquiry-choice
+            data-default={scenario.id === EMAIL_ENQUIRY_DEFAULT_ID ? 'true' : undefined}
+            data-subject={scenario.subject}
+            data-sender={scenario.sender}
+            data-dates={scenario.dates}
+            data-guests={scenario.guests}
+            data-message={scenario.message}
+          >{scenario.choice}</button>
+        ))}
+      </div>
     </div>
-  </div>
-  <section class="email-enquiry-preview" aria-label={copy.previewLabel} data-email-enquiry-preview>
-    <header><span>{copy.previewLabel}</span><strong data-email-enquiry-subject>{initial.subject}</strong></header>
-    <dl>
-      <div><dt>{copy.recipientLabel}</dt><dd>{copy.recipient}</dd></div>
-      <div><dt>{copy.senderLabel}</dt><dd data-email-enquiry-sender>{initial.sender}</dd></div>
-      <div><dt>{copy.datesLabel}</dt><dd data-email-enquiry-dates>{initial.dates}</dd></div>
-      <div><dt>{copy.guestsLabel}</dt><dd data-email-enquiry-guests>{initial.guests}</dd></div>
-      <div><dt>{copy.stayLabel}</dt><dd>{copy.stay}</dd></div>
-    </dl>
-    <p data-email-enquiry-message>{initial.message}</p>
+    <section class="email-enquiry-preview" aria-label={copy.previewLabel} data-email-enquiry-preview>
+      <header><span>{copy.previewLabel}</span><strong data-email-enquiry-subject>{initial.subject}</strong></header>
+      <dl>
+        <div><dt>{copy.recipientLabel}</dt><dd>{copy.recipient}</dd></div>
+        <div><dt>{copy.senderLabel}</dt><dd data-email-enquiry-sender>{initial.sender}</dd></div>
+        <div><dt>{copy.datesLabel}</dt><dd data-email-enquiry-dates>{initial.dates}</dd></div>
+        <div><dt>{copy.guestsLabel}</dt><dd data-email-enquiry-guests>{initial.guests}</dd></div>
+        <div><dt>{copy.stayLabel}</dt><dd>{copy.stay}</dd></div>
+      </dl>
+      <p data-email-enquiry-message>{initial.message}</p>
+    </section>
+    <p class="email-enquiry-boundary" role="note">{copy.boundary}</p>
+    <footer>
+      <button type="button" data-email-enquiry-reset>{copy.reset}</button>
+      <span role="status" aria-live="polite" data-email-enquiry-status>{copy.initialStatus}</span>
+    </footer>
+  </article>
+  <section
+    class="email-delivery-readiness"
+    aria-labelledby={readinessTitleId}
+    data-email-delivery-readiness
+  >
+    <header>
+      <span>{locale === 'es' ? 'Contrato de preparación' : 'Readiness contract'}</span>
+      <h3 id={readinessTitleId}>{locale === 'es' ? 'Expediente antes del envío' : 'File required before delivery'}</h3>
+      <p>{locale === 'es'
+        ? 'Elegir un caso ficticio solo cambia la vista previa: valida cero condiciones de entrega. Las trece requieren política de datos, configuración, pruebas y aceptación separadas.'
+        : 'Choosing a fictitious case only changes the preview: it validates zero delivery conditions. All thirteen require separate data policy, configuration, tests and acceptance.'}</p>
+      <div class="email-delivery-readiness-zero">
+        <span>{locale === 'es' ? 'Condiciones validadas' : 'Validated conditions'}</span>
+        <strong>0 / {EMAIL_DELIVERY_READINESS_FIELDS.length}</strong>
+      </div>
+    </header>
+    <ol>
+      {EMAIL_DELIVERY_READINESS_FIELDS.map((field, index) => (
+        <li data-email-delivery-readiness-field={field}>
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <div>
+            <strong>{EMAIL_DELIVERY_READINESS.labels[field][locale]}</strong>
+            <p>{EMAIL_DELIVERY_READINESS.requirements[field][locale]}</p>
+            <small>{locale === 'es' ? 'Por validar' : 'Not validated'}</small>
+          </div>
+        </li>
+      ))}
+    </ol>
   </section>
-  <p class="email-enquiry-boundary" role="note">{copy.boundary}</p>
-  <footer>
-    <button type="button" data-email-enquiry-reset>{copy.reset}</button>
-    <span role="status" aria-live="polite" data-email-enquiry-status>{copy.initialStatus}</span>
-  </footer>
-</article>
 
 <script>
   const bindEmailEnquiryDemo = (root: HTMLElement) => {
