@@ -269,6 +269,8 @@ const structuredData = [
       window.estanciaLoadGtm = loadGtm;
       if (hasAnalyticsConsent()) loadGtm();
       const allowedEvents = new Set(allowedAnalyticsEvents);
+      let resolvedAnalyticsRuntime = null;
+      window.estanciaRuntimeReady.then((runtime) => { resolvedAnalyticsRuntime = runtime; });
       window.estanciaTrack = (event, parameters = {}) => {
         if (!hasAnalyticsConsent() || !isAnalyticsSafeLocation() || !allowedEvents.has(event)) return;
         const safe = Object.fromEntries(Object.entries(parameters).filter(([key, value]) => {
@@ -284,12 +286,26 @@ const structuredData = [
           if (Object.entries(shape.values).some(([key, allowed]) => key in safe && !allowed.includes(safe[key]))) return;
           if (Array.isArray(shape.combinations) && !shape.combinations.some((combination) => Object.entries(combination).every(([key, value]) => safe[key] === value))) return;
         }
-        window.estanciaRuntimeReady.then((runtime) => {
+        const pushWhenAllowed = (runtime) => {
           if (!hasAnalyticsConsent() || !isAnalyticsSafeLocation() || runtime.providers.analytics !== 'live') return;
           window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event, ...safe });
-        });
+        };
+        if (resolvedAnalyticsRuntime) pushWhenAllowed(resolvedAnalyticsRuntime);
+        else window.estanciaRuntimeReady.then(pushWhenAllowed);
       };
-      document.addEventListener('click', (event) => { const target = event.target.closest?.('[data-track]'); if (!target) return; window.estanciaTrack?.(target.dataset.track, { locale: document.documentElement.lang, plan: target.dataset.plan, segment: target.dataset.segment, source_section: target.dataset.section }); });
+      document.addEventListener('click', (event) => {
+        const target = event.target.closest?.('[data-track]');
+        if (!target) return;
+        window.estanciaTrack?.(target.dataset.track, {
+          locale: document.documentElement.lang,
+          plan: target.dataset.plan,
+          segment: target.dataset.segment,
+          web: target.dataset.web,
+          panel: target.dataset.panel,
+          handoff: target.dataset.handoff,
+          source_section: target.dataset.section,
+        });
+      });
       const wa = document.querySelector('[data-whatsapp]');
       const footer = document.querySelector('footer');
       const commercialActions = document.querySelectorAll('[data-commercial-actions], [data-guide-context], .portfolio-card-links, .web-concept-next');

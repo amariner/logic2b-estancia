@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const consentKey = 'logic-estancia-consent';
 const consentVersion = '1.0.0';
@@ -95,6 +95,8 @@ const trackedEventNames = [
   'solution_view',
   'web_view',
   'panel_view',
+  'web_handoff',
+  'panel_handoff',
   'plan_select',
   'assessment_start',
   'assessment_step',
@@ -147,6 +149,11 @@ async function trackedEvents(page: Page): Promise<Record<string, unknown>[]> {
     const allowed = new Set(names);
     return (window.dataLayer ?? []).filter((entry) => typeof entry.event === 'string' && allowed.has(entry.event));
   }, trackedEventNames);
+}
+
+async function clickWithoutNavigation(link: Locator): Promise<void> {
+  await link.evaluate((element) => element.addEventListener('click', (event) => event.preventDefault(), { once: true }));
+  await link.click();
 }
 
 test('analytics activates only with a coherent live runtime and current versioned consent', async ({ page }) => {
@@ -240,6 +247,10 @@ test('all twelve website directions emit one exact localized web_view', async ({
       await expect.poll(() => eventsNamed(page, 'web_view')).toEqual([{
         event: 'web_view', locale: item.locale, web: item.web, plan: item.plan, source_section: 'web_portfolio',
       }]);
+      await clickWithoutNavigation(page.locator('[data-web-handoff="assessment"]'));
+      await expect.poll(() => eventsNamed(page, 'web_handoff')).toEqual([{
+        event: 'web_handoff', locale: item.locale, web: item.web, plan: item.plan, handoff: 'assessment', source_section: 'web_portfolio',
+      }]);
     });
   }
 });
@@ -256,8 +267,35 @@ test('all six workspace evidence pages emit one exact localized panel_view', asy
       await expect.poll(() => eventsNamed(page, 'panel_view')).toEqual([{
         event: 'panel_view', locale: item.locale, panel: item.panel, plan: item.plan, source_section: 'panel_portfolio',
       }]);
+      await clickWithoutNavigation(page.locator('[data-panel-handoff="assessment"]'));
+      await expect.poll(() => eventsNamed(page, 'panel_handoff')).toEqual([{
+        event: 'panel_handoff', locale: item.locale, panel: item.panel, plan: item.plan, handoff: 'assessment', source_section: 'panel_portfolio',
+      }]);
     });
   }
+});
+
+test('published demo and contact handoffs emit exact synchronous commercial events', async ({ page }) => {
+  await seedConsent(page, true);
+  await routeRuntime(page, liveAnalyticsManifest);
+
+  await page.goto('/webs/nivora/');
+  await waitForRuntime(page);
+  await clickWithoutNavigation(page.locator('[data-web-handoff="demo"]'));
+  await clickWithoutNavigation(page.locator('[data-web-handoff="contact"]'));
+  expect(await eventsNamed(page, 'web_handoff')).toEqual([
+    { event: 'web_handoff', locale: 'es', web: 'nivora', plan: 'basico', handoff: 'demo', source_section: 'web_portfolio' },
+    { event: 'web_handoff', locale: 'es', web: 'nivora', plan: 'basico', handoff: 'contact', source_section: 'web_portfolio' },
+  ]);
+
+  await page.goto('/en/panels/planning/');
+  await waitForRuntime(page);
+  await clickWithoutNavigation(page.locator('[data-panel-handoff="demo"]'));
+  await clickWithoutNavigation(page.locator('[data-panel-handoff="contact"]'));
+  expect(await eventsNamed(page, 'panel_handoff')).toEqual([
+    { event: 'panel_handoff', locale: 'en', panel: 'planning', plan: 'gestion', handoff: 'demo', source_section: 'panel_portfolio' },
+    { event: 'panel_handoff', locale: 'en', panel: 'planning', plan: 'gestion', handoff: 'contact', source_section: 'panel_portfolio' },
+  ]);
 });
 
 test('portfolio views wait for in-page consent and remain idempotent', async ({ page }) => {
@@ -268,10 +306,16 @@ test('portfolio views wait for in-page consent and remain idempotent', async ({ 
   const banner = page.getByRole('dialog', { name: 'Configuración de cookies' });
   await expect(banner).toBeVisible();
   expect(await eventsNamed(page, 'web_view')).toEqual([]);
+  await clickWithoutNavigation(page.locator('[data-web-handoff="contact"]'));
+  expect(await eventsNamed(page, 'web_handoff')).toEqual([]);
   await banner.getByRole('button', { name: 'Aceptar', exact: true }).click();
 
   const expected = [{ event: 'web_view', locale: 'es', web: 'linde', plan: 'basico', source_section: 'web_portfolio' }];
   await expect.poll(() => eventsNamed(page, 'web_view')).toEqual(expected);
+  await clickWithoutNavigation(page.locator('[data-web-handoff="assessment"]'));
+  await expect.poll(() => eventsNamed(page, 'web_handoff')).toEqual([
+    { event: 'web_handoff', locale: 'es', web: 'linde', plan: 'basico', handoff: 'assessment', source_section: 'web_portfolio' },
+  ]);
   await page.evaluate(() => {
     window.dispatchEvent(new CustomEvent('estancia:consent-updated', {
       detail: { essential: true, analytics: true, version: '1.0.0' },
@@ -292,11 +336,13 @@ test('a portfolio view is dropped when consent is revoked before runtime resolve
     contentType: 'application/javascript', body: '/* provider must remain unloaded */',
   }));
   await page.goto('/paneles/preparacion/');
+  await clickWithoutNavigation(page.locator('[data-panel-handoff="contact"]'));
   await page.evaluate((key) => localStorage.removeItem(key), consentKey);
   releaseRuntime();
   await waitForRuntime(page);
 
   await expect.poll(() => eventsNamed(page, 'panel_view')).toEqual([]);
+  await expect.poll(() => eventsNamed(page, 'panel_handoff')).toEqual([]);
   await expect(page.locator('script[data-gtm]')).toHaveCount(0);
 });
 
@@ -311,6 +357,8 @@ test('canonical demos remain analytics-free even with stored consent', async ({ 
     await page.goto(path);
     await page.waitForTimeout(25);
     expect(await eventsNamed(page, 'web_view')).toEqual([]);
+    expect(await eventsNamed(page, 'web_handoff')).toEqual([]);
+    expect(await eventsNamed(page, 'panel_handoff')).toEqual([]);
     await expect(page.locator('script[data-gtm]')).toHaveCount(0);
   }
   expect(capabilityRequests).toBe(0);
@@ -540,6 +588,21 @@ test('the live dataLayer strips PII and drops incomplete or non-canonical events
       plan: 'gestion',
       source_section: 'panel_portfolio',
     });
+    window.estanciaTrack?.('web_handoff', {
+      locale: 'es',
+      web: 'linde',
+      plan: 'inteligente',
+      handoff: 'private-route',
+      source_section: 'web_portfolio',
+      page_location: 'https://example.test/private-handoff',
+    });
+    window.estanciaTrack?.('panel_handoff', {
+      locale: 'es',
+      panel: 'copilot',
+      plan: 'gestion',
+      handoff: 'contact',
+      source_section: 'panel_portfolio',
+    });
     window.estanciaTrack?.('invented_event', {
       locale: 'es',
       segment: 'hotels',
@@ -559,11 +622,13 @@ test('the live dataLayer strips PII and drops incomplete or non-canonical events
   expect(await eventsNamed(page, 'invented_event')).toEqual([]);
   expect(await eventsNamed(page, 'web_view')).toEqual([]);
   expect(await eventsNamed(page, 'panel_view')).toEqual([]);
+  expect(await eventsNamed(page, 'web_handoff')).toEqual([]);
+  expect(await eventsNamed(page, 'panel_handoff')).toEqual([]);
   const dataLayer = await page.evaluate(() => window.dataLayer ?? []);
   const serialized = JSON.stringify(dataLayer);
   for (const privateValue of [
     'enterprise', 'private-client', 'secret-flow', 'buyer@example.test',
     'Ada Lovelace', '+34 600 000 000', 'Necesito ayuda con mi hotel',
-    'https://example.test/private', 'private-panel',
+    'https://example.test/private', 'private-panel', 'private-route', 'https://example.test/private-handoff',
   ]) expect(serialized).not.toContain(privateValue);
 });

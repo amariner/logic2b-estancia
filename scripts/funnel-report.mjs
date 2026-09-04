@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const CONTRACT_VERSION = '2.1.0';
+export const CONTRACT_VERSION = '2.2.0';
 const SCRIPT_DIRECTORY = dirname(fileURLToPath(import.meta.url));
 const analyticsContract = JSON.parse(await readFile(resolve(SCRIPT_DIRECTORY, '../packages/config/src/analytics-contract.json'), 'utf8'));
 const FUNNEL = [
@@ -44,6 +44,10 @@ const EXAMPLE = {
     { event: 'web_view', count: 6, locale: 'en', web: 'cobalto', plan: 'inteligente', source_section: 'web_portfolio' },
     { event: 'panel_view', count: 9, locale: 'es', panel: 'planning', plan: 'gestion', source_section: 'panel_portfolio' },
     { event: 'panel_view', count: 4, locale: 'en', panel: 'copilot', plan: 'inteligente', source_section: 'panel_portfolio' },
+    { event: 'web_handoff', count: 5, locale: 'es', web: 'linde', plan: 'basico', handoff: 'assessment', source_section: 'web_portfolio' },
+    { event: 'web_handoff', count: 3, locale: 'en', web: 'cobalto', plan: 'inteligente', handoff: 'contact', source_section: 'web_portfolio' },
+    { event: 'panel_handoff', count: 4, locale: 'es', panel: 'planning', plan: 'gestion', handoff: 'demo', source_section: 'panel_portfolio' },
+    { event: 'panel_handoff', count: 2, locale: 'en', panel: 'copilot', plan: 'inteligente', handoff: 'contact', source_section: 'panel_portfolio' },
   ],
 };
 
@@ -86,7 +90,7 @@ export function validateDataset(dataset) {
   if (start > end) throw new Error('period.start no puede ser posterior a period.end.');
   if (!Array.isArray(dataset.rows) || dataset.rows.length === 0) throw new Error('rows debe contener al menos una fila agregada.');
   const rows = dataset.rows.map((row, index) => validateRow(row, index));
-  if (!rows.some((row) => FUNNEL.some((stage) => matchesStage(row, stage)) || isCanonicalEvidenceView(row))) throw new Error('El dataset debe contener al menos un evento canónico del embudo o de evidencia web/panel.');
+  if (!rows.some((row) => FUNNEL.some((stage) => matchesStage(row, stage)) || isCanonicalEvidenceEvent(row))) throw new Error('El dataset debe contener al menos un evento canónico del embudo o de evidencia web/panel.');
   return { contractVersion: CONTRACT_VERSION, period: { start: dataset.period.start, end: dataset.period.end }, consentMode: dataset.consentMode, rows };
 }
 
@@ -133,6 +137,8 @@ export function buildReport(validDataset) {
   })).filter(({ total }) => total > 0);
   const webViewsByConcept = buildEvidenceViewBreakdown(validDataset.rows, 'web_view', 'web', 'web_portfolio');
   const panelViewsBySurface = buildEvidenceViewBreakdown(validDataset.rows, 'panel_view', 'panel', 'panel_portfolio');
+  const webHandoffsByConcept = buildHandoffBreakdown(validDataset.rows, 'web_handoff', 'web', 'web_portfolio');
+  const panelHandoffsBySurface = buildHandoffBreakdown(validDataset.rows, 'panel_handoff', 'panel', 'panel_portfolio');
   return {
     contractVersion: validDataset.contractVersion,
     period: validDataset.period,
@@ -143,6 +149,8 @@ export function buildReport(validDataset) {
     solutionViewsBySegment,
     webViewsByConcept,
     panelViewsBySurface,
+    webHandoffsByConcept,
+    panelHandoffsBySurface,
     warnings,
     notes,
     excludedOutcomes: ['proposals', 'won_projects', 'lost_projects', 'revenue', 'objections'],
@@ -194,6 +202,22 @@ export function renderMarkdown(report) {
       '| --- | --- | ---: | ---: | ---: |',
       ...report.panelViewsBySurface.map(({ id, plan, es, en, total }) => `| ${id} | ${plan} | ${es} | ${en} | ${total} |`),
     ] : ['Sin `panel_view` canónicos en el periodo.']),
+    '',
+    '## Handoffs desde evidencia web',
+    '',
+    ...(report.webHandoffsByConcept.length ? [
+      '| Web | Plan | Destino | ES | EN | Total |',
+      '| --- | --- | --- | ---: | ---: | ---: |',
+      ...report.webHandoffsByConcept.map(({ id, plan, handoff, es, en, total }) => `| ${id} | ${plan} | ${handoff} | ${es} | ${en} | ${total} |`),
+    ] : ['Sin `web_handoff` canónicos en el periodo.']),
+    '',
+    '## Handoffs desde evidencia de panel',
+    '',
+    ...(report.panelHandoffsBySurface.length ? [
+      '| Panel | Plan | Destino | ES | EN | Total |',
+      '| --- | --- | --- | ---: | ---: | ---: |',
+      ...report.panelHandoffsBySurface.map(({ id, plan, handoff, es, en, total }) => `| ${id} | ${plan} | ${handoff} | ${es} | ${en} | ${total} |`),
+    ] : ['Sin `panel_handoff` canónicos en el periodo.']),
     '',
     '## Totales de eventos observados',
     '',
@@ -268,9 +292,11 @@ function validateEventShape(row, label) {
   }
 }
 function matchesStage(row, stage) { return row.event === stage.event && row.source_section === stage.sourceSection; }
-function isCanonicalEvidenceView(row) {
+function isCanonicalEvidenceEvent(row) {
   return (row.event === 'web_view' && row.source_section === 'web_portfolio')
-    || (row.event === 'panel_view' && row.source_section === 'panel_portfolio');
+    || (row.event === 'panel_view' && row.source_section === 'panel_portfolio')
+    || (row.event === 'web_handoff' && row.source_section === 'web_portfolio')
+    || (row.event === 'panel_handoff' && row.source_section === 'panel_portfolio');
 }
 function buildEvidenceViewBreakdown(rows, event, dimension, sourceSection) {
   const canonicalPlans = new Map((EVENT_SHAPES[event]?.combinations ?? []).map((combination) => [combination[dimension], combination.plan]));
@@ -281,6 +307,17 @@ function buildEvidenceViewBreakdown(rows, event, dimension, sourceSection) {
     const en = sum(selected.filter((row) => row.locale === 'en'));
     return { id, plan, es, en, total: es + en };
   }).filter(({ total }) => total > 0);
+}
+function buildHandoffBreakdown(rows, event, dimension, sourceSection) {
+  const canonicalPlans = new Map((EVENT_SHAPES[event]?.combinations ?? []).map((combination) => [combination[dimension], combination.plan]));
+  const handoffs = analyticsContract.parameterValues.handoff ?? [];
+  const matching = rows.filter((row) => row.event === event && row.source_section === sourceSection);
+  return [...canonicalPlans].flatMap(([id, plan]) => handoffs.map((handoff) => {
+    const selected = matching.filter((row) => row[dimension] === id && row.plan === plan && row.handoff === handoff);
+    const es = sum(selected.filter((row) => row.locale === 'es'));
+    const en = sum(selected.filter((row) => row.locale === 'en'));
+    return { id, plan, handoff, es, en, total: es + en };
+  })).filter(({ total }) => total > 0);
 }
 function sum(rows) { return rows.reduce((total, row) => total + row.count, 0); }
 function round(value) { return Math.round(value * 10) / 10; }

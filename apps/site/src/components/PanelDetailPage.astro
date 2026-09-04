@@ -13,6 +13,7 @@ const { locale, panel } = Astro.props as { locale: Locale; panel: PanelPortfolio
 const en = locale === 'en';
 const indexHref = en ? '/en/panels/' : '/paneles/';
 const sourcePath = en ? '/en/panels/' : '/paneles/';
+const contactHref = en ? '/en/#contacto' : '/#contacto';
 const detailTitles: Record<PanelPortfolioItem['id'], Record<Locale, string>> = {
   enquiries: { es: 'Solicitudes con contexto', en: 'Enquiries with context' },
   planning: { es: 'Planning con contexto compartido', en: 'Planning with shared context' },
@@ -95,7 +96,11 @@ const relatedCapabilities = panel.capabilityIds.map((id) => {
 
   <section class="section shell panel-detail-actions" data-commercial-actions>
     <div><p class="eyebrow">{en ? 'Check the source' : 'Comprueba la fuente'}</p><h2 class="heading">{en ? `Open the exact ${demoName} view or assess the starting plan.` : `Abre la vista exacta de ${demoName} o evalúa el plan de partida.`}</h2><p>{en ? 'The demo opens without registration and resets to its fictitious fixture. The assessment keeps only allowlisted project context and collects no personal data.' : 'La demo abre sin registro y vuelve a su fixture ficticio. El diagnóstico conserva solo contexto de proyecto permitido y no recoge datos personales.'}</p></div>
-    <div><a class="text-link" href={evidenceHref} data-panel-evidence={panel.id}>{en ? 'Open local demo evidence' : 'Abrir evidencia en la demo local'} <span aria-hidden="true">↗</span></a><a class="pill" href={assessmentHref} data-panel-assess={panel.id}>{en ? `Assess ${panel.planLabel}` : `Evaluar ${panel.planLabel}`} <span aria-hidden="true">→</span></a></div>
+    <div>
+      <a class="text-link" href={evidenceHref} data-panel-evidence={panel.id} data-track="panel_handoff" data-panel={panel.id} data-plan={panel.plan} data-handoff="demo" data-section="panel_portfolio" data-panel-handoff="demo">{en ? 'Open local demo evidence' : 'Abrir evidencia en la demo local'} <span aria-hidden="true">↗</span></a>
+      <a class="text-link" href={contactHref} data-contact-trigger data-track="panel_handoff" data-panel={panel.id} data-plan={panel.plan} data-handoff="contact" data-section="panel_portfolio" data-panel-handoff="contact">{en ? 'Talk to Logic2B' : 'Hablar con Logic2B'} <span aria-hidden="true">→</span></a>
+      <a class="pill" href={assessmentHref} data-panel-assess={panel.id} data-track="panel_handoff" data-panel={panel.id} data-plan={panel.plan} data-handoff="assessment" data-section="panel_portfolio" data-panel-handoff="assessment">{en ? `Assess ${panel.planLabel}` : `Evaluar ${panel.planLabel}`} <span aria-hidden="true">→</span></a>
+    </div>
   </section>
 
   {nextPanel && nextPanel.id !== panel.id && <footer class="panel-detail-next shell"><p><span>{en ? 'Next verified workspace' : 'Siguiente panel verificado'}</span><strong>{nextPanel.title}</strong></p><a href={nextPanel.detailHref ?? indexHref}>{en ? 'Continue exploring' : 'Seguir explorando'} <span aria-hidden="true">→</span></a></footer>}

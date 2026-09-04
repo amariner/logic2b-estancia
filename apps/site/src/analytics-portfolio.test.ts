@@ -12,8 +12,14 @@ describe('portfolio analytics contract', () => {
     expect(analyticsContract.eventShapes.web_view.combinations).toEqual(
       concepts.map(({ slug, plan }) => ({ web: slug, plan })),
     );
+    expect(analyticsContract.eventShapes.web_handoff.combinations).toEqual(
+      concepts.map(({ slug, plan }) => ({ web: slug, plan })),
+    );
+    expect(analyticsContract.eventShapes.web_handoff.values.handoff).toEqual(['demo', 'assessment', 'contact']);
     expect(analyticsContract.surfaces.site).toContain('web_view');
+    expect(analyticsContract.surfaces.site).toContain('web_handoff');
     expect(analyticsContract.surfaces.demo).not.toContain('web_view');
+    expect(analyticsContract.surfaces.demo).not.toContain('web_handoff');
   });
 
   it('keeps all six published panel identifiers and canonical plan pairs in sync', () => {
@@ -23,7 +29,13 @@ describe('portfolio analytics contract', () => {
     expect(analyticsContract.eventShapes.panel_view.combinations).toEqual(
       panels.map(({ id, plan }) => ({ panel: id, plan })),
     );
+    expect(analyticsContract.eventShapes.panel_handoff.combinations).toEqual(
+      panels.map(({ id, plan }) => ({ panel: id, plan })),
+    );
+    expect(analyticsContract.eventShapes.panel_handoff.values.handoff).toEqual(['demo', 'assessment', 'contact']);
     expect(analyticsContract.surfaces.site).toContain('panel_view');
+    expect(analyticsContract.surfaces.site).toContain('panel_handoff');
+    expect(analyticsContract.surfaces.demo).not.toContain('panel_handoff');
   });
 
   it('allows analytics on every indexable web and panel detail route', () => {

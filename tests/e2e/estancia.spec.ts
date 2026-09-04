@@ -271,6 +271,7 @@ test('panel portfolio publishes only complete localized evidence pages', async (
       await expectCleanPage(page, detailHref);
       await expect(page.locator(`[data-panel-detail="${id}"]`)).toBeVisible();
       await expect(page.locator(`[data-panel-evidence="${id}"]`)).toHaveAttribute('href', evidenceHref);
+      await expect(page.locator('[data-panel-handoff="contact"]')).toHaveAttribute('href', indexPath.startsWith('/en') ? '/en/#contacto' : '/#contacto');
       await expect(page.locator('[data-panel-boundary]')).toBeVisible();
       if (id === 'operations-revenue') await expect(page.locator('[data-panel-capability-scope]')).toContainText(indexPath === '/paneles/' ? 'Previsión de demanda y precioEn ruta' : 'Demand and pricing forecastsOn the roadmap');
       if (id === 'copilot') {
@@ -450,6 +451,9 @@ test('all website direction pages are localized, indexable and non-operational',
       await expect(page.locator(`[data-web-concept="${slug}"]`)).toBeVisible();
       await expect.poll(() => page.locator('.web-concept-hero img').evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
       await expect(page.locator('[data-web-concept] form, [data-web-concept] input, [data-web-concept] textarea, [data-web-concept] select')).toHaveCount(0);
+      await expect(page.locator('[data-web-handoff="contact"]')).toHaveAttribute('href', path.startsWith('/en') ? '/en/#contacto' : '/#contacto');
+      const assessmentHref = await page.locator('[data-web-handoff="assessment"]').getAttribute('href');
+      expect(new URL(assessmentHref ?? '', appOrigin).searchParams.get('sourcePath')).toBe(path.startsWith('/en') ? '/en/webs/' : '/webs/');
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /index,follow/);
       await expect(page.locator('link[rel="alternate"]')).toHaveCount(3);
       const alternates = await page.locator('link[rel="alternate"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')));

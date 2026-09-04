@@ -23,7 +23,7 @@ describe('funnel report', () => {
   it('documents the versioned aggregate-only contract', async () => {
     const result = await runFunnelReport({ args: ['--validate'] });
     expect(result.exitCode).toBe(0);
-    expect(JSON.parse(result.output)).toMatchObject({ ok: true, contractVersion: '2.1.0', privacy: 'aggregated-allowlist-only' });
+    expect(JSON.parse(result.output)).toMatchObject({ ok: true, contractVersion: '2.2.0', privacy: 'aggregated-allowlist-only' });
   });
 
   it('calculates stable directional rates without user attribution', () => {
@@ -60,6 +60,14 @@ describe('funnel report', () => {
     expect(report.panelViewsBySurface).toEqual([
       { id: 'planning', plan: 'gestion', es: 9, en: 0, total: 9 },
       { id: 'copilot', plan: 'inteligente', es: 0, en: 4, total: 4 },
+    ]);
+    expect(report.webHandoffsByConcept).toEqual([
+      { id: 'linde', plan: 'basico', handoff: 'assessment', es: 5, en: 0, total: 5 },
+      { id: 'cobalto', plan: 'inteligente', handoff: 'contact', es: 0, en: 3, total: 3 },
+    ]);
+    expect(report.panelHandoffsBySurface).toEqual([
+      { id: 'planning', plan: 'gestion', handoff: 'demo', es: 4, en: 0, total: 4 },
+      { id: 'copilot', plan: 'inteligente', handoff: 'contact', es: 0, en: 2, total: 2 },
     ]);
   });
 
@@ -99,6 +107,12 @@ describe('funnel report', () => {
     expect(() => validateDataset({ ...dataset, rows: [
       { event: 'panel_view', count: 1, locale: 'es', panel: 'copilot', plan: 'gestion', source_section: 'panel_portfolio' },
     ] })).toThrow(/combinación canónica/);
+    expect(() => validateDataset({ ...dataset, rows: [
+      { event: 'web_handoff', count: 1, locale: 'es', web: 'linde', plan: 'inteligente', handoff: 'assessment', source_section: 'web_portfolio' },
+    ] })).toThrow(/combinación canónica/);
+    expect(() => validateDataset({ ...dataset, rows: [
+      { event: 'panel_handoff', count: 1, locale: 'es', panel: 'copilot', plan: 'inteligente', handoff: 'private-route', source_section: 'panel_portfolio' },
+    ] })).toThrow(/handoff no está allowlisted/);
   });
 
   it('flags downstream counts instead of hiding a non-cohort comparison', () => {
@@ -140,6 +154,22 @@ describe('funnel report', () => {
     ] }));
     expect(report.webViewsByConcept).toEqual([{ id: 'nivora', plan: 'basico', es: 7, en: 3, total: 10 }]);
     expect(report.panelViewsBySurface).toEqual([{ id: 'preparation', plan: 'inteligente', es: 5, en: 0, total: 5 }]);
+    expect(report.stages.every(({ count }) => count === 0)).toBe(true);
+  });
+
+  it('accepts handoff-only aggregates and reports closed commercial destinations', () => {
+    const report = buildReport(validateDataset({ ...dataset, rows: [
+      { event: 'web_handoff', count: 6, locale: 'es', web: 'nivora', plan: 'basico', handoff: 'demo', source_section: 'web_portfolio' },
+      { event: 'web_handoff', count: 2, locale: 'en', web: 'nivora', plan: 'basico', handoff: 'contact', source_section: 'web_portfolio' },
+      { event: 'panel_handoff', count: 4, locale: 'es', panel: 'preparation', plan: 'inteligente', handoff: 'assessment', source_section: 'panel_portfolio' },
+    ] }));
+    expect(report.webHandoffsByConcept).toEqual([
+      { id: 'nivora', plan: 'basico', handoff: 'demo', es: 6, en: 0, total: 6 },
+      { id: 'nivora', plan: 'basico', handoff: 'contact', es: 0, en: 2, total: 2 },
+    ]);
+    expect(report.panelHandoffsBySurface).toEqual([
+      { id: 'preparation', plan: 'inteligente', handoff: 'assessment', es: 4, en: 0, total: 4 },
+    ]);
     expect(report.stages.every(({ count }) => count === 0)).toBe(true);
   });
 

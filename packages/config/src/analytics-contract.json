@@ -1,10 +1,12 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "containerId": "GTM-TVDWZ9LC",
   "events": [
     "solution_view",
     "web_view",
     "panel_view",
+    "web_handoff",
+    "panel_handoff",
     "plan_select",
     "assessment_start",
     "assessment_step",
@@ -25,6 +27,7 @@
     "plan",
     "web",
     "panel",
+    "handoff",
     "demo",
     "flow",
     "step_index",
@@ -36,6 +39,7 @@
     "plan": ["basico", "gestion", "inteligente", "none"],
     "web": ["nivora", "terrava", "aurem", "linde", "cobalto", "oria", "boscara", "velares", "nocta", "riscoa", "solerna", "cendra"],
     "panel": ["enquiries", "planning", "guests-arrivals", "preparation", "operations-revenue", "copilot"],
+    "handoff": ["demo", "assessment", "contact"],
     "demo": ["nivora", "terrava", "aurem"],
     "flow": ["arrival-risk", "channel-review", "enquiry-booking", "free", "guided", "maintenance", "stay-operation", "supervised-ai", "website-editor"],
     "source_section": ["assessment", "dashboard", "guided_tour", "header", "hero", "homepage_contact", "homepage_plans", "homepage_scope", "panel_portfolio", "persistent", "plans_grid", "plans_hero", "resource", "solution", "solution_footer", "solution_hero", "web_portfolio", "website"]
@@ -78,6 +82,38 @@
         { "panel": "copilot", "plan": "inteligente" }
       ]
     },
+    "web_handoff": {
+      "required": ["locale", "web", "plan", "handoff", "source_section"],
+      "allowed": ["locale", "web", "plan", "handoff", "source_section"],
+      "values": { "handoff": ["demo", "assessment", "contact"], "source_section": ["web_portfolio"] },
+      "combinations": [
+        { "web": "nivora", "plan": "basico" },
+        { "web": "terrava", "plan": "gestion" },
+        { "web": "aurem", "plan": "inteligente" },
+        { "web": "linde", "plan": "basico" },
+        { "web": "cobalto", "plan": "inteligente" },
+        { "web": "oria", "plan": "gestion" },
+        { "web": "boscara", "plan": "inteligente" },
+        { "web": "velares", "plan": "gestion" },
+        { "web": "nocta", "plan": "basico" },
+        { "web": "riscoa", "plan": "gestion" },
+        { "web": "solerna", "plan": "basico" },
+        { "web": "cendra", "plan": "inteligente" }
+      ]
+    },
+    "panel_handoff": {
+      "required": ["locale", "panel", "plan", "handoff", "source_section"],
+      "allowed": ["locale", "panel", "plan", "handoff", "source_section"],
+      "values": { "handoff": ["demo", "assessment", "contact"], "source_section": ["panel_portfolio"] },
+      "combinations": [
+        { "panel": "enquiries", "plan": "gestion" },
+        { "panel": "planning", "plan": "gestion" },
+        { "panel": "guests-arrivals", "plan": "gestion" },
+        { "panel": "preparation", "plan": "inteligente" },
+        { "panel": "operations-revenue", "plan": "inteligente" },
+        { "panel": "copilot", "plan": "inteligente" }
+      ]
+    },
     "assessment_start": {
       "required": ["locale", "segment", "source_section"],
       "allowed": ["locale", "segment", "source_section"],
@@ -110,7 +146,7 @@
     }
   },
   "surfaces": {
-    "site": ["solution_view", "web_view", "panel_view", "plan_select", "assessment_start", "assessment_step", "assessment_complete", "assessment_submit", "demo_open", "demo_mode_select", "demo_step_complete", "demo_flow_complete", "demo_cta", "lead_submit", "meeting_click", "cta_click"],
+    "site": ["solution_view", "web_view", "panel_view", "web_handoff", "panel_handoff", "plan_select", "assessment_start", "assessment_step", "assessment_complete", "assessment_submit", "demo_open", "demo_mode_select", "demo_step_complete", "demo_flow_complete", "demo_cta", "lead_submit", "meeting_click", "cta_click"],
     "demo": ["demo_open", "demo_mode_select", "demo_step_complete", "demo_flow_complete", "demo_cta"]
   }
 }
