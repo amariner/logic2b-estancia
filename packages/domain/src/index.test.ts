@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAPABILITIES, CAPABILITY_STATUSES, DEMO_PLANS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
+import { CAPABILITIES, CAPABILITY_STATUSES, CHANNEL_READINESS_CONTRACTS, CHANNEL_READINESS_FIELDS, DEMO_PLANS, hasLevel, nights, normalizePlanLevel, recommendLevel, validateOrganization, type StayOrganization } from './index';
 
 const mono: StayOrganization = {
   id: 'org-nivora', name: 'Nivora One', vertical: 'apartment', mode: 'mono', currency: 'EUR',
@@ -54,6 +54,21 @@ describe('domain', () => {
     });
     const exposedWorkspaceViews = new Set(['home', 'enquiries', 'planning', 'bookings', 'guests', 'cleaning', 'maintenance', 'website', 'channels', 'automations', 'automation', 'control', 'reports']);
     expect(CAPABILITIES.filter(({ evidence }) => evidence.surface === 'workspace').every(({ evidence }) => evidence.surface === 'workspace' && exposedWorkspaceViews.has(evidence.view))).toBe(true);
+  });
+  it('keeps channel readiness complete, generic and disconnected until provider validation', () => {
+    expect(CHANNEL_READINESS_CONTRACTS).toHaveLength(4);
+    expect(new Set(CHANNEL_READINESS_CONTRACTS.map(({ id }) => id)).size).toBe(4);
+    expect(CHANNEL_READINESS_FIELDS).toEqual([
+      'owner', 'permissions', 'credentialReference', 'mapping', 'sandboxCases', 'idempotency',
+      'reconciliation', 'failureRecovery', 'audit', 'acceptance', 'killSwitch', 'rollback',
+    ]);
+    for (const contract of CHANNEL_READINESS_CONTRACTS) {
+      expect(contract.connectionState).toBe('not_connected');
+      expect(contract.readinessState).toBe('not_validated');
+      expect(Object.keys(contract.requirements)).toEqual([...CHANNEL_READINESS_FIELDS]);
+      expect(Object.values(contract.requirements).every(({ es, en }) => es.length > 0 && en.length > 0)).toBe(true);
+    }
+    expect(JSON.stringify(CHANNEL_READINESS_CONTRACTS)).not.toMatch(/booking\.com|airbnb|expedia/i);
   });
   it.each([
     [{ propertyCount: 1, unitCount: 1, wantsBookings: false, wantsAutomation: false, wantsOperations: false }, 'basico'],

@@ -13,7 +13,7 @@ La suite `tests/e2e/accessibility.spec.ts` audita las 30 rutas públicas en Chro
 - Landing, soluciones, planes, diagnóstico, documentación y recursos comerciales.
 - Aviso legal, privacidad y cookies.
 - Nivora, Terrava y Aurem en ES/EN, incluidos los gestores de Terrava y Aurem.
-- Los estados profundos ES/EN de ingresos, canales, automatizaciones inertes y Copiloto supervisado de Aurem, abiertos mediante `?vista=reports`, `?vista=channels`, `?vista=automations` y `?vista=automation`, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. `automations` y `automation` son superficies deliberadamente distintas.
+- Los estados profundos ES/EN de ingresos, preparación de canales, automatizaciones inertes y Copiloto supervisado de Aurem, abiertos mediante `?vista=reports`, `?vista=channels`, `?vista=automations` y `?vista=automation`, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. Canales incluye selección dinámica de categoría y doce requisitos; `automations` y `automation` son superficies deliberadamente distintas.
 
 Además comprueba:
 
@@ -57,7 +57,7 @@ pnpm e2e
 pnpm peers check
 ```
 
-Resultado verificado el 2026-09-04: la puerta global pasa 105/105 E2E, incluida la cobertura axe, landmarks, reflow a 320 px y texto al 200 % de `automations` y `automation`. `pnpm check` completa 7/7 tareas de lint y 21/21 tareas de typecheck, pruebas y build.
+Resultado verificado el 2026-09-04: la puerta global pasa 106/106 E2E, incluida la cobertura axe, landmarks, reflow a 320 px y texto al 200 % de Canales, `automations` y `automation`. La primera ampliación al 200 % detectó 83 px de desbordamiento en el grid de Canales; la composición adaptativa lo corrigió y el barrido final completo quedó verde. `pnpm check` completa 7/7 tareas de lint y 21/21 tareas de typecheck, pruebas y build.
 
 ## Deuda y siguiente revisión
 

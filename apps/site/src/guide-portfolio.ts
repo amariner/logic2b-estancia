@@ -324,7 +324,7 @@ const definitions: readonly GuideDefinition[] = [
         ],
         boundaries: [
           'Los roles de Aurem son una representación local: no crean cuentas, permisos o datos de producción.',
-          'La matriz muestra cero canales conectados; no contiene credenciales, no sincroniza ni publica y cada activación exige validación propia.',
+          'La matriz muestra cuatro categorías genéricas, cero canales conectados y doce condiciones de preparación sin validar; no contiene marcas, cuentas o credenciales, no sincroniza ni publica y cada proveedor exige validación propia.',
           'Las reglas de automatización no inician jobs, colas, cron, webhooks, mensajes o proveedores; el copiloto no usa modelo ni envía nada. Esta guía tampoco sustituye asesoría jurídica, evaluación de seguridad o certificación de cumplimiento.',
         ],
       },
@@ -348,7 +348,7 @@ const definitions: readonly GuideDefinition[] = [
         ],
         boundaries: [
           'Aurem roles are a local representation: they create no live account, permission or production data.',
-          'The matrix shows zero connected channels; it holds no credentials, synchronises or publishes nothing, and every activation needs its own validation.',
+          'The matrix shows four generic categories, zero connected channels and twelve unvalidated readiness conditions; it holds no brands, accounts or credentials, synchronises or publishes nothing, and every provider needs its own validation.',
           'Automation rules start no jobs, queues, cron, webhooks, messages or providers; the copilot uses no model and sends nothing. This guide also replaces no legal advice, security assessment or compliance certification.',
         ],
       },

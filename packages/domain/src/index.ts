@@ -43,6 +43,174 @@ export interface Capability {
   description: { es: string; en: string };
 }
 
+export type ChannelReadinessCandidateId =
+  | 'ota-distribution'
+  | 'stay-marketplace'
+  | 'hotel-distribution'
+  | 'ical-feed';
+
+export type ChannelReadinessField =
+  | 'owner'
+  | 'permissions'
+  | 'credentialReference'
+  | 'mapping'
+  | 'sandboxCases'
+  | 'idempotency'
+  | 'reconciliation'
+  | 'failureRecovery'
+  | 'audit'
+  | 'acceptance'
+  | 'killSwitch'
+  | 'rollback';
+
+type LocalizedText = { es: string; en: string };
+
+export interface ChannelReadinessContract {
+  id: ChannelReadinessCandidateId;
+  label: LocalizedText;
+  status: LocalizedText;
+  detail: LocalizedText;
+  coverage: {
+    availability: LocalizedText;
+    rates: LocalizedText;
+    bookings: LocalizedText;
+    messages: LocalizedText;
+  };
+  connectionState: 'not_connected';
+  readinessState: 'not_validated';
+  requirements: Record<ChannelReadinessField, LocalizedText>;
+}
+
+export const CHANNEL_READINESS_FIELDS = [
+  'owner',
+  'permissions',
+  'credentialReference',
+  'mapping',
+  'sandboxCases',
+  'idempotency',
+  'reconciliation',
+  'failureRecovery',
+  'audit',
+  'acceptance',
+  'killSwitch',
+  'rollback',
+] as const satisfies readonly ChannelReadinessField[];
+
+export const CHANNEL_READINESS_CONTRACTS: readonly ChannelReadinessContract[] = [
+  {
+    id: 'ota-distribution',
+    label: { es: 'Distribución OTA', en: 'OTA distribution' },
+    status: { es: 'Categoría por validar', en: 'Category to validate' },
+    detail: { es: 'Categoría genérica para disponibilidad y tarifas. No representa un acuerdo, una cuenta o un proveedor seleccionado.', en: 'Generic category for availability and rates. It represents no agreement, account or selected provider.' },
+    coverage: {
+      availability: { es: 'Escenario', en: 'Scenario' },
+      rates: { es: 'Escenario', en: 'Scenario' },
+      bookings: { es: 'Sin entrada', en: 'No intake' },
+      messages: { es: 'Fuera de demo', en: 'Out of demo' },
+    },
+    connectionState: 'not_connected',
+    readinessState: 'not_validated',
+    requirements: {
+      owner: { es: 'Dirección acepta el alcance y una persona técnica mantiene el conector.', en: 'Direction accepts scope and a technical owner maintains the connector.' },
+      permissions: { es: 'Lectura y publicación se separan con mínimo privilegio y aprobación humana.', en: 'Read and publish access are separated with least privilege and human approval.' },
+      credentialReference: { es: 'Referencia externa por definir; esta demo contiene cero valores o secretos.', en: 'External reference to be defined; this demo contains zero values or secrets.' },
+      mapping: { es: 'Alojamiento, unidades, ocupación, tarifas, impuestos y restricciones.', en: 'Property, units, occupancy, rates, tax and restrictions.' },
+      sandboxCases: { es: 'Alta, cambio, cierre de venta, cancelación y rechazo en entorno aislado.', en: 'Create, change, stop-sell, cancel and reject in an isolated environment.' },
+      idempotency: { es: 'Cada cambio necesita clave estable y repetición sin efectos duplicados.', en: 'Every change needs a stable key and replay without duplicate effects.' },
+      reconciliation: { es: 'Comparación periódica entre fuente de verdad y canal, con diferencias visibles.', en: 'Periodic comparison between source of truth and channel, with visible differences.' },
+      failureRecovery: { es: 'Timeout, reintento acotado, cola detenible y recuperación manual documentada.', en: 'Timeout, bounded retry, stoppable queue and documented manual recovery.' },
+      audit: { es: 'Actor, motivo, entrada, resultado y correlación sin datos sensibles en logs.', en: 'Actor, reason, input, result and correlation without sensitive data in logs.' },
+      acceptance: { es: 'Casos críticos aprobados por Dirección antes de una ventana de cambio.', en: 'Critical cases approved by Direction before a change window.' },
+      killSwitch: { es: 'Interruptor independiente que bloquea nuevas publicaciones sin borrar evidencia.', en: 'Independent switch that blocks new publications without deleting evidence.' },
+      rollback: { es: 'Procedimiento para restaurar configuración y reconciliar cambios parciales.', en: 'Procedure to restore configuration and reconcile partial changes.' },
+    },
+  },
+  {
+    id: 'stay-marketplace',
+    label: { es: 'Marketplace de estancias', en: 'Stay marketplace' },
+    status: { es: 'Categoría por validar', en: 'Category to validate' },
+    detail: { es: 'Categoría genérica para un anuncio con reglas propias. No presupone OAuth, acceso o relación comercial.', en: 'Generic category for a listing with its own rules. It assumes no OAuth, access or commercial relationship.' },
+    coverage: {
+      availability: { es: 'Escenario', en: 'Scenario' },
+      rates: { es: 'Escenario', en: 'Scenario' },
+      bookings: { es: 'Sin entrada', en: 'No intake' },
+      messages: { es: 'Fuera de demo', en: 'Out of demo' },
+    },
+    connectionState: 'not_connected',
+    readinessState: 'not_validated',
+    requirements: {
+      owner: { es: 'Dirección controla el anuncio y una persona técnica responde del adaptador.', en: 'Direction controls the listing and a technical owner is accountable for the adapter.' },
+      permissions: { es: 'Autorización limitada al anuncio acordado y publicación siempre supervisada.', en: 'Authorisation limited to the agreed listing and publishing always supervised.' },
+      credentialReference: { es: 'Referencia OAuth por definir fuera del cliente; esta demo no inicia autorización.', en: 'OAuth reference to be defined outside the client; this demo starts no authorisation.' },
+      mapping: { es: 'Anuncio, unidades, calendario, reglas de estancia, tasas y disponibilidad.', en: 'Listing, units, calendar, stay rules, fees and availability.' },
+      sandboxCases: { es: 'Alta, modificación, bloqueo, cancelación y webhook inválido en cuenta aislada.', en: 'Create, modify, block, cancel and invalid webhook in an isolated account.' },
+      idempotency: { es: 'Eventos repetidos no pueden duplicar bloqueos, reservas o actualizaciones.', en: 'Repeated events cannot duplicate blocks, bookings or updates.' },
+      reconciliation: { es: 'Calendario y reservas se contrastan con una fuente de verdad acordada.', en: 'Calendar and bookings are checked against an agreed source of truth.' },
+      failureRecovery: { es: 'Firma inválida, cuota, timeout y revocación deben parar y escalar sin publicar.', en: 'Invalid signature, quota, timeout and revocation must stop and escalate without publishing.' },
+      audit: { es: 'Autorizaciones y cambios quedan correlacionados sin registrar tokens ni mensajes.', en: 'Authorisations and changes are correlated without logging tokens or messages.' },
+      acceptance: { es: 'Dirección valida reglas, disponibilidad y cancelaciones antes de activar.', en: 'Direction validates rules, availability and cancellations before activation.' },
+      killSwitch: { es: 'Revocación de publicación y recepción por separado, comprobable al instante.', en: 'Separate revocation for publishing and intake, verifiable immediately.' },
+      rollback: { es: 'Restaurar el último mapeo aceptado y resolver eventos recibidos durante el corte.', en: 'Restore the last accepted mapping and resolve events received during the cutover.' },
+    },
+  },
+  {
+    id: 'hotel-distribution',
+    label: { es: 'Distribución hotelera', en: 'Hotel distribution' },
+    status: { es: 'Diferencia ficticia por revisar', en: 'Fictitious difference to review' },
+    detail: { es: 'El fixture señala una diferencia de tarifa para revisar el contrato; no existe destino al que publicarla.', en: 'The fixture flags a rate difference for contract review; there is no destination to publish it to.' },
+    coverage: {
+      availability: { es: 'Escenario', en: 'Scenario' },
+      rates: { es: 'Por revisar', en: 'Review' },
+      bookings: { es: 'Sin entrada', en: 'No intake' },
+      messages: { es: 'Fuera de demo', en: 'Out of demo' },
+    },
+    connectionState: 'not_connected',
+    readinessState: 'not_validated',
+    requirements: {
+      owner: { es: 'Revenue acepta reglas y Dirección nombra responsable técnico y operativo.', en: 'Revenue accepts rules and Direction names technical and operational owners.' },
+      permissions: { es: 'Inventario y tarifas requieren permisos separados y doble revisión para publicar.', en: 'Inventory and rates require separate permissions and dual review to publish.' },
+      credentialReference: { es: 'Referencia contractual por definir en un almacén de secretos; cero valores aquí.', en: 'Contractual reference to be defined in a secret store; zero values here.' },
+      mapping: { es: 'Hotel, tipos de habitación, planes de tarifa, ocupación, impuestos y restricciones.', en: 'Hotel, room types, rate plans, occupancy, tax and restrictions.' },
+      sandboxCases: { es: 'Inventario, tarifa, cierre, reserva, modificación, cancelación y fallo parcial.', en: 'Inventory, rate, stop-sell, booking, change, cancel and partial failure.' },
+      idempotency: { es: 'Publicaciones y entradas repetidas mantienen una única versión operativa.', en: 'Repeated publications and intake retain a single operational version.' },
+      reconciliation: { es: 'Inventario, tarifa y reserva se cuadran por ventana y diferencia explicable.', en: 'Inventory, rate and booking reconcile by window and explainable difference.' },
+      failureRecovery: { es: 'Reintentos con límite, circuito abierto, alerta y procedimiento de operación manual.', en: 'Bounded retries, open circuit, alert and manual operation procedure.' },
+      audit: { es: 'Cada publicación conserva versión, aprobador, correlación y respuesta saneada.', en: 'Every publication retains version, approver, correlation and sanitised response.' },
+      acceptance: { es: 'Revenue y Dirección aprueban paridad, fallos y reversión en sandbox.', en: 'Revenue and Direction approve parity, failures and rollback in sandbox.' },
+      killSwitch: { es: 'Corte inmediato por hotel, tipo de habitación y operación de escritura.', en: 'Immediate cut-off by hotel, room type and write operation.' },
+      rollback: { es: 'Volver a la última versión aceptada y conciliar reservas durante la incidencia.', en: 'Return to the last accepted version and reconcile bookings during the incident.' },
+    },
+  },
+  {
+    id: 'ical-feed',
+    label: { es: 'Calendario iCal', en: 'iCal calendar' },
+    status: { es: 'Lectura ficticia', en: 'Fictitious read' },
+    detail: { es: 'Un feed real requeriría URL protegida, frecuencia, zona horaria, deduplicación y gestión de errores.', en: 'A live feed would require a protected URL, frequency, timezone, deduplication and error handling.' },
+    coverage: {
+      availability: { es: 'Lectura demo', en: 'Demo read' },
+      rates: { es: 'No compatible', en: 'Unsupported' },
+      bookings: { es: 'Sin entrada', en: 'No intake' },
+      messages: { es: 'Fuera de demo', en: 'Out of demo' },
+    },
+    connectionState: 'not_connected',
+    readinessState: 'not_validated',
+    requirements: {
+      owner: { es: 'Dirección identifica la fuente y una persona técnica controla su lectura.', en: 'Direction identifies the source and a technical owner controls its intake.' },
+      permissions: { es: 'Solo lectura, URL individual y acceso revocable sin exponerla al navegador.', en: 'Read-only, individual URL and revocable access without exposing it to the browser.' },
+      credentialReference: { es: 'Referencia de URL por definir fuera del cliente; la demo no contiene feeds.', en: 'URL reference to be defined outside the client; the demo contains no feeds.' },
+      mapping: { es: 'Calendario, unidad, zona horaria, inicio, fin, estado y origen.', en: 'Calendar, unit, timezone, start, end, status and source.' },
+      sandboxCases: { es: 'Evento nuevo, cambio, cancelación, duplicado, feed vacío y formato inválido.', en: 'New event, change, cancellation, duplicate, empty feed and invalid format.' },
+      idempotency: { es: 'El mismo UID y versión no crean bloqueos repetidos.', en: 'The same UID and version create no repeated blocks.' },
+      reconciliation: { es: 'Eventos importados se comparan con el feed y la fuente operativa acordada.', en: 'Imported events are compared with the feed and agreed operational source.' },
+      failureRecovery: { es: 'Timeout, feed caído o formato inválido conservan el último estado y alertan.', en: 'Timeout, unavailable feed or invalid format retain the last state and alert.' },
+      audit: { es: 'Lecturas, diferencias y descartes se registran sin guardar la URL completa.', en: 'Reads, differences and discards are logged without storing the full URL.' },
+      acceptance: { es: 'Dirección valida zona horaria, duplicados y recuperación antes de usarlo.', en: 'Direction validates timezone, duplicates and recovery before use.' },
+      killSwitch: { es: 'Pausa inmediata de nuevas lecturas por feed o unidad.', en: 'Immediate pause of new reads by feed or unit.' },
+      rollback: { es: 'Retirar los cambios importados del lote afectado y restaurar el fixture aceptado.', en: 'Remove imported changes from the affected batch and restore the accepted fixture.' },
+    },
+  },
+] as const;
+
 export type AssignMode = 'specific-unit' | 'unit-type';
 
 export interface ReservableUnit {

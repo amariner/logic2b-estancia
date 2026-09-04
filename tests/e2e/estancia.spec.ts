@@ -1538,7 +1538,7 @@ test('Aurem revenue remains explainable and navigable in both locales', async ({
   }
 });
 
-test('Aurem channel matrix is an inspectable fixture with no publish action', async ({ page }) => {
+test('Aurem channel readiness contracts are complete, unbranded and non-operational', async ({ page }) => {
   const externalWrites: string[] = [];
   page.on('request', (request) => {
     if (operationalMethods.has(request.method())) externalWrites.push(request.url());
@@ -1549,30 +1549,59 @@ test('Aurem channel matrix is an inspectable fixture with no publish action', as
       path: '/demos/aurem/gestion/?vista=channels',
       heading: 'Canales',
       boundary: '0 canales conectados',
-      channel: /iCal directo/,
+      boundaryDetail: 'marcas validadas',
+      channel: /Calendario iCal/,
       detail: 'zona horaria, deduplicación y gestión de errores',
-      requirements: 'Qué exigiría conectar de verdad',
-      readOnly: 'Inspección de solo lectura · no revisa ni publica nada',
+      candidate: /Distribución hotelera/,
+      candidateDetail: 'diferencia de tarifa',
+      mapping: 'Hotel, tipos de habitación, planes de tarifa',
+      failure: 'Reintentos con límite, circuito abierto',
+      requirements: 'Expediente antes de activar',
+      readOnly: 'Solo lectura · sin proveedor elegido, validación, activación o publicación',
+      notValidated: 'Por validar',
+      diagnostic: 'Revisar el alcance y abrir diagnóstico',
     },
     {
       path: '/en/demos/aurem/gestion/?vista=channels',
       heading: 'Channels',
       boundary: '0 connected channels',
-      channel: /Direct iCal/,
+      boundaryDetail: 'validated brands',
+      channel: /iCal calendar/,
       detail: 'timezone, deduplication and error handling',
-      requirements: 'What a live connection would require',
-      readOnly: 'Read-only inspection · reviews and publishes nothing',
+      candidate: /Hotel distribution/,
+      candidateDetail: 'rate difference',
+      mapping: 'Hotel, room types, rate plans',
+      failure: 'Bounded retries, open circuit',
+      requirements: 'File required before activation',
+      readOnly: 'Read-only · no selected provider, validation, activation or publication',
+      notValidated: 'Not validated',
+      diagnostic: 'Review scope and open assessment',
     },
   ]) {
     await page.goto(item.path);
+    const storageBefore = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }));
     await expect(page.getByRole('heading', { level: 1, name: item.heading })).toBeVisible();
     await expect(page.getByRole('note')).toContainText(item.boundary);
+    await expect(page.getByRole('note')).toContainText(item.boundaryDetail);
     await expect(page.locator('.channel-matrix tbody tr')).toHaveCount(4);
+    await expect(page.locator('.channel-metrics')).toContainText(/0/);
+    await expect(page.getByText(/Booking\.com|Airbnb|Expedia/i)).toHaveCount(0);
+    await page.getByRole('button', { name: item.candidate }).click();
+    await expect(page.locator('.channel-review')).toContainText(item.candidateDetail);
+    await expect(page.locator('[data-channel-readiness="hotel-distribution"]')).toBeVisible();
+    await expect(page.locator('[data-readiness-field="mapping"]')).toContainText(item.mapping);
+    await expect(page.locator('[data-readiness-field="failureRecovery"]')).toContainText(item.failure);
     await page.getByRole('button', { name: item.channel }).click();
     await expect(page.locator('.channel-review')).toContainText(item.detail);
     await expect(page.locator('.channel-review')).toContainText(item.readOnly);
     await expect(page.getByRole('heading', { name: item.requirements })).toBeVisible();
+    await expect(page.locator('[data-readiness-field]')).toHaveCount(12);
+    await expect(page.locator('[data-readiness-field]').getByText(item.notValidated)).toHaveCount(12);
     await expect(page.locator('.dash-content form, .dash-content textarea')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /activar|activate|publicar|publish/i })).toHaveCount(0);
+    await expect(page.locator('.demo-conversion')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: item.diagnostic })).toHaveAttribute('href', /diagnostico|assessment/);
+    expect(await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))).toEqual(storageBefore);
   }
 
   expect(externalWrites).toEqual([]);
