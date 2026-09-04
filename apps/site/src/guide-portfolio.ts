@@ -301,6 +301,7 @@ const definitions: readonly GuideDefinition[] = [
       { id: 'roles', label: { es: 'Abrir representación de roles en Aurem', en: 'Open the role representation in Aurem' } },
       { id: 'channels', label: { es: 'Abrir requisitos de canales en Aurem', en: 'Open channel requirements in Aurem' } },
       { id: 'supervised-ai', label: { es: 'Abrir revisión supervisada en Aurem', en: 'Open supervised review in Aurem' } },
+      { id: 'automation', label: { es: 'Abrir reglas inertes en Aurem', en: 'Open inert rules in Aurem' } },
     ],
     copy: {
       es: {
@@ -324,7 +325,7 @@ const definitions: readonly GuideDefinition[] = [
         boundaries: [
           'Los roles de Aurem son una representación local: no crean cuentas, permisos o datos de producción.',
           'La matriz muestra cero canales conectados; no contiene credenciales, no sincroniza ni publica y cada activación exige validación propia.',
-          'El copiloto no usa modelo o proveedor y no envía nada; esta guía tampoco sustituye asesoría jurídica, evaluación de seguridad o certificación de cumplimiento.',
+          'Las reglas de automatización no inician jobs, colas, cron, webhooks, mensajes o proveedores; el copiloto no usa modelo ni envía nada. Esta guía tampoco sustituye asesoría jurídica, evaluación de seguridad o certificación de cumplimiento.',
         ],
       },
       en: {
@@ -348,7 +349,7 @@ const definitions: readonly GuideDefinition[] = [
         boundaries: [
           'Aurem roles are a local representation: they create no live account, permission or production data.',
           'The matrix shows zero connected channels; it holds no credentials, synchronises or publishes nothing, and every activation needs its own validation.',
-          'The copilot uses no model or provider and sends nothing; this guide also replaces no legal advice, security assessment or compliance certification.',
+          'Automation rules start no jobs, queues, cron, webhooks, messages or providers; the copilot uses no model and sends nothing. This guide also replaces no legal advice, security assessment or compliance certification.',
         ],
       },
     },

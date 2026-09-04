@@ -59,6 +59,8 @@ const deepStateRoutes = [
   '/en/demos/aurem/gestion/?vista=reports',
   '/demos/aurem/gestion/?vista=channels',
   '/en/demos/aurem/gestion/?vista=channels',
+  '/demos/aurem/gestion/?vista=automations',
+  '/en/demos/aurem/gestion/?vista=automations',
   '/demos/aurem/gestion/?vista=automation',
   '/en/demos/aurem/gestion/?vista=automation',
 ];
@@ -152,7 +154,7 @@ test('every audited route reflows without page-level horizontal scrolling at 320
 
 test('representative families tolerate text resized to 200 percent', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  for (const path of ['/', '/planes/', '/paneles/solicitudes/', '/webs/linde/', '/diagnostico/', '/demos/nivora/', '/demos/terrava/', '/demos/terrava/gestion/?vista=website', '/demos/aurem/gestion/?vista=reports']) {
+  for (const path of ['/', '/planes/', '/paneles/solicitudes/', '/webs/linde/', '/diagnostico/', '/demos/nivora/', '/demos/terrava/', '/demos/terrava/gestion/?vista=website', '/demos/aurem/gestion/?vista=automations', '/demos/aurem/gestion/?vista=reports']) {
     await gotoStable(page, path);
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
     const reflow = await page.evaluate(() => ({
@@ -187,6 +189,17 @@ test('Terrava supervised editor remains accessible after local approval at 320px
   await expect(page.locator('.editor-controls .tag')).toHaveText('Aprobada en esta demo');
   const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
   expect(formatViolations('Terrava website editor', result.violations)).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+});
+
+test('Aurem inert automations remain accessible after local review at 320px', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await gotoStable(page, '/demos/aurem/gestion/?vista=automations');
+  await page.getByRole('button', { name: /Elevar una incidencia/ }).click();
+  await page.getByRole('button', { name: 'Registrar revisión local' }).click();
+  await expect(page.locator('.automation-inspector .tag')).toHaveText('Revisada · sigue inactiva');
+  const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(formatViolations('Aurem inert automations', result.violations)).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });
 

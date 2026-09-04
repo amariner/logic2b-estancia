@@ -86,13 +86,13 @@ test('capability maps expose truthful evidence and exact localized targets', asy
   await expect(planning.locator('[data-capability-evidence]')).toHaveAttribute('href', '/demos/terrava/gestion/?vista=planning');
 
   await page.goto('/soluciones/hoteles/');
-  await expect(page.locator('[data-capability-evidence]')).toHaveCount(6);
+  await expect(page.locator('[data-capability-evidence]')).toHaveCount(7);
   await expect(page.locator('[data-capability="channels"]')).toContainText('Activable por proyecto');
   await expect(page.locator('[data-capability-evidence="channels"]')).toHaveAttribute('href', '/demos/aurem/gestion/?vista=channels');
 
   await page.goto('/en/plans/');
   const evidenceLinks = page.locator('[data-capability-evidence]');
-  await expect(evidenceLinks).toHaveCount(14);
+  await expect(evidenceLinks).toHaveCount(15);
   await expect(page.locator('[data-capability-evidence="explainable-revenue"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=reports');
   await expect(page.locator('[data-capability="supervised-ai"]')).toContainText('Visible in the demo');
   await expect(page.locator('[data-capability-evidence="supervised-ai"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=automation');
@@ -101,6 +101,7 @@ test('capability maps expose truthful evidence and exact localized targets', asy
   await expect(page.locator('[data-capability-evidence-unavailable="revenue"]')).toBeVisible();
   await expect(page.locator('[data-capability-evidence="email-enquiries"]')).toHaveAttribute('href', '/en/demos/nivora/#reserva');
   await expect(page.locator('[data-capability-evidence="website-editor"]')).toHaveAttribute('href', '/en/demos/terrava/gestion/?vista=website');
+  await expect(page.locator('[data-capability-evidence="automation"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=automations');
 
   for (const href of await evidenceLinks.evaluateAll((links) => links.map((link) => link.getAttribute('href')).filter(Boolean) as string[])) {
     expect((await request.get(href)).status(), href).toBe(200);
@@ -210,7 +211,10 @@ test('panel portfolio publishes only complete localized evidence pages', async (
       await expect(page.locator(`[data-panel-evidence="${id}"]`)).toHaveAttribute('href', evidenceHref);
       await expect(page.locator('[data-panel-boundary]')).toBeVisible();
       if (id === 'operations-revenue') await expect(page.locator('[data-panel-capability-scope]')).toContainText(indexPath === '/paneles/' ? 'Previsión de demanda y precioEn ruta' : 'Demand and pricing forecastsOn the roadmap');
-      if (id === 'copilot') await expect(page.locator('[data-panel-capability-scope]')).toContainText(indexPath === '/paneles/' ? 'AutomatizacionesDemo visual pendiente' : 'AutomationsVisual demo pending');
+      if (id === 'copilot') {
+        await expect(page.locator('[data-panel-capability-scope]')).toContainText(indexPath === '/paneles/' ? 'AutomatizacionesVisible en la demo' : 'AutomationsVisible in the demo');
+        await expect(page.locator('[data-panel-capability-evidence="automation"]')).toHaveAttribute('href', `${indexPath.startsWith('/en') ? '/en' : ''}/demos/aurem/gestion/?vista=automations`);
+      }
       await expect(page.locator('[data-panel-detail] form, [data-panel-detail] input, [data-panel-detail] textarea, [data-panel-detail] select')).toHaveCount(0);
       const assessmentHref = await page.locator(`[data-panel-assess="${id}"]`).getAttribute('href');
       expect(new URL(assessmentHref ?? '', appOrigin).searchParams.get('sourcePath')).toBe(indexPath);
@@ -230,14 +234,14 @@ test('role guides publish five complete journeys with truthful capability maturi
       ['reception', '/docs/reservas-recepcion/', 3, 0],
       ['operations', '/docs/operaciones/', 2, 3],
       ['marketing-revenue', '/docs/marketing-ingresos/', 1, 2],
-      ['technical-privacy', '/docs/tecnica-privacidad/', 1, 3],
+      ['technical-privacy', '/docs/tecnica-privacidad/', 1, 4],
     ]],
     ['/en/docs/', [
       ['direction', '/en/docs/ownership-direction/', 2, 0],
       ['reception', '/en/docs/reservations-reception/', 3, 0],
       ['operations', '/en/docs/operations/', 2, 3],
       ['marketing-revenue', '/en/docs/marketing-revenue/', 1, 2],
-      ['technical-privacy', '/en/docs/technical-privacy/', 1, 3],
+      ['technical-privacy', '/en/docs/technical-privacy/', 1, 4],
     ]],
   ] as const) {
     await expectCleanPage(page, indexPath);
@@ -285,8 +289,8 @@ test('role guides publish five complete journeys with truthful capability maturi
         await expect(detail.locator('[data-guide-capability-evidence="channels"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=channels`);
         await expect(detail.locator('[data-guide-capability-evidence="supervised-ai"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=automation`);
         await expect(detail.locator('[data-guide-capability="channels"]')).toContainText(indexPath.startsWith('/en') ? 'Activated per project' : 'Activable por proyecto');
-        await expect(detail.locator('[data-guide-capability="automation"]')).toContainText(indexPath.startsWith('/en') ? 'Visual demo pending' : 'Demo visual pendiente');
-        await expect(detail.locator('[data-guide-capability-evidence="automation"]')).toHaveCount(0);
+        await expect(detail.locator('[data-guide-capability="automation"]')).toContainText(indexPath.startsWith('/en') ? 'Visible in the demo' : 'Visible en la demo');
+        await expect(detail.locator('[data-guide-capability-evidence="automation"]')).toHaveAttribute('href', `${prefix}/demos/aurem/gestion/?vista=automations`);
       }
     }
   }
@@ -1569,6 +1573,82 @@ test('Aurem channel matrix is an inspectable fixture with no publish action', as
     await expect(page.locator('.channel-review')).toContainText(item.readOnly);
     await expect(page.getByRole('heading', { name: item.requirements })).toBeVisible();
     await expect(page.locator('.dash-content form, .dash-content textarea')).toHaveCount(0);
+  }
+
+  expect(externalWrites).toEqual([]);
+});
+
+test('Aurem automations are inspectable, locally reviewed and permanently inert', async ({ page }) => {
+  const externalWrites: string[] = [];
+  page.on('request', (request) => {
+    if (operationalMethods.has(request.method())) externalWrites.push(request.url());
+  });
+
+  for (const item of [
+    {
+      path: '/demos/aurem/gestion/?vista=automations',
+      heading: 'Automatizaciones',
+      banner: 'La ejecución permanece inactiva',
+      role: 'Rol',
+      reception: 'reception',
+      direction: 'direction',
+      rule: /Elevar una incidencia/,
+      trigger: 'Prioridad alta en el fixture',
+      blocked: 'Requiere Dirección',
+      review: 'Registrar revisión local',
+      reviewed: 'Revisada · sigue inactiva',
+      restore: 'Restaurar fixture',
+      pending: 'Pendiente de revisión · inactiva',
+      boundary: 'Sin job, cola, cron, webhook, mensaje, proveedor, persistencia ni escritura HTTP',
+      diagnostic: '/diagnostico/?segment=hotels&plan=inteligente&demo=aurem',
+    },
+    {
+      path: '/en/demos/aurem/gestion/?vista=automations',
+      heading: 'Automations',
+      banner: 'Execution remains inactive',
+      role: 'Role',
+      reception: 'reception',
+      direction: 'direction',
+      rule: /Escalate an incident/,
+      trigger: 'High priority in the fixture',
+      blocked: 'Requires Direction',
+      review: 'Record local review',
+      reviewed: 'Reviewed · still inactive',
+      restore: 'Restore fixture',
+      pending: 'Pending review · inactive',
+      boundary: 'No job, queue, cron, webhook, message, provider, persistence or HTTP write',
+      diagnostic: '/en/assessment/?segment=hotels&plan=inteligente&demo=aurem',
+    },
+  ]) {
+    await page.goto(item.path);
+    await expect(page.getByRole('heading', { level: 1, name: item.heading })).toBeVisible();
+    await expect(page.locator('.demo-banner')).toContainText(item.banner);
+    await expect(page.locator('.automation-rule-buttons button')).toHaveCount(3);
+    const storageBefore = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }));
+
+    await page.getByRole('button', { name: item.rule }).click();
+    await expect(page.locator('.automation-inspector')).toContainText(item.trigger);
+    const role = page.getByLabel(item.role);
+    await role.selectOption(item.reception);
+    await expect(page.getByRole('button', { name: item.blocked })).toBeDisabled();
+    await expect(page.getByRole('status')).toContainText(item.path.startsWith('/en') ? 'Direction must review' : 'Dirección debe revisar');
+
+    await role.selectOption(item.direction);
+    await page.getByRole('button', { name: item.review }).click();
+    await expect(page.locator('.automation-inspector .tag')).toHaveText(item.reviewed);
+    await expect(page.getByRole('button', { name: item.rule })).toContainText(item.path.startsWith('/en') ? 'Locally reviewed · inactive' : 'Revisada localmente · inactiva');
+    await expect(page.locator('.automation-safety')).toContainText(item.boundary);
+    await expect(page.locator('.dash-content form, .dash-content input, .dash-content textarea')).toHaveCount(0);
+    await expect(page.locator('.demo-conversion')).toHaveCount(0);
+    await expect(page.locator('.automations-diagnostic')).toHaveAttribute('href', item.diagnostic);
+    expect(await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))).toEqual(storageBefore);
+
+    await page.getByRole('button', { name: item.restore }).click();
+    await expect(page.getByRole('button', { name: item.rule })).toContainText(item.pending);
+    await page.getByRole('button', { name: item.review }).click();
+    await page.reload();
+    await expect(page.locator('.automation-inspector .tag')).toHaveText(item.path.startsWith('/en') ? 'Inactive' : 'Inactiva');
+    await expect(page.getByLabel(item.role)).toHaveValue(item.direction);
   }
 
   expect(externalWrites).toEqual([]);

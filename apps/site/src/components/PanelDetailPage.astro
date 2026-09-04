@@ -1,7 +1,7 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { CAPABILITIES } from '@logic-estancia/domain';
-import { capabilityStatusDetail, capabilityStatusLabel } from '../capability-evidence';
+import { capabilityEvidenceHref, capabilityStatusDetail, capabilityStatusLabel } from '../capability-evidence';
 import { guideContextForPanel } from '../guide-context';
 import { getPublishedPanels, type PanelPortfolioItem } from '../panel-portfolio';
 import { getPlanCards, planHandoffHref } from '../plan-contract';
@@ -35,7 +35,7 @@ const demoName = capability.evidence.demo === 'aurem' ? 'Aurem' : capability.evi
 const relatedCapabilities = panel.capabilityIds.map((id) => {
   const related = CAPABILITIES.find((candidate) => candidate.id === id);
   if (!related) throw new Error(`missing_related_panel_capability:${id}`);
-  return related;
+  return { capability: related, evidenceHref: capabilityEvidenceHref(related, locale) };
 });
 ---
 
@@ -84,7 +84,7 @@ const relatedCapabilities = panel.capabilityIds.map((id) => {
       <p><strong>{en ? 'Boundary' : 'Límite'}:</strong> {capability.evidence.boundary[locale]}</p>
       <div class="panel-capability-scope" data-panel-capability-scope>
         <strong>{en ? 'Capability scope' : 'Alcance de capacidades'}</strong>
-        <ul>{relatedCapabilities.map((related) => <li><span>{related.label[locale]}</span><span class={`capability-status ${related.status}`}>{capabilityStatusLabel(related.status, locale)}</span></li>)}</ul>
+        <ul>{relatedCapabilities.map(({ capability: related, evidenceHref: relatedHref }) => <li><span>{related.label[locale]}</span><span class="panel-capability-meta"><span class={`capability-status ${related.status}`}>{capabilityStatusLabel(related.status, locale)}</span>{relatedHref && <a href={relatedHref} data-panel-capability-evidence={related.id}>{en ? 'View evidence' : 'Ver evidencia'} <span aria-hidden="true">↗</span></a>}</span></li>)}</ul>
       </div>
     </div>
   </section>

@@ -37,4 +37,10 @@ describe("read-only demo fixtures", () => {
     expect(canOperate("reception", "website")).toBe(false);
     expect(canOperate("cleaning", "website")).toBe(false);
   });
+
+  it("reserves local automation review for Direction", () => {
+    expect(canOperate("direction", "automations")).toBe(true);
+    expect(canOperate("reception", "automations")).toBe(false);
+    expect(canOperate("cleaning", "automations")).toBe(false);
+  });
 });

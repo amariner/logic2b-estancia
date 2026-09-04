@@ -43,6 +43,7 @@ type View =
   | "maintenance"
   | "website"
   | "channels"
+  | "automations"
   | "automation"
   | "control"
   | "reports"
@@ -51,6 +52,7 @@ type Utility = "search" | "notifications" | null;
 type Notice = { title: string; detail: string; view: View; urgent?: boolean };
 type RevenueMetric = "revenue" | "occupancy" | "adr" | "revpar";
 type ChannelId = "booking" | "airbnb" | "expedia" | "ical";
+type AutomationRuleId = "arrival" | "turnover" | "incident";
 
 type TourStep = {
   phase: string;
@@ -85,6 +87,7 @@ const labels = {
     maintenance: "Mantenimiento",
     website: "Mi web",
     channels: "Canales",
+    automations: "Automatizaciones",
     automation: "Copiloto",
     control: "Centro operativo",
     reports: "Informes",
@@ -100,6 +103,7 @@ const labels = {
     maintenance: "Maintenance",
     website: "My website",
     channels: "Channels",
+    automations: "Automations",
     automation: "Copilot",
     control: "Operations centre",
     reports: "Reports",
@@ -124,6 +128,7 @@ const icons: Record<View, typeof House> = {
   maintenance: Wrench,
   website: PanelsTopLeft,
   channels: Activity,
+  automations: BellRing,
   automation: Sparkles,
   control: Bot,
   reports: CircleDollarSign,
@@ -149,6 +154,7 @@ const viewsFor = (scenario: Scenario): View[] =>
         "cleaning",
         "maintenance",
         "channels",
+        "automations",
         "automation",
         "control",
         "reports",
@@ -704,6 +710,10 @@ export function DashboardDemo({
               ? locale === "es"
                 ? "Editor supervisado y local con contenido ficticio. Los cambios viven en memoria; no hay CMS, despliegue ni publicación real."
                 : "Supervised local editor with fictitious content. Changes live in memory; there is no CMS, deployment or live publishing."
+              : view === "automations"
+                ? locale === "es"
+                  ? "Reglas ficticias para inspección y revisión local. La ejecución permanece inactiva: no hay jobs, colas, cron, webhooks, mensajes ni proveedores."
+                  : "Fictitious rules for local inspection and review. Execution remains inactive: there are no jobs, queues, cron, webhooks, messages or providers."
               : locale === "es"
                 ? "Panel de solo lectura con datos ficticios. No da de alta alojamientos ni ejecuta cobros, reservas, mensajes, publicaciones o sincronizaciones."
                 : "Read-only panel with fictitious data. It does not register stays or perform payments, bookings, messages, publishing or synchronisation."}
@@ -752,22 +762,31 @@ export function DashboardDemo({
             patch={patch}
             go={go}
           />
-          {view === "website" && (
+          {(view === "website" || view === "automations") && (
             <a
-              className="website-diagnostic"
+              className={
+                view === "website"
+                  ? "website-diagnostic"
+                  : "automations-diagnostic"
+              }
               href={assessmentHref}
               onClick={() =>
                 track("demo_cta", {
                   locale,
                   demo: scenario,
-                  plan: "gestion",
-                  source_section: "website_editor",
+                  plan: scenario === "aurem" ? "inteligente" : "gestion",
+                  source_section:
+                    view === "website" ? "website_editor" : "automations",
                 })
               }
             >
-              {locale === "es"
-                ? "Terminar la revisión y abrir diagnóstico"
-                : "Finish the review and open assessment"}{" "}
+              {view === "website"
+                ? locale === "es"
+                  ? "Terminar la revisión y abrir diagnóstico"
+                  : "Finish the review and open assessment"
+                : locale === "es"
+                  ? "Cerrar la revisión y abrir diagnóstico"
+                  : "Close the review and open assessment"}{" "}
               <ChevronRight size={16} />
             </a>
           )}
@@ -887,7 +906,7 @@ export function DashboardDemo({
           </div>
         </div>
       )}
-      {view !== "website" && (
+      {view !== "website" && view !== "automations" && (
         <a
           className="demo-conversion"
           href={assessmentHref}
@@ -1077,6 +1096,8 @@ function ViewContent({
     );
   if (view === "channels")
     return <Channels locale={locale} />;
+  if (view === "automations")
+    return <Automations locale={locale} state={state} />;
   if (view === "automation")
     return <Automation locale={locale} state={state} patch={patch} />;
   if (view === "control")
@@ -2001,6 +2022,239 @@ function Channels({ locale }: { locale: Locale }) {
           {requirements.map(([number, title, detail]) => <li key={number}><span>{number}</span><div><strong>{title}</strong><p>{detail}</p></div></li>)}
         </ol>
       </section>
+    </>
+  );
+}
+
+function Automations({
+  locale,
+  state,
+}: {
+  locale: Locale;
+  state: DemoState;
+}) {
+  const [selected, setSelected] = useState<AutomationRuleId>("arrival");
+  const [reviewed, setReviewed] = useState<AutomationRuleId | null>(null);
+  const allowedToReview = canOperate(state.role, "automations");
+  const rules: Record<
+    AutomationRuleId,
+    {
+      title: string;
+      trigger: string;
+      condition: string;
+      outcome: string;
+      owner: string;
+    }
+  > =
+    locale === "es"
+      ? {
+          arrival: {
+            title: "Preparar una llegada",
+            trigger: "24 h antes de la entrada ficticia",
+            condition: "Hora de llegada todavía sin revisar",
+            outcome: "Proponer un borrador de instrucciones",
+            owner: "Recepción propone · Dirección revisa",
+          },
+          turnover: {
+            title: "Coordinar la habitación 408",
+            trigger: "Salida prevista a las 11:08",
+            condition: "Nueva entrada ficticia el mismo día",
+            outcome: "Proponer el checklist de preparación",
+            owner: "Limpieza informa · Dirección revisa",
+          },
+          incident: {
+            title: "Elevar una incidencia",
+            trigger: "Prioridad alta en el fixture",
+            condition: "Sigue abierta tras 30 min simulados",
+            outcome: "Proponer un aviso interno a Dirección",
+            owner: "Recepción prepara · Dirección revisa",
+          },
+        }
+      : {
+          arrival: {
+            title: "Prepare an arrival",
+            trigger: "24 h before the fictitious check-in",
+            condition: "Arrival time has not been reviewed",
+            outcome: "Propose a draft set of instructions",
+            owner: "Reception proposes · Direction reviews",
+          },
+          turnover: {
+            title: "Coordinate room 408",
+            trigger: "Expected departure at 11:08",
+            condition: "Another fictitious arrival that day",
+            outcome: "Propose the preparation checklist",
+            owner: "Cleaning reports · Direction reviews",
+          },
+          incident: {
+            title: "Escalate an incident",
+            trigger: "High priority in the fixture",
+            condition: "Still open after 30 simulated minutes",
+            outcome: "Propose an internal note to Direction",
+            owner: "Reception prepares · Direction reviews",
+          },
+        };
+  const active = rules[selected];
+  const activeReviewed = reviewed === selected;
+
+  return (
+    <>
+      <div className="integration-note automations-boundary" role="note">
+        <strong>
+          {locale === "es"
+            ? "3 reglas ficticias · 0 ejecuciones"
+            : "3 fictitious rules · 0 executions"}
+        </strong>
+        <span>
+          {locale === "es"
+            ? "Solo puedes inspeccionar y registrar una revisión durante esta visita. Ninguna regla se activa ni produce una tarea, mensaje o cambio externo."
+            : "You can only inspect and record a review during this visit. No rule is activated or creates a task, message or external change."}
+        </span>
+      </div>
+      <div className="automation-layout">
+        <section
+          className="automation-rule-list"
+          aria-labelledby="automation-rule-list-title"
+        >
+          <div className="automation-rule-heading">
+            <span className="tag">
+              {locale === "es" ? "Fixture local" : "Local fixture"}
+            </span>
+            <h2 id="automation-rule-list-title">
+              {locale === "es" ? "Reglas por revisar" : "Rules to review"}
+            </h2>
+            <p>
+              {locale === "es"
+                ? "Selecciona una regla para comprobar qué haría falta validar."
+                : "Select a rule to inspect what would need validation."}
+            </p>
+          </div>
+          <div className="automation-rule-buttons">
+            {(Object.entries(rules) as [AutomationRuleId, typeof active][]).map(
+              ([id, rule], index) => (
+                <button
+                  type="button"
+                  key={id}
+                  aria-pressed={selected === id}
+                  onClick={() => setSelected(id)}
+                >
+                  <span>0{index + 1}</span>
+                  <strong>{rule.title}</strong>
+                  <small>
+                    {reviewed === id
+                      ? locale === "es"
+                        ? "Revisada localmente · inactiva"
+                        : "Locally reviewed · inactive"
+                      : locale === "es"
+                        ? "Pendiente de revisión · inactiva"
+                        : "Pending review · inactive"}
+                  </small>
+                </button>
+              ),
+            )}
+          </div>
+        </section>
+        <article className="panel automation-inspector" aria-live="polite">
+          <div className="panel-head">
+            <div>
+              <span className={`tag ${activeReviewed ? "reviewed" : "pending"}`}>
+                {activeReviewed
+                  ? locale === "es"
+                    ? "Revisada · sigue inactiva"
+                    : "Reviewed · still inactive"
+                  : locale === "es"
+                    ? "Inactiva"
+                    : "Inactive"}
+              </span>
+              <h2>{active.title}</h2>
+            </div>
+            <BellRing size={24} />
+          </div>
+          <ol
+            className="automation-flow"
+            aria-label={
+              locale === "es"
+                ? "Definición de la regla ficticia"
+                : "Fictitious rule definition"
+            }
+          >
+            <li>
+              <span>01</span>
+              <div>
+                <strong>{locale === "es" ? "Disparador" : "Trigger"}</strong>
+                <p>{active.trigger}</p>
+              </div>
+            </li>
+            <li>
+              <span>02</span>
+              <div>
+                <strong>{locale === "es" ? "Condición" : "Condition"}</strong>
+                <p>{active.condition}</p>
+              </div>
+            </li>
+            <li>
+              <span>03</span>
+              <div>
+                <strong>
+                  {locale === "es" ? "Resultado propuesto" : "Proposed outcome"}
+                </strong>
+                <p>{active.outcome}</p>
+              </div>
+            </li>
+            <li>
+              <span>04</span>
+              <div>
+                <strong>{locale === "es" ? "Decisión humana" : "Human decision"}</strong>
+                <p>{active.owner}</p>
+              </div>
+            </li>
+          </ol>
+          <div className="automation-actions">
+            <button
+              type="button"
+              className="primary"
+              disabled={!allowedToReview || activeReviewed}
+              onClick={() => allowedToReview && setReviewed(selected)}
+            >
+              {!allowedToReview
+                ? locale === "es"
+                  ? "Requiere Dirección"
+                  : "Requires Direction"
+                : activeReviewed
+                  ? locale === "es"
+                    ? "Revisión registrada"
+                    : "Review recorded"
+                  : locale === "es"
+                    ? "Registrar revisión local"
+                    : "Record local review"}
+            </button>
+            <button
+              type="button"
+              disabled={reviewed === null}
+              onClick={() => setReviewed(null)}
+            >
+              {locale === "es" ? "Restaurar fixture" : "Restore fixture"}
+            </button>
+          </div>
+          <p className="automation-permission" role="status">
+            {activeReviewed
+              ? locale === "es"
+                ? "Dirección ha revisado esta definición durante la visita. La regla continúa inactiva y no se ha ejecutado."
+                : "Direction reviewed this definition during the visit. The rule remains inactive and has not run."
+              : allowedToReview
+                ? locale === "es"
+                  ? "Dirección puede registrar la revisión del fixture; no puede activarlo desde esta demo."
+                  : "Direction can record the fixture review; it cannot activate it from this demo."
+                : locale === "es"
+                  ? "Recepción y Limpieza pueden inspeccionar; Dirección debe revisar. Nadie puede activar la regla."
+                  : "Reception and Cleaning can inspect; Direction must review. Nobody can activate the rule."}
+          </p>
+          <p className="automation-safety">
+            {locale === "es"
+              ? "Sin job, cola, cron, webhook, mensaje, proveedor, persistencia ni escritura HTTP. Recargar restaura el fixture."
+              : "No job, queue, cron, webhook, message, provider, persistence or HTTP write. Reloading restores the fixture."}
+          </p>
+        </article>
+      </div>
     </>
   );
 }

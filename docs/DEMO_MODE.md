@@ -106,7 +106,7 @@ El rechazo no debe crear una cuota de rate limit, referencia durable, alarma, lo
 | Email y mensajería de producto | Nivora representa tres solicitudes ficticias y su vista previa local | Email, SMS o mensajería externa | Sin campos personales, destinatarios reales, envío o proveedor; la interacción vive en memoria | Consentimiento/base jurídica, proveedor, plantillas, idempotencia y trazabilidad |
 | Publicación web | Terrava permite editar, descartar y aprobar localmente un titular ficticio | Escritura en CMS o despliegue | Estado solo en memoria, aprobación limitada a Dirección; sin CMS, repositorio, proveedor o HTTP | Repositorio/entorno aislado, permisos, preview y rollback probado |
 | Canales | Matriz de cobertura con cero conexiones | Inventario, tarifas, reservas o mensajes | Sin OAuth, webhook o adaptador; proveedor `disabled` | Contrato por canal, mapeo, deduplicación, reconciliación y recuperación |
-| Automatizaciones y jobs | Sin superficie pública de demo | Jobs, colas, reglas o notificaciones | `jobs=false`; sin consumidor externo | Flag específico, observabilidad, reintentos, límites y kill switch |
+| Automatizaciones y jobs | Aurem permite inspeccionar y revisar localmente tres reglas ficticias, siempre inactivas | Jobs, colas, reglas o notificaciones | Estado de revisión en memoria; `jobs=false`; sin cron, cola, webhook, mensaje o consumidor externo | Flag específico, observabilidad, reintentos, límites y kill switch |
 | IA supervisada | Copiloto ficticio editable, versionado y revisable por rol | Inferencia o envío a un modelo | Sin modelo ni proveedor; estado en memoria, envío deshabilitado y restauración al recargar | Proveedor, política de datos, fuentes, evaluación, revisión y fallback |
 | Analítica | Sin medición externa | Carga de GTM/GA y eventos agregados | `ANALYTICS_PROVIDER_MODE=disabled`, incluso con consentimiento previo | `DEMO_MODE=false`, `REAL_OPERATIONS_ENABLED=true`, modo `gtm`, consentimiento y contrato sin PII |
 | Webhooks | Ninguno | Procesamiento de eventos de terceros | Ruta ausente o rechazo antes del cuerpo | Firma, replay protection, idempotencia, observabilidad y prueba aislada |
@@ -136,7 +136,7 @@ Inventario comercial vigente:
 | Mantenimiento | `demo_visual_disponible` | Prioridad, responsable e impacto hipotético | No crea órdenes ni contacta proveedores |
 | Equipos y permisos | `demo_visual_disponible` | Diferencias visuales entre roles | No crea usuarios ni aplica autorización real |
 | Canales e inventario | `activable_por_proyecto` | Matriz visual de cobertura y requisitos | Cero canales conectados; cada proveedor exige validación |
-| Automatizaciones | `demo_visual_pendiente` | La narrativa y los fixtures existen | No hay job, regla, cola o mensajería activa |
+| Automatizaciones | `demo_visual_disponible` | Tres reglas ficticias muestran disparador, condición, resultado propuesto y revisión humana | No hay job, cola, cron, webhook, mensaje, proveedor o escritura HTTP; recargar restaura el fixture |
 | Copiloto supervisado | `demo_visual_disponible` | Fixture con fuentes, edición, versionado y revisión humana por rol | No hay modelo ni proveedor, nada se envía y recargar restaura el fixture |
 | Revenue y previsión | `en_ruta` | Solo un escenario matemático ficticio | No es una predicción ni una capacidad operacional disponible |
 
@@ -211,7 +211,7 @@ El smoke de Resend es seco por defecto. Nunca debe ejecutarse contra una demo ni
 
 - El único adaptador externo de operación implementado es Resend para el formulario comercial; no es un motor de reservas para clientes.
 - No existe todavía un despliegue de cliente con pagos, PMS, canales, CRM, mensajería, IA o jobs operativos.
-- Las capacidades marcadas `demo_visual_pendiente` necesitan recuperar una superficie coherente y pruebas antes de comunicarse como demostrables. El copiloto supervisado ya dispone de esa superficie, pero sigue siendo un fixture local sin inferencia ni entrega.
+- Las capacidades marcadas `demo_visual_pendiente` necesitan recuperar una superficie coherente y pruebas antes de comunicarse como demostrables. Automatizaciones y copiloto supervisado ya disponen de superficies distintas, pero siguen siendo fixtures locales: la primera no ejecuta reglas y el segundo no realiza inferencia ni entrega.
 - Revenue utiliza matemáticas de fixtures; no entrena, predice ni recomienda precios reales.
 - Los textos legales necesitan validación profesional para cada implantación y proveedor.
 

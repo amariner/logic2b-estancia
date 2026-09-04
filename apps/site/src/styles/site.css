@@ -870,6 +870,8 @@
 .panel-capability-scope li { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 7px; }
 .panel-capability-scope li > span:first-child { color: var(--slate); }
 .panel-capability-scope .capability-status { flex: 0 0 auto; }
+.panel-capability-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.panel-capability-meta a { color: var(--ink); font-size: .62rem; font-weight: 650; text-underline-offset: 3px; }
 .panel-detail-actions { align-items: end; border-top: 1px solid var(--line); }
 .panel-detail-actions > div:first-child > p:last-child { max-width: 680px; margin: 22px 0 0; color: var(--slate); font-size: .8rem; line-height: 1.65; }
 .panel-detail-actions > div:last-child { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: flex-end; }

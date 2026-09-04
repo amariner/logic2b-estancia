@@ -259,10 +259,16 @@ export function parseStored(raw: string | null, scenario: Scenario): DemoState {
 
 export function canOperate(
   role: DemoRole,
-  action: "booking" | "cleaning" | "review" | "maintenance" | "website",
+  action:
+    | "booking"
+    | "cleaning"
+    | "review"
+    | "maintenance"
+    | "website"
+    | "automations",
 ): boolean {
   if (role === "direction") return true;
-  if (action === "website") return false;
+  if (action === "website" || action === "automations") return false;
   if (action === "booking") return role === "reception";
   if (action === "cleaning") return role === "cleaning";
   if (action === "maintenance") return role === "reception";

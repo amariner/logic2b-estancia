@@ -1,6 +1,6 @@
 # Logic Estancia · Auditoría de accesibilidad
 
-Última actualización: 2026-08-17
+Última actualización: 2026-09-04
 
 ## Estado
 
@@ -13,7 +13,7 @@ La suite `tests/e2e/accessibility.spec.ts` audita las 30 rutas públicas en Chro
 - Landing, soluciones, planes, diagnóstico, documentación y recursos comerciales.
 - Aviso legal, privacidad y cookies.
 - Nivora, Terrava y Aurem en ES/EN, incluidos los gestores de Terrava y Aurem.
-- Los estados profundos ES/EN de ingresos, canales y automatización de Aurem, abiertos mediante `?vista=reports`, `?vista=channels` y `?vista=automation`, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas.
+- Los estados profundos ES/EN de ingresos, canales, automatizaciones inertes y Copiloto supervisado de Aurem, abiertos mediante `?vista=reports`, `?vista=channels`, `?vista=automations` y `?vista=automation`, se añaden a axe, landmarks y reflow sin contarlos como nuevas URLs públicas. `automations` y `automation` son superficies deliberadamente distintas.
 
 Además comprueba:
 
@@ -46,7 +46,7 @@ La segunda pasada de interacción y reflow detectó y corrigió:
 - Diagnóstico permanente del selector y geometría responsables cuando una futura ruta vuelva a desbordar.
 - Anchura intrínseca del editor de IA y cabecera larga de Automatización a 320 px, manteniendo textarea, acciones y trazabilidad dentro del viewport.
 
-Después de las correcciones, axe no reporta violaciones en ninguna de las 30 rutas ni en los seis estados profundos de ingresos/canales/automatización. El QA visual responsive sobre portada a 1366 px y 375 px, Terrava, el gestor Aurem, el recurso largo español, Aurem inglés y las vistas de ingresos/canales/automatización a 320 px confirmó ausencia de overflow y regresiones visibles.
+Después de las correcciones, axe no reporta violaciones en ninguna de las 30 rutas ni en los estados profundos cubiertos. El QA visual responsive más reciente de automatizaciones a 1440 × 1000 y 390 × 844, junto con la matriz de reflow a 320 px y texto al 200 %, confirmó ausencia de overflow y regresiones visibles; el Copiloto conserva su propia ruta y sus pruebas independientes.
 
 ## Evidencia reproducible
 
@@ -57,7 +57,7 @@ pnpm e2e
 pnpm peers check
 ```
 
-Resultado verificado el 2026-08-17: 14 pruebas específicas de accesibilidad correctas. La puerta global suma 47 E2E —30 funcionales, 14 de accesibilidad y 3 de SEO técnico—, además de 28 tareas de paquetes más lint de scripts/pruebas raíz y ninguna incidencia de peers.
+Resultado verificado el 2026-09-04: la puerta global pasa 105/105 E2E, incluida la cobertura axe, landmarks, reflow a 320 px y texto al 200 % de `automations` y `automation`. `pnpm check` completa 7/7 tareas de lint y 21/21 tareas de typecheck, pruebas y build.
 
 ## Deuda y siguiente revisión
 
