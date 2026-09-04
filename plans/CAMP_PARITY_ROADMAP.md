@@ -2,7 +2,7 @@
 
 Última revisión de la referencia: 2026-09-02
 
-Estado de ejecución: P0, P1, P2 y P3 cerrados; 12/12 direcciones web y 6/6 fichas de panel navegables verificadas. P4 está en curso con 5/5 guías publicadas y un contrato de implantación completo; faltan los enlaces contextuales antes de cerrar la fase. P5–P6 permanecen pendientes.
+Estado de ejecución: P0, P1, P2, P3 y P4 cerrados; 12/12 direcciones web, 6/6 fichas de panel y 5/5 guías por rol navegables y enlazadas contextualmente. P5–P6 permanecen pendientes.
 
 Referencia: [camp.logic2b.com](https://camp.logic2b.com/)
 
@@ -170,7 +170,7 @@ Entregables:
 3. Enlaces contextuales desde home, planes, soluciones, webs y paneles.
 4. Revisión jurídica española antes de convertir textos de privacidad, pagos, registro de viajeros o contratos en afirmaciones operativas.
 
-Estado al 2026-09-04: **P4 en curso, 5/5 guías publicadas**. El índice canónico existente `/docs/` y `/en/docs/` sustituye la propuesta duplicada `/guias/`: conserva la ruta ya enlazada desde footer, sitemap y analítica, y coincide con la arquitectura pública de referencia. Un registro único mantiene los cinco roles y sus estados. Todas las fichas disponen de contenido ES/EN, responsabilidad, relevo humano, capacidades, evidencia exacta, validaciones, límites, metadata, canonical, `hreflang`, sitemap, pruebas y QA. Técnica/privacidad enlaza roles, canales y copiloto supervisado de Aurem, mantiene canales como activables por proyecto y automatización como demo pendiente, y no afirma producción, asesoría o certificación. El índice explica entradas, decisiones, pruebas, publicación supervisada, soporte y fuera de alcance; solo falta propagar enlaces contextuales desde las demás superficies para cerrar P4.
+Estado al 2026-09-04: **P4 cerrado, 5/5 guías publicadas y enlazadas**. El índice canónico existente `/docs/` y `/en/docs/` sustituye la propuesta duplicada `/guias/`: conserva la ruta ya enlazada desde footer, sitemap y analítica, y coincide con la arquitectura pública de referencia. Un registro único mantiene los cinco roles y sus estados. Todas las fichas disponen de contenido ES/EN, responsabilidad, relevo humano, capacidades, evidencia exacta, validaciones, límites, metadata, canonical, `hreflang`, sitemap, pruebas y QA. Técnica/privacidad enlaza roles, canales y copiloto supervisado de Aurem, mantiene canales como activables por proyecto y automatización como demo pendiente, y no afirma producción, asesoría o certificación. El índice explica entradas, decisiones, pruebas, publicación supervisada, soporte y fuera de alcance. Un contrato adicional de 13 contextos distribuye enlaces HTML rastreables entre home, planes, soluciones, webs y paneles, cubre 28 superficies por idioma y mantiene las guías separadas de la evidencia operativa y de la captación.
 
 ### P5 · Conectividad demostrable y madurez real
 
@@ -228,4 +228,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Terminar **P4 · Guías, implantación y confianza de compra** propagando enlaces contextuales ES/EN desde home, planes, soluciones, webs y paneles mediante un mapeo central por `GuideId`. Home presenta la colección; planes orienta a dirección y técnica/privacidad; soluciones enlazan recepción u operaciones según el recorrido; webs conduce a marketing/ingresos; y cada panel enlaza el rol responsable pertinente. Los enlaces deben ser crawlables, relevantes y no duplicar captación ni convertir una guía en evidencia operativa. Tras probar destinos, canonical/hreflang, teclado, reflow y ausencia de callejones se cierra P4 y comienza P5.
+Comenzar **P5 · Conectividad demostrable y madurez real** por `email-enquiries`, la primera capacidad visual pendiente y el límite más temprano del plan Básico. Nivora incorporará una representación ES/EN completamente local e inerte de una solicitud por email: estado y datos inequívocamente ficticios, interacción solo en memoria si existe, confirmación visible de que nada se envía, cero inventario o reserva y restauración al recargar. No se añadirá otro formulario comercial, `/api/leads`, proveedor ni dashboard a Básico. El contrato solo pasará a `demo_visual_disponible` después de verificar evidencia exacta, límites, cero escrituras, teclado, reflow y texto al 200 %; después se abordarán el editor web supervisado y las automatizaciones inertes.
