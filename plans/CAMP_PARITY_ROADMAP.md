@@ -1,8 +1,8 @@
 # Logic2B Estancias · Roadmap de paridad con Logic2B Campings
 
-Última revisión de la referencia: 2026-09-02
+Última revisión de la referencia: 2026-09-04
 
-Estado de ejecución: P0, P1, P2, P3 y P4 cerrados; 12/12 direcciones web, 6/6 fichas de panel y 5/5 guías por rol navegables y enlazadas contextualmente. P5 está en curso con el primer bloque visual 3/3, cinco contratos de preparación y su registro/puerta de validación cerrados; la validación de proveedores continúa en 0 y requiere decisión, evidencias y autorización externas. P6 tiene cerrado el alcance local de vistas, handoffs y recorrido medible explícito; la configuración de GTM, la línea base y los experimentos permanecen externos y bloqueados.
+Estado de ejecución: **paridad estructural del home cerrada en 11/11 bloques, más el shell global de header y footer**. P0, P1, P2, P3 y P4 están cerrados; el recorrido horizontal contiene 7 momentos, el explorador 5 tabs, y existen 12/12 direcciones web, 6/6 fichas de panel y 5/5 guías por rol navegables y enlazadas contextualmente. P5 permanece en su techo local seguro con cero proveedores validados; P6 tiene cerrado su alcance local y mantiene GTM, línea base y experimentos como actividades externas. El SHA de producto verificado es `77887492c9e2a16e6fabccedde8a04ddfaf6cbbe`: `pnpm check` pasa completo, la matriz Playwright pasa 124/124 y `camp-parity` 7/7. El QA local cubre desktop, 1024 px, 320–430 px, texto al 200 %, movimiento reducido, foco, axe WCAG 2.2 AA y revisión visual de hero, carruseles, popups, contacto, cierre, footer y acompañamiento/recursos. Solo restan comprobaciones humanas externas con lector de pantalla, alto contraste y comprensión; no se declara Lighthouse ni despliegue productivo.
 
 Referencia: [camp.logic2b.com](https://camp.logic2b.com/)
 
@@ -12,7 +12,7 @@ Fuera de alcance: copiar identidad visual, textos, datos, precios o dashboards e
 
 ## Decisión estratégica
 
-Logic2B Estancias debe alcanzar una **paridad estructural y de producto alta** con Logic2B Campings: la misma lógica de negocio `web → captación/reserva → gestión → operación avanzada`, demostrada con una portada de densidad y orden equivalentes y un ecosistema público comparable de webs, planes, paneles, guías y entrada comercial.
+Logic2B Estancias debe conservar la **paridad estructural y de producto alta ya alcanzada** con Logic2B Campings: la misma lógica de negocio `web → captación/reserva → gestión → operación avanzada`, demostrada con una portada de densidad y orden equivalentes y un ecosistema público comparable de webs, planes, paneles, guías y entrada comercial.
 
 La paridad no significa una copia literal. Estancias conservará su dirección cálida, editorial y orientada a hospitalidad; Camp seguirá siendo la referencia de arquitectura, jerarquía y profundidad. Los dashboards se diseñarán alrededor de estancias, huéspedes, habitaciones/unidades, preparación, incidencias y revenue, no alrededor de parcelas o recepción de camping.
 
@@ -20,7 +20,7 @@ La paridad no significa una copia literal. Estancias conservará su dirección c
 
 Camp no se limita a describir un servicio. Su home permite comprobar, en este orden, qué se compra, cómo fluye, qué áreas contiene, cómo crece, qué aspecto puede tener, cómo se trabaja dentro y cómo se implanta. Además, cada promesa importante enlaza a una prueba navegable o a una ficha específica.
 
-Estancias ya tiene una base sólida —hero, tres verticales, tres demos canónicas, planes, diagnóstico, capacidades con evidencia, servicio humano, FAQ y captación real única—, pero actualmente presenta esos activos como secciones independientes. Le faltan la continuidad visual del flujo, un explorador de producto, un portfolio web profundo, un escaparate de paneles, guías por rol y una arquitectura de rutas que convierta las afirmaciones en evidencia inmediata.
+La auditoría inicial del 2026-09-02 detectó que Estancias presentaba sus activos como secciones independientes. El contraste de cierre del 2026-09-04 confirma que esa brecha ya no está vigente: la portada enlaza la secuencia completa, ofrece continuidad visual mediante el flujo horizontal de 7 momentos, incorpora un explorador de 5 áreas y conecta portfolio, paneles, guías, planes y captación sin duplicar el formulario real.
 
 ## Contrato de paridad
 
@@ -50,9 +50,9 @@ Estancias ya tiene una base sólida —hero, tres verticales, tres demos canóni
 - Reservas, pagos, mensajes, sincronizaciones, inventario, analítica o IA presentados como activos cuando solo existe una demo local.
 - Métricas, clientes, testimonios, resultados o disponibilidad inventados.
 
-## Anatomía objetivo del home
+## Anatomía implementada del home
 
-La portada final seguirá el mismo arco que Camp. Esta secuencia —11 bloques de contenido, más header y footer— es el contrato de información; la composición visual será propia de Estancias.
+La portada sigue el mismo arco informativo que Camp. Esta secuencia implementada —11 bloques de contenido, más header y footer— es el contrato de información; la composición visual y los recursos siguen siendo propios de Estancias.
 
 | Orden | Bloque de referencia | Adaptación para Estancias | Evidencia o salida |
 | --- | --- | --- | --- |
@@ -70,18 +70,18 @@ La portada final seguirá el mismo arco que Camp. Esta secuencia —11 bloques d
 | 11 | Cierre demostrativo | CTA de demostración con mockups web + móvil + gestor; abre o conduce a la única instancia comercial | Contexto de origen allowlisted y sin PII |
 | 12 | Footer de ecosistema | Producto, explora, guías, contacto y legal con rutas equivalentes a la nueva arquitectura | Navegación completa ES/EN |
 
-## Arquitectura pública objetivo
+## Arquitectura pública implementada
 
 | Necesidad | Ruta objetivo | Estado actual | Decisión |
 | --- | --- | --- | --- |
-| Portada | `/` y `/en/` | Disponible | Reestructurar por el contrato de bloques |
-| Portfolio web | `/webs/` y fichas | Tres demos dispersas | Crear índice, filtros por vertical/plan y fichas; reutilizar primero Nivora, Terrava y Aurem |
-| Gestor | `/paneles/` y fichas | Deep links dentro de demos | Crear escaparate comercial separado; el dashboard subyacente sigue siendo específico de Estancias |
-| Planes | `/planes/` y `/en/plans/` | Disponible | Llevar previews, demos, límites y handoff contextual al nivel de Camp sin publicar precios |
-| Guías | `/docs/` y fichas por rol | Índice general corto | Convertir en centro de aprendizaje por responsabilidad |
-| Recorrido | `/recorrido/` y `/en/journey/` | Ruta dedicada publicada | Recorrido comercial transversal de cinco pasos que une web, Gestión e Inteligente con inicio y final explícitos |
-| Empezar | Diagnóstico y contacto único | Disponible pero fragmentado | Mantener diagnóstico sin PII y entregar después el contexto a la única captación de portada |
-| Soluciones | Rurales, apartamentos y hoteles | Disponible | Conservar como SEO/segmento; enlazar con portfolio, paneles y planes, no usarlas como navegación primaria única |
+| Portada | `/` y `/en/` | Paridad 11/11 + shell global | Conservar el contrato de bloques y sus salidas verificables |
+| Portfolio web | `/webs/` y fichas | 12/12 direcciones ES/EN | Cerrado: filtros, fichas y casos canónicos conectados |
+| Gestor | `/paneles/` y fichas | 6/6 fichas ES/EN | Cerrado: escaparate comercial separado con evidencia exacta de Estancias |
+| Planes | `/planes/` y `/en/plans/` | Tres tarjetas ricas y contextualizadas | Cerrado sin publicar precios ni alterar el mapeo de demos |
+| Guías | `/docs/` y fichas por rol | 5/5 guías ES/EN | Cerrado como centro de aprendizaje por responsabilidad |
+| Recorrido | `/recorrido/` y `/en/journey/` | Flujo home de 7 momentos y ruta/modal de 5 pasos | Conservar la diferencia semántica: progresión visual frente a tour guiado medible |
+| Empezar | Diagnóstico y contacto único | Diagnóstico sin PII + una sola captación real | No duplicar formularios; transferir solo contexto allowlisted |
+| Soluciones | Rurales, apartamentos y hoteles | Publicadas y enlazadas contextualmente | Conservar como SEO/segmento conectado a portfolio, paneles y planes |
 
 No se creará una segunda captación en `/empezar/`, `/planes/`, `/webs/`, `/paneles/`, soluciones, docs o demos. Esas superficies transfieren únicamente contexto cerrado a `/#contacto`.
 
@@ -111,11 +111,13 @@ Entregables:
 
 Criterios de cierre:
 
-- Los 11 bloques de contenido, el header y el footer existen con los activos verificables actuales; no hay placeholders ni CTAs hacia superficies vacías. P2–P4 aumentarán después la profundidad de sus galerías y guías.
+- Los 11 bloques de contenido, el header y el footer existen con los activos verificables actuales; no hay placeholders ni CTAs hacia superficies vacías. La profundidad posterior de P2–P4 también está cerrada en 12/12 webs, 6/6 paneles y 5/5 guías.
 - Nivora, Terrava y Aurem conservan su mapeo de plan y sus límites.
-- ES/EN, teclado, 320 px, 200 % de texto, movimiento reducido y ausencia de overflow quedan verificados.
+- ES/EN, teclado, 320 px, 200 % de texto, movimiento reducido y ausencia de overflow forman la puerta de QA y constan ejecutados; lector de pantalla, alto contraste y comprensión siguen siendo controles humanos externos.
 - Solo existe un `[data-lead]` y solo la portada puede llamar a `/api/leads`.
-- `pnpm check` y E2E focalizados de home, navegación, consentimiento y límites pasan.
+- La puerta automatizada registrada para el cierre es `pnpm check`, 124/124 E2E, `camp-parity` 7/7 y `diff-check`; incluye 24/24 unitarias de site y 80/80 de Worker.
+
+Estado de cierre al 2026-09-04: **P0 cerrado**. El shell global conserva header y footer, y el contenido sigue el orden 11/11 verificado: hero, franja de ecosistema, flujo de 7 momentos, explorador de 5 tabs, banda de capacidades, planes, portfolio de webs, escaparate de paneles, implantación/guías, FAQ y cierre demostrativo. Las tres galerías horizontales de recorrido, temas y paneles, los diálogos y la devolución de foco forman parte del contrato interactivo. El tour guiado de 5 pasos se mantiene diferenciado del flujo visual de 7 momentos. Solo existe un formulario comercial real; el recorrido, los temas, los paneles, las demos y los dashboards no crean captaciones ni escrituras externas. Nivora conserva Básico sin dashboard, Terrava demuestra Gestión y Aurem demuestra Inteligente. La evidencia final es `pnpm check`, 124/124 E2E, `camp-parity` 7/7, `diff-check`, axe, reflow, texto al 200 %, movimiento reducido, foco y QA visual local; únicamente quedan controles humanos externos.
 
 ### P1 · Planes y handoff comercial equivalentes
 
@@ -197,26 +199,32 @@ Entregables:
 3. Medir descubrimiento → evidencia → diagnóstico → lead → agenda con periodos fechados; no mezclar la home anterior con la nueva.
 4. Ejecutar un solo experimento principal cada vez y no declarar ganador sin evidencia suficiente.
 
-Estado al 2026-09-04: **P6 tiene cerrado su alcance local de instrumentación y preparación de activación**. Las doce direcciones web y las seis fichas de panel disponen de rutas comerciales ES/EN allowlisted que emiten una sola vista por carga únicamente tras consentimiento explícito y runtime analítico `live`; sus acciones reales hacia demo exacta, diagnóstico contextual o el formulario único de contacto emiten handoffs con destino cerrado sin retrasar la navegación. `/recorrido/` y `/en/journey/` añaden una ruta indexable de cinco pasos que reutiliza Nivora, Solicitudes, Planning, Preparación y Operación e ingresos: solo los botones inequívocos de inicio y final emiten `tour_start` y `tour_complete`, una vez por carga, nunca por scroll, tiempo o navegación implícita. El contrato e informe `2.4.0` separan 15 eventos de proveedor con forma exacta y 5 eventos locales de demo; `plan_select` y `cta_click` ya no admiten payloads sin forma. El expediente `pnpm gtm:dossier` deriva de ese contrato etiquetas, activadores, variables, hostname exacto, consentimiento, puertas de runtime, verificación y rollback, y conserva sin rellenar responsable, aprobador, referencia GA4 y fecha de corte. Falla ante divergencias y no usa red, escribe, autoriza, activa o despliega. Las demos canónicas conservan CSP `connect-src 'none'`, no leen consentimiento, no consultan capacidades y no cargan GTM. Aplicar el expediente, configurar el contenedor compartido, activar el runtime, abrir una línea base fechada y experimentar continúan bloqueados como actividades externas.
+Estado al 2026-09-04: **P6 tiene cerrado su alcance local de instrumentación y preparación de activación**. Las doce direcciones web y las seis fichas de panel disponen de rutas comerciales ES/EN allowlisted que emiten una sola vista por carga únicamente tras consentimiento explícito y runtime analítico `live`; sus acciones reales hacia demo exacta, diagnóstico contextual o el formulario único de contacto emiten handoffs con destino cerrado sin retrasar la navegación. `/recorrido/` y `/en/journey/` añaden una ruta indexable de cinco pasos que reutiliza Nivora, Solicitudes, Planning, Preparación y Operación e ingresos: solo los botones inequívocos de inicio y final emiten `tour_start` y `tour_complete`, una vez por carga, nunca por scroll, tiempo o navegación implícita. El contrato e informe `2.4.0` separan 15 eventos de proveedor con forma exacta y 5 eventos locales de demo; `plan_select` y `cta_click` ya no admiten payloads sin forma. El expediente `pnpm gtm:dossier` deriva de ese contrato etiquetas, activadores, variables, hostname exacto, consentimiento, puertas de runtime, verificación y rollback, y conserva sin rellenar responsable, aprobador, referencia GA4 y fecha de corte. Falla ante divergencias y no usa red, escribe, autoriza, activa o despliega. Las demos y las variantes explícitas `?embed=theme` usan iframe `sandbox="allow-scripts"`, CSP `connect-src 'none'`, `form-action 'none'`, `frame-ancestors 'self'`, `SAMEORIGIN` y `noindex`; no leen consentimiento, no consultan capacidades y no cargan GTM. Las rutas `/webs/:slug/` canónicas siguen no embebibles con `DENY` y conservan la CSP analítica, verificada por los 19/19 E2E de analítica dentro de la matriz completa. Aplicar el expediente, configurar el contenedor compartido, activar el runtime, abrir una línea base fechada y experimentar continúan bloqueados como actividades externas.
 
 ## Definición de paridad conseguida
 
-La paridad se considera alcanzada cuando:
+El cierre local del 2026-09-04 satisface los siguientes criterios:
 
 - La portada contiene la secuencia completa de 11 bloques, más header y footer, y cada promesa crítica enlaza a una prueba o límite.
 - Existen tres planes coherentes, 12 webs navegables, seis fichas de panel y cinco guías por rol.
 - Un visitante puede recorrer `web → plan → demo → panel → diagnóstico → contacto` sin perder contexto y sin encontrar callejones sin salida.
 - Toda superficie ES tiene una decisión explícita de localización EN, canonical, hreflang, sitemap y estado de indexación.
 - La única captación real sigue siendo la de la portada; demos y dashboards hacen cero escrituras externas.
-- La auditoría multidisciplinar, accesibilidad, rendimiento, SEO, pruebas y QA visual pasan con los mismos umbrales actuales o mejores.
+- La auditoría multidisciplinar antes y después del incremento no detecta una brecha local material de estructura, verdad comercial, seguridad, SEO o arquitectura; el QA local automatizado y visual queda cerrado, y solo restan controles humanos externos.
+
+## Revisión multidisciplinar del cierre
+
+Antes de implementar, Estrategia de marketing pidió conservar un arco comercial comprobable; Producto y UX exigieron continuidad entre promesa y evidencia; UI fijó la equivalencia estructural sin copiar identidad; SEO preservó rutas ES/EN y superficies rastreables; Frontend y Full stack limitaron la nueva interacción a componentes y contratos existentes; QA, accesibilidad, rendimiento y confianza comercial bloquearon cualquier formulario duplicado, acción externa en demos o promesa no demostrable.
+
+Después de implementar, Marketing, Producto, UX, UI, SEO y Arquitectura/Ingeniería quedan **correctos** respecto a la paridad 11/11 + shell, el recorrido de 7 momentos, el explorador de 5 tabs y la profundidad 12/12 webs, 6/6 paneles y 5/5 guías. Seguridad y confianza comercial quedan **correctas**: una sola captación real, contexto cerrado sin PII, previews aislados y demos locales sin escrituras externas. QA, accesibilidad, rendimiento y confianza quedan **correctos en el alcance local disponible** con `pnpm check`, 124/124 E2E, `camp-parity` 7/7, axe, 320 px, texto al 200 %, movimiento reducido, foco y QA visual desktop/móvil. VoiceOver/otro lector, alto contraste y comprensión quedan como revisión humana externa, no como nueva fase funcional.
 
 ## Métricas de avance del roadmap
 
-- **Paridad estructural del home:** bloques de contenido terminados / 11, con header y footer evaluados aparte.
-- **Paridad de evidencia:** promesas críticas con deep link verificable / promesas críticas totales.
-- **Profundidad web:** demos navegables verificadas / 12.
-- **Profundidad de gestor:** fichas con demo verificable / 6.
-- **Cobertura de guías:** guías revisadas y enlazadas / 5.
+- **Paridad estructural del home:** 11/11 bloques de contenido, con shell global de header y footer verificado aparte.
+- **Paridad de evidencia:** deep links y handoffs cubiertos por el contrato focal; no se declara un total numérico adicional en este cierre.
+- **Profundidad web:** 12/12 demos navegables verificadas.
+- **Profundidad de gestor:** 6/6 fichas con demo verificable.
+- **Cobertura de guías:** 5/5 guías revisadas y enlazadas.
 - **Integridad comercial:** CTAs válidos / CTAs totales; objetivo 100 %.
 - **Veracidad:** afirmaciones sin estado o límite / afirmaciones de capacidad; objetivo 0.
 
@@ -232,4 +240,4 @@ La paridad se considera alcanzada cuando:
 
 ## Siguiente incremento exacto
 
-Con P5 bloqueado por decisiones y evidencias externas y P6 en su techo local seguro, realizar una **auditoría de cierre de paridad contra la referencia vigente de `camp.logic2b.com`**. Debe volver a capturar de forma read-only la arquitectura comercial actual de Camp, contrastarla con los 11 bloques, recorridos y evidencias ya cerrados, y registrar únicamente diferencias materiales y accionables que puedan resolverse localmente sin copiar identidad ni ampliar promesas. Si no hay una brecha local relevante, documentar el techo de paridad alcanzado y dejar como siguientes acciones solo las dependencias humanas: proveedor de P5, aplicación autorizada del expediente GTM, línea base fechada, entrevistas/propuestas y validaciones humanas de accesibilidad. No desplegar ni modificar Camp o servicios externos durante la auditoría.
+No queda un nuevo incremento funcional local abierto. El siguiente punto exacto es una revisión humana externa con VoiceOver/otro lector, alto contraste y comprensión; después, conservar el cierre y esperar las dependencias ya documentadas: decisión y evidencias de proveedor para P5, aplicación autorizada del expediente GTM, línea base fechada, revisión jurídica, validación del buzón real y el umbral de 15 entrevistas cualificadas y 5 propuestas reales. No desplegar, modificar Camp, configurar servicios externos ni publicar precios sin la autorización correspondiente.
