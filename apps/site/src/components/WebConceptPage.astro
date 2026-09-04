@@ -1,21 +1,25 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { getPlanCards, planHandoffHref } from '../plan-contract';
-import { getWebPortfolio, type OriginalWebPortfolioConcept } from '../web-portfolio';
+import { getWebPortfolio, type WebPortfolioConcept } from '../web-portfolio';
 import ContextualGuides from './ContextualGuides.astro';
+import PortfolioViewAnalytics from './PortfolioViewAnalytics.astro';
 
-const { locale, concept } = Astro.props as { locale: Locale; concept: OriginalWebPortfolioConcept };
+const { locale, concept } = Astro.props as { locale: Locale; concept: WebPortfolioConcept };
 const en = locale === 'en';
 const plan = getPlanCards(locale).find((candidate) => candidate.id === concept.plan);
 if (!plan) throw new Error(`missing_plan_for_concept:${concept.slug}`);
 const assessmentHref = planHandoffHref(locale, plan, en ? '/en/webs/' : '/webs/', concept.vertical);
 const portfolioHref = en ? '/en/webs/' : '/webs/';
 const portfolioCount = getWebPortfolio(locale).length;
-const sourceSet = `/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w, /media/${concept.slug}/hero-1280.avif 1280w`;
+const sourceSet = concept.status === 'canonical'
+  ? `/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w, /media/${concept.slug}/hero-1600.avif 1600w`
+  : `/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w, /media/${concept.slug}/hero-1280.avif 1280w`;
 ---
+<PortfolioViewAnalytics event="web_view" locale={locale} web={concept.slug} plan={concept.plan} />
 <article class={`web-concept web-concept-${concept.slug}`} data-web-concept={concept.slug}>
   <header class="web-concept-notice shell">
-    <p><strong>{en ? 'Fictional website concept' : 'Concepto web ficticio'}</strong><span>{en ? 'Original visual direction · no real property or customer' : 'Dirección visual original · no representa un alojamiento o cliente real'}</span></p>
+    <p><strong>{concept.status === 'canonical' ? (en ? 'Canonical fictional case' : 'Caso canónico ficticio') : (en ? 'Fictional website concept' : 'Concepto web ficticio')}</strong><span>{concept.status === 'canonical' ? (en ? 'Product evidence · no real property or customer' : 'Evidencia de producto · no representa un alojamiento o cliente real') : (en ? 'Original visual direction · no real property or customer' : 'Dirección visual original · no representa un alojamiento o cliente real')}</span></p>
     <a href={portfolioHref}>{en ? 'Back to all websites' : 'Volver a todas las webs'} <span aria-hidden="true">↗</span></a>
   </header>
 
@@ -67,6 +71,6 @@ const sourceSet = `/media/${concept.slug}/hero-640.avif 640w, /media/${concept.s
 
   <footer class="web-concept-next shell">
     <div><p class="eyebrow">{en ? 'Continue with evidence' : 'Continúa con evidencia'}</p><h2>{en ? 'Compare this direction with the full portfolio.' : 'Compara esta dirección con el portfolio completo.'}</h2></div>
-    <div><a class="text-link" href={portfolioHref}>{en ? `See all ${portfolioCount} website directions` : `Ver las ${portfolioCount} direcciones web`} <span aria-hidden="true">→</span></a><a class="pill" href={assessmentHref}>{concept.assessmentCta} <span aria-hidden="true">→</span></a></div>
+    <div>{concept.status === 'canonical' && <a class="text-link" href={concept.demoHref}>{concept.demoCta} <span aria-hidden="true">↗</span></a>}<a class="text-link" href={portfolioHref}>{en ? `See all ${portfolioCount} website directions` : `Ver las ${portfolioCount} direcciones web`} <span aria-hidden="true">→</span></a><a class="pill" href={assessmentHref}>{concept.assessmentCta} <span aria-hidden="true">→</span></a></div>
   </footer>
 </article>

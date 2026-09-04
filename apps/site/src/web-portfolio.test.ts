@@ -23,7 +23,8 @@ describe('web portfolio contract', () => {
       expect(concepts.every(({ visiblePages, boundary, demoHref }) => visiblePages.length >= 3 && boundary.length > 30 && demoHref.startsWith('/'))).toBe(true);
       expect(concepts.filter(({ status }) => status === 'canonical')).toHaveLength(3);
       expect(concepts.filter(({ status }) => status === 'original')).toHaveLength(9);
-      expect(getOriginalWebPortfolio(locale).every((concept) => concept.showcase.moments.length === 3)).toBe(true);
+      expect(concepts.every((concept) => concept.showcase.moments.length === 3)).toBe(true);
+      expect(getOriginalWebPortfolio(locale)).toHaveLength(9);
       for (const vertical of ['rural', 'apartments', 'hotels'] as const) {
         const verticalConcepts = concepts.filter((concept) => concept.vertical === vertical);
         expect(verticalConcepts).toHaveLength(4);

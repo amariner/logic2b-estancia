@@ -282,6 +282,7 @@ const structuredData = [
           const keys = Object.keys(safe);
           if (shape.required.some((key) => !(key in safe)) || keys.some((key) => !shape.allowed.includes(key))) return;
           if (Object.entries(shape.values).some(([key, allowed]) => key in safe && !allowed.includes(safe[key]))) return;
+          if (Array.isArray(shape.combinations) && !shape.combinations.some((combination) => Object.entries(combination).every(([key, value]) => safe[key] === value))) return;
         }
         window.estanciaRuntimeReady.then((runtime) => {
           if (!hasAnalyticsConsent() || !isAnalyticsSafeLocation() || runtime.providers.analytics !== 'live') return;

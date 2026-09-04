@@ -23,7 +23,7 @@ describe('funnel report', () => {
   it('documents the versioned aggregate-only contract', async () => {
     const result = await runFunnelReport({ args: ['--validate'] });
     expect(result.exitCode).toBe(0);
-    expect(JSON.parse(result.output)).toMatchObject({ ok: true, contractVersion: '2.0.0', privacy: 'aggregated-allowlist-only' });
+    expect(JSON.parse(result.output)).toMatchObject({ ok: true, contractVersion: '2.1.0', privacy: 'aggregated-allowlist-only' });
   });
 
   it('calculates stable directional rates without user attribution', () => {
@@ -52,6 +52,14 @@ describe('funnel report', () => {
       { segment: 'rural', es: 18, en: 0, total: 18 },
       { segment: 'apartments', es: 12, en: 0, total: 12 },
       { segment: 'hotels', es: 0, en: 8, total: 8 },
+    ]);
+    expect(report.webViewsByConcept).toEqual([
+      { id: 'linde', plan: 'basico', es: 14, en: 0, total: 14 },
+      { id: 'cobalto', plan: 'inteligente', es: 0, en: 6, total: 6 },
+    ]);
+    expect(report.panelViewsBySurface).toEqual([
+      { id: 'planning', plan: 'gestion', es: 9, en: 0, total: 9 },
+      { id: 'copilot', plan: 'inteligente', es: 0, en: 4, total: 4 },
     ]);
   });
 
@@ -85,6 +93,12 @@ describe('funnel report', () => {
     expect(() => validateDataset({ ...dataset, rows: [
       { event: 'assessment_step', count: 1, locale: 'es', step_index: 7, source_section: 'assessment' },
     ] })).toThrow(/step_index no es canónico/);
+    expect(() => validateDataset({ ...dataset, rows: [
+      { event: 'web_view', count: 1, locale: 'es', web: 'linde', plan: 'inteligente', source_section: 'web_portfolio' },
+    ] })).toThrow(/combinación canónica/);
+    expect(() => validateDataset({ ...dataset, rows: [
+      { event: 'panel_view', count: 1, locale: 'es', panel: 'copilot', plan: 'gestion', source_section: 'panel_portfolio' },
+    ] })).toThrow(/combinación canónica/);
   });
 
   it('flags downstream counts instead of hiding a non-cohort comparison', () => {
@@ -116,6 +130,17 @@ describe('funnel report', () => {
     ] }));
     expect(report.solutionViewsBySegment).toEqual([{ segment: 'hotels', es: 7, en: 0, total: 7 }]);
     expect(report.eventTotals.solution_view).toBe(7);
+  });
+
+  it('accepts evidence-only aggregates and reports canonical web and panel views', () => {
+    const report = buildReport(validateDataset({ ...dataset, rows: [
+      { event: 'web_view', count: 7, locale: 'es', web: 'nivora', plan: 'basico', source_section: 'web_portfolio' },
+      { event: 'web_view', count: 3, locale: 'en', web: 'nivora', plan: 'basico', source_section: 'web_portfolio' },
+      { event: 'panel_view', count: 5, locale: 'es', panel: 'preparation', plan: 'inteligente', source_section: 'panel_portfolio' },
+    ] }));
+    expect(report.webViewsByConcept).toEqual([{ id: 'nivora', plan: 'basico', es: 7, en: 3, total: 10 }]);
+    expect(report.panelViewsBySurface).toEqual([{ id: 'preparation', plan: 'inteligente', es: 5, en: 0, total: 5 }]);
+    expect(report.stages.every(({ count }) => count === 0)).toBe(true);
   });
 
   it('accepts pnpm separators and rejects malformed input', async () => {

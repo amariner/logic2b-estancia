@@ -1,9 +1,9 @@
-import { PORTFOLIO_ORIGINAL_SLUGS } from './web-portfolio';
+import { getWebPortfolio } from './web-portfolio';
 import { getPublishedPanels } from './panel-portfolio';
 import { getPublishedGuides } from './guide-portfolio';
 
 const sharedRoutes = ['/', '/docs/', '/legal/', '/privacidad/', '/cookies/'] as const;
-const originalPortfolioRoutes = PORTFOLIO_ORIGINAL_SLUGS.flatMap((slug) => [`/webs/${slug}/`, `/en/webs/${slug}/`]);
+const portfolioRoutes = getWebPortfolio('es').flatMap(({ slug }) => [`/webs/${slug}/`, `/en/webs/${slug}/`]);
 const publishedPanelRoutes = [
   '/paneles/', '/en/panels/',
   ...getPublishedPanels('es').map((panel) => `/paneles/${panel.slug}/`),
@@ -20,7 +20,7 @@ export const INDEXABLE_PATHS = [
   '/soluciones/apartamentos/', '/en/solutions/apartments/',
   '/soluciones/hoteles/', '/en/solutions/hotels/',
   '/planes/', '/en/plans/', '/webs/', '/en/webs/', '/diagnostico/', '/en/assessment/',
-  ...originalPortfolioRoutes,
+  ...portfolioRoutes,
   ...publishedPanelRoutes,
   ...publishedGuideRoutes,
   '/recursos/gestor-reservas-apartamentos-turisticos/',

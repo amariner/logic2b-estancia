@@ -1,8 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const appOrigin = 'http://127.0.0.1:8790';
-const originalWebConcepts = ['linde', 'cobalto', 'oria', 'boscara', 'velares', 'nocta', 'riscoa', 'solerna', 'cendra'] as const;
-const originalWebPaths = originalWebConcepts.flatMap((slug) => [`/webs/${slug}/`, `/en/webs/${slug}/`]);
+const webConcepts = ['nivora', 'terrava', 'aurem', 'linde', 'cobalto', 'oria', 'boscara', 'velares', 'nocta', 'riscoa', 'solerna', 'cendra'] as const;
+const webPaths = webConcepts.flatMap((slug) => [`/webs/${slug}/`, `/en/webs/${slug}/`]);
 
 const paths = [
   '/', '/en/', '/docs/', '/en/docs/',
@@ -14,7 +14,7 @@ const paths = [
   '/paneles/', '/paneles/solicitudes/', '/paneles/planning/', '/paneles/huespedes-llegadas/', '/paneles/preparacion/', '/paneles/operacion-ingresos/', '/paneles/copiloto-supervisado/',
   '/en/solutions/rural-stays/', '/en/solutions/apartments/', '/en/solutions/hotels/', '/en/plans/', '/en/webs/', '/en/assessment/',
   '/en/panels/', '/en/panels/enquiries/', '/en/panels/planning/', '/en/panels/guests-arrivals/', '/en/panels/preparation/', '/en/panels/operations-revenue/', '/en/panels/supervised-copilot/',
-  ...originalWebPaths,
+  ...webPaths,
   '/recursos/gestor-reservas-apartamentos-turisticos/', '/recursos/web-hotel-reservas-directas-operacion/',
   '/legal/', '/privacidad/', '/cookies/',
   '/en/legal/', '/en/privacidad/', '/en/cookies/',
@@ -426,9 +426,11 @@ test('portfolio exposes twelve truthful navigable directions in both languages',
     await expect(page.locator('[data-portfolio-card][data-portfolio-vertical="apartments"]')).toHaveCount(4);
     await expect(page.locator('[data-portfolio-card][data-portfolio-vertical="hotels"]')).toHaveCount(4);
 
-    for (const slug of originalWebConcepts) {
+    for (const slug of webConcepts) {
       const card = page.locator(`[data-portfolio-card="${slug}"]`);
-      await expect(card).toContainText(path === '/webs/' ? 'Concepto navegable' : 'Navigable concept');
+      await expect(card).toContainText(slug === 'nivora' || slug === 'terrava' || slug === 'aurem'
+        ? (path === '/webs/' ? 'Caso canónico' : 'Canonical case')
+        : (path === '/webs/' ? 'Concepto navegable' : 'Navigable concept'));
       const href = `${prefix}/webs/${slug}/`;
       await expect(card.locator(`[data-portfolio-open="${slug}"]`)).toHaveAttribute('href', href);
       await card.scrollIntoViewIfNeeded();
@@ -438,11 +440,11 @@ test('portfolio exposes twelve truthful navigable directions in both languages',
   }
 });
 
-test('original website concepts are localized, indexable and non-operational', async ({ page }) => {
+test('all website direction pages are localized, indexable and non-operational', async ({ page }) => {
   const writes: string[] = [];
   page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
 
-  for (const slug of originalWebConcepts) {
+  for (const slug of webConcepts) {
     for (const [path, otherLocale] of [[`/webs/${slug}/`, `/en/webs/${slug}/`], [`/en/webs/${slug}/`, `/webs/${slug}/`]] as const) {
       await expectCleanPage(page, path);
       await expect(page.locator(`[data-web-concept="${slug}"]`)).toBeVisible();
@@ -452,6 +454,9 @@ test('original website concepts are localized, indexable and non-operational', a
       await expect(page.locator('link[rel="alternate"]')).toHaveCount(3);
       const alternates = await page.locator('link[rel="alternate"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
       expect(alternates.some((href) => href?.endsWith(otherLocale))).toBe(true);
+      if (slug === 'nivora' || slug === 'terrava' || slug === 'aurem') {
+        await expect(page.locator(`[data-web-concept="${slug}"]`).getByRole('link', { name: /(?:Explorar web demo|Explore website demo)/ })).toHaveAttribute('href', `${path.startsWith('/en') ? '/en' : ''}/demos/${slug}/`);
+      }
     }
   }
   expect(writes).toEqual([]);
@@ -936,8 +941,8 @@ test('web portfolio exposes localized collections and accessible filters', async
     for (const [index, slug] of ['nivora', 'terrava', 'aurem'].entries()) {
       const card = portfolio.locator(`[data-portfolio-card="${slug}"]`);
       await expect(card).toContainText(labels[index]);
-      await expect(card.locator(`[data-portfolio-demo="${slug}"]`)).toHaveAttribute('href', `${prefix}/demos/${slug}/`);
-      await expect(card.locator(`[data-portfolio-open="${slug}"]`)).toHaveAttribute('href', `${prefix}/demos/${slug}/`);
+      await expect(card.locator(`[data-portfolio-detail="${slug}"]`)).toHaveAttribute('href', `${prefix}/webs/${slug}/`);
+      await expect(card.locator(`[data-portfolio-open="${slug}"]`)).toHaveAttribute('href', `${prefix}/webs/${slug}/`);
       const assessmentHref = await card.locator(`[data-portfolio-assess="${slug}"]`).getAttribute('href');
       expect(assessmentHref).toBeTruthy();
       const target = new URL(assessmentHref ?? '', appOrigin);

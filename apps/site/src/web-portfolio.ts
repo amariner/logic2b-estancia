@@ -46,7 +46,7 @@ interface WebPortfolioConceptBase {
 export interface CanonicalWebPortfolioConcept extends WebPortfolioConceptBase {
   slug: DemoSlug;
   status: 'canonical';
-  showcase: null;
+  showcase: PortfolioShowcase;
 }
 
 export interface OriginalWebPortfolioConcept extends WebPortfolioConceptBase {
@@ -67,7 +67,14 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Inicio', 'El espacio', 'Guía local'],
       boundaryLabel: 'Límite de la evidencia', boundary: 'Web visual ficticia; no consulta disponibilidad, recoge solicitudes ni incluye gestor.',
       image: '/media/nivora/hero.webp', imageAlt: 'Escena visual ficticia de Nivora One', demoHref: '/demos/nivora/', demoCta: 'Explorar web demo', assessmentCta: 'Evaluar este punto de partida',
-      showcase: null,
+      showcase: {
+        eyebrow: 'Una web que empieza por el lugar', title: 'Vive la ciudad desde dentro.', intro: 'Nivora demuestra cómo una sola propiedad puede ganar una voz propia antes de añadir inventario, reservas o un gestor que todavía no necesita.',
+        moments: [
+          { number: '01', title: 'Presencia antes que inventario', text: 'Luz, materiales y una guía local explican la estancia sin consultar disponibilidad.' },
+          { number: '02', title: 'Una consulta solo demostrada', text: 'Tres casos ficticios permiten revisar el contexto de un email sin recoger datos ni enviar nada.' },
+          { number: '03', title: 'Básico conserva el límite', text: 'La evidencia termina en la web y su preview local; no existe dashboard, reserva, pago o proveedor.' },
+        ],
+      },
     },
     {
       slug: 'terrava', number: '02', brand: 'Terrava Collection', vertical: 'rural', verticalLabel: 'Casa rural', plan: 'gestion', planLabel: 'Gestión', status: 'canonical', statusLabel: 'Caso canónico',
@@ -77,7 +84,14 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Las casas', 'Experiencias', 'Panel de solicitudes', 'Planning visual'],
       boundaryLabel: 'Límite de la evidencia', boundary: 'Web y workspace ficticios de solo lectura; no confirma reservas, cambia tarifas ni envía comunicaciones.',
       image: '/media/terrava/hero.webp', imageAlt: 'Escena visual ficticia de Terrava Collection', demoHref: '/demos/terrava/', demoCta: 'Explorar web demo', assessmentCta: 'Evaluar este punto de partida',
-      showcase: null,
+      showcase: {
+        eyebrow: 'Ocho casas, una lectura común', title: 'Cada casa conserva su carácter.', intro: 'Terrava conecta una dirección rural propia con la continuidad de solicitudes y planning que corresponde al plan Gestión, siempre mediante datos ficticios.',
+        moments: [
+          { number: '01', title: 'La colección no borra las casas', text: 'Paisaje, materia y relato permiten distinguir cada estancia sin reducirla a una ficha.' },
+          { number: '02', title: 'La solicitud mantiene contexto', text: 'La evidencia canónica enlaza fechas, alojamiento y alternativa sin confirmar ni enviar nada.' },
+          { number: '03', title: 'Gestión sigue siendo supervisada', text: 'Planning y publicación web son vistas locales; no cambian tarifas, reservas, CMS o sistemas externos.' },
+        ],
+      },
     },
     {
       slug: 'aurem', number: '03', brand: 'Aurem Hotel', vertical: 'hotels', verticalLabel: 'Hotel', plan: 'inteligente', planLabel: 'Inteligente', status: 'canonical', statusLabel: 'Caso canónico',
@@ -87,7 +101,14 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Habitaciones', 'Servicios', 'Centro operativo', 'Revenue visual'],
       boundaryLabel: 'Límite de la evidencia', boundary: 'Caso local con datos ficticios; no ejecuta tareas, canales, IA, pagos ni cambios en sistemas reales.',
       image: '/media/aurem/hero.webp', imageAlt: 'Escena visual ficticia de Aurem Hotel', demoHref: '/demos/aurem/', demoCta: 'Explorar web demo', assessmentCta: 'Evaluar este punto de partida',
-      showcase: null,
+      showcase: {
+        eyebrow: 'La calma también se prepara', title: 'Todo dispuesto antes de llegar.', intro: 'Aurem une una presencia hotelera contemporánea con una lectura operativa explicable, sin convertir el escenario en automatización o inteligencia activa.',
+        moments: [
+          { number: '01', title: 'La experiencia empieza en la web', text: 'Habitaciones y servicios construyen una promesa visual sin disponibilidad, checkout o pago.' },
+          { number: '02', title: 'La operación hace visible la prioridad', text: 'Llegadas, preparación e incidencias se leen en fixtures locales y con responsabilidad humana.' },
+          { number: '03', title: 'Inteligente no significa autónomo', text: 'Revenue y copiloto muestran fórmulas, fuentes y revisión; no predicen, ejecutan ni envían.' },
+        ],
+      },
     },
     {
       slug: 'linde', number: '04', brand: 'Linde Casa', vertical: 'rural', verticalLabel: 'Casa rural', plan: 'basico', planLabel: 'Básico', status: 'original', statusLabel: 'Concepto navegable',
@@ -252,7 +273,14 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       visibleLabel: 'Visible pages and surfaces', visiblePages: ['Home', 'The space', 'Local guide'],
       boundaryLabel: 'Evidence boundary', boundary: 'Fictional visual website; it checks no availability, collects no enquiries and includes no workspace.',
       image: '/media/nivora/hero.webp', imageAlt: 'Fictional visual scene for Nivora One', demoHref: '/en/demos/nivora/', demoCta: 'Explore website demo', assessmentCta: 'Assess this starting point',
-      showcase: null,
+      showcase: {
+        eyebrow: 'A website that starts with place', title: 'Live the city from within.', intro: 'Nivora shows how one property can gain a voice of its own before adding inventory, bookings or a workspace it does not yet need.',
+        moments: [
+          { number: '01', title: 'Presence before inventory', text: 'Light, materials and a local guide explain the stay without checking availability.' },
+          { number: '02', title: 'An enquiry demonstrated only', text: 'Three fictitious cases make email context reviewable without collecting data or sending anything.' },
+          { number: '03', title: 'Basic keeps the boundary', text: 'Evidence stops at the website and its local preview; there is no dashboard, booking, payment or provider.' },
+        ],
+      },
     },
     {
       slug: 'terrava', number: '02', brand: 'Terrava Collection', vertical: 'rural', verticalLabel: 'Rural stays', plan: 'gestion', planLabel: 'Management', status: 'canonical', statusLabel: 'Canonical case',
@@ -262,7 +290,14 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       visibleLabel: 'Visible pages and surfaces', visiblePages: ['The homes', 'Experiences', 'Enquiries workspace', 'Visual planning'],
       boundaryLabel: 'Evidence boundary', boundary: 'Fictional read-only website and workspace; it confirms no booking, changes no rates and sends no communication.',
       image: '/media/terrava/hero.webp', imageAlt: 'Fictional visual scene for Terrava Collection', demoHref: '/en/demos/terrava/', demoCta: 'Explore website demo', assessmentCta: 'Assess this starting point',
-      showcase: null,
+      showcase: {
+        eyebrow: 'Eight homes, one shared view', title: 'Every home keeps its character.', intro: 'Terrava connects an owned rural direction with the enquiry and planning continuity of Management, always through fictitious data.',
+        moments: [
+          { number: '01', title: 'The collection does not erase each home', text: 'Landscape, material and story distinguish every stay without reducing it to a listing.' },
+          { number: '02', title: 'The enquiry keeps its context', text: 'Canonical evidence links dates, property and alternative without confirming or sending anything.' },
+          { number: '03', title: 'Management remains supervised', text: 'Planning and website publication are local views; they change no rates, bookings, CMS or external system.' },
+        ],
+      },
     },
     {
       slug: 'aurem', number: '03', brand: 'Aurem Hotel', vertical: 'hotels', verticalLabel: 'Hotel', plan: 'inteligente', planLabel: 'Intelligent', status: 'canonical', statusLabel: 'Canonical case',
@@ -272,7 +307,14 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       visibleLabel: 'Visible pages and surfaces', visiblePages: ['Rooms', 'Services', 'Operations centre', 'Visual revenue'],
       boundaryLabel: 'Evidence boundary', boundary: 'Local case with fictitious data; it runs no task, channel, AI, payment or live system change.',
       image: '/media/aurem/hero.webp', imageAlt: 'Fictional visual scene for Aurem Hotel', demoHref: '/en/demos/aurem/', demoCta: 'Explore website demo', assessmentCta: 'Assess this starting point',
-      showcase: null,
+      showcase: {
+        eyebrow: 'Calm is prepared too', title: 'Everything ready before arrival.', intro: 'Aurem joins a contemporary hotel presence to an explainable operating view without presenting the scenario as active automation or intelligence.',
+        moments: [
+          { number: '01', title: 'The experience starts on the website', text: 'Rooms and services build a visual promise without availability, checkout or payment.' },
+          { number: '02', title: 'Operations make the priority visible', text: 'Arrivals, preparation and incidents are read from local fixtures with human ownership.' },
+          { number: '03', title: 'Intelligent does not mean autonomous', text: 'Revenue and copilot show formulas, sources and review; they predict, execute or send nothing.' },
+        ],
+      },
     },
     {
       slug: 'linde', number: '04', brand: 'Linde Casa', vertical: 'rural', verticalLabel: 'Rural stay', plan: 'basico', planLabel: 'Basic', status: 'original', statusLabel: 'Navigable concept',

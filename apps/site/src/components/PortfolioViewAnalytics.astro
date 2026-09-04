@@ -1,0 +1,48 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import type { PlanLevel } from '@logic-estancia/domain';
+import type { PanelId } from '../panel-portfolio';
+import type { WebPortfolioConcept } from '../web-portfolio';
+
+type Props =
+  | { event: 'web_view'; locale: Locale; plan: PlanLevel; web: WebPortfolioConcept['slug'] }
+  | { event: 'panel_view'; locale: Locale; plan: PlanLevel; panel: PanelId };
+
+const props = Astro.props as Props;
+---
+
+<span
+  hidden
+  data-portfolio-view
+  data-event={props.event}
+  data-locale={props.locale}
+  data-plan={props.plan}
+  data-web={props.event === 'web_view' ? props.web : undefined}
+  data-panel={props.event === 'panel_view' ? props.panel : undefined}
+></span>
+
+<script>
+  import { getConsent } from '../scripts/analytics-consent';
+
+  const view = document.querySelector<HTMLElement>('[data-portfolio-view]');
+  let emitted = false;
+
+  async function emitPortfolioView(): Promise<void> {
+    if (emitted || !view || !getConsent()?.analytics || !window.estanciaTrack) return;
+    const runtime = await window.estanciaRuntimeReady;
+    if (emitted || runtime?.providers.analytics !== 'live' || !getConsent()?.analytics || !window.estanciaTrack) return;
+
+    const { event, locale, plan, web, panel } = view.dataset;
+    if (event === 'web_view' && web) {
+      emitted = true;
+      window.estanciaTrack(event, { locale, web, plan, source_section: 'web_portfolio' });
+    } else if (event === 'panel_view' && panel) {
+      emitted = true;
+      window.estanciaTrack(event, { locale, panel, plan, source_section: 'panel_portfolio' });
+    }
+  }
+
+  window.addEventListener('estancia:consent-updated', () => { void emitPortfolioView(); });
+  if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', () => { void emitPortfolioView(); }, { once: true });
+  else void emitPortfolioView();
+</script>

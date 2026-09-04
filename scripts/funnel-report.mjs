@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const CONTRACT_VERSION = '2.0.0';
+export const CONTRACT_VERSION = '2.1.0';
 const SCRIPT_DIRECTORY = dirname(fileURLToPath(import.meta.url));
 const analyticsContract = JSON.parse(await readFile(resolve(SCRIPT_DIRECTORY, '../packages/config/src/analytics-contract.json'), 'utf8'));
 const FUNNEL = [
@@ -40,6 +40,10 @@ const EXAMPLE = {
     { event: 'solution_view', count: 12, locale: 'es', segment: 'apartments', source_section: 'solution' },
     { event: 'solution_view', count: 8, locale: 'en', segment: 'hotels', source_section: 'solution' },
     { event: 'demo_open', count: 32, locale: 'es', demo: 'terrava', source_section: 'website' },
+    { event: 'web_view', count: 14, locale: 'es', web: 'linde', plan: 'basico', source_section: 'web_portfolio' },
+    { event: 'web_view', count: 6, locale: 'en', web: 'cobalto', plan: 'inteligente', source_section: 'web_portfolio' },
+    { event: 'panel_view', count: 9, locale: 'es', panel: 'planning', plan: 'gestion', source_section: 'panel_portfolio' },
+    { event: 'panel_view', count: 4, locale: 'en', panel: 'copilot', plan: 'inteligente', source_section: 'panel_portfolio' },
   ],
 };
 
@@ -82,7 +86,7 @@ export function validateDataset(dataset) {
   if (start > end) throw new Error('period.start no puede ser posterior a period.end.');
   if (!Array.isArray(dataset.rows) || dataset.rows.length === 0) throw new Error('rows debe contener al menos una fila agregada.');
   const rows = dataset.rows.map((row, index) => validateRow(row, index));
-  if (!rows.some((row) => FUNNEL.some((stage) => matchesStage(row, stage)))) throw new Error('El dataset debe contener al menos un evento del embudo principal con su source_section canónico.');
+  if (!rows.some((row) => FUNNEL.some((stage) => matchesStage(row, stage)) || isCanonicalEvidenceView(row))) throw new Error('El dataset debe contener al menos un evento canónico del embudo o de evidencia web/panel.');
   return { contractVersion: CONTRACT_VERSION, period: { start: dataset.period.start, end: dataset.period.end }, consentMode: dataset.consentMode, rows };
 }
 
@@ -127,6 +131,8 @@ export function buildReport(validDataset) {
     en: sum(solutionViewRows.filter((row) => row.segment === segment && row.locale === 'en')),
     total: sum(solutionViewRows.filter((row) => row.segment === segment)),
   })).filter(({ total }) => total > 0);
+  const webViewsByConcept = buildEvidenceViewBreakdown(validDataset.rows, 'web_view', 'web', 'web_portfolio');
+  const panelViewsBySurface = buildEvidenceViewBreakdown(validDataset.rows, 'panel_view', 'panel', 'panel_portfolio');
   return {
     contractVersion: validDataset.contractVersion,
     period: validDataset.period,
@@ -135,6 +141,8 @@ export function buildReport(validDataset) {
     eventTotals: Object.fromEntries(Object.entries(eventTotals).filter(([, count]) => count > 0)),
     byLocale,
     solutionViewsBySegment,
+    webViewsByConcept,
+    panelViewsBySurface,
     warnings,
     notes,
     excludedOutcomes: ['proposals', 'won_projects', 'lost_projects', 'revenue', 'objections'],
@@ -171,6 +179,22 @@ export function renderMarkdown(report) {
       ...report.solutionViewsBySegment.map(({ segment, es, en, total }) => `| ${segment} | ${es} | ${en} | ${total} |`),
     ] : ['Sin `solution_view` canónicos en el periodo.']),
     '',
+    '## Vistas de evidencia web',
+    '',
+    ...(report.webViewsByConcept.length ? [
+      '| Web | Plan | ES | EN | Total |',
+      '| --- | --- | ---: | ---: | ---: |',
+      ...report.webViewsByConcept.map(({ id, plan, es, en, total }) => `| ${id} | ${plan} | ${es} | ${en} | ${total} |`),
+    ] : ['Sin `web_view` canónicos en el periodo.']),
+    '',
+    '## Vistas de evidencia de panel',
+    '',
+    ...(report.panelViewsBySurface.length ? [
+      '| Panel | Plan | ES | EN | Total |',
+      '| --- | --- | ---: | ---: | ---: |',
+      ...report.panelViewsBySurface.map(({ id, plan, es, en, total }) => `| ${id} | ${plan} | ${es} | ${en} | ${total} |`),
+    ] : ['Sin `panel_view` canónicos en el periodo.']),
+    '',
     '## Totales de eventos observados',
     '',
     '| Evento | Recuento |',
@@ -183,6 +207,7 @@ export function renderMarkdown(report) {
     ...report.notes.map((note) => `- Contexto: ${note}`),
     '- Propuestas, proyectos ganados/perdidos, ingresos y objeciones quedan fuera: requieren evidencia comercial separada.',
     '- No interpretar este informe como tráfico total: la analítica solo se activa tras consentimiento explícito.',
+    '- Las vistas son cargas agregadas de evidencia, no personas ni usuarios únicos.',
   ];
   return `${lines.join('\n')}\n`;
 }
@@ -238,8 +263,25 @@ function validateEventShape(row, label) {
   for (const [key, allowed] of Object.entries(shape.values)) {
     if (row[key] !== undefined && !allowed.includes(row[key])) throw new Error(`${label}.${key} no es canónico para ${row.event}.`);
   }
+  if (Array.isArray(shape.combinations) && !shape.combinations.some((combination) => Object.entries(combination).every(([key, value]) => row[key] === value))) {
+    throw new Error(`${label} no contiene una combinación canónica para ${row.event}.`);
+  }
 }
 function matchesStage(row, stage) { return row.event === stage.event && row.source_section === stage.sourceSection; }
+function isCanonicalEvidenceView(row) {
+  return (row.event === 'web_view' && row.source_section === 'web_portfolio')
+    || (row.event === 'panel_view' && row.source_section === 'panel_portfolio');
+}
+function buildEvidenceViewBreakdown(rows, event, dimension, sourceSection) {
+  const canonicalPlans = new Map((EVENT_SHAPES[event]?.combinations ?? []).map((combination) => [combination[dimension], combination.plan]));
+  const matching = rows.filter((row) => row.event === event && row.source_section === sourceSection);
+  return [...canonicalPlans].map(([id, plan]) => {
+    const selected = matching.filter((row) => row[dimension] === id && row.plan === plan);
+    const es = sum(selected.filter((row) => row.locale === 'es'));
+    const en = sum(selected.filter((row) => row.locale === 'en'));
+    return { id, plan, es, en, total: es + en };
+  }).filter(({ total }) => total > 0);
+}
 function sum(rows) { return rows.reduce((total, row) => total + row.count, 0); }
 function round(value) { return Math.round(value * 10) / 10; }
 function formatPercent(value) { return Number.isInteger(value) ? String(value) : value.toFixed(1); }

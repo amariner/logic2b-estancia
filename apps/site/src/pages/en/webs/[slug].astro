@@ -1,14 +1,15 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import WebConceptPage from '../../../components/WebConceptPage.astro';
-import { getOriginalWebPortfolio, type OriginalWebPortfolioConcept } from '../../../web-portfolio';
+import { getWebPortfolio, type WebPortfolioConcept } from '../../../web-portfolio';
 
 export function getStaticPaths() {
-  return getOriginalWebPortfolio('en').map((concept) => ({ params: { slug: concept.slug }, props: { concept } }));
+  return getWebPortfolio('en').map((concept) => ({ params: { slug: concept.slug }, props: { concept } }));
 }
 
-const { concept } = Astro.props as { concept: OriginalWebPortfolioConcept };
+const { concept } = Astro.props as { concept: WebPortfolioConcept };
 const title = `${concept.brand}: ${concept.verticalLabel.toLowerCase()} website concept | Logic2B Estancias`;
 const description = `${concept.summary} A navigable fictional concept with explicit evidence boundaries.`;
+const heroMaxWidth = concept.status === 'canonical' ? 1600 : 1280;
 ---
-<Base locale="en" route={`webs/${concept.slug}`} alternateRoute={`webs/${concept.slug}`} title={title} description={description} image={concept.image} imageAlt={concept.imageAlt} preloadImage={`/media/${concept.slug}/hero-1280.avif`} preloadImageSrcset={`/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w, /media/${concept.slug}/hero-1280.avif 1280w`} preloadImageSizes="100vw" preloadImageType="image/avif"><WebConceptPage locale="en" concept={concept} /></Base>
+<Base locale="en" route={`webs/${concept.slug}`} alternateRoute={`webs/${concept.slug}`} title={title} description={description} image={concept.image} imageAlt={concept.imageAlt} preloadImage={`/media/${concept.slug}/hero-${heroMaxWidth}.avif`} preloadImageSrcset={`/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w, /media/${concept.slug}/hero-${heroMaxWidth}.avif ${heroMaxWidth}w`} preloadImageSizes="100vw" preloadImageType="image/avif"><WebConceptPage locale="en" concept={concept} /></Base>

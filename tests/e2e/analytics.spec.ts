@@ -49,8 +49,52 @@ const solutionCases = [
   { path: '/en/solutions/hotels/', locale: 'en', segment: 'hotels' },
 ] as const;
 
+const webViewCases = [
+  { path: '/webs/nivora/', locale: 'es', web: 'nivora', plan: 'basico' },
+  { path: '/webs/terrava/', locale: 'es', web: 'terrava', plan: 'gestion' },
+  { path: '/webs/aurem/', locale: 'es', web: 'aurem', plan: 'inteligente' },
+  { path: '/webs/linde/', locale: 'es', web: 'linde', plan: 'basico' },
+  { path: '/webs/cobalto/', locale: 'es', web: 'cobalto', plan: 'inteligente' },
+  { path: '/webs/oria/', locale: 'es', web: 'oria', plan: 'gestion' },
+  { path: '/webs/boscara/', locale: 'es', web: 'boscara', plan: 'inteligente' },
+  { path: '/webs/velares/', locale: 'es', web: 'velares', plan: 'gestion' },
+  { path: '/webs/nocta/', locale: 'es', web: 'nocta', plan: 'basico' },
+  { path: '/webs/riscoa/', locale: 'es', web: 'riscoa', plan: 'gestion' },
+  { path: '/webs/solerna/', locale: 'es', web: 'solerna', plan: 'basico' },
+  { path: '/webs/cendra/', locale: 'es', web: 'cendra', plan: 'inteligente' },
+  { path: '/en/webs/nivora/', locale: 'en', web: 'nivora', plan: 'basico' },
+  { path: '/en/webs/terrava/', locale: 'en', web: 'terrava', plan: 'gestion' },
+  { path: '/en/webs/aurem/', locale: 'en', web: 'aurem', plan: 'inteligente' },
+  { path: '/en/webs/linde/', locale: 'en', web: 'linde', plan: 'basico' },
+  { path: '/en/webs/cobalto/', locale: 'en', web: 'cobalto', plan: 'inteligente' },
+  { path: '/en/webs/oria/', locale: 'en', web: 'oria', plan: 'gestion' },
+  { path: '/en/webs/boscara/', locale: 'en', web: 'boscara', plan: 'inteligente' },
+  { path: '/en/webs/velares/', locale: 'en', web: 'velares', plan: 'gestion' },
+  { path: '/en/webs/nocta/', locale: 'en', web: 'nocta', plan: 'basico' },
+  { path: '/en/webs/riscoa/', locale: 'en', web: 'riscoa', plan: 'gestion' },
+  { path: '/en/webs/solerna/', locale: 'en', web: 'solerna', plan: 'basico' },
+  { path: '/en/webs/cendra/', locale: 'en', web: 'cendra', plan: 'inteligente' },
+] as const;
+
+const panelViewCases = [
+  { path: '/paneles/solicitudes/', locale: 'es', panel: 'enquiries', plan: 'gestion' },
+  { path: '/paneles/planning/', locale: 'es', panel: 'planning', plan: 'gestion' },
+  { path: '/paneles/huespedes-llegadas/', locale: 'es', panel: 'guests-arrivals', plan: 'gestion' },
+  { path: '/paneles/preparacion/', locale: 'es', panel: 'preparation', plan: 'inteligente' },
+  { path: '/paneles/operacion-ingresos/', locale: 'es', panel: 'operations-revenue', plan: 'inteligente' },
+  { path: '/paneles/copiloto-supervisado/', locale: 'es', panel: 'copilot', plan: 'inteligente' },
+  { path: '/en/panels/enquiries/', locale: 'en', panel: 'enquiries', plan: 'gestion' },
+  { path: '/en/panels/planning/', locale: 'en', panel: 'planning', plan: 'gestion' },
+  { path: '/en/panels/guests-arrivals/', locale: 'en', panel: 'guests-arrivals', plan: 'gestion' },
+  { path: '/en/panels/preparation/', locale: 'en', panel: 'preparation', plan: 'inteligente' },
+  { path: '/en/panels/operations-revenue/', locale: 'en', panel: 'operations-revenue', plan: 'inteligente' },
+  { path: '/en/panels/supervised-copilot/', locale: 'en', panel: 'copilot', plan: 'inteligente' },
+] as const;
+
 const trackedEventNames = [
   'solution_view',
+  'web_view',
+  'panel_view',
   'plan_select',
   'assessment_start',
   'assessment_step',
@@ -182,6 +226,94 @@ test('all six localized solution landings emit one exact solution_view', async (
       ]);
     });
   }
+});
+
+test('all twelve website directions emit one exact localized web_view', async ({ page }) => {
+  await seedConsent(page, true);
+  await routeRuntime(page, liveAnalyticsManifest);
+
+  for (const item of webViewCases) {
+    await test.step(item.path, async () => {
+      const response = await page.goto(item.path);
+      expect(response?.status()).toBe(200);
+      await waitForRuntime(page);
+      await expect.poll(() => eventsNamed(page, 'web_view')).toEqual([{
+        event: 'web_view', locale: item.locale, web: item.web, plan: item.plan, source_section: 'web_portfolio',
+      }]);
+    });
+  }
+});
+
+test('all six workspace evidence pages emit one exact localized panel_view', async ({ page }) => {
+  await seedConsent(page, true);
+  await routeRuntime(page, liveAnalyticsManifest);
+
+  for (const item of panelViewCases) {
+    await test.step(item.path, async () => {
+      const response = await page.goto(item.path);
+      expect(response?.status()).toBe(200);
+      await waitForRuntime(page);
+      await expect.poll(() => eventsNamed(page, 'panel_view')).toEqual([{
+        event: 'panel_view', locale: item.locale, panel: item.panel, plan: item.plan, source_section: 'panel_portfolio',
+      }]);
+    });
+  }
+});
+
+test('portfolio views wait for in-page consent and remain idempotent', async ({ page }) => {
+  await routeRuntime(page, liveAnalyticsManifest);
+  await page.goto('/webs/linde/');
+  await waitForRuntime(page);
+
+  const banner = page.getByRole('dialog', { name: 'Configuración de cookies' });
+  await expect(banner).toBeVisible();
+  expect(await eventsNamed(page, 'web_view')).toEqual([]);
+  await banner.getByRole('button', { name: 'Aceptar', exact: true }).click();
+
+  const expected = [{ event: 'web_view', locale: 'es', web: 'linde', plan: 'basico', source_section: 'web_portfolio' }];
+  await expect.poll(() => eventsNamed(page, 'web_view')).toEqual(expected);
+  await page.evaluate(() => {
+    window.dispatchEvent(new CustomEvent('estancia:consent-updated', {
+      detail: { essential: true, analytics: true, version: '1.0.0' },
+    }));
+  });
+  await expect.poll(() => eventsNamed(page, 'web_view')).toEqual(expected);
+});
+
+test('a portfolio view is dropped when consent is revoked before runtime resolves', async ({ page }) => {
+  await seedConsent(page, true);
+  let releaseRuntime = () => {};
+  const runtimeGate = new Promise<void>((resolve) => { releaseRuntime = resolve; });
+  await page.route('**/api/capabilities', async (route) => {
+    await runtimeGate;
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(liveAnalyticsManifest) });
+  });
+  await page.route('https://www.googletagmanager.com/**', (route) => route.fulfill({
+    contentType: 'application/javascript', body: '/* provider must remain unloaded */',
+  }));
+  await page.goto('/paneles/preparacion/');
+  await page.evaluate((key) => localStorage.removeItem(key), consentKey);
+  releaseRuntime();
+  await waitForRuntime(page);
+
+  await expect.poll(() => eventsNamed(page, 'panel_view')).toEqual([]);
+  await expect(page.locator('script[data-gtm]')).toHaveCount(0);
+});
+
+test('canonical demos remain analytics-free even with stored consent', async ({ page }) => {
+  await seedConsent(page, true);
+  let capabilityRequests = 0;
+  await page.route('**/api/capabilities', (route) => {
+    capabilityRequests += 1;
+    return route.fulfill({ contentType: 'application/json', body: JSON.stringify(liveAnalyticsManifest) });
+  });
+  for (const path of ['/demos/nivora/', '/demos/terrava/', '/demos/aurem/', '/en/demos/nivora/', '/en/demos/terrava/', '/en/demos/aurem/']) {
+    await page.goto(path);
+    await page.waitForTimeout(25);
+    expect(await eventsNamed(page, 'web_view')).toEqual([]);
+    await expect(page.locator('script[data-gtm]')).toHaveCount(0);
+  }
+  expect(capabilityRequests).toBe(0);
 });
 
 test('a solution view waits for in-page consent and stays idempotent after repeated approval', async ({ page }) => {
@@ -395,6 +527,19 @@ test('the live dataLayer strips PII and drops incomplete or non-canonical events
       step_index: 7,
       source_section: 'assessment',
     });
+    window.estanciaTrack?.('web_view', {
+      locale: 'es',
+      web: 'linde',
+      plan: 'inteligente',
+      source_section: 'web_portfolio',
+      page_location: 'https://example.test/private',
+    });
+    window.estanciaTrack?.('panel_view', {
+      locale: 'es',
+      panel: 'private-panel',
+      plan: 'gestion',
+      source_section: 'panel_portfolio',
+    });
     window.estanciaTrack?.('invented_event', {
       locale: 'es',
       segment: 'hotels',
@@ -412,10 +557,13 @@ test('the live dataLayer strips PII and drops incomplete or non-canonical events
     },
   ]);
   expect(await eventsNamed(page, 'invented_event')).toEqual([]);
+  expect(await eventsNamed(page, 'web_view')).toEqual([]);
+  expect(await eventsNamed(page, 'panel_view')).toEqual([]);
   const dataLayer = await page.evaluate(() => window.dataLayer ?? []);
   const serialized = JSON.stringify(dataLayer);
   for (const privateValue of [
     'enterprise', 'private-client', 'secret-flow', 'buyer@example.test',
     'Ada Lovelace', '+34 600 000 000', 'Necesito ayuda con mi hotel',
+    'https://example.test/private', 'private-panel',
   ]) expect(serialized).not.toContain(privateValue);
 });

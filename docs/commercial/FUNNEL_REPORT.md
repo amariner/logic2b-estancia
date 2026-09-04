@@ -1,6 +1,6 @@
 # Informe reproducible del embudo digital
 
-El informe `2.0.0` transforma recuentos agregados de eventos consentidos en una lectura estable del embudo. Esta revisión reemplaza el borrador preactivación `1.0.0`: añade la entrega válida al embudo y exige formas canónicas incompatibles con aquel borrador. No consulta GA4, no modifica etiquetas, no escribe archivos y no acepta identificadores de usuario, sesión, dispositivo o contacto.
+El informe `2.1.0` transforma recuentos agregados de eventos consentidos en una lectura estable del embudo y de la evidencia comercial consultada. Conserva el embudo estricto de `2.0.0` y añade `web_view` para las doce direcciones navegables y `panel_view` para las seis fichas publicadas. No consulta GA4, no modifica etiquetas, no escribe archivos y no acepta identificadores de usuario, sesión, dispositivo o contacto.
 
 ## Qué mide
 
@@ -18,13 +18,15 @@ Las tasas comparan recuentos agregados, no personas. Un envío puede comenzar fu
 
 Propuestas, proyectos ganados o perdidos, ingresos y objeciones no forman parte del contrato web. Se revisan con evidencia comercial separada y nunca se infieren de estos eventos.
 
+Las vistas de evidencia tampoco representan personas únicas. Cada carga consentida de una dirección o ficha comercial cuenta una vista y conserva únicamente idioma, identificador cerrado, plan canónico y sección de origen. Las doce direcciones —incluidas las fichas canónicas de Nivora, Terrava y Aurem— y las seis fichas de panel se miden en rutas indexables con consentimiento. Las demos permanecen fuera de analítica: no leen consentimiento, no consultan el runtime, no cargan GTM y conservan su CSP sin conexiones externas.
+
 ## Contrato de entrada
 
 La entrada es un objeto JSON agregado:
 
 ```json
 {
-  "contractVersion": "2.0.0",
+  "contractVersion": "2.1.0",
   "period": { "start": "2026-08-01", "end": "2026-08-31" },
   "consentMode": "analytics-consent-only",
   "rows": [
@@ -39,7 +41,7 @@ La entrada es un objeto JSON agregado:
 }
 ```
 
-Cada fila admite exclusivamente `event`, `count`, `locale`, `segment`, `plan`, `demo`, `flow`, `step_index` y `source_section`. Son las dimensiones allowlisted en el contrato único `packages/config/src/analytics-contract.json`, consumido también por la landing y las demos. Sus valores se validan contra los valores emitidos por el producto; no se aceptan dimensiones libres. Las etapas medidas exigen además su forma canónica: por ejemplo, `assessment_submit` requiere idioma, segmento, plan y `source_section=assessment`, mientras que `solution_view` exige idioma, uno de los tres segmentos publicados y `source_section=solution`.
+Cada fila admite exclusivamente `event`, `count`, `locale`, `segment`, `plan`, `web`, `panel`, `demo`, `flow`, `step_index` y `source_section`. Son las dimensiones allowlisted en el contrato único `packages/config/src/analytics-contract.json`, consumido también por la landing y las demos. Sus valores se validan contra los valores emitidos por el producto; no se aceptan dimensiones libres. Las etapas medidas exigen además su forma canónica: por ejemplo, `assessment_submit` requiere idioma, segmento, plan y `source_section=assessment`, mientras que `solution_view` exige idioma, uno de los tres segmentos publicados y `source_section=solution`. `web_view` y `panel_view` requieren además que identificador y plan formen una de las dieciocho combinaciones publicadas; mezclar Linde con Inteligente o Copiloto con Gestión se rechaza aunque ambos valores existan por separado.
 
 Para preparar el JSON, agrega en la fuente por evento y dimensiones permitidas. No exportes `user_pseudo_id`, session ID, URL completa, títulos libres, términos de búsqueda, datos del formulario ni ningún valor personalizado. La CLI rechazará cualquier clave desconocida, aunque el origen la considere inocua.
 
@@ -59,7 +61,7 @@ Genera el informe desde un archivo temporal autorizado:
 pnpm funnel:report -- < /ruta/segura/recuentos-agregados.json
 ```
 
-La salida Markdown incluye periodo, cobertura, tabla de etapas, tasas respecto a la etapa anterior, totales por evento, desglose de las etapas por idioma, vistas de solución por segmento, advertencias de calidad y notas de contexto. La salida JSON ofrece los mismos cálculos para revisión automatizada. `assessment_complete` con `source_section=homepage_scope` es una forma válida: queda fuera de las tasas y se presenta como contexto, no como incidencia. Las combinaciones incompletas o no canónicas se rechazan antes de calcular el informe.
+La salida Markdown incluye periodo, cobertura, tabla de etapas, tasas respecto a la etapa anterior, totales por evento, desglose de las etapas por idioma, vistas de solución por segmento, vistas web por concepto/plan y vistas de panel por superficie/plan, advertencias de calidad y notas de contexto. La salida JSON ofrece los mismos cálculos para revisión automatizada. `assessment_complete` con `source_section=homepage_scope` es una forma válida: queda fuera de las tasas y se presenta como contexto, no como incidencia. Un dataset puede contener solo vistas de evidencia canónicas; las combinaciones incompletas o no canónicas se rechazan antes de calcular el informe.
 
 ## Interpretación y puerta de decisión
 

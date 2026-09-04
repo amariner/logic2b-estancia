@@ -7,6 +7,7 @@ import { getPublishedPanels, type PanelPortfolioItem } from '../panel-portfolio'
 import { getPlanCards, planHandoffHref } from '../plan-contract';
 import PanelPreview from './PanelPreview.astro';
 import ContextualGuides from './ContextualGuides.astro';
+import PortfolioViewAnalytics from './PortfolioViewAnalytics.astro';
 
 const { locale, panel } = Astro.props as { locale: Locale; panel: PanelPortfolioItem };
 const en = locale === 'en';
@@ -39,6 +40,7 @@ const relatedCapabilities = panel.capabilityIds.map((id) => {
 });
 ---
 
+<PortfolioViewAnalytics event="panel_view" locale={locale} panel={panel.id} plan={panel.plan} />
 <article class="panel-detail" data-panel-detail={panel.id}>
   <header class="panel-detail-notice shell">
     <p><strong>{en ? 'Commercial evidence page' : 'Ficha de evidencia comercial'}</strong><span>{en ? 'Underlying local demo · fictitious preloaded data' : 'Demo local subyacente · datos ficticios precargados'}</span></p>
