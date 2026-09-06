@@ -17,7 +17,7 @@ const implementation = en ? [
 ] : [
   ['01', 'Entradas', 'Objetivos, proceso actual, responsables y fuentes candidatas. No se pide una credencial hasta que el alcance la necesite.'],
   ['02', 'Decisiones', 'Capacidad, fuente de verdad, permisos y responsable de aceptación se acuerdan antes de implementar.'],
-  ['03', 'Pruebas', 'Fixtures, recorridos esperados, seguridad, accesibilidad y fallos convierten la promesa en evidencia comprobable.'],
+  ['03', 'Pruebas', 'Probamos los recorridos con datos de ejemplo, incluidos los errores, la seguridad y la accesibilidad.'],
   ['04', 'Publicación supervisada', 'Una persona acepta el resultado, la ventana de cambio y la reversión antes de pasar a un entorno real.'],
   ['05', 'Soporte', 'Responsabilidad, escalado, observación y ritmo de revisión siguen visibles después de publicar.'],
   ['06', 'Fuera de alcance', 'Asesoría legal, pagos, registro de viajeros, integraciones reales y previsión requieren validación separada.'],
@@ -27,14 +27,14 @@ const implementation = en ? [
 <div data-guide-portfolio>
   <section class="guide-hero section">
     <div class="shell guide-hero-grid">
-      <div><p class="eyebrow">{en ? 'Guides by responsibility' : 'Guías por responsabilidad'}</p><h1 class="display">{en ? 'Decide who owns the outcome before choosing what to connect.' : 'Decide quién responde del resultado antes de elegir qué conectar.'}</h1></div>
-      <div><p>{en ? 'Five Logic2B Estancias role-based guides turn a commercial promise into decisions, evidence and human handoffs. Only guides with complete content and verifiable routes count as published.' : 'Cinco guías por rol de Logic2B Estancias convierten una promesa comercial en decisiones, evidencia y relevos humanos. Solo cuentan como publicadas las guías con contenido completo y recorridos comprobables.'}</p><dl><div><dt>{en ? 'Published now' : 'Publicadas ahora'}</dt><dd>{publishedCount}/5</dd></div><div><dt>{en ? 'Live operations' : 'Operaciones reales'}</dt><dd>{en ? 'None' : 'Ninguna'}</dd></div></dl></div>
+      <div><p class="eyebrow">{en ? 'Guides by responsibility' : 'Guías por responsabilidad'}</p><h1 class="display">{en ? 'A practical guide for everyone on your team.' : 'Una guía práctica para cada persona del equipo.'}</h1></div>
+      <div><p>{en ? 'Learn what to review, who takes care of each step and how to prepare your project. Five guides with examples from the Logic2B Estancias demos.' : 'Qué revisar, quién se ocupa de cada paso y cómo preparar tu proyecto. Cinco guías con ejemplos de las demos de Logic2B Estancias.'}</p><dl><div><dt>{en ? 'Practical guides' : 'Guías prácticas'}</dt><dd>{publishedCount}/5</dd></div><div><dt>{en ? 'Live operations' : 'Operaciones reales'}</dt><dd>{en ? 'None' : 'Ninguna'}</dd></div></dl></div>
     </div>
   </section>
 
   <section class="section guide-catalog" aria-labelledby="guide-catalog-title">
     <div class="shell">
-      <div class="guide-section-heading"><div><p class="eyebrow">{en ? 'A shared operating language' : 'Un lenguaje operativo compartido'}</p><h2 id="guide-catalog-title" class="heading">{en ? 'Start with the people who must make and review the decision.' : 'Empieza por las personas que deben decidir y revisar.'}</h2></div><p>{en ? 'All five guides are ready to explore: ownership and direction, reservations and reception, operations, marketing and revenue, and technical and privacy.' : 'Las cinco guías ya se pueden explorar: propiedad y dirección, reservas y recepción, operaciones, marketing e ingresos, y técnica y privacidad.'}</p></div>
+      <div class="guide-section-heading"><div><p class="eyebrow">{en ? 'A shared operating language' : 'Un lenguaje operativo compartido'}</p><h2 id="guide-catalog-title" class="heading">{en ? 'Start with your role.' : 'Empieza por tu responsabilidad.'}</h2></div><p>{en ? 'All five guides are ready to explore: ownership and direction, reservations and reception, operations, marketing and revenue, and technical and privacy.' : 'Las cinco guías ya se pueden explorar: propiedad y dirección, reservas y recepción, operaciones, marketing e ingresos, y técnica y privacidad.'}</p></div>
       <div class="guide-grid">
         {guides.map((guide) => (
           <article class:list={['guide-card', { 'is-published': guide.status === 'published' }]} data-guide-card={guide.id} data-guide-status={guide.status}>

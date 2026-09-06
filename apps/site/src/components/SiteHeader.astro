@@ -106,7 +106,7 @@ const shell = getSiteShell(locale, isHome);
 
   .header-primary {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     gap: clamp(22px, 3vw, 42px);
   }
 
@@ -115,7 +115,7 @@ const shell = getSiteShell(locale, isHome);
   .header-tour,
   .header-locale {
     color: var(--ink);
-    font-size: .72rem;
+    font-size: .875rem;
     font-weight: 650;
     text-decoration: none;
   }
@@ -163,23 +163,23 @@ const shell = getSiteShell(locale, isHome);
   }
 
   .header-contact {
-    color: white;
-    background: var(--ink);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    background: transparent;
   }
 
-  .header-contact:hover {
-    background: #31543f;
-  }
+  .header-contact:hover { background: #eef2ec; }
 
   .header-tour {
     gap: 9px;
-    border: 1px solid var(--line);
-    background: white;
+    border: 1px solid #294832;
+    color: white;
+    background: #294832;
   }
 
   .header-tour:hover {
     border-color: #8ba18f;
-    background: #f2f6f2;
+    background: #365c40;
   }
 
   .header-locale {
@@ -344,7 +344,7 @@ const shell = getSiteShell(locale, isHome);
       gap: 18px;
       border-bottom: 1px solid rgb(255 255 255 / .1);
       color: rgb(255 255 255 / .82);
-      font-size: .72rem;
+      font-size: .875rem;
       text-decoration: none;
     }
 

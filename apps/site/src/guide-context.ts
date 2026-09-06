@@ -27,8 +27,8 @@ export interface GuideContext extends GuideContextCopy {
 }
 
 const homeCopy = {
-  es: { eyebrow: 'Guías por responsabilidad', title: 'Cinco conversaciones antes de conectar nada.', body: 'Cada guía convierte una promesa en decisiones, evidencia y un relevo humano que se puede revisar.' },
-  en: { eyebrow: 'Guides by responsibility', title: 'Five conversations before connecting anything.', body: 'Every guide turns a promise into decisions, evidence and a human handoff that can be reviewed.' },
+  es: { eyebrow: 'Guías por responsabilidad', title: 'Guías para trabajar mejor.', body: 'Propiedad, recepción, operaciones, marketing y técnica. Cada persona tiene su punto de partida.' },
+  en: { eyebrow: 'Guides by responsibility', title: 'Guides for a better working day.', body: 'Ownership, reception, operations, marketing and technical teams. A starting point for everyone.' },
 } as const;
 
 const panelCopy = {

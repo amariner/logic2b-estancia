@@ -48,7 +48,7 @@ test('the sales form produces a local simulation and makes no lead request in de
   await form.locator('[name="businessName"]').fill('Alojamiento ficticio');
   await form.locator('[name="email"]').fill('demo@example.test');
   await form.locator('[name="accept"]').check();
-  await form.getByRole('button', { name: 'Quiero una recomendación' }).click();
+  await form.getByRole('button', { name: 'Solicitar información' }).click();
   await expect(form.locator('.form-status')).toHaveText('Simulación completada. No se ha enviado, almacenado ni comunicado ningún dato.');
   await expect(form.locator('[data-lead-receipt]')).toBeHidden();
   expect(leadRequests).toBe(0);
@@ -65,7 +65,7 @@ test('the sales form cannot reach the lead API when JavaScript is unavailable', 
   const form = page.locator('[data-lead]');
   await expect(form).toHaveAttribute('method', 'dialog');
   await expect(form).not.toHaveAttribute('action');
-  await expect(form.getByRole('button', { name: 'Quiero una recomendación' })).toHaveAttribute('type', 'submit');
+  await expect(form.getByRole('button', { name: 'Solicitar información' })).toHaveAttribute('type', 'submit');
   await form.locator('[name="name"]').fill('Persona ficticia');
   await form.locator('[name="businessName"]').fill('Alojamiento ficticio');
   await form.locator('[name="email"]').fill('demo@example.test');
@@ -73,15 +73,15 @@ test('the sales form cannot reach the lead API when JavaScript is unavailable', 
     (element as HTMLInputElement).checked = true;
   });
   const currentUrl = page.url();
-  await form.getByRole('button', { name: 'Quiero una recomendación' }).click({ force: true });
+  await form.getByRole('button', { name: 'Solicitar información' }).click({ force: true });
   await expect(page).toHaveURL(currentUrl);
   expect(leadRequests).toBe(0);
   await context.close();
 });
 
 for (const { locale, path, submit, unavailable } of [
-  { locale: 'ES', path: '/', submit: 'Quiero una recomendación', unavailable: 'No hemos podido verificar el servicio. No se ha enviado, almacenado ni comunicado ningún dato.' },
-  { locale: 'EN', path: '/en/', submit: 'Get my recommendation', unavailable: 'We could not verify the service. No data was sent, stored or communicated.' },
+  { locale: 'ES', path: '/', submit: 'Solicitar información', unavailable: 'No hemos podido verificar el servicio. No se ha enviado, almacenado ni comunicado ningún dato.' },
+  { locale: 'EN', path: '/en/', submit: 'Request information', unavailable: 'We could not verify the service. No data was sent, stored or communicated.' },
 ]) {
   test(`the ${locale} sales form recovers when the runtime manifest hangs`, async ({ page }) => {
     let leadRequests = 0;

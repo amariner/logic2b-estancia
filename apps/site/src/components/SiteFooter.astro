@@ -1,7 +1,7 @@
 ---
 import type { Locale } from '@logic-estancia/config';
-import { getPublishedPanels } from '../panel-portfolio';
 import { getSiteShell } from '../site-shell';
+import { SPANISH_RESOURCES } from '../resources';
 import BrandLockup from './BrandLockup.astro';
 
 interface Props {
@@ -16,43 +16,9 @@ interface Props {
 const { locale, translated, localeHref, isHome, whatsappHref, whatsappPhone } = Astro.props;
 const en = locale === 'en';
 const shell = getSiteShell(locale, isHome);
-const featuredPanel = getPublishedPanels(locale).find(({ id }) => id === 'operations-revenue');
-const panelsHref = `${en ? '/en' : ''}/${en ? 'panels' : 'paneles'}/`;
 ---
 
 <footer class="site-footer" data-site-footer>
-  {featuredPanel && (
-    <section class="footer-panel-feature shell" aria-labelledby="footer-panel-title">
-      <div class="footer-panel-copy">
-        <p class="footer-kicker">{en ? 'Inside the workspace' : 'Dentro del gestor'}</p>
-        <h2 id="footer-panel-title">{en ? 'See the decision before choosing the plan.' : 'Mira la decisión antes de elegir el plan.'}</h2>
-        <p>{en
-          ? 'Six navigable pages show what the team can read, what remains under human review and what is still outside the project.'
-          : 'Seis fichas navegables enseñan qué puede leer el equipo, qué sigue bajo revisión humana y qué permanece fuera del proyecto.'}</p>
-        <div>
-          <a href={panelsHref}>{en ? 'Explore all workspace pages' : 'Explorar todos los paneles'}<span aria-hidden="true">→</span></a>
-          <span>{en ? 'Local demos · fictitious data' : 'Demos locales · datos ficticios'}</span>
-        </div>
-      </div>
-      <article class="footer-panel-card">
-        <div class="footer-panel-card-heading"><span>{featuredPanel.number}</span><div><small>{featuredPanel.planLabel}</small><strong>{featuredPanel.title}</strong></div></div>
-        <div class="footer-panel-preview" role="img" aria-label={en ? 'Explainable fictitious Aurem revenue scenario with forecasting unavailable' : 'Escenario ficticio explicable de ingresos de Aurem con previsión no disponible'}>
-          <div class="footer-panel-preview-bar"><strong>Aurem Hotel</strong><span>{en ? 'Local demo · read-only' : 'Demo local · solo lectura'}</span></div>
-          <div class="footer-panel-preview-shell">
-            <div class="footer-panel-preview-nav" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-            <div class="footer-panel-preview-content">
-              <div class="footer-panel-preview-title"><div><span>{en ? 'Explainable local scenario' : 'Escenario local explicable'}</span><strong>{en ? 'Revenue · 28 days' : 'Ingresos · 28 días'}</strong></div><b>{en ? 'No forecast' : 'Sin previsión'}</b></div>
-              <div class="footer-panel-preview-metrics"><p><span>{en ? 'Simulated revenue' : 'Ingresos simulados'}</span><strong>{en ? '€296,608' : '€296.608'}</strong></p><p><span>{en ? 'Occupancy' : 'Ocupación'}</span><strong>89%</strong></p><p><span>ADR</span><strong>€124</strong></p><p><span>RevPAR</span><strong>€110</strong></p></div>
-              <div class="footer-panel-preview-chart" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-              <p class="footer-panel-preview-boundary">{en ? 'Fictitious formulas · no PMS, accounting or forecast' : 'Fórmulas ficticias · sin PMS, contabilidad ni previsión'}</p>
-            </div>
-          </div>
-        </div>
-        <a href={featuredPanel.detailHref ?? panelsHref}>{en ? 'Open the verified page' : 'Abrir la ficha verificada'}<span aria-hidden="true">↗</span></a>
-      </article>
-    </section>
-  )}
-
   <div class="footer-main shell">
     <section class="footer-brand" aria-labelledby="footer-brand-title">
       <h2 id="footer-brand-title" class="sr-only">Logic2B Estancias</h2>
@@ -86,6 +52,8 @@ const panelsHref = `${en ? '/en' : ''}/${en ? 'panels' : 'paneles'}/`;
       <small>{whatsappPhone}</small>
     </section>
   </div>
+
+  {isHome && !en && <nav class="footer-resources shell" aria-label="Recursos para alojamientos">{Object.values(SPANISH_RESOURCES).map((resource) => <a href={resource.href}>{resource.title} <span aria-hidden="true">→</span></a>)}</nav>}
 
   <div class="footer-bar shell">
     <p>© 2026 Logic2B · Castelló</p>

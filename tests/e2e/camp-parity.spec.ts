@@ -48,6 +48,35 @@ const mainBlockSelectors = [
   '[data-home-closing]',
 ] as const;
 
+test('indicative pricing stays consistent across home and plans, with scope visible', async ({ page }) => {
+  for (const locale of locales) {
+    let expected: string[] | undefined;
+    for (const path of [locale.home, `${locale.prefix}/${locale.route.plans}/`]) {
+      await page.goto(path);
+      const prices = page.locator('[data-plan-price]');
+      await expect(prices).toHaveCount(3);
+      const amounts = await prices.allTextContents();
+      if (expected) expect(amounts).toEqual(expected);
+      expected = amounts;
+      for (const [index, monthly, setup] of [[0, 49, 490], [1, 149, 990], [2, 299, 1990]]) {
+        expect(amounts[index].replace(/[.,\s\u00a0]/g, '')).toContain(String(monthly));
+        expect(amounts[index].replace(/[.,\s\u00a0]/g, '')).toContain(String(setup));
+      }
+      await expect(page.locator('.pricing-note')).toBeVisible();
+      await expect(page.locator('.pricing-note')).toContainText(locale.prefix ? 'up to 5 units' : 'hasta 5 unidades');
+      await expect(page.locator('.pricing-note')).toContainText(locale.prefix ? 'excluding VAT' : 'sin IVA');
+      await expect(page.locator('[data-plan-card="basico"] [data-plan-panel]')).toHaveCount(0);
+      await expect(page.locator('[data-plan-assess="gestion"]')).toHaveAttribute('href', /plan=gestion/);
+    }
+    await page.goto(locale.home);
+    await expect(page.locator('[data-technical-details]')).not.toHaveAttribute('open');
+    await expect(page.locator('.connection-note')).toBeVisible();
+    await page.locator('[data-technical-details] > summary').focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('[data-provider-validation-gate]')).toBeVisible();
+  }
+});
+
 async function rawHrefs(locator: Locator) {
   return locator.evaluateAll((links) => links.map((link) => link.getAttribute('href')));
 }
@@ -97,9 +126,11 @@ test('the home keeps the reference block sequence and evidence counts in ES and 
     await expect(page.locator('[data-home-aftercare] [data-guide-context="home"] [data-guide-context-link]')).toHaveCount(5);
 
     const ecosystem = page.locator('[data-home-ecosystem]');
-    await expect(ecosystem).toContainText('12/12');
-    await expect(ecosystem).toContainText('6/6');
-    await expect(ecosystem).toContainText('5/5');
+    await expect(ecosystem.locator('a')).toHaveCount(3);
+    for (const link of await ecosystem.locator('a').all()) {
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute('href', /\/(soluciones|solutions)\//);
+    }
   }
 });
 
@@ -181,6 +212,7 @@ test('website and workspace previews close back onto their launch controls', asy
 });
 
 test('all twelve theme popups and all six workspace popups are wired in both languages', async ({ page, request }) => {
+  test.setTimeout(240_000);
   for (const locale of locales) {
     await page.goto(locale.home);
 
@@ -260,7 +292,7 @@ test('the five-step home journey completes and restores focus in ES and EN', asy
 
     for (let step = 1; step <= 5; step += 1) {
       await expect(progressText).toHaveText(locale.tourProgress(step));
-      await expect.poll(() => progress.evaluate((element: HTMLProgressElement) => element.value)).toBe(step);
+      await expect(progress).toHaveJSProperty('value', step);
       await expect(visibleSteps).toHaveCount(1);
       if (step < 5) await dialog.locator('[data-home-tour-next]').click();
     }

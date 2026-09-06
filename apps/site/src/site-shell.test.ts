@@ -9,8 +9,8 @@ describe('global site shell contract', () => {
       const prefix = locale === 'en' ? '/en' : '';
 
       expect(home.product.map(({ label }) => label)).toEqual(locale === 'en'
-        ? ['Websites', 'Workspace', 'Plans']
-        : ['Webs', 'Gestor', 'Planes']);
+        ? ['Websites', 'Workspace', 'Pricing']
+        : ['Webs', 'Gestor', 'Precios']);
       expect(home.product.at(-1)?.href).toBe('#planes');
       expect(nested.product.at(-1)?.href).toBe(`${prefix}/#planes`);
       expect(home.journey.href).toBe(`${prefix}/${locale === 'en' ? 'journey' : 'recorrido'}/`);

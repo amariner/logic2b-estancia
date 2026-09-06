@@ -8,6 +8,7 @@ import {
   capabilityStatusDetail,
   capabilityStatusLabel,
 } from '../capability-evidence';
+import { pricingTerms } from '../pricing';
 import { getPlanCards } from '../plan-contract';
 import HumanService from './HumanService.astro';
 import ContextualGuides from './ContextualGuides.astro';
@@ -18,17 +19,17 @@ const plans = getPlanCards(locale);
 const planNames = Object.fromEntries(plans.map(({ id, name }) => [id, name])) as Record<PlanLevel, string>;
 const sourcePath = en ? '/en/plans/' : '/planes/';
 ---
-<section class="commercial-hero shell"><p class="eyebrow">{en ? 'Three starting points · one path forward' : 'Tres puntos de partida · un camino para avanzar'}</p><h1 class="display">{en ? 'Pay for the problem you need to solve. Not for the suite you might need one day.' : 'Paga por el problema que necesitas resolver. No por la suite que quizá uses algún día.'}</h1><p>{en ? 'Every plan combines personalised implementation, configuration by the Logic2B team and a subscription. Basic improves attraction, Management gives bookings continuity and Intelligent helps teams anticipate operations.' : 'Cada plan combina implantación personalizada, configuración por el equipo de Logic2B y una suscripción. Básico mejora la captación, Gestión da continuidad a las reservas e Inteligente ayuda a anticipar la operación.'}</p><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-track="cta_click" data-section="plans_hero">{en ? 'Find my starting point' : 'Ver mi punto de partida'} →</a></section>
-<section class="section shell"><div class="plans-grid" data-plan-showcase>{plans.map((plan, index) => <PlanCard locale={locale} plan={plan} sourcePath={sourcePath} featured={index === 1} />)}</div><p class="pricing-note">{en ? 'All plans include hosting, technical maintenance, security and base support. Domain, migrations, integrations, advanced branding and extended support are scoped separately.' : 'Todos incluyen hosting, mantenimiento técnico, seguridad y soporte base. Dominio, migraciones, integraciones, branding avanzado y soporte extendido se presupuestan aparte.'}</p></section>
-<HumanService locale={locale} ctaHref={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} />
-<ContextualGuides locale={locale} contextId="plans" />
+<section class="commercial-hero shell"><p class="eyebrow">{en ? 'Three starting points · one path forward' : 'Tres puntos de partida · un camino para avanzar'}</p><h1 class="display">{en ? 'Three plans. A better organised accommodation business.' : 'Tres planes. Un alojamiento mejor organizado.'}</h1><p>{en ? 'Every plan combines personalised implementation, configuration by the Logic2B team and a subscription. Basic improves attraction, Management gives bookings continuity and Intelligent helps teams anticipate operations.' : 'Cada plan combina implantación personalizada, configuración por el equipo de Logic2B y una suscripción. Básico mejora la captación, Gestión da continuidad a las reservas e Inteligente ayuda a anticipar la operación.'}</p><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-track="cta_click" data-section="plans_hero">{en ? 'Find my starting point' : 'Ver mi punto de partida'} →</a></section>
+<section class="section shell"><div class="plans-grid" data-commercial-actions data-plan-showcase>{plans.map((plan, index) => <PlanCard locale={locale} plan={plan} sourcePath={sourcePath} featured={index === 1} />)}</div><p class="pricing-note">{pricingTerms(locale)}</p></section>
+
 <section class="section soft">
   <div class="shell">
     <div class="section-head">
-      <p class="eyebrow">{en ? 'Compare with status and boundaries visible' : 'Compara con estado y límites a la vista'}</p>
-      <h2 class="heading">{en ? 'Separate what the demo shows from what a live project must activate.' : 'Separa lo que muestra la demo de lo que debe activar un proyecto real.'}</h2>
-      <p>{en ? 'The plan indicates a possible starting point. Status states what can be evidenced today; every live capability still requires an agreed scope and validation.' : 'El plan indica un posible punto de partida. El estado dice qué puede evidenciarse hoy; toda capacidad real exige alcance acordado y validación.'}</p>
+      <p class="eyebrow">{en ? 'Compare the details' : 'Compara los detalles'}</p>
+      <h2 class="heading">{en ? 'What each plan covers.' : 'Qué contempla cada plan.'}</h2>
+      <p>{en ? 'Check the features and try their demos. We confirm the live setup in your proposal.' : 'Consulta las funciones y prueba sus demos. La puesta en marcha real se concreta en tu propuesta.'}</p>
     </div>
+    <details class="commercial-disclosure" data-plan-comparison><summary>{en ? 'Compare every capability and its availability' : 'Comparar todas las capacidades y su disponibilidad'}</summary>
     <p class="table-scroll-hint">{en ? 'Swipe to view evidence, plan fit, status and boundaries.' : 'Desliza para ver evidencia, encaje por plan, estado y límites.'}</p>
     <div class="capability-table" role="table">
       <div class="capability-row header" role="row">
@@ -75,7 +76,10 @@ const sourcePath = en ? '/en/plans/' : '/planes/';
         );
       })}
     </div>
+    </details>
   </div>
 </section>
+<HumanService locale={locale} ctaHref={`${prefix}/#contacto`} />
+<ContextualGuides locale={locale} contextId="plans" />
 <section class="section shell extras"><div class="section-head"><p class="eyebrow">{en ? 'Scoped additions' : 'Extras con alcance'}</p><h2 class="heading">{en ? 'The core stays clear. Exceptional work stays visible.' : 'El núcleo se mantiene claro. Lo excepcional se presupuesta.'}</h2></div><ul>{(en ? ['Advanced brand identity', 'Content or data migration', 'External integrations', 'Extended training and support', 'Campaigns and new sections'] : ['Identidad de marca avanzada', 'Migración de contenido o datos', 'Integraciones externas', 'Formación y soporte extendidos', 'Campañas y nuevas secciones']).map((item) => <li>{item}</li>)}</ul></section>
 <section class="section shell final-cta"><p class="eyebrow">{en ? 'No gated result' : 'Resultado sin bloqueo'}</p><h2 class="heading">{en ? 'Answer six steps and see your recommendation.' : 'Responde seis pasos y consulta tu recomendación.'}</h2><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`}>{en ? 'Start assessment' : 'Empezar diagnóstico'} →</a></section>

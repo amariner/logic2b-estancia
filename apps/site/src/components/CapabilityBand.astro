@@ -42,6 +42,13 @@ const dataSourceItems = DATA_SOURCE_READINESS_FIELDS.map((field) => ({
       <h2 id="capability-band-title" class="heading">{home.capabilityStatusCopy.title}</h2>
       <p>{home.capabilityStatusCopy.body}</p>
     </div>
+    <div class="connection-overview">
+      <article><span>01</span><h3>{en ? 'Your existing tools' : 'Tus herramientas actuales'}</h3><p>{en ? 'We review your PMS, calendars and booking channels to define what to keep and what to connect.' : 'Revisamos tu PMS, calendarios y canales de reserva para definir qué conservar y qué conectar.'}</p></article>
+      <article><span>02</span><h3>{en ? 'Bookings and payments' : 'Reservas y cobros'}</h3><p>{en ? 'We agree how availability, payment status and guest information should work together.' : 'Acordamos cómo deben trabajar juntos la disponibilidad, el estado del cobro y la información del huésped.'}</p></article>
+      <article><span>03</span><h3>{en ? 'Supervised automation' : 'Automatización supervisada'}</h3><p>{en ? 'Messages, tasks and recommendations with clear permissions and human review.' : 'Mensajes, tareas y recomendaciones con permisos claros y revisión humana.'}</p></article>
+    </div>
+    <p class="connection-note">{en ? 'Connections are scoped separately. Demos have no active providers or live integrations.' : 'Las conexiones se presupuestan por separado. Las demos no tienen proveedores ni integraciones reales activas.'}</p>
+    <details class="commercial-disclosure" data-technical-details><summary>{en ? 'View capability status and technical requirements' : 'Ver estado de capacidades y requisitos técnicos'}</summary>
     <div class="capability-band-grid">
       {home.capabilityGroups.map((group) => (
         <article class="capability-band-card" data-capability-group={group.id}>
@@ -99,6 +106,7 @@ const dataSourceItems = DATA_SOURCE_READINESS_FIELDS.map((field) => ({
         itemStatus={en ? 'Not validated' : 'Sin validar'}
       />
     </div>
+    </details>
     <p class="capability-band-footnote" role="note">{en ? 'Demo status is not production activation. Connections require a validated project, provider and agreed scope.' : 'El estado de demo no equivale a activación en producción. Las conexiones requieren proyecto, proveedor y alcance validados.'}</p>
   </div>
 </section>

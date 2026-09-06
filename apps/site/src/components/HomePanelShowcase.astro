@@ -17,9 +17,9 @@ const panels = getPanelPortfolio(locale).filter((panel): panel is NavigablePanel
 if (panels.length !== 6) throw new Error(`home_panel_showcase_expected_six:${locale}:${panels.length}`);
 
 const labels = en ? {
-  eyebrow: 'Six verified workspaces',
-  title: 'See the decision before you see the software.',
-  intro: 'Explore six local, fictitious management surfaces. Each one makes its purpose, evidence and product boundary explicit before you open the full page.',
+  eyebrow: 'Inside the workspace',
+  title: 'Every task in its place.',
+  intro: 'Enquiries, planning, arrivals and teams. Six views to discover how you could work, with fictional data.',
   all: 'See all six workspaces',
   previous: 'Show previous workspaces',
   next: 'Show next workspaces',
@@ -33,9 +33,9 @@ const labels = en ? {
   note: 'Fictitious local evidence. It sends no message, booking, payment or external update.',
   carousel: 'Verified workspace carousel',
 } : {
-  eyebrow: 'Seis paneles verificados',
-  title: 'Mira la decisión antes que el software.',
-  intro: 'Explora seis superficies de gestión locales y ficticias. Cada una hace explícitos su propósito, su evidencia y el límite del producto antes de abrir la ficha completa.',
+  eyebrow: 'El gestor, por dentro',
+  title: 'Cada tarea, en su sitio.',
+  intro: 'Solicitudes, planning, llegadas y equipo. Seis vistas para descubrir cómo trabajarías, con datos ficticios.',
   all: 'Ver los seis paneles',
   previous: 'Mostrar paneles anteriores',
   next: 'Mostrar paneles siguientes',

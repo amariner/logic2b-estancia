@@ -72,7 +72,7 @@ const spanish: Omit<HomeContract, 'locale'> = {
   navigation: [
     { key: 'webs', label: 'Webs', href: '/webs/' },
     { key: 'gestor', label: 'Gestor', href: '/paneles/' },
-    { key: 'planes', label: 'Planes', href: '#planes' },
+    { key: 'planes', label: 'Precios', href: '#planes' },
     { key: 'recorrido', label: 'Ver recorrido', href: '/recorrido/' },
   ],
   heroCases: [
@@ -104,8 +104,8 @@ const spanish: Omit<HomeContract, 'locale'> = {
   ],
   capabilityStatusCopy: {
     eyebrow: 'Capacidades a la vista',
-    title: 'Conecta lo que ya funciona. Añade lo que el proyecto pueda sostener.',
-    body: 'Cada grupo conserva su estado, evidencia y límite. La demo ayuda a decidir; no activa proveedores, reservas, pagos, mensajes, sincronizaciones ni automatizaciones.',
+    title: 'Conecta tu alojamiento, sin empezar de cero.',
+    body: 'Un proyecto que tiene en cuenta las herramientas que ya usas y la forma de trabajar de tu equipo.',
     evidence: 'Evidencia',
     boundary: 'Límite',
   },
@@ -115,7 +115,7 @@ const english: Omit<HomeContract, 'locale'> = {
   navigation: [
     { key: 'webs', label: 'Websites', href: '/webs/' },
     { key: 'gestor', label: 'Workspace', href: '/panels/' },
-    { key: 'planes', label: 'Plans', href: '#planes' },
+    { key: 'planes', label: 'Pricing', href: '#planes' },
     { key: 'recorrido', label: 'See the journey', href: '/journey/' },
   ],
   heroCases: [

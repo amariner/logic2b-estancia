@@ -1,4 +1,5 @@
 ---
+import WebMiniature from './WebMiniature.astro';
 import type { Locale } from '@logic-estancia/config';
 import { getWebPortfolio } from '../web-portfolio';
 
@@ -9,7 +10,7 @@ const prefix = en ? '/en' : '';
 const labels = en ? {
   eyebrow: 'Twelve website directions',
   title: 'Your stay should not look like anyone else’s.',
-  intro: 'Explore twelve navigable visual directions built with local fictional content. Open a preview here or continue to the full commercial page.',
+  intro: 'Twelve fictional stays, twelve ways to welcome your guests. Find a visual direction that feels like yours.',
   all: 'See all twelve websites',
   previous: 'Show previous website directions',
   next: 'Show next website directions',
@@ -21,7 +22,7 @@ const labels = en ? {
 } : {
   eyebrow: 'Doce direcciones web',
   title: 'Tu alojamiento no tiene que parecerse a ningún otro.',
-  intro: 'Explora doce direcciones visuales navegables construidas con contenido local ficticio. Abre una vista previa aquí o continúa a la ficha comercial completa.',
+  intro: 'Doce alojamientos ficticios, doce formas de dar la bienvenida. Encuentra una dirección visual que se sienta tuya.',
   all: 'Ver las doce webs',
   previous: 'Ver direcciones web anteriores',
   next: 'Ver direcciones web siguientes',
@@ -61,11 +62,8 @@ const labels = en ? {
               data-demo-card={concept.status === 'canonical' ? concept.slug : undefined}
               aria-label={`${concept.brand}: ${concept.demoCta}`}
             >
-              <picture>
-                <source type="image/avif" srcset={`/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w`} sizes="(max-width: 720px) 82vw, (max-width: 1100px) 44vw, 30vw" />
-                <img src={concept.image} alt="" width="2016" height="1344" loading="lazy" decoding="async" />
-              </picture>
-              <span class="home-theme-card-plan">{en ? 'Fictional case' : 'Caso ficticio'} · {concept.planLabel}</span>
+              <WebMiniature concept={concept} />
+              <span class="home-theme-card-status">{en ? 'Fictional case' : 'Caso ficticio'} · {concept.planLabel}</span>
             </a>
             <div class="home-theme-card-copy">
               <span>{concept.number} · {concept.verticalLabel}</span>

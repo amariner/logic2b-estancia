@@ -1,0 +1,31 @@
+---
+import type { WebPortfolioConcept } from '../web-portfolio';
+const { concept, eager = false } = Astro.props as { concept: WebPortfolioConcept; eager?: boolean };
+---
+<div class:list={['web-miniature', `web-miniature-${concept.vertical}`]} aria-hidden="true">
+  <picture><source type="image/avif" srcset={`/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w`} sizes="(max-width: 760px) 42vw, 280px" /><img src={concept.image} alt="" width="2016" height="1344" loading={eager ? 'eager' : 'lazy'} decoding="async" /></picture>
+  <div class="miniature-nav"><span>{concept.brand}</span><i></i><i></i><b></b></div>
+  <div class="miniature-copy"><small>{concept.verticalLabel} · {concept.planLabel}</small><strong>{concept.brand}</strong><span>{concept.showcase.eyebrow}</span></div>
+  <div class="miniature-action"><span></span><b>→</b></div>
+</div>
+
+<style>
+  .web-miniature { position: relative; isolation: isolate; min-height: 230px; height: 100%; overflow: hidden; color: #fff; background: #23382b; font-family: var(--serif); }
+  picture, img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+  .web-miniature::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #14251ace, #17221e26); }
+  .miniature-nav { display: flex; gap: 7px; align-items: center; padding: 18px 16px; }
+  .miniature-nav > span { flex: 1; font-size: 12px; }
+  .miniature-nav i { width: 12px; height: 2px; background: currentColor; opacity: .5; }
+  .miniature-nav b { width: 23px; height: 10px; border-radius: 20px; background: currentColor; opacity: .8; }
+  .miniature-copy { padding: 14px 20px 60px; }
+  .miniature-copy small { display: block; font: 600 10px/1.4 var(--sans); text-transform: uppercase; letter-spacing: .08em; }
+  .miniature-copy strong { display: block; max-width: 180px; margin: 10px 0; font-size: 34px; line-height: .95; font-weight: 400; letter-spacing: -.04em; }
+  .miniature-copy > span { display: block; max-width: 160px; font: 11px/1.5 var(--sans); }
+  .miniature-action { position: absolute; bottom: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; padding: 6px; border: 1px solid #ffffff75; background: #ffffffc9; border-radius: 5px; }
+  .miniature-action > span { height: 3px; width: 65%; margin-left: 7px; background: #6a726357; }
+  .miniature-action b { display: grid; place-items: center; width: 24px; height: 24px; color: #203b2a; background: #fff; border-radius: 4px; font: 14px var(--sans); }
+  .web-miniature-apartments { color: #25362d; }
+  .web-miniature-apartments::after { background: linear-gradient(90deg, #f4f0e5f5, #f4f0e587 62%, #f4f0e520); }
+  .web-miniature-hotels .miniature-copy { margin: 0 14px 16px; padding: 16px 12px 55px; border: 1px solid #ffffff70; }
+  @media (max-width: 760px) { .web-miniature { min-height: 190px; } .miniature-nav { padding: 12px 10px; } .miniature-nav > span { font-size: 10px; } .miniature-nav i { display: none; } .miniature-copy { padding: 8px 12px 55px; } .miniature-copy strong { font-size: 25px; } .miniature-copy small { font-size: 9px; } .miniature-copy > span { display: none; } .miniature-action { bottom: 14px; left: 12px; right: 12px; } }
+</style>

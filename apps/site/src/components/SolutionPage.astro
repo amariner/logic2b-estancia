@@ -23,7 +23,7 @@ const relatedResource = en ? undefined : getSpanishResourceForSegment(segment);
 const spanishCopy = {
   rural: {
     eyebrow: 'Para casas rurales y alojamientos con identidad propia',
-    title: 'Haz que elijan tu casa por lo que se vive allí. No solo por la fecha y el precio.',
+    title: 'Una web a la altura de tu casa rural.',
     body: 'Convierte lo que hace especial tu casa en consultas directas y una gestión que conserva el trato cercano.',
     capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'guest-context', 'website-editor', 'basic-reports'],
     demoTitle: 'Terrava Collection',
@@ -33,7 +33,7 @@ const spanishCopy = {
   },
   apartments: {
     eyebrow: 'Para apartamentos turísticos y pequeños gestores',
-    title: 'Haz crecer tus apartamentos sin multiplicar calendarios, mensajes y tareas.',
+    title: 'Más apartamentos. Menos tareas dispersas.',
     body: 'Construye una marca propia y organiza consultas, reservas y huéspedes sin multiplicar herramientas.',
     capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'guest-context', 'website-editor', 'basic-reports'],
     demoTitle: 'Nivora One',
@@ -43,7 +43,7 @@ const spanishCopy = {
   },
   hotels: {
     eyebrow: 'Para hoteles y equipos operativos',
-    title: 'Que cada turno empiece con prioridades claras. No con la primera urgencia.',
+    title: 'Tu hotel, preparado para cada llegada.',
     body: 'Prioriza llegadas, habitaciones e incidencias con el mismo contexto para todo el equipo.',
     capabilityIds: ['operations-centre', 'cleaning', 'maintenance', 'roles', 'channels', 'automation', 'explainable-revenue', 'revenue'],
     demoTitle: 'Aurem Hotel',
@@ -56,7 +56,7 @@ const spanishCopy = {
 const englishCopy = {
   rural: {
     eyebrow: 'For rural stays with an identity of their own',
-    title: 'Be chosen for what guests experience there. Not only for the date and price.',
+    title: 'A website worthy of your rural stay.',
     body: 'Turn what makes your stay special into direct enquiries and management that keeps the personal touch.',
     capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'guest-context', 'website-editor', 'basic-reports'],
     demoTitle: 'Terrava Collection', demoCopy: 'Eight homes, one enquiry and an alternative that keeps its context.',
@@ -65,7 +65,7 @@ const englishCopy = {
   },
   apartments: {
     eyebrow: 'For holiday apartments and small managers',
-    title: 'Grow your apartments without multiplying calendars, messages and tasks.',
+    title: 'More apartments. Fewer scattered tasks.',
     body: 'Build an owned brand and organise enquiries, bookings and guests without multiplying tools.',
     capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'guest-context', 'website-editor', 'basic-reports'],
     demoTitle: 'Nivora One', demoCopy: 'An owned website for one fictional apartment.',
@@ -74,7 +74,7 @@ const englishCopy = {
   },
   hotels: {
     eyebrow: 'For hotels and operations teams',
-    title: 'Start every shift with clear priorities. Not with the first emergency.',
+    title: 'Your hotel, ready for every arrival.',
     body: 'Prioritise arrivals, rooms and incidents with the same context for the whole team.',
     capabilityIds: ['operations-centre', 'cleaning', 'maintenance', 'roles', 'channels', 'automation', 'explainable-revenue', 'revenue'],
     demoTitle: 'Aurem Hotel', demoCopy: 'One at-risk arrival connects reception, housekeeping and management.',
@@ -103,9 +103,10 @@ const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEn
   <div class="shell">
     <div class="section-head compact-head">
       <p class="eyebrow">{en ? 'Verifiable status' : 'Estado verificable'}</p>
-      <h2 class="heading">{en ? 'See what is visible today and what still requires activation.' : 'Comprueba qué puedes ver hoy y qué requiere activación.'}</h2>
+      <h2 class="heading">{en ? 'Explore the features for your accommodation.' : 'Explora las funciones para tu alojamiento.'}</h2>
       <p>{en ? '“Visible in the demo” never means “active in production”. Every capability keeps its evidence, status and boundary in view.' : '«Visible en la demo» nunca significa «activo en producción». Cada capacidad mantiene a la vista su evidencia, estado y límite.'}</p>
     </div>
+    <details class="commercial-disclosure" data-solution-capabilities><summary>{en ? 'View features and demo availability' : 'Ver funciones y disponibilidad en la demo'}</summary>
     <div class="capability-grid">
       {visible.map((capability) => {
         const evidenceHref = capabilityEvidenceHref(capability, locale);
@@ -135,6 +136,7 @@ const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEn
         );
       })}
     </div>
+    </details>
   </div>
 </section>
 

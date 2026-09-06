@@ -44,7 +44,7 @@ const relatedCapabilities = panel.capabilityIds.map((id) => {
 <PortfolioViewAnalytics event="panel_view" locale={locale} panel={panel.id} plan={panel.plan} />
 <article class="panel-detail" data-panel-detail={panel.id}>
   <header class="panel-detail-notice shell">
-    <p><strong>{en ? 'Commercial evidence page' : 'Ficha de evidencia comercial'}</strong><span>{en ? 'Underlying local demo · fictitious preloaded data' : 'Demo local subyacente · datos ficticios precargados'}</span></p>
+    <p><strong>{en ? 'Workspace demo' : 'Demo del gestor'}</strong><span>{en ? 'Explore with fictional data' : 'Explora con datos ficticios'}</span></p>
     <a href={indexHref}>{en ? 'Back to all workspaces' : 'Volver a todos los paneles'} <span aria-hidden="true">↗</span></a>
   </header>
 
@@ -71,7 +71,7 @@ const relatedCapabilities = panel.capabilityIds.map((id) => {
   <section class="section panel-detail-flow" aria-labelledby="panel-flow-title">
     <div class="shell">
       <p class="eyebrow">{en ? 'How the context moves' : 'Cómo avanza el contexto'}</p>
-      <h2 id="panel-flow-title" class="heading">{en ? 'The view supports a sequence; it does not execute it.' : 'La vista acompaña una secuencia; no la ejecuta.'}</h2>
+      <h2 id="panel-flow-title" class="heading">{en ? 'How your team would use it.' : 'Así lo utilizaría tu equipo.'}</h2>
       <ol>{panel.flow.map((step, index) => <li><span>0{index + 1}</span><p>{step}</p></li>)}</ol>
     </div>
   </section>
@@ -79,7 +79,7 @@ const relatedCapabilities = panel.capabilityIds.map((id) => {
   <section class="section shell panel-detail-evidence" aria-labelledby="panel-evidence-title" data-panel-boundary>
     <div>
       <p class="eyebrow">{en ? 'Contract and boundary' : 'Contrato y límite'}</p>
-      <h2 id="panel-evidence-title" class="heading">{en ? 'The promise stops where the evidence stops.' : 'La promesa termina donde termina la evidencia.'}</h2>
+      <h2 id="panel-evidence-title" class="heading">{en ? 'What you can try today.' : 'Qué puedes probar hoy.'}</h2>
     </div>
     <div>
       <p class="panel-detail-status"><span class={`capability-status ${capability.status}`}>{capabilityStatusLabel(capability.status, locale)}</span><small>{capabilityStatusDetail(capability.status, locale)}</small></p>

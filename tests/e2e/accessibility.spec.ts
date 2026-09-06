@@ -176,6 +176,7 @@ test('representative families tolerate text resized to 200 percent', async ({ pa
 test('home integration readiness files remain accessible and reflow when expanded', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 900 });
   await gotoStable(page, '/');
+  await page.locator('[data-technical-details] > summary').click();
   const providerGate = page.locator('[data-provider-validation-gate]');
   await providerGate.getByText('Revisar las diez puertas de validación', { exact: true }).click();
   await expect(providerGate.locator('[data-provider-validation-field]')).toHaveCount(10);
@@ -192,6 +193,7 @@ test('home integration readiness files remain accessible and reflow when expande
 
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoStable(page, '/en/');
+  await page.locator('[data-technical-details] > summary').click();
   await page.locator('[data-provider-validation-gate]').getByText('Review the ten validation gates', { exact: true }).click();
   await page.locator('[data-readiness-file="data-pms"]').getByText('Review the sixteen conditions', { exact: true }).click();
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });

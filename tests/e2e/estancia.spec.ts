@@ -78,6 +78,7 @@ test('public routes are complete and demos remain isolated', async ({ page }) =>
 
 test('capability maps expose truthful evidence and exact localized targets', async ({ page, request }) => {
   await page.goto('/soluciones/casas-rurales/');
+  await page.locator('[data-solution-capabilities] > summary').click();
   await expect(page.locator('[data-capability-evidence]')).toHaveCount(7);
   const planning = page.locator('[data-capability="planning"]');
   await expect(planning).toContainText('Desde Gestión');
@@ -86,11 +87,13 @@ test('capability maps expose truthful evidence and exact localized targets', asy
   await expect(planning.locator('[data-capability-evidence]')).toHaveAttribute('href', '/demos/terrava/gestion/?vista=planning');
 
   await page.goto('/soluciones/hoteles/');
+  await page.locator('[data-solution-capabilities] > summary').click();
   await expect(page.locator('[data-capability-evidence]')).toHaveCount(7);
   await expect(page.locator('[data-capability="channels"]')).toContainText('Activable por proyecto');
   await expect(page.locator('[data-capability-evidence="channels"]')).toHaveAttribute('href', '/demos/aurem/gestion/?vista=channels');
 
   await page.goto('/en/plans/');
+  await page.locator('[data-plan-comparison] > summary').click();
   const evidenceLinks = page.locator('[data-capability-evidence]');
   await expect(evidenceLinks).toHaveCount(15);
   await expect(page.locator('[data-capability-evidence="explainable-revenue"]')).toHaveAttribute('href', '/en/demos/aurem/gestion/?vista=reports');
@@ -143,8 +146,8 @@ test('home exposes the connected product spine in both languages', async ({ page
   const writes: string[] = [];
   page.on('request', (request) => operationalMethods.has(request.method()) && writes.push(request.url()));
   for (const [path, prefix, labels] of [
-    ['/', '', { webs: 'Webs', panels: '/paneles/', gestor: 'Gestor', plans: 'Planes', recorrido: 'Ver recorrido', evidence: 'Evidencia', gateTitle: 'Cinco expedientes. Cero proveedores validados.', gateReview: 'Revisar las diez puertas de validación', gateBoundary: 'no revela una marca, concede autorización ni activa una conexión', paymentTitle: 'Pagos: qué debe estar validado antes de cobrar', paymentReview: 'Revisar las quince condiciones', paymentProvider: 'no hay marca, cuenta o proveedor seleccionado', paymentBoundary: 'no crea checkout, campo de tarjeta, sesión, autorización, captura, devolución', dataTitle: 'Datos y PMS: qué debe conservar la fuente de verdad', dataReview: 'Revisar las dieciséis condiciones', dataProvider: 'no hay marca, cuenta o proveedor seleccionado', dataBoundary: 'no crea proveedor, cuenta, credencial, conexión PMS, API, webhook' }],
-    ['/en/', '/en', { webs: 'Websites', panels: '/en/panels/', gestor: 'Workspace', plans: 'Plans', recorrido: 'See the journey', evidence: 'Evidence', gateTitle: 'Five readiness files. Zero validated providers.', gateReview: 'Review the ten validation gates', gateBoundary: 'does not reveal a brand, grant authorisation or activate a connection', paymentTitle: 'Payments: what must be validated before charging', paymentReview: 'Review the fifteen conditions', paymentProvider: 'no brand, account or provider is selected', paymentBoundary: 'creates no checkout, card field, session, authorisation, capture, refund', dataTitle: 'Data and PMS: what the source of truth must preserve', dataReview: 'Review the sixteen conditions', dataProvider: 'no brand, account or provider is selected', dataBoundary: 'creates no provider, account, credential, PMS connection, API, webhook' }],
+    ['/', '', { webs: 'Webs', panels: '/paneles/', gestor: 'Gestor', plans: 'Precios', recorrido: 'Ver recorrido', evidence: 'Evidencia', gateTitle: 'Cinco expedientes. Cero proveedores validados.', gateReview: 'Revisar las diez puertas de validación', gateBoundary: 'no revela una marca, concede autorización ni activa una conexión', paymentTitle: 'Pagos: qué debe estar validado antes de cobrar', paymentReview: 'Revisar las quince condiciones', paymentProvider: 'no hay marca, cuenta o proveedor seleccionado', paymentBoundary: 'no crea checkout, campo de tarjeta, sesión, autorización, captura, devolución', dataTitle: 'Datos y PMS: qué debe conservar la fuente de verdad', dataReview: 'Revisar las dieciséis condiciones', dataProvider: 'no hay marca, cuenta o proveedor seleccionado', dataBoundary: 'no crea proveedor, cuenta, credencial, conexión PMS, API, webhook' }],
+    ['/en/', '/en', { webs: 'Websites', panels: '/en/panels/', gestor: 'Workspace', plans: 'Pricing', recorrido: 'See the journey', evidence: 'Evidence', gateTitle: 'Five readiness files. Zero validated providers.', gateReview: 'Review the ten validation gates', gateBoundary: 'does not reveal a brand, grant authorisation or activate a connection', paymentTitle: 'Payments: what must be validated before charging', paymentReview: 'Review the fifteen conditions', paymentProvider: 'no brand, account or provider is selected', paymentBoundary: 'creates no checkout, card field, session, authorisation, capture, refund', dataTitle: 'Data and PMS: what the source of truth must preserve', dataReview: 'Review the sixteen conditions', dataProvider: 'no brand, account or provider is selected', dataBoundary: 'creates no provider, account, credential, PMS connection, API, webhook' }],
   ] as const) {
     await page.goto(path);
     const header = page.locator('.site-header');
@@ -167,6 +170,7 @@ test('home exposes the connected product spine in both languages', async ({ page
     for (const href of new Set(deepLinks)) expect((await request.get(href)).status(), href).toBe(200);
     await expect(page.locator('[data-capability-band]')).toContainText(labels.evidence);
 
+    await page.locator('[data-technical-details] > summary').click();
     const providerGate = page.locator('[data-provider-validation-gate]');
     await expect(providerGate.getByRole('heading', { name: labels.gateTitle })).toBeVisible();
     await expect(providerGate.locator('[data-readiness-registry-item]')).toHaveCount(5);
@@ -544,6 +548,7 @@ test('capability evidence opens the exact fictitious flow without external write
   });
 
   await page.goto('/soluciones/hoteles/');
+  await page.locator('[data-solution-capabilities] > summary').click();
   await page.locator('[data-capability-evidence="channels"]').click();
   await expect(page).toHaveURL(/\/demos\/aurem\/gestion\/\?vista=channels$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Canales' })).toBeVisible();
@@ -840,11 +845,11 @@ test('mobile navigation keeps Contactar visible and opens the accessible project
 
   await contact.focus();
   await page.keyboard.press('Enter');
-  const dialog = page.getByRole('dialog', { name: 'Cuéntanos dónde se atasca hoy una reserva.' });
+  const dialog = page.getByRole('dialog', { name: 'Demos el siguiente paso.' });
   await expect(mobileNav).toBeHidden();
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole('heading', { name: 'Cuéntanos dónde se atasca hoy una reserva.' })).toBeFocused();
+  await expect(dialog.getByRole('heading', { name: 'Demos el siguiente paso.' })).toBeFocused();
   await expect(dialog.locator('[data-lead]')).toHaveCount(1);
   await expect(page.locator('[data-lead]')).toHaveCount(1);
   await expect(page.locator('body')).toHaveClass(/contact-dialog-open/);
@@ -859,8 +864,8 @@ test('mobile navigation keeps Contactar visible and opens the accessible project
 test('mobile contact always reaches the localized home modal from other marketing routes', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 860 });
   for (const item of [
-    { path: '/planes/', menu: 'Menú', nav: 'Principal móvil', contact: 'Contactar', href: '/#contacto', url: /\/#contacto$/, dialog: 'Cuéntanos dónde se atasca hoy una reserva.', close: 'Cerrar formulario de contacto' },
-    { path: '/en/plans/', menu: 'Menu', nav: 'Mobile main', contact: 'Contact us', href: '/en/#contacto', url: /\/en\/#contacto$/, dialog: 'Tell us where a booking gets stuck today.', close: 'Close contact form' },
+    { path: '/planes/', menu: 'Menú', nav: 'Principal móvil', contact: 'Contactar', href: '/#contacto', url: /\/#contacto$/, dialog: 'Demos el siguiente paso.', close: 'Cerrar formulario de contacto' },
+    { path: '/en/plans/', menu: 'Menu', nav: 'Mobile main', contact: 'Contact us', href: '/en/#contacto', url: /\/en\/#contacto$/, dialog: 'Let’s take the next step.', close: 'Close contact form' },
   ] as const) {
     await page.goto(item.path);
     await page.getByRole('button', { name: item.menu }).click();
@@ -882,11 +887,11 @@ test('mobile contact always reaches the localized home modal from other marketin
 test('hero follows the case-led structure and keeps its demos explicitly local', async ({ page, request }) => {
   await page.goto('/');
   const hero = page.locator('.hero');
-  await expect(hero.getByRole('heading', { level: 1 })).toHaveAttribute('aria-label', 'Gestiona solicitudes, estancias y operación sin perder el contexto.');
+  await expect(hero.getByRole('heading', { level: 1 })).toHaveAttribute('aria-label', 'Gestiona reservas, estancias y tu equipo sin complicarte.');
   await expect(hero.locator('[data-hero-word]')).toHaveCount(3);
-  await expect(hero.getByRole('link', { name: /Encuentra tu punto de partida/ })).toHaveAttribute('href', '/diagnostico/');
-  await expect(hero.getByRole('link', { name: /Ver cómo se conecta/ })).toHaveAttribute('href', '#producto');
-  await expect(hero).toContainText('Casos locales con datos ficticios');
+  await expect(hero.getByRole('link', { name: /Solicitar información/ })).toHaveAttribute('href', '#contacto');
+  await expect(hero.getByRole('link', { name: /Ver el producto/ })).toHaveAttribute('href', '#producto');
+  await expect(hero).toContainText('Demos ficticias.');
   await expect(hero.locator('form, input, select, textarea, [data-lead], [data-commercial-lead]')).toHaveCount(0);
 
   const shortcuts = hero.locator('[data-hero-shortcut]');
@@ -916,10 +921,10 @@ test('hero follows the case-led structure and keeps its demos explicitly local',
 
   await page.goto('/en/');
   const englishHero = page.locator('.hero');
-  await expect(englishHero.getByRole('heading', { level: 1 })).toHaveAttribute('aria-label', 'Manage enquiries, stays and operations without losing context.');
-  await expect(englishHero.getByRole('link', { name: /Find your starting point/ })).toHaveAttribute('href', '/en/assessment/');
+  await expect(englishHero.getByRole('heading', { level: 1 })).toHaveAttribute('aria-label', 'Manage bookings, stays and your team with less effort.');
+  await expect(englishHero.getByRole('link', { name: /Request information/ })).toHaveAttribute('href', '#contacto');
   await expect(englishHero.locator('[data-hero-proof]')).toHaveCount(3);
-  await expect(englishHero).toContainText('Local cases with fictitious data');
+  await expect(englishHero).toContainText('Fictional demos.');
 });
 
 test('hero rail stays inside the viewport at every compact breakpoint', async ({ page }) => {
@@ -943,13 +948,14 @@ test('hero rail stays inside the viewport at every compact breakpoint', async ({
       };
     });
     expect(layout.overflow, `${width}px overflow`).toBeLessThanOrEqual(0);
-    expect(layout.columns, `${width}px grid columns`).toBe(1);
-    expect(layout.gallery.top, `${width}px gallery position`).toBeGreaterThan(layout.copy.bottom);
+    expect(layout.columns, `${width}px grid columns`).toBe(width <= 760 ? 1 : 2);
+    if (width <= 760) expect(layout.gallery.top, `${width}px gallery position`).toBeGreaterThan(layout.copy.bottom);
+    else expect(layout.gallery.left, `${width}px gallery position`).toBeGreaterThan(layout.copy.right);
     for (const [name, bounds] of [['copy', layout.copy], ['gallery', layout.gallery], ['rail', layout.rail]] as const) {
       expect(bounds.left, `${width}px ${name} left bound`).toBeGreaterThanOrEqual(-0.5);
       expect(bounds.right, `${width}px ${name} right bound`).toBeLessThanOrEqual(layout.viewportWidth + 0.5);
     }
-    expect(layout.rail.height, `${width}px rail height`).toBeGreaterThan(300);
+    expect(layout.rail.height, `${width}px rail height`).toBeGreaterThan(250);
     expect(layout.gallery.height, `${width}px gallery height`).toBeGreaterThan(layout.rail.height);
     for (const [index, card] of layout.cases.entries()) {
       expect(card.left, `${width}px case ${index} left bound`).toBeGreaterThanOrEqual(layout.rail.left - 0.5);
@@ -987,7 +993,7 @@ test('rich plan cards expose canonical previews and carry evidence context into 
   }
 
   await page.goto('/');
-  await page.locator('[data-plan-card="gestion"]').getByRole('link', { name: 'Evaluar este plan' }).click();
+  await page.locator('[data-plan-card="gestion"]').getByRole('link', { name: 'Elegir este plan' }).click();
   await expect(page).toHaveURL(/\/diagnostico\/\?plan=gestion&web=terrava&panel=terrava&segment=unknown&sourcePath=%2F$/);
   await expect(page.locator('[name="bookingNeeds"][value="bookings"]')).toBeChecked();
   await page.locator('[data-step="1"]').getByText('Apartamentos', { exact: true }).click();
@@ -1085,7 +1091,7 @@ test('business landing links preserve the prospect segment in the assessment and
     await page.goto(path);
     await page.locator('.solution-hero').getByRole('link', { name: 'Pedir una conversación' }).click();
     await expect(page).toHaveURL(new RegExp(`/\\?contact=${segment}#contacto$`));
-    const dialog = page.getByRole('dialog', { name: 'Cuéntanos dónde se atasca hoy una reserva.' });
+    const dialog = page.getByRole('dialog', { name: 'Demos el siguiente paso.' });
     await expect(dialog).toBeVisible();
     await expect(dialog.locator('[name="accommodationType"]')).toHaveValue(type);
   }
@@ -1095,7 +1101,7 @@ test('managed human service is explicit across the commercial journey', async ({
   for (const path of ['/', '/soluciones/casas-rurales/', '/planes/']) {
     await page.goto(path);
     const service = page.locator('.human-service');
-    await expect(service.getByRole('heading', { name: 'No te damos un software para que te apañes solo.' })).toBeVisible();
+    await expect(service.getByRole('heading', { name: 'Lo preparamos contigo. Te acompañamos después.' })).toBeVisible();
     await expect(service.getByRole('heading', { name: 'Lo configuramos por ti' })).toBeVisible();
     await expect(service).toContainText('todo lo acordado');
     await expect(service).toContainText('soporte base');
@@ -1103,7 +1109,7 @@ test('managed human service is explicit across the commercial journey', async ({
 
   await page.goto('/en/solutions/apartments/');
   const service = page.locator('.human-service');
-  await expect(service.getByRole('heading', { name: "We don't hand you software and leave you to figure it out." })).toBeVisible();
+  await expect(service.getByRole('heading', { name: "We set it up with you. We stay alongside you." })).toBeVisible();
   await expect(service.getByRole('heading', { name: 'We configure it for you' })).toBeVisible();
   await expect(service).toContainText('everything agreed in scope');
 });
@@ -1175,8 +1181,9 @@ test('each accommodation landing explains its own detailed workflow', async ({ p
   await expect(workflow.locator('.workflow-step')).toHaveCount(5);
 });
 
-test('capability evidence and its boundary are visible without a hidden disclosure', async ({ page }) => {
+test('capability evidence and its boundary remain readable inside the optional feature details', async ({ page }) => {
   await page.goto('/soluciones/hoteles/');
+  await page.locator('[data-solution-capabilities] > summary').click();
   const capability = page.locator('[data-capability="operations-centre"]');
   await expect(capability.getByRole('link', { name: /Ver evidencia visual en Aurem/ })).toBeVisible();
   await expect(capability).toContainText('No toma decisiones ni ejecuta acciones de forma autónoma');
@@ -1185,6 +1192,7 @@ test('capability evidence and its boundary are visible without a hidden disclosu
 
 test('scope configurator recommends progressively and prefills the commercial form', async ({ page }) => {
   await page.goto('/');
+  await page.locator('#alcance > summary').click();
   const scope = page.locator('[data-scope-estimator]');
   await expect(scope).toHaveAttribute('data-level', 'basico');
   await expect(scope.getByRole('heading', { name: 'Básico', exact: true })).toBeVisible();
@@ -1210,6 +1218,7 @@ test('scope configurator recommends progressively and prefills the commercial fo
 
 test('scope configurator remains localized in English', async ({ page }) => {
   await page.goto('/en/');
+  await page.locator('#alcance > summary').click();
   const scope = page.locator('[data-scope-estimator]');
   await scope.getByLabel('Messages, reminders and channels').check();
   await expect(scope).toHaveAttribute('data-level', 'inteligente');
@@ -1291,7 +1300,7 @@ test('assessment keeps context local until the single sales form is reviewed and
   await form.locator('[name="email"]').fill('ada@example.test');
   await form.locator('[name="timeline"]').selectOption('0-3');
   await form.locator('[name="accept"]').check();
-  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
+  await form.getByRole('button', { name: /Solicitar información/ }).click();
   await expect(form.locator('[data-lead-receipt]')).toBeVisible();
   expect(leadRequests).toBe(1);
   expect(submitted).toMatchObject({
@@ -1345,7 +1354,7 @@ test('only the home landing exposes and submits the real commercial lead form', 
   await form.locator('[name="email"]').fill('ada@example.test');
   await form.locator('[name="message"]').fill('Solicitud comercial de prueba.');
   await form.locator('[name="accept"]').check();
-  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
+  await form.getByRole('button', { name: /Solicitar información/ }).click();
   const receipt = form.locator('[data-lead-receipt]');
   await expect(receipt).toBeVisible();
   await expect(receipt).toBeFocused();
@@ -1375,7 +1384,7 @@ test('only the home landing exposes and submits the real commercial lead form', 
     await expect(contact).toHaveAttribute('href', `/?contact=${segment}#contacto`);
     await contact.click();
     await expect(page).toHaveURL(new RegExp(`/\\?contact=${segment}#contacto$`));
-    const dialog = page.getByRole('dialog', { name: 'Cuéntanos dónde se atasca hoy una reserva.' });
+    const dialog = page.getByRole('dialog', { name: 'Demos el siguiente paso.' });
     await expect(dialog).toBeVisible();
     const solutionForm = dialog.locator('[data-lead]');
     await expect(solutionForm).toHaveCount(1);
@@ -1385,7 +1394,7 @@ test('only the home landing exposes and submits the real commercial lead form', 
     await solutionForm.locator('[name="businessName"]').fill('Estancia Vertical');
     await solutionForm.locator('[name="email"]').fill('ada@example.test');
     await solutionForm.locator('[name="accept"]').check();
-    await solutionForm.getByRole('button', { name: /Quiero una recomendación/ }).click();
+    await solutionForm.getByRole('button', { name: /Solicitar información/ }).click();
     await expect(solutionForm.locator('[data-lead-receipt]')).toBeVisible();
     expect(submitted).toMatchObject({ accommodationType: type, sourcePath: path });
     await dialog.getByRole('button', { name: 'Cerrar formulario de contacto' }).click();
@@ -1409,7 +1418,7 @@ test('the English receipt exposes only a valid optional meeting link', async ({ 
   await form.locator('[name="businessName"]').fill('Demo Stay');
   await form.locator('[name="email"]').fill('ada@example.test');
   await form.locator('[name="accept"]').check();
-  await form.getByRole('button', { name: /Get my recommendation/ }).click();
+  await form.getByRole('button', { name: /Request information/ }).click();
   const receipt = form.locator('[data-lead-receipt]');
   await expect(receipt).toContainText('The conversation is now under way.');
   await expect(receipt.locator('[data-meeting-copy]')).toHaveText('If useful, you can also choose a time.');
@@ -1426,10 +1435,10 @@ test('the sales form does not claim delivery for a non-delivery 202 response', a
   await form.locator('[name="businessName"]').fill('Casa Demo');
   await form.locator('[name="email"]').fill('ada@example.test');
   await form.locator('[name="accept"]').check();
-  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
+  await form.getByRole('button', { name: /Solicitar información/ }).click();
   await expect(form.locator('[data-lead-receipt]')).toBeHidden();
   await expect(form.locator('.form-status')).toHaveText('No hemos podido entregarla. Prueba por WhatsApp o vuelve a intentarlo.');
-  await expect(form.getByRole('button', { name: /Quiero una recomendación/ })).toBeEnabled();
+  await expect(form.getByRole('button', { name: /Solicitar información/ })).toBeEnabled();
 });
 
 test('the sales form explains rate limiting and re-enables itself in both locales', async ({ page }) => {
@@ -1441,8 +1450,8 @@ test('the sales form explains rate limiting and re-enables itself in both locale
   });
   await enableCommercialLead(page);
   const cases = [
-    { path: '/', submit: 'Quiero una recomendación', waiting: 'Reintentar en 2 s', status: 'Has hecho varios intentos. Conservamos tus datos en el formulario; podrás volver a enviarlo en 2 s.' },
-    { path: '/en/', submit: 'Get my recommendation', waiting: 'Try again in 2s', status: 'You have made several attempts. Your details remain in the form; you can send it again in 2s.' },
+    { path: '/', submit: 'Solicitar información', waiting: 'Reintentar en 2 s', status: 'Has hecho varios intentos. Conservamos tus datos en el formulario; podrás volver a enviarlo en 2 s.' },
+    { path: '/en/', submit: 'Request information', waiting: 'Try again in 2s', status: 'You have made several attempts. Your details remain in the form; you can send it again in 2s.' },
   ];
   for (const item of cases) {
     await page.goto(item.path);
@@ -1472,19 +1481,19 @@ test('the sales form bounds a stalled request and can retry without claiming del
   await form.locator('[name="businessName"]').fill('Casa Demo');
   await form.locator('[name="email"]').fill('ada@example.test');
   await form.locator('[name="accept"]').check();
-  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
+  await form.getByRole('button', { name: /Solicitar información/ }).click();
   await expect(form.getByRole('button', { name: /Enviando/ })).toBeDisabled();
 
   await page.clock.fastForward(15_000);
 
   await expect(form.locator('[data-lead-receipt]')).toBeHidden();
   await expect(form.locator('.form-status')).toHaveText('La conexión está tardando demasiado y no podemos confirmar la entrega. Vuelve a intentarlo: si la solicitud ya llegó, conservaremos una única referencia.');
-  await expect(form.getByRole('button', { name: /Quiero una recomendación/ })).toBeEnabled();
+  await expect(form.getByRole('button', { name: /Solicitar información/ })).toBeEnabled();
   expect(requests).toBe(1);
 
   await page.unrouteAll({ behavior: 'ignoreErrors' });
   await page.route('**/api/leads', (route) => route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'retry-ref', meetingUrl: null }) }));
-  await form.getByRole('button', { name: /Quiero una recomendación/ }).click();
+  await form.getByRole('button', { name: /Solicitar información/ }).click();
   await expect(form.locator('[data-lead-receipt]')).toContainText('retry-ref');
 });
 

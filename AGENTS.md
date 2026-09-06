@@ -42,7 +42,7 @@ Antes de implementar se identifica qué necesita cada perfil. Después se regist
 - HubSpot permanece fuera de alcance y no debe configurarse ni invocarse hasta una autorización futura explícita.
 - La recomendación se basa en capacidades; el tamaño solo añade contexto de implantación.
 - No se envía PII a GA4 y la analítica solo se activa tras consentimiento explícito.
-- No se publican precios hasta completar 15 entrevistas cualificadas y 5 propuestas reales.
+- Por petición explícita del usuario el 2026-09-05, se muestran precios orientativos desde 49/149/299 €/mes y 490/990/1.990 € de implantación, sin IVA, con alcance y condiciones visibles. Esta excepción sustituye la prohibición anterior de mostrar precios. Las 15 entrevistas cualificadas y 5 propuestas reales siguen pendientes para validar disposición a pagar; no se presentan como completadas. No autoriza despliegue de producción ni contratación automática.
 - No se inventan clientes, testimonios, integraciones, resultados comerciales ni funcionalidades operacionales.
 
 ## Fuente de verdad de continuidad

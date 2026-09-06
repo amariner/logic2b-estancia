@@ -23,11 +23,11 @@ const filters = en ? {
     <div class="shell panel-portfolio-hero-grid">
       <div>
         <p class="eyebrow">{en ? 'Workspace portfolio' : 'Portfolio de paneles'}</p>
-        <h1 class="display">{en ? 'See the decision before you see the software.' : 'Mira la decisión antes que el software.'}</h1>
+        <h1 class="display">{en ? 'A clearer view of every working day.' : 'El día a día, más claro.'}</h1>
       </div>
       <div>
-        <p>{en ? 'Six management surfaces organise the commercial evidence for Management and Intelligent. Only pages with complete content and an exact local demo count as navigable.' : 'Seis superficies de gestión ordenan la evidencia comercial de Gestión e Inteligente. Solo cuentan como navegables las fichas con contenido completo y una demo local exacta.'}</p>
-        <dl><div><dt>{en ? 'Verified now' : 'Verificadas ahora'}</dt><dd>{publishedCount}/6</dd></div><div><dt>{en ? 'External actions' : 'Acciones externas'}</dt><dd>{en ? 'None' : 'Ninguna'}</dd></div></dl>
+        <p>{en ? 'Enquiries, planning, arrivals and operations. Six workspace views to explore with fictional data, without changing real bookings.' : 'Solicitudes, planning, llegadas y operación. Seis vistas del gestor para explorar con datos ficticios, sin modificar reservas reales.'}</p>
+        <dl><div><dt>{en ? 'Demo views' : 'Vistas de demo'}</dt><dd>{publishedCount}/6</dd></div><div><dt>{en ? 'External actions' : 'Acciones externas'}</dt><dd>{en ? 'None' : 'Ninguna'}</dd></div></dl>
       </div>
     </div>
   </section>
@@ -35,8 +35,8 @@ const filters = en ? {
   <section class="section panel-portfolio-catalog" aria-labelledby="panel-catalog-title">
     <div class="shell">
       <div class="panel-portfolio-heading">
-        <div><p class="eyebrow">{en ? 'Evidence by responsibility' : 'Evidencia por responsabilidad'}</p><h2 id="panel-catalog-title" class="heading">{en ? 'Start with the surfaces that can already be checked.' : 'Empieza por las superficies que ya se pueden comprobar.'}</h2></div>
-        <p>{en ? 'All six pages now open exact local evidence: three Management surfaces in Terrava and three Intelligent surfaces in Aurem. Their boundaries distinguish what is visible from what remains pending or on the roadmap.' : 'Las seis fichas ya abren evidencia local exacta: tres superficies de Gestión en Terrava y tres de Inteligente en Aurem. Sus límites distinguen lo visible de lo pendiente o en ruta.'}</p>
+        <div><p class="eyebrow">{en ? 'For every team' : 'Para cada equipo'}</p><h2 id="panel-catalog-title" class="heading">{en ? 'Find the view your team needs.' : 'Encuentra la vista que necesita tu equipo.'}</h2></div>
+        <p>{en ? 'Management brings enquiries and planning together. Intelligent adds preparation, operations and a supervised copilot. Explore both levels below.' : 'Gestión reúne solicitudes y planning. Inteligente añade preparación, operación y un copiloto supervisado. Explora los dos niveles.'}</p>
       </div>
       <div class="portfolio-filters panel-portfolio-filters" aria-label={en ? 'Filter workspace pages' : 'Filtrar fichas de panel'}>
         <fieldset class="portfolio-search"><legend>{filters.search}</legend><label class="sr-only" for="panel-portfolio-search">{filters.placeholder}</label><input id="panel-portfolio-search" type="search" placeholder={filters.placeholder} autocomplete="off" data-panel-search /></fieldset>
