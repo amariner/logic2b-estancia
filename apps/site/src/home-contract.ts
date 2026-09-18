@@ -76,7 +76,7 @@ const spanish: Omit<HomeContract, 'locale'> = {
     { key: 'recorrido', label: 'Ver recorrido', href: '/recorrido/' },
   ],
   heroCases: [
-    { slug: 'nivora', brand: 'Nivora One', label: 'Web de marca', text: 'Una presencia propia que abre la conversación directa.', plan: 'basico', planLabel: 'Básico', href: '/demos/nivora/', image: '/media/nivora/hero.webp' },
+    { slug: 'nivora', brand: 'Nivora One', label: 'Web de marca', text: 'Una presencia propia que abre la conversación directa.', plan: 'basico', planLabel: 'Básico', href: '/demos/nivora/', image: '/media/nivora/hero-morning.webp' },
     { slug: 'terrava', brand: 'Terrava Collection', label: 'Web + gestor', text: 'Una colección que conserva el contexto de cada solicitud.', plan: 'gestion', planLabel: 'Gestión', href: '/demos/terrava/', image: '/media/terrava/hero.webp' },
     { slug: 'aurem', brand: 'Aurem Hotel', label: 'Operación', text: 'Un centro visual para priorizar antes de la llegada.', plan: 'inteligente', planLabel: 'Inteligente', href: '/demos/aurem/', image: '/media/aurem/hero.webp' },
   ],
@@ -119,7 +119,7 @@ const english: Omit<HomeContract, 'locale'> = {
     { key: 'recorrido', label: 'See the journey', href: '/journey/' },
   ],
   heroCases: [
-    { slug: 'nivora', brand: 'Nivora One', label: 'Brand website', text: 'An owned presence that opens a direct conversation.', plan: 'basico', planLabel: 'Basic', href: '/en/demos/nivora/', image: '/media/nivora/hero.webp' },
+    { slug: 'nivora', brand: 'Nivora One', label: 'Brand website', text: 'An owned presence that opens a direct conversation.', plan: 'basico', planLabel: 'Basic', href: '/en/demos/nivora/', image: '/media/nivora/hero-morning.webp' },
     { slug: 'terrava', brand: 'Terrava Collection', label: 'Website + workspace', text: 'A collection that keeps every enquiry’s context intact.', plan: 'gestion', planLabel: 'Management', href: '/en/demos/terrava/', image: '/media/terrava/hero.webp' },
     { slug: 'aurem', brand: 'Aurem Hotel', label: 'Operations', text: 'A visual centre for prioritising before arrival.', plan: 'inteligente', planLabel: 'Intelligent', href: '/en/demos/aurem/', image: '/media/aurem/hero.webp' },
   ],

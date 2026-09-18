@@ -15,7 +15,17 @@ const other = locale === 'es' ? `/en/demos/${slug}/${dashboard ? 'gestion/' : ''
   <slot />
   {!dashboard && <footer class="demo-footer"><span>{demo.brand}</span><small>{locale === 'es' ? 'Marca ficticia · Solo visualización' : 'Fictitious brand · View only'}</small><div><a href={other}>{locale === 'es' ? 'English' : 'Español'}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/#contacto`}>Logic2B ↗</a></div></footer>}
   <script is:inline>
-    if (window.self !== window.top) document.documentElement.classList.add('demo-is-embedded');
+    if (window.self !== window.top) {
+      document.documentElement.classList.add('demo-is-embedded');
+      window.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape' || event.repeat) return;
+        const nestedDialogOpen = Boolean(document.querySelector('dialog[open]'));
+        // Let an inner search, menu or dialog consume Escape before closing its preview.
+        setTimeout(() => {
+          if (!event.defaultPrevented && !nestedDialogOpen) window.parent.postMessage({ type: 'logic-estancia:close-preview' }, location.origin);
+        }, 0);
+      });
+    }
   </script>
 </body></html>
 <style is:global>

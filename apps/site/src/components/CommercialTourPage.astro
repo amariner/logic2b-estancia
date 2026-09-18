@@ -1,16 +1,30 @@
 ---
 import type { Locale } from '@logic-estancia/config';
-import { getCommercialTour } from '../commercial-tour';
+import { getCommercialTour, type CommercialTourStepId } from '../commercial-tour';
+import { tourAssessmentHref } from '../tour-entry';
 import PanelPreview from './PanelPreview.astro';
 
 const { locale } = Astro.props as { locale: Locale };
 const en = locale === 'en';
 const prefix = en ? '/en' : '';
 const steps = getCommercialTour(locale);
+const questions: Record<CommercialTourStepId, string> = en ? {
+  'brand-web': 'How would my stay look online?',
+  enquiries: 'What does this enquiry need?',
+  planning: 'Which dates could I offer?',
+  preparation: 'What is left before the arrival?',
+  operations: 'How is my accommodation doing?',
+} : {
+  'brand-web': '¿Cómo se vería mi alojamiento?',
+  enquiries: '¿Qué necesita esta consulta?',
+  planning: '¿Qué fechas puedo ofrecer?',
+  preparation: '¿Qué falta antes de la llegada?',
+  operations: '¿Cómo va mi alojamiento?',
+};
 const labels = en ? {
-  eyebrow: 'Three-minute product journey',
-  title: 'Follow one stay from its website to the decisions behind it.',
-  intro: 'Explore the website, planning and operations in five steps. All examples use fictional data and perform no live actions.',
+  eyebrow: 'A look in three minutes',
+  title: 'From your website to the day ahead.',
+  intro: 'Explore a website, an enquiry and the work behind them. Three separate fictional examples; start with what matters to you.',
   duration: 'About 3 minutes',
   start: 'Start the guided journey',
   overview: 'What you will see',
@@ -18,28 +32,28 @@ const labels = en ? {
   progress: 'Journey progress',
   step: 'Step',
   of: 'of',
-  decision: 'Decision in view',
+  decision: 'What it helps with',
   outcome: 'What this shows',
-  boundaryLabel: 'Demo limits',
+  more: 'What you can explore',
   detail: 'Explore this feature',
   exact: 'Try the demo',
   newTab: 'opens in a new tab',
-  evidenceNote: 'Opening evidence does not complete the journey. Return to this tab to continue.',
+  evidenceNote: 'The demo opens in another tab. You can return here at any time.',
   previous: 'Previous step',
   next: 'Next step',
   complete: 'Complete the journey',
   completeEyebrow: 'Journey completed',
-  completeTitle: 'You have explored the complete journey.',
-  completeBody: 'The next useful step is to compare the three layers or assess which capabilities your business needs first. Contact remains the only route that can submit a real commercial request.',
+  completeTitle: 'Where would you like to start?',
+  completeBody: 'Compare the plans or get a recommendation for your accommodation. If you already have a question, we can talk it through.',
   review: 'Review the journey again',
   plans: 'Compare plans',
   assessment: 'Start the assessment',
   contact: 'Talk to Logic2B',
-  noScript: 'The five moments remain readable below. Interactive progress and measurement require JavaScript; all evidence links still work.',
+  noScript: 'Explore the five stages below. You can open each demo directly.',
 } : {
-  eyebrow: 'Recorrido de producto en tres minutos',
-  title: 'Sigue una estancia desde su web hasta las decisiones que la preparan.',
-  intro: 'Explora la web, el planning y la operación en cinco pasos. Todos los ejemplos usan datos ficticios y no realizan acciones reales.',
+  eyebrow: 'Un vistazo en tres minutos',
+  title: 'De tu web al día a día.',
+  intro: 'Explora una web, una consulta y el trabajo que hay detrás. Tres ejemplos ficticios e independientes; empieza por lo que te interesa.',
   duration: 'Unos 3 minutos',
   start: 'Empezar el recorrido guiado',
   overview: 'Qué vas a ver',
@@ -47,33 +61,36 @@ const labels = en ? {
   progress: 'Progreso del recorrido',
   step: 'Paso',
   of: 'de',
-  decision: 'Decisión a la vista',
+  decision: 'Para qué sirve',
   outcome: 'Qué te muestra',
-  boundaryLabel: 'Límites de la demo',
+  more: 'Qué puedes comprobar',
   detail: 'Conocer esta función',
   exact: 'Probar la demo',
   newTab: 'se abre en otra pestaña',
-  evidenceNote: 'Abrir evidencia no completa el recorrido. Vuelve a esta pestaña para continuar.',
+  evidenceNote: 'La demo se abre en otra pestaña. Puedes volver aquí cuando quieras.',
   previous: 'Paso anterior',
   next: 'Siguiente paso',
   complete: 'Completar el recorrido',
   completeEyebrow: 'Recorrido completado',
-  completeTitle: 'Ya conoces el recorrido completo.',
-  completeBody: 'El siguiente paso útil es comparar las tres capas o evaluar qué capacidades necesita primero tu negocio. Contacto sigue siendo la única ruta capaz de enviar una solicitud comercial real.',
+  completeTitle: '¿Por dónde quieres empezar?',
+  completeBody: 'Compara los planes o recibe una recomendación para tu alojamiento. Si ya tienes una pregunta, podemos hablarla contigo.',
   review: 'Revisar el recorrido de nuevo',
   plans: 'Comparar planes',
   assessment: 'Empezar el diagnóstico',
   contact: 'Hablar con Logic2B',
-  noScript: 'Los cinco momentos siguen siendo legibles a continuación. El progreso interactivo y la medición requieren JavaScript; todos los enlaces de evidencia siguen funcionando.',
+  noScript: 'Explora las cinco etapas a continuación. Puedes abrir cada demo directamente.',
 };
 ---
 
-<article class="commercial-tour" data-commercial-tour data-state="ready">
+<article class="commercial-tour" data-commercial-tour data-state="ready" data-locale={locale}>
   <header class="commercial-tour-hero section shell">
     <div>
       <p class="eyebrow">{labels.eyebrow}</p>
       <h1 class="display">{labels.title}</h1>
       <p>{labels.intro}</p>
+      <label class="tour-entry-label">{en ? 'Which question would you like to explore first?' : '¿Qué pregunta quieres explorar primero?'}
+        <select data-tour-entry>{steps.map(step => <option value={step.id}>{questions[step.id]}</option>)}</select>
+      </label>
       <div class="commercial-tour-start">
         <button class="pill" type="button" data-tour-start data-track="tour_start" data-flow="guided" data-section="guided_tour">{labels.start} <span aria-hidden="true">→</span></button>
         <span>{labels.duration}</span>
@@ -86,7 +103,7 @@ const labels = en ? {
     </aside>
   </header>
 
-  <noscript><style>.commercial-tour-start{display:none!important}</style><p class="shell commercial-tour-noscript">{labels.noScript}</p></noscript>
+  <noscript><style>.commercial-tour-start,.tour-entry-label{display:none!important}</style><p class="shell commercial-tour-noscript">{labels.noScript}</p></noscript>
 
   <section class="commercial-tour-workspace section" data-tour-workspace aria-live="polite">
     <div class="shell">
@@ -94,8 +111,9 @@ const labels = en ? {
         <div>
           <p>{labels.progress}</p>
           <strong data-tour-progress-text>{labels.step} 1 {labels.of} {steps.length}</strong>
+          <p data-tour-seen data-seen-label={en ? "stages explored" : "etapas vistas"}>0 / 5</p>
         </div>
-        <div class="commercial-tour-progress-track" role="progressbar" aria-label={labels.progress} aria-valuemin="1" aria-valuemax={steps.length} aria-valuenow="1" data-tour-progress><i></i></div>
+        <div class="commercial-tour-progress-track" role="progressbar" aria-label={labels.progress} aria-valuemin="0" aria-valuemax={steps.length} aria-valuenow="0" data-tour-progress><i></i></div>
       </header>
 
       <div class="commercial-tour-step-list">
@@ -105,21 +123,25 @@ const labels = en ? {
               <p class="eyebrow">{step.number} · {step.phase}</p>
               <h2 id={`commercial-tour-step-${step.id}`} class="heading" tabindex="-1">{step.title}</h2>
               <p class="commercial-tour-summary">{step.summary}</p>
-              <dl>
-                <div><dt>{labels.decision}</dt><dd>{step.decision}</dd></div>
-                <div><dt>{labels.outcome}</dt><dd>{step.outcome}</dd></div>
-                <div><dt>{labels.boundaryLabel}</dt><dd>{step.boundary}</dd></div>
-              </dl>
+              <p class="tour-step-boundary" role="note">{step.boundary}</p>
+              <details class="tour-step-details">
+                <summary>{labels.more}</summary>
+                <dl>
+                  <div><dt>{labels.decision}</dt><dd>{step.decision}</dd></div>
+                  <div><dt>{labels.outcome}</dt><dd>{step.outcome}</dd></div>
+                </dl>
+              </details>
               <div class="commercial-tour-evidence">
                 <a class="text-link" href={step.detailHref} target="_blank" rel="noopener noreferrer">{labels.detail} <span class="sr-only">({labels.newTab})</span><span aria-hidden="true">↗</span></a>
                 <a class="text-link" href={step.evidenceHref} target="_blank" rel="noopener noreferrer">{labels.exact} <span class="sr-only">({labels.newTab})</span><span aria-hidden="true">↗</span></a>
               </div>
               <p class="commercial-tour-evidence-note">{labels.evidenceNote}</p>
+              <a class="pill" href={tourAssessmentHref(locale, step.id, en ? '/en/journey/' : '/recorrido/')} data-tour-assess={step.id}>{en ? 'Assess this need · no sign-up' : 'Evaluar esta necesidad · sin registro'} →</a>
             </div>
             <div class="commercial-tour-step-visual">
-              <p><span>{step.planLabel}</span><small>{step.kind === 'web' ? (en ? 'Website evidence' : 'Evidencia web') : (en ? 'Workspace evidence' : 'Evidencia de gestor')}</small></p>
+              <p><span>{step.planLabel}</span><small>{step.kind === 'web' ? (en ? 'Website demo' : 'Web de muestra') : (en ? 'Workspace demo' : 'Gestor de muestra')}</small></p>
               {step.kind === 'web'
-                ? <picture><source type="image/avif" srcset="/media/nivora/hero-640.avif 640w, /media/nivora/hero-960.avif 960w" sizes="(max-width: 800px) calc(100vw - 48px), 48vw" /><img src={step.image} alt={step.imageAlt} width="2016" height="1344" loading="eager" decoding="async" /></picture>
+                ? <picture><source type="image/avif" srcset="/media/nivora/hero-morning-640.avif 640w, /media/nivora/hero-morning-960.avif 960w" sizes="(max-width: 800px) calc(100vw - 48px), 48vw" /><img src={step.image} alt={step.imageAlt} width="2016" height="1344" loading="eager" decoding="async" /></picture>
                 : <PanelPreview locale={locale} kind={step.preview} compact />}
             </div>
           </section>
@@ -142,7 +164,7 @@ const labels = en ? {
     </div>
     <div class="commercial-tour-complete-actions">
       <a class="text-link" href={`${prefix}/${en ? 'plans' : 'planes'}/`} data-track="cta_click" data-flow="guided" data-section="guided_tour">{labels.plans} <span aria-hidden="true">→</span></a>
-      <a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-track="cta_click" data-flow="guided" data-section="guided_tour">{labels.assessment} <span aria-hidden="true">→</span></a>
+      <a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/`} data-tour-complete-assess data-track="cta_click" data-flow="guided" data-section="guided_tour">{labels.assessment} <span aria-hidden="true">→</span></a>
       <a class="text-link" href={`${prefix}/#contacto`} data-contact-trigger data-track="cta_click" data-flow="guided" data-section="guided_tour">{labels.contact} <span aria-hidden="true">→</span></a>
       <button type="button" data-tour-review>{labels.review}</button>
     </div>
@@ -150,6 +172,8 @@ const labels = en ? {
 </article>
 
 <script>
+  import { COMMERCIAL_TOUR_STEP_IDS } from '../commercial-tour';
+  import { parseTourEntry, tourAssessmentHref } from '../tour-entry';
   const tour = document.querySelector<HTMLElement>('[data-commercial-tour]');
   const workspace = tour?.querySelector<HTMLElement>('[data-tour-workspace]');
   const completion = tour?.querySelector<HTMLElement>('[data-tour-completion]');
@@ -161,21 +185,40 @@ const labels = en ? {
   const progress = tour?.querySelector<HTMLElement>('[data-tour-progress]');
   const progressText = tour?.querySelector<HTMLElement>('[data-tour-progress-text]');
   const stepPanels = [...(tour?.querySelectorAll<HTMLElement>('[data-tour-step]') ?? [])];
+  const locale = tour?.dataset.locale === 'en' ? 'en' : 'es';
+  const entry = parseTourEntry(new URLSearchParams(location.search), locale);
+  const entrySelect = tour?.querySelector<HTMLSelectElement>('[data-tour-entry]');
+  if (entrySelect) entrySelect.value = entry.step;
+  const seenSteps = new Set<number>();
   let currentStep = 0;
+  tour?.querySelectorAll<HTMLAnchorElement>('[data-tour-assess]').forEach(link => {
+    const step = COMMERCIAL_TOUR_STEP_IDS.find(id => id === link.dataset.tourAssess);
+    if (step) link.href = tourAssessmentHref(locale, step, entry.sourcePath, entry.segment);
+  });
+  const updateEntry = () => {
+    const step = COMMERCIAL_TOUR_STEP_IDS.find(id => id === entrySelect?.value) ?? entry.step;
+    const link = tour?.querySelector<HTMLAnchorElement>('[data-tour-complete-assess]');
+    if (link) link.href = tourAssessmentHref(locale, step, entry.sourcePath, entry.segment);
+  };
+  entrySelect?.addEventListener('change', updateEntry);
+  updateEntry();
 
   function showStep(index: number, moveFocus = true) {
     if (!tour || !workspace || !completion || !previous || !next || !complete || !progress || !progressText || stepPanels.length === 0) return;
     currentStep = Math.max(0, Math.min(stepPanels.length - 1, index));
+    seenSteps.add(currentStep);
     tour.dataset.state = 'active';
     workspace.hidden = false;
     completion.hidden = true;
     if (start) start.hidden = true;
     stepPanels.forEach((panel, panelIndex) => { panel.hidden = panelIndex !== currentStep; });
     previous.hidden = currentStep === 0;
-    next.hidden = currentStep === stepPanels.length - 1;
-    complete.hidden = currentStep !== stepPanels.length - 1;
-    progress.setAttribute('aria-valuenow', String(currentStep + 1));
-    progress.style.setProperty('--tour-progress', `${((currentStep + 1) / stepPanels.length) * 100}%`);
+    next.hidden = currentStep === stepPanels.length - 1 && seenSteps.size === stepPanels.length;
+    complete.hidden = seenSteps.size !== stepPanels.length;
+    progress.setAttribute('aria-valuenow', String(seenSteps.size));
+    const seen = tour.querySelector<HTMLElement>('[data-tour-seen]');
+    if (seen) seen.textContent = `${seenSteps.size} / ${stepPanels.length} ${seen.dataset.seenLabel}`;
+    progress.style.setProperty('--tour-progress', `${(seenSteps.size / stepPanels.length) * 100}%`);
     progressText.textContent = `${tour.dataset.stepLabel} ${currentStep + 1} ${tour.dataset.ofLabel} ${stepPanels.length}`;
     if (moveFocus) stepPanels[currentStep]?.querySelector<HTMLElement>('h2')?.focus();
   }
@@ -190,18 +233,30 @@ const labels = en ? {
   }
 
   start?.addEventListener('click', () => {
-    showStep(0);
+    const index = COMMERCIAL_TOUR_STEP_IDS.findIndex(id => id === entrySelect?.value);
+    showStep(Math.max(0, index));
+    if (entrySelect) entrySelect.disabled = true;
     setTimeout(() => start.removeAttribute('data-track'), 0);
   });
   previous?.addEventListener('click', () => showStep(currentStep - 1));
-  next?.addEventListener('click', () => showStep(currentStep + 1));
+  next?.addEventListener('click', () => showStep((currentStep + 1) % stepPanels.length));
   complete?.addEventListener('click', () => {
-    if (!tour || !workspace || !completion) return;
+    if (!tour || !workspace || !completion || seenSteps.size !== stepPanels.length) return;
     tour.dataset.state = 'complete';
     workspace.hidden = true;
     completion.hidden = false;
     completion.querySelector<HTMLElement>('h2')?.focus();
     setTimeout(() => complete.removeAttribute('data-track'), 0);
   });
-  review?.addEventListener('click', () => showStep(0));
+  review?.addEventListener('click', () => { seenSteps.clear(); showStep(0); });
 </script>
+<style>
+  .tour-entry-label { display:grid; gap:10px; margin-top:24px; font-weight:600; }
+  .tour-entry-label select { width:100%; min-width:0; max-width:520px; padding:14px; font:inherit; border:1px solid var(--line); border-radius:12px; background:var(--paper); color:var(--ink); }
+  .commercial-tour-step-copy > .pill { margin-top:16px; white-space:normal; }
+  .tour-step-boundary { margin:18px 0; padding-left:12px; border-left:2px solid #527458; color:var(--slate); font-size:.75rem; line-height:1.6; }
+  .tour-step-details { margin-top:18px; }
+  .tour-step-details summary { width:fit-content; min-height:44px; align-content:center; color:var(--ink); font-size:.78rem; font-weight:600; cursor:pointer; }
+  .tour-step-details summary:focus-visible { outline:3px solid #be775d; outline-offset:4px; border-radius:3px; }
+  .commercial-tour-step .tour-step-details dl { margin-top:8px; }
+</style>

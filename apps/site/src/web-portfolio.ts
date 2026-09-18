@@ -66,7 +66,7 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       businessProblem: 'Una sola propiedad necesita una presencia propia que explique el valor antes de que todo se reduzca a fecha y precio.',
       visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Inicio', 'El espacio', 'Guía local'],
       boundaryLabel: 'Límite de la evidencia', boundary: 'Web visual ficticia; no consulta disponibilidad, recoge solicitudes ni incluye gestor.',
-      image: '/media/nivora/hero.webp', imageAlt: 'Escena visual ficticia de Nivora One', demoHref: '/demos/nivora/', demoCta: 'Explorar web demo', assessmentCta: 'Evaluar este punto de partida',
+      image: '/media/nivora/hero-morning.webp', imageAlt: 'Escena visual ficticia de Nivora One', demoHref: '/demos/nivora/', demoCta: 'Explorar web demo', assessmentCta: 'Evaluar este punto de partida',
       showcase: {
         eyebrow: 'Una web que empieza por el lugar', title: 'Vive la ciudad desde dentro.', intro: 'Nivora demuestra cómo una sola propiedad puede ganar una voz propia antes de añadir inventario, reservas o un gestor que todavía no necesita.',
         moments: [
@@ -272,7 +272,7 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       businessProblem: 'One property needs an owned presence that explains its value before everything is reduced to date and price.',
       visibleLabel: 'Visible pages and surfaces', visiblePages: ['Home', 'The space', 'Local guide'],
       boundaryLabel: 'Evidence boundary', boundary: 'Fictional visual website; it checks no availability, collects no enquiries and includes no workspace.',
-      image: '/media/nivora/hero.webp', imageAlt: 'Fictional visual scene for Nivora One', demoHref: '/en/demos/nivora/', demoCta: 'Explore website demo', assessmentCta: 'Assess this starting point',
+      image: '/media/nivora/hero-morning.webp', imageAlt: 'Fictional visual scene for Nivora One', demoHref: '/en/demos/nivora/', demoCta: 'Explore website demo', assessmentCta: 'Assess this starting point',
       showcase: {
         eyebrow: 'A website that starts with place', title: 'Live the city from within.', intro: 'Nivora shows how one property can gain a voice of its own before adding inventory, bookings or a workspace it does not yet need.',
         moments: [

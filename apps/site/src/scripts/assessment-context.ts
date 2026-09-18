@@ -1,3 +1,5 @@
+import { PLAN_HANDOFF_SOURCES } from '../plan-contract';
+
 export const ASSESSMENT_CONTEXT_KEY = 'logic-estancia-assessment-v1';
 export const ASSESSMENT_CONTEXT_VERSION = '1.0.0';
 export const ASSESSMENT_CONTEXT_MAX_AGE = 2 * 60 * 60 * 1000;
@@ -9,7 +11,7 @@ const plans = ['basico', 'gestion', 'inteligente'] as const;
 const webValues = ['nivora', 'terrava', 'aurem'] as const;
 const panelValues = ['none', 'terrava', 'aurem'] as const;
 const segmentValues = ['rural', 'apartments', 'hotels', 'unknown'] as const;
-const sourcePaths = ['/', '/planes/', '/en/', '/en/plans/', '/webs/', '/en/webs/'] as const;
+const sourcePaths = PLAN_HANDOFF_SOURCES;
 const stackValues = ['website', 'email', 'booking-engine', 'calendar', 'channels', 'pms'] as const;
 const capabilityValues = ['enquiries', 'bookings', 'planning', 'guests', 'rates', 'web-editor', 'cleaning', 'teams', 'maintenance', 'channels', 'automation', 'ai', 'metrics'] as const;
 const timelines = ['0-3', '3-6', '6-12', 'exploring'] as const;

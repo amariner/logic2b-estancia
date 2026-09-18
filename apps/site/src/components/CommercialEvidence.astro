@@ -1,0 +1,46 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getPlanCards, planHandoffHref, type PlanHandoffSource } from '../plan-contract';
+import { getPublishedPanels } from '../panel-portfolio';
+import WebsitePreview from './WebsitePreview.astro';
+import PanelPreview from './PanelPreview.astro';
+const { locale, sourcePath, rural = false } = Astro.props as { locale: Locale; sourcePath: PlanHandoffSource; rural?: boolean };
+const en = locale === 'en';
+const webPlan = getPlanCards(locale).find(({ id }) => id === (rural ? 'gestion' : 'basico'))!;
+const panel = getPublishedPanels(locale).find(({ id }) => id === 'enquiries')!;
+const management = getPlanCards(locale).find(({ id }) => id === 'gestion')!;
+const prefix = en ? '/en' : '';
+const webAssessment = rural ? `${prefix}/${en ? 'assessment' : 'diagnostico'}/?${new URLSearchParams({ web: webPlan.webSlug, segment: 'rural', sourcePath })}` : planHandoffHref(locale, webPlan, sourcePath);
+---
+<div class="commercial-evidence" data-commercial-evidence data-commercial-actions>
+  <article>
+    <div class="evidence-image" aria-hidden="true"><WebsitePreview locale={locale} slug={webPlan.webSlug} /></div>
+    <div class="evidence-copy">
+      <p class="eyebrow">{webPlan.name} · {rural ? 'Terrava' : 'Nivora'}</p>
+      <h3>{en ? 'How could my accommodation look?' : '¿Cómo podría verse mi alojamiento?'}</h3>
+      <p>{en ? 'Explore the design, the rooms and the enquiry entry. Fictional website: no messages or live availability.' : 'Explora el diseño, los espacios y la entrada a consultas. Web ficticia: sin envíos ni disponibilidad real.'}</p>
+      <a class="text-link" data-evidence-web href={`${prefix}/demos/${webPlan.webSlug}/`}>{en ? 'Explore this fictional website' : 'Explorar esta web ficticia'} <span aria-hidden="true">→</span></a>
+      <a class="text-link" data-evidence-assess href={webAssessment}>{en ? 'Assess whether this scope fits' : 'Evaluar si este alcance encaja'} <span aria-hidden="true">→</span></a>
+    </div>
+  </article>
+  <article>
+    <div class="evidence-image" aria-hidden="true"><PanelPreview locale={locale} kind="enquiries" compact /></div>
+    <div class="evidence-copy">
+      <p class="eyebrow">{management.name} · Terrava</p>
+      <h3>{en ? 'What does this enquiry need?' : '¿Qué necesita esta solicitud?'}</h3>
+      <p>{en ? 'Compare dates and an alternative before replying. Fictional data: no replies or real bookings.' : 'Compara fechas y una alternativa antes de responder. Datos ficticios: sin respuestas ni reservas reales.'}</p>
+      <a class="text-link" data-evidence-panel href={panel.evidenceHref}>{en ? 'Inspect the sample enquiry' : 'Revisar la solicitud de muestra'} <span aria-hidden="true">→</span></a>
+      <a class="text-link" data-evidence-assess href={planHandoffHref(locale, management, sourcePath, rural ? 'rural' : 'unknown', 'enquiries')}>{en ? 'Assess this management need' : 'Evaluar esta necesidad de gestión'} <span aria-hidden="true">→</span></a>
+    </div>
+  </article>
+</div>
+<style>
+  .commercial-evidence { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin:32px 0; }
+  article { min-width:0; border:1px solid var(--line); border-radius:20px; overflow:hidden; background:var(--paper,#fffdf7); }
+  .evidence-image { height:260px; overflow:hidden; padding:18px; background:#eef0e8; }
+  .evidence-copy { padding:24px; }
+  h3 { font-size:clamp(1.2rem,2vw,1.65rem); line-height:1.3; overflow-wrap:anywhere; margin:10px 0; }
+  .evidence-copy > p:not(.eyebrow) { color:var(--slate); line-height:1.65; }
+  a { display:flex; width:fit-content; min-height:44px; align-items:center; gap:8px; margin-top:10px; }
+  @media(max-width:760px) { .commercial-evidence { grid-template-columns:minmax(0,1fr); } .evidence-image { height:220px; } .evidence-copy { padding:20px; } }
+</style>

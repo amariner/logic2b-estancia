@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { getHomeContract } from '../home-contract';
+import CommercialEvidence from './CommercialEvidence.astro';
 import InterfaceIcon from './InterfaceIcon.astro';
 
 const { locale } = Astro.props as { locale: Locale };
@@ -13,11 +14,15 @@ const icons = ['spark', 'web', 'mail', 'calendar', 'check', 'users', 'chart'] as
   <div class="shell">
     <div class="home-journey-header">
       <div class="section-head home-journey-heading">
-        <p class="eyebrow">{en ? 'Your operation, connected' : 'Tu operativa, conectada'}</p>
-        <h2 id="home-journey-title" class="heading">{en ? 'The whole journey of a stay, in one project.' : 'Todo el recorrido de una estancia, en un mismo proyecto.'}</h2>
-        <p>{en ? 'From the first visit to the next arrival. Every step has its place.' : 'Desde que te descubren hasta que preparas la próxima llegada. Cada paso tiene su sitio.'}</p>
-        <a class="pill" href={en ? '/en/journey/' : '/recorrido/'} data-estancia-tour-trigger aria-haspopup="dialog">{en ? 'Start the three-minute guided journey' : 'Empezar el recorrido guiado de tres minutos'} <span aria-hidden="true">→</span></a>
+        <p class="eyebrow">{en ? 'Try before choosing' : 'Comprueba antes de elegir'}</p>
+        <h2 id="home-journey-title" class="heading">{en ? 'See what could work for you.' : 'Mira qué encaja contigo.'}</h2>
+        <p>{en ? 'From your website to everyday management. Explore the examples at your own pace.' : 'De tu web al trabajo de cada día. Explora los ejemplos a tu ritmo.'}</p>
+        <a class="pill" href={en ? '/en/journey/' : '/recorrido/'} data-estancia-tour-trigger aria-haspopup="dialog">{en ? 'See the guided journey' : 'Ver el recorrido guiado'} <span aria-hidden="true">→</span></a>
       </div>
+
+    </div>
+    <CommercialEvidence locale={locale} sourcePath={en ? "/en/" : "/"} />
+    <div class="journey-track-heading"><p>{en ? 'From the first visit to the next arrival' : 'De la primera visita a la próxima llegada'}</p>
       <div class="home-journey-slider-controls" aria-label={en ? 'Journey steps' : 'Pasos del recorrido'}>
         <button type="button" aria-label={en ? 'Show previous steps' : 'Ver pasos anteriores'} data-journey-previous disabled><span aria-hidden="true">←</span></button>
         <button type="button" aria-label={en ? 'Show next steps' : 'Ver pasos siguientes'} data-journey-next><span aria-hidden="true">→</span></button>
@@ -62,3 +67,10 @@ const icons = ['spark', 'web', 'mail', 'calendar', 'check', 'users', 'chart'] as
     update();
   });
 </script>
+
+<style>
+  .journey-track-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; margin:44px 0 18px; }
+  .journey-track-heading > p { margin:0; max-width:26ch; color:var(--slate); font-size:.875rem; line-height:1.5; }
+  .journey-track-heading .home-journey-slider-controls { flex-shrink:0; }
+  @media(max-width:380px) { .journey-track-heading { gap:12px; } .journey-track-heading > p { font-size:.75rem; } }
+</style>

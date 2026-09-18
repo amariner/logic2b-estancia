@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const appOrigin = 'http://127.0.0.1:8790';
+const appOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? '8790'}`;
 const webConcepts = ['nivora', 'terrava', 'aurem', 'linde', 'cobalto', 'oria', 'boscara', 'velares', 'nocta', 'riscoa', 'solerna', 'cendra'] as const;
 const webPaths = webConcepts.flatMap((slug) => [`/webs/${slug}/`, `/en/webs/${slug}/`]);
 
@@ -300,7 +300,12 @@ test('guided commercial journey has explicit start, five verified steps and expl
     const completion = tour.locator('[data-tour-completion]');
     await expect(completion).toBeVisible();
     await expect(completion.getByRole('link', { name: /(?:Comparar planes|Compare plans)/ })).toHaveAttribute('href', item.plans);
-    await expect(completion.getByRole('link', { name: /(?:Empezar el diagnóstico|Start the assessment)/ })).toHaveAttribute('href', item.assessment);
+    const assessmentHref = await completion.locator('[data-tour-complete-assess]').getAttribute('href');
+    const assessmentUrl = new URL(assessmentHref!, appOrigin);
+    expect(assessmentUrl.pathname).toBe(item.assessment);
+    expect(assessmentUrl.searchParams.get('sourcePath')).toBe(item.path);
+    expect(assessmentUrl.searchParams.get('plan')).toBe('basico');
+    expect(assessmentUrl.searchParams.get('web')).toBe('nivora');
     await expect(completion.getByRole('link', { name: /(?:Hablar con Logic2B|Talk to Logic2B)/ })).toHaveAttribute('href', item.contact);
     expect(await page.evaluate(() => JSON.stringify({
       local: Object.fromEntries(Object.keys(localStorage).sort().map((key) => [key, localStorage.getItem(key)])),
@@ -888,10 +893,10 @@ test('mobile contact always reaches the localized home modal from other marketin
 test('hero follows the case-led structure and keeps its demos explicitly local', async ({ page, request }) => {
   await page.goto('/');
   const hero = page.locator('.hero');
-  await expect(hero.getByRole('heading', { level: 1 })).toHaveAttribute('aria-label', 'Gestiona reservas, estancias y tu equipo sin complicarte.');
-  await expect(hero.locator('[data-hero-word]')).toHaveCount(3);
-  await expect(hero.getByRole('link', { name: /Solicitar información/ })).toHaveAttribute('href', '#contacto');
-  await expect(hero.getByRole('link', { name: /Ver el producto/ })).toHaveAttribute('href', '#producto');
+  await expect(hero.getByRole('heading', { level: 1 })).toHaveText('Una web con carácter. Una gestión a tu medida.');
+  await expect(hero.locator('[data-evaluation-expectation]')).toContainText('Sin registro ni envío de datos.');
+  await expect(hero.getByRole('link', { name: /Evaluar qué necesito/ })).toHaveAttribute('href', '/diagnostico/?sourcePath=%2F');
+  await expect(hero.getByRole('link', { name: /Explorar una demo/ })).toHaveAttribute('href', '/recorrido/?step=enquiries&sourcePath=%2F');
   await expect(hero).toContainText('Demos ficticias.');
   await expect(hero.locator('form, input, select, textarea, [data-lead], [data-commercial-lead]')).toHaveCount(0);
 
@@ -912,7 +917,7 @@ test('hero follows the case-led structure and keeps its demos explicitly local',
     const proof = hero.locator(`[data-hero-proof="${slug}"]`);
     await expect(proof).toHaveAttribute('href', `/demos/${slug}/`);
     await expect(proof.locator('img')).toHaveAttribute('alt', '');
-    await expect(proof.locator('source[type="image/avif"]')).toHaveAttribute('srcset', new RegExp(`/media/${slug}/hero-640\\.avif`));
+    await expect(proof.locator('source[type="image/avif"]')).toHaveAttribute('srcset', new RegExp(`/media/${slug}/${slug === 'nivora' ? 'hero-morning' : 'hero'}-640\\.avif`));
   }
   const toggle = hero.locator('[data-hero-motion-toggle]');
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
@@ -922,8 +927,8 @@ test('hero follows the case-led structure and keeps its demos explicitly local',
 
   await page.goto('/en/');
   const englishHero = page.locator('.hero');
-  await expect(englishHero.getByRole('heading', { level: 1 })).toHaveAttribute('aria-label', 'Manage bookings, stays and your team with less effort.');
-  await expect(englishHero.getByRole('link', { name: /Request information/ })).toHaveAttribute('href', '#contacto');
+  await expect(englishHero.getByRole('heading', { level: 1 })).toHaveText('A website with character. Management that fits.');
+  await expect(englishHero.getByRole('link', { name: /Assess what I need/ })).toHaveAttribute('href', '/en/assessment/?sourcePath=%2Fen%2F');
   await expect(englishHero.locator('[data-hero-proof]')).toHaveCount(3);
   await expect(englishHero).toContainText('Fictional demos.');
 });
@@ -981,7 +986,7 @@ test('rich plan cards expose canonical previews and carry evidence context into 
       await expect(card.locator(`[data-plan-web="${plan}"]`)).toHaveAttribute('href', `${prefix}/demos/${plan === 'basico' ? 'nivora' : plan === 'gestion' ? 'terrava' : 'aurem'}/`);
       const panel = card.locator(`[data-plan-panel="${plan}"]`);
       if (plan === 'basico') await expect(panel).toHaveCount(0);
-      else await expect(panel).toHaveAttribute('href', `${prefix}/demos/${plan === 'gestion' ? 'terrava' : 'aurem'}/gestion/?vista=home`);
+      else await expect(panel).toHaveAttribute('href', `${prefix}/demos/${plan === 'gestion' ? 'terrava' : 'aurem'}/gestion/?vista=${plan === 'gestion' ? 'planning' : 'reports'}`);
       const assessmentHref = await card.locator(`[data-plan-assess="${plan}"]`).getAttribute('href');
       expect(assessmentHref).toBeTruthy();
       const target = new URL(assessmentHref ?? '', appOrigin);
@@ -994,9 +999,9 @@ test('rich plan cards expose canonical previews and carry evidence context into 
   }
 
   await page.goto('/');
-  await page.locator('[data-plan-card="gestion"]').getByRole('link', { name: 'Elegir este plan' }).click();
-  await expect(page).toHaveURL(/\/diagnostico\/\?plan=gestion&web=terrava&panel=terrava&segment=unknown&sourcePath=%2F$/);
-  await expect(page.locator('[name="bookingNeeds"][value="bookings"]')).toBeChecked();
+  await page.locator('[data-plan-card="gestion"]').getByRole('link', { name: 'Evaluar este plan' }).click();
+  await expect(page).toHaveURL(/\/diagnostico\/\?plan=gestion&web=terrava&panel=terrava&segment=unknown&sourcePath=%2F&need=planning$/);
+  await expect(page.locator('[name="bookingNeeds"][value="planning"]')).toBeChecked();
   await page.locator('[data-step="1"]').getByText('Apartamentos', { exact: true }).click();
   for (let step = 0; step < 5; step += 1) await page.getByRole('button', { name: /Siguiente/ }).click();
   await page.getByRole('button', { name: /Ver recomendación/ }).click();
@@ -1092,7 +1097,9 @@ test('business landing links preserve the prospect segment in the assessment and
     const contact = page.locator('.solution-hero').getByRole('link', { name: 'Pedir una conversación' });
     await expect(contact).toHaveAttribute('href', `/?contact=${segment}#contacto`);
     await page.locator('.human-service').getByRole('link', { name: 'Cuéntanos cómo trabajas' }).click();
-    await expect(page).toHaveURL(new RegExp(`/diagnostico/\\?segment=${segment}$`));
+    expect(new URL(page.url()).pathname).toBe('/diagnostico/');
+    expect(new URL(page.url()).searchParams.get('segment')).toBe(segment);
+    if (segment === 'rural') expect(new URL(page.url()).searchParams.get('sourcePath')).toBe(path);
     await expect(page.locator(`[name="accommodationType"][value="${type}"]`)).toBeChecked();
     await page.goto(path);
     await page.locator('.solution-hero').getByRole('link', { name: 'Pedir una conversación' }).click();
@@ -1125,7 +1132,12 @@ test('WhatsApp contact follows the Camp pattern without covering the footer', as
   await page.getByRole('button', { name: 'Rechazar' }).click();
   const contact = page.getByRole('link', { name: 'Contacta con Logic2B por WhatsApp' });
   await expect(contact).toHaveAttribute('data-visible', 'false');
-  await page.evaluate(() => window.scrollTo(0, 700));
+  await page.locator('[data-commercial-evidence]').scrollIntoViewIfNeeded();
+  await expect(contact).toHaveAttribute('data-visible', 'false');
+  // The section anchor keeps a header offset, which can leave the protected
+  // product explorer on screen. Check visibility only after that area exits.
+  await page.locator('[data-capability-band] .capability-band-heading').evaluate(element => element.scrollIntoView({ block: 'start' }));
+  await expect(page.locator('[data-product-explorer]')).not.toBeInViewport();
   await expect(contact).toHaveAttribute('data-visible', 'true');
   await expect(contact).toHaveAttribute('tabindex', '0');
   await expect(contact.locator('svg')).toBeVisible();

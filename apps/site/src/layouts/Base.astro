@@ -92,6 +92,15 @@ const structuredData = [
     <script is:inline>
       const isThemePreview = /^\/(?:en\/)?webs\/[^/]+\/$/.test(location.pathname) && new URLSearchParams(location.search).get('embed') === 'theme';
       if (isThemePreview) document.documentElement.classList.add('theme-is-embedded');
+      if (isThemePreview && window.self !== window.top) {
+        window.addEventListener('keydown', (event) => {
+          if (event.key !== 'Escape' || event.repeat) return;
+          const nestedDialogOpen = Boolean(document.querySelector('dialog[open]'));
+          setTimeout(() => {
+            if (!event.defaultPrevented && !nestedDialogOpen) window.parent.postMessage({ type: 'logic-estancia:close-preview' }, location.origin);
+          }, 0);
+        });
+      }
       const runtimeManifestTimeoutMs = 4_000;
       const safeRuntimeCapabilities = Object.freeze({ schemaVersion: '1.0.0', manifestAvailable: false, mode: 'demo', demoMode: true, commercialLeadsEnabled: false, sideEffects: false, durableWrites: false, jobs: false, providers: { analytics: 'disabled', email: 'disabled', payments: 'disabled', webhooks: 'disabled', externalStorage: 'disabled' }, operations: { commercialLead: 'blocked', payments: 'unavailable', webhooks: 'unavailable', automations: 'unavailable' } });
       const normalizeRuntimeCapabilities = (candidate) => {

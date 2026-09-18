@@ -3,13 +3,15 @@ import type { Locale } from '@logic-estancia/config';
 import type { PlanCardData, PlanHandoffSource } from '../plan-contract';
 import { PLAN_PRICING, euro } from '../pricing';
 import { planHandoffHref } from '../plan-contract';
+import { getPublishedPanels } from '../panel-portfolio';
 import WebsitePreview from './WebsitePreview.astro';
 import PanelPreview from './PanelPreview.astro';
 
 const { locale, plan, sourcePath, featured = false } = Astro.props as { locale: Locale; plan: PlanCardData; sourcePath: PlanHandoffSource; featured?: boolean };
 const prefix = locale === 'en' ? '/en' : '';
 const webHref = `${prefix}/demos/${plan.webSlug}/`;
-const panelHref = plan.panelSlug === 'none' ? null : `${prefix}/demos/${plan.panelSlug}/gestion/?vista=home`;
+const panelHref = plan.panelSlug === 'none' ? null : getPublishedPanels(locale).find(({ id }) => id === (plan.id === 'gestion' ? 'planning' : 'operations-revenue'))?.evidenceHref;
+const question = locale === 'en' ? { basico: 'How would I present my stay and receive an enquiry?', gestion: 'What should I check before offering dates?', inteligente: 'Which figures help me review the operation?' } : { basico: '¿Cómo presentaría mi estancia y recibiría una consulta?', gestion: '¿Qué debo revisar antes de ofrecer fechas?', inteligente: '¿Qué cifras ayudan a revisar la operación?' };
 const previewAlt = locale === 'en' ? `${plan.name} fictional website preview` : `Vista previa de web ficticia del plan ${plan.name}`;
 ---
 <article class={`plan-card card ${featured ? 'featured' : ''}`} data-plan-card={plan.id}>
@@ -25,8 +27,16 @@ const previewAlt = locale === 'en' ? `${plan.name} fictional website preview` : 
     <p>{plan.id === 'basico' ? (locale === 'en' ? 'Your own website' : 'Web con identidad propia') : (locale === 'en' ? 'Website + workspace' : 'Web + gestor')}</p>
   </div>
   <div class="plan-card-detail"><strong>{plan.visibleLabel}</strong><ul>{plan.visible.map((item) => <li>{item}</li>)}</ul></div>
+  <p class="plan-card-question" data-plan-question>{question[plan.id]}</p>
+  <p class="plan-card-boundary" data-plan-boundary>{plan.boundary}</p>
   <div class="plan-card-links">
-    <div>{webHref && <a class="text-link" href={webHref} data-plan-web={plan.id}>{plan.webCta} <span aria-hidden="true">→</span></a>}{panelHref && <a class="text-link" href={panelHref} data-plan-panel={plan.id}>{plan.panelCta} <span aria-hidden="true">→</span></a>}</div>
-    <a class="pill" href={planHandoffHref(locale, plan, sourcePath)} data-plan={plan.id} data-plan-assess={plan.id} data-track="plan_select" data-section={sourcePath === '/' || sourcePath === '/en/' ? 'homepage_plans' : 'plans_grid'}>{plan.assessCta} <span aria-hidden="true">→</span></a>
+    <div>{webHref && <a class="text-link" href={webHref} data-plan-web={plan.id}>{plan.webCta} <span aria-hidden="true">→</span></a>}{panelHref && <a class="text-link" href={panelHref} data-plan-panel={plan.id}>{locale === 'en' ? (plan.id === 'gestion' ? 'Inspect demo planning' : 'Inspect demo revenue') : (plan.id === 'gestion' ? 'Revisar planning demo' : 'Revisar ingresos demo')} <span aria-hidden="true">→</span></a>}</div>
+    <a class="pill" href={planHandoffHref(locale, plan, sourcePath, 'unknown', plan.id === 'gestion' ? 'planning' : plan.id === 'inteligente' ? 'metrics' : undefined)} data-plan={plan.id} data-plan-assess={plan.id} data-track="plan_select" data-section={sourcePath === '/' || sourcePath === '/en/' ? 'homepage_plans' : 'plans_grid'}>{plan.assessCta} <span aria-hidden="true">→</span></a>
+    <small>{locale === 'en' ? 'Get an editable recommendation before contacting us. No purchase or sign-up.' : 'Obtén una recomendación editable antes de contactar. Sin contratación ni registro.'}</small>
   </div>
 </article>
+<style>
+  .plan-card-question { font-weight: 650; color: var(--ink); }
+  .plan-card-boundary { font-size: .85rem; line-height: 1.6; }
+  .plan-card-links small { display:block; margin-top:12px; line-height:1.6; color:var(--slate); }
+</style>

@@ -10,6 +10,7 @@ import {
 import { getBusiness, type BusinessSegment } from '../businesses';
 import { guideContextForSolution } from '../guide-context';
 import { getSpanishResourceForSegment } from '../resources';
+import CommercialEvidence from './CommercialEvidence.astro';
 import BusinessWorkflow from './BusinessWorkflow.astro';
 import ContextualGuides from './ContextualGuides.astro';
 import HumanService from './HumanService.astro';
@@ -23,12 +24,12 @@ const relatedResource = en ? undefined : getSpanishResourceForSegment(segment);
 const spanishCopy = {
   rural: {
     eyebrow: 'Para casas rurales y alojamientos con identidad propia',
-    title: 'Una web a la altura de tu casa rural.',
-    body: 'Convierte lo que hace especial tu casa en consultas directas y una gestión que conserva el trato cercano.',
+    title: 'Tu casa rural, de la web a la consulta con contexto.',
+    body: 'Presenta lo que hace especial tu casa y comprueba cómo revisar una consulta antes de responder. Empieza por web o gestión según tus necesidades, con implantación acompañada y alcance acordado.',
     capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'guest-context', 'website-editor', 'basic-reports'],
     demoTitle: 'Terrava Collection',
     demoCopy: 'Ocho casas, una consulta y una alternativa que conserva su contexto.',
-    journey: 'Consulta → alternativa → reserva → preparación de la estancia.',
+    journey: 'Consulta y alternativa de muestra. La demo no confirma reservas ni prepara estancias reales.',
     faq: [['¿Necesito un motor de reservas para empezar?', 'No necesariamente. Si hoy necesitas explicar mejor la estancia y recibir consultas directas, Básico puede ser suficiente. Un motor o una gestión conectada solo se plantean cuando el alcance real lo justifica.'], ['¿Puedo mantener los portales que ya utilizo?', 'Sí. El proyecto no presupone que debas abandonar un canal que funciona. Revisamos qué papel conserva cada plataforma y qué relación quieres recuperar bajo tu propia marca.'], ['¿Sirve para una sola casa rural?', 'Sí. El tamaño ayuda a dimensionar la implantación, pero el plan se decide por capacidades. Una casa puede empezar con web y consultas; una colección puede necesitar planning y gestión.']],
   },
   apartments: {
@@ -56,11 +57,11 @@ const spanishCopy = {
 const englishCopy = {
   rural: {
     eyebrow: 'For rural stays with an identity of their own',
-    title: 'A website worthy of your rural stay.',
-    body: 'Turn what makes your stay special into direct enquiries and management that keeps the personal touch.',
+    title: 'Your rural stay, from website to an enquiry with context.',
+    body: 'Show what makes your stay special and explore how to review an enquiry before replying. Start with a website or management according to your needs, with guided implementation and an agreed scope.',
     capabilityIds: ['brand-web', 'email-enquiries', 'enquiry-workspace', 'planning', 'guest-context', 'website-editor', 'basic-reports'],
     demoTitle: 'Terrava Collection', demoCopy: 'Eight homes, one enquiry and an alternative that keeps its context.',
-    journey: 'Enquiry → alternative → booking → stay preparation.',
+    journey: 'Sample enquiry and alternative. The demo confirms no booking and prepares no real stay.',
     faq: [['Do I need a booking engine to start?', 'Not necessarily. If you need to explain the stay better and receive direct enquiries, Basic may be enough. A booking engine or connected management is considered only when the real scope justifies it.'], ['Can I keep the platforms I already use?', 'Yes. The project does not assume you should abandon a channel that works. We review the role of each platform and the relationship you want to regain under your brand.'], ['Does it work for one rural stay?', 'Yes. Size helps scope implementation, while capabilities determine the plan. One stay may start with a website and enquiries; a collection may need planning and management.']],
   },
   apartments: {
@@ -84,20 +85,25 @@ const englishCopy = {
 } as const;
 
 const copy = (en ? englishCopy : spanishCopy)[segment];
+const ruralSource = en ? '/en/solutions/rural-stays/' : '/soluciones/casas-rurales/';
+const ruralAssessment = `${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=rural&sourcePath=${encodeURIComponent(ruralSource)}`;
+const ruralTour = `${prefix}/${en ? 'journey' : 'recorrido'}/?step=enquiries&segment=rural&sourcePath=${encodeURIComponent(ruralSource)}`;
 const planNames: Record<PlanLevel, string> = en ? { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' } : { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' };
 const visible = CAPABILITIES.filter(({ id }) => (copy.capabilityIds as readonly string[]).includes(id));
 const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: copy.faq.map(([question, answer]) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })) };
 ---
 <section class="solution-hero" data-solution-view data-locale={locale} data-segment={segment}>
   <div class="shell solution-hero-layout">
-    <div><p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p>{copy.body}</p><div class="hero-actions"><a class="pill" href={`${prefix}/?contact=${segment}#contacto`} data-contact-trigger data-track="cta_click" data-segment={segment} data-section="solution_hero">{en ? 'Request a conversation' : 'Pedir una conversación'}</a><a class="pill ghost" href={`${prefix}/demos/${business.demo}/`}>{en ? 'Explore the design' : 'Explorar el diseño'}</a></div></div>
-    <a class="solution-hero-media" href={`${prefix}/demos/${business.demo}/`} aria-label={en ? `Explore the fictional ${copy.demoTitle} case` : `Explorar el diseño ${copy.demoTitle}`}><picture><source type="image/avif" srcset={`/media/${business.demo}/hero-640.avif 640w, /media/${business.demo}/hero-960.avif 960w`} sizes="(max-width: 900px) 100vw, 45vw" /><img src={business.image} alt="" width="2016" height="1344" /></picture><span><small>{en ? 'Website and style' : 'Web y estilo'}</small><strong>{copy.demoTitle}</strong></span><b aria-hidden="true">↗</b></a>
+    <div><p class="eyebrow">{copy.eyebrow}</p><h1 class="display">{copy.title}</h1><p>{copy.body}</p><div class="hero-actions"><a class="pill" href={segment === 'rural' ? ruralAssessment : `${prefix}/?contact=${segment}#contacto`} data-contact-trigger={segment !== 'rural' || undefined} data-track="cta_click" data-segment={segment} data-section="solution_hero">{segment === 'rural' ? (en ? 'Assess what my stay needs' : 'Evaluar qué necesita mi casa') : (en ? 'Request a conversation' : 'Pedir una conversación')}</a><a class="pill ghost" href={segment === 'rural' ? ruralTour : `${prefix}/demos/${business.demo}/`}>{segment === 'rural' ? (en ? 'Inspect a sample enquiry' : 'Revisar una solicitud de muestra') : (en ? 'Explore the design' : 'Explorar el diseño')}</a></div>{segment === 'rural' && <p class="hero-note">{en ? 'Assessment: an on-screen plan recommendation, without contact details. Demo: fictional data, no live bookings or messages.' : 'Evaluación: una recomendación de plan en pantalla, sin datos de contacto. Demo: datos ficticios, sin reservas ni mensajes reales.'}</p>}{segment === 'rural' && <a class="text-link" href={`${prefix}/?contact=rural#contacto`} data-contact-trigger>{en ? 'Request a conversation' : 'Pedir una conversación'} <span aria-hidden="true">→</span></a>}</div>
+    <a class="solution-hero-media" href={`${prefix}/demos/${business.demo}/`} aria-label={en ? `Explore the fictional ${copy.demoTitle} case` : `Explorar el diseño ${copy.demoTitle}`}><picture><source type="image/avif" srcset={`${business.image.replace('.webp', '')}-640.avif 640w, ${business.image.replace('.webp', '')}-960.avif 960w`} sizes="(max-width: 900px) 100vw, 45vw" /><img src={business.image} alt="" width="2016" height="1344" /></picture><span><small>{en ? 'Website and style' : 'Web y estilo'}</small><strong>{copy.demoTitle}</strong></span><b aria-hidden="true">↗</b></a>
   </div>
 </section>
 
+{segment === 'rural' && <section class="section shell" aria-label={en ? 'Two questions to assess your project' : 'Dos preguntas para evaluar tu proyecto'}><CommercialEvidence locale={locale} sourcePath={ruralSource} rural /></section>}
+
 <BusinessWorkflow locale={locale} segment={segment} />
 
-<HumanService locale={locale} ctaHref={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} />
+<HumanService locale={locale} ctaHref={segment === 'rural' ? ruralAssessment : `${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} />
 
 
 <section class="section capability-section">
@@ -161,7 +167,7 @@ const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEn
 <section class="section shell faq"><div class="section-head"><p class="eyebrow">{en ? `Questions from ${business.plural.toLowerCase()}` : `Preguntas de ${business.plural.toLowerCase()}`}</p><h2 class="heading">{en ? 'Resolve the boundary before changing tools.' : 'Aclara el alcance antes de cambiar herramientas.'}</h2></div><div class="faq-list">{copy.faq.map(([question, answer], index) => <details open={index === 0}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
 <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
 
-<section class="section shell final-cta"><p class="eyebrow">{en ? 'A recommendation before a proposal' : 'Una recomendación antes que una propuesta'}</p><h2 class="heading">{en ? `See where ${business.plural.toLowerCase()} should start.` : `Descubre por dónde debería empezar tu ${segment === 'rural' ? 'casa rural' : segment === 'apartments' ? 'negocio de apartamentos' : 'hotel'}.`}</h2><p>{en ? 'The assessment uses capabilities; size only helps scope implementation.' : 'El diagnóstico utiliza capacidades; el tamaño solo ayuda a dimensionar la implantación.'}</p><a class="pill" href={`${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} data-track="cta_click" data-segment={segment} data-section="solution_footer">{en ? 'Start the assessment' : 'Empezar diagnóstico'} →</a></section>
+<section class="section shell final-cta"><p class="eyebrow">{en ? 'A recommendation before a proposal' : 'Una recomendación antes que una propuesta'}</p><h2 class="heading">{en ? `See where ${business.plural.toLowerCase()} should start.` : `Descubre por dónde debería empezar tu ${segment === 'rural' ? 'casa rural' : segment === 'apartments' ? 'negocio de apartamentos' : 'hotel'}.`}</h2><p>{en ? 'The assessment uses capabilities; size only helps scope implementation.' : 'El diagnóstico utiliza capacidades; el tamaño solo ayuda a dimensionar la implantación.'}</p><a class="pill" href={segment === 'rural' ? ruralAssessment : `${prefix}/${en ? 'assessment' : 'diagnostico'}/?segment=${segment}`} data-track="cta_click" data-segment={segment} data-section="solution_footer">{en ? 'Start the assessment' : 'Empezar diagnóstico'} →</a></section>
 
 <script>
   import { getConsent } from '../scripts/analytics-consent';

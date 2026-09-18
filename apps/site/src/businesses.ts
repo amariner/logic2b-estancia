@@ -23,7 +23,7 @@ const businesses = {
     },
   },
   apartments: {
-    image: '/media/nivora/hero.webp',
+    image: '/media/nivora/hero-morning.webp',
     demo: 'nivora',
     es: {
       label: 'Apartamentos',

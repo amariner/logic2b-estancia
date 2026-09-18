@@ -28,7 +28,7 @@ const prefix = locale === 'en' ? '/en' : '';
 const heroShortcutHrefs = [
   home.heroCases[0]?.href,
   `${prefix}/${locale === 'es' ? 'recorrido' : 'journey'}/`,
-  `${prefix}/demos/terrava/gestion/?vista=home`,
+  `${prefix}/demos/terrava/gestion/?vista=enquiries`,
 ] as const;
 const wa = logic2bContact(locale, 'commercial');
 const faqSchema = {
@@ -80,24 +80,21 @@ const serviceSchema = {
   <div class="hero-layout shell">
     <div class="hero-copy">
       <p class="eyebrow">{c.hero.eyebrow}</p>
-      <h1 class="display hero-title" aria-label={c.hero.label}>
-        <span>{c.hero.lead}</span>
-        <span class="hero-word-stack" aria-hidden="true">{c.hero.terms.map((term) => <span class="hero-word" data-hero-word>{term}</span>)}</span>
-        <span>{c.hero.tail}</span>
-      </h1>
+      <h1 class="display hero-title">{c.hero.label}</h1>
       <p>{c.hero.body}</p>
       <div class="hero-start" aria-label={locale === 'es' ? 'Siguiente paso' : 'Next step'}>
-        <a class="pill" href="#contacto" data-contact-trigger data-track="cta_click" data-section="hero">{c.hero.primary} <span aria-hidden="true">→</span></a>
-        <a class="hero-start-link" href="#producto">{c.hero.secondary} <span aria-hidden="true">↓</span></a>
+        <a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/?sourcePath=${encodeURIComponent(`${prefix}/`)}`} data-track="cta_click" data-section="hero">{c.hero.primary} <span aria-hidden="true">→</span></a>
+        <a class="hero-start-link" data-estancia-tour-trigger data-tour-entry-step="enquiries" aria-haspopup="dialog" href={`${prefix}/${locale === 'es' ? 'recorrido' : 'journey'}/?step=enquiries&sourcePath=${encodeURIComponent(`${prefix}/`)}`}>{c.hero.secondary} <span aria-hidden="true">→</span></a>
       </div>
-      <ul class="hero-shortcuts" aria-label={locale === 'es' ? 'Accesos al recorrido' : 'Journey shortcuts'}>{c.hero.shortcuts.map((shortcut, index) => <li><a href={heroShortcutHrefs[index]} data-hero-shortcut>{shortcut} <span aria-hidden="true">↗</span></a></li>)}</ul>
+      <p class="hero-note" data-evaluation-expectation>{c.hero.expectation}</p>
+      <details class="hero-direct-views"><summary>{locale === 'es' ? 'Ir a una vista concreta' : 'Go to a specific view'} <span aria-hidden="true">+</span></summary><ul class="hero-shortcuts" aria-label={locale === 'es' ? 'Accesos al recorrido' : 'Journey shortcuts'}>{c.hero.shortcuts.map((shortcut, index) => <li><a href={heroShortcutHrefs[index]} data-hero-shortcut>{shortcut} <span aria-hidden="true">↗</span></a></li>)}</ul></details>
       <p class="hero-note">{c.hero.note}</p>
     </div>
     <aside id="webs" class="hero-case-gallery" aria-labelledby="hero-case-gallery-title">
       <div class="hero-case-gallery-top"><div><p class="eyebrow">{c.hero.rail}</p><h2 id="hero-case-gallery-title">{c.hero.railTitle}</h2></div><button type="button" class="hero-motion-toggle" data-hero-motion-toggle aria-pressed="false"><span data-hero-motion-label>{c.hero.pause}</span><span aria-hidden="true">Ⅱ</span></button></div>
       <div class="hero-case-rails" data-hero-rail>
         <div class="hero-case-rail"><div class="hero-case-track hero-case-track-up">
-          {[...heroConcepts, ...heroConcepts].map((concept, index) => index < heroConcepts.length ? <a class="hero-gallery-case" href={concept.demoHref} aria-label={`${concept.brand} · ${concept.planLabel}`} data-hero-proof={concept.status === 'canonical' ? concept.slug : undefined}><WebMiniature concept={concept} eager={index < 2} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong><span>{concept.verticalLabel}</span></div></a> : <div class="hero-gallery-case" aria-hidden="true" data-hero-case-clone={concept.status === 'canonical' ? '' : undefined}><WebMiniature concept={concept} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong></div></div>)}
+          {[...heroConcepts, ...heroConcepts].map((concept, index) => index < heroConcepts.length ? <a class="hero-gallery-case" href={concept.demoHref} data-theme-preview-open={`theme-preview-${concept.slug}`} aria-haspopup="dialog" aria-label={`${concept.brand} · ${concept.planLabel}`} data-hero-proof={concept.status === 'canonical' ? concept.slug : undefined}><WebMiniature concept={concept} eager={index < 2} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong><span>{concept.verticalLabel}</span></div></a> : <div class="hero-gallery-case" aria-hidden="true" data-hero-case-clone={concept.status === 'canonical' ? '' : undefined}><WebMiniature concept={concept} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong></div></div>)}
         </div></div>
         <div class="hero-case-rail hero-case-rail-secondary" aria-hidden="true"><div class="hero-case-track hero-case-track-down">
           {[...heroConcepts].reverse().concat([...heroConcepts].reverse()).map((concept) => <div class="hero-gallery-case"><WebMiniature concept={concept} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong><span>{concept.verticalLabel}</span></div></div>)}
@@ -332,3 +329,14 @@ const serviceSchema = {
   import '../scripts/assessment-context';
   import '../scripts/scope-estimator';
 </script>
+
+<style>
+  .faq .heading, .faq summary { overflow-wrap:anywhere; }
+  .hero-direct-views { max-width: 490px; margin: 24px 0 0; border-top: 1px solid var(--line); }
+  .hero-direct-views summary { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:44px; cursor:pointer; color:var(--slate); font-size:.8125rem; list-style:none; }
+  .hero-direct-views summary::-webkit-details-marker { display:none; }
+  .hero-direct-views summary span { font-size:1.25rem; }
+  .hero-direct-views[open] summary span { transform:rotate(45deg); }
+  .hero-direct-views .hero-shortcuts { margin:4px 0 14px; }
+  .hero-direct-views summary:focus-visible { outline:3px solid var(--sienna); outline-offset:3px; }
+</style>

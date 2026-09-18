@@ -4,14 +4,15 @@ import type { WebPortfolioConcept } from '../web-portfolio';
 import type { PlanHandoffSource } from '../plan-contract';
 import { themeDetailHref, themeRequestHref } from '../theme-detail';
 import InterfaceIcon from './InterfaceIcon.astro';
+import '../styles/preview-dialogs.css';
 const { locale, concept, sourcePath } = Astro.props as { locale: Locale; concept: WebPortfolioConcept; sourcePath: PlanHandoffSource };
 const en = locale === 'en';
 const detailHref = themeDetailHref(locale, concept.slug);
 ---
-<dialog id={`theme-preview-${concept.slug}`} class="portfolio-preview-dialog refined-preview" aria-labelledby={`theme-preview-title-${concept.slug}`} data-theme-preview-dialog data-preview-dialog>
+<dialog id={`theme-preview-${concept.slug}`} class="portfolio-preview-dialog refined-preview" aria-labelledby={`theme-preview-title-${concept.slug}`} aria-describedby={`theme-preview-boundary-${concept.slug}`} data-theme-preview-dialog data-preview-dialog>
   <div class="refined-preview-layout">
     <div class="preview-toolbar">
-      <span class="preview-toolbar-title">{concept.brand}</span>
+      <span class="preview-toolbar-title">{en ? 'Website preview' : 'Vista previa de la web'}</span>
       <div class="preview-device-controls" role="group" aria-label={en ? 'Preview size' : 'Tamaño de vista previa'}>
         <button type="button" data-preview-device="desktop" aria-pressed="true" aria-label={en ? 'Desktop preview' : 'Vista de escritorio'}><InterfaceIcon name="web" /></button>
         <button type="button" data-preview-device="mobile" aria-pressed="false" aria-label={en ? 'Mobile preview' : 'Vista móvil'}><InterfaceIcon name="phone" /></button>
@@ -27,9 +28,17 @@ const detailHref = themeDetailHref(locale, concept.slug);
       <aside class="preview-sidebar">
         <p class="eyebrow">{concept.verticalLabel} · {concept.planLabel}</p>
         <h2 id={`theme-preview-title-${concept.slug}`}>{concept.brand}</h2>
-        <p>{concept.showcase.eyebrow}</p>
-        <p class="preview-boundary" role="note">{concept.boundary}</p>
-        <div class="preview-actions"><a class="pill" href={themeRequestHref(locale, concept, sourcePath)}>{en ? 'Request this design' : 'Solicitar este diseño'} <InterfaceIcon name="arrow" /></a><a class="text-link" href={detailHref}>{en ? 'More information' : 'Más información'} <InterfaceIcon name="external" /></a></div>
+        <p class="preview-intro">{concept.showcase.eyebrow}</p>
+        <details class="preview-details" data-preview-details>
+          <summary>{en ? 'About this design' : 'Sobre este diseño'}<span aria-hidden="true">+</span></summary>
+          <div class="preview-details-content">
+            <ul>{concept.visiblePages.map(page => <li>{page}</li>)}</ul>
+            <p>{concept.boundary}</p>
+            <a class="text-link" href={detailHref}>{en ? 'View full design' : 'Ver diseño completo'} <InterfaceIcon name="arrow" /></a>
+          </div>
+        </details>
+        <div class="preview-actions"><a class="pill" href={themeRequestHref(locale, concept, sourcePath)}>{en ? 'I want this design' : 'Quiero este diseño'} <InterfaceIcon name="arrow" /></a></div>
+        <p id={`theme-preview-boundary-${concept.slug}`} class="preview-boundary" role="note">{en ? 'Fictional demo. No live bookings, payments or messages.' : 'Demo ficticia. Sin reservas, cobros ni envíos reales.'}</p>
         <p class="preview-help" data-preview-help hidden>{en ? 'Taking longer than expected. You can open the website in another tab.' : 'La carga está tardando. Puedes abrir la web en otra pestaña.'}</p>
       </aside>
     </div>

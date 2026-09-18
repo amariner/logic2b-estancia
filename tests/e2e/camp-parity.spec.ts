@@ -180,7 +180,7 @@ test('website and workspace previews close back onto their launch controls', asy
   for (const locale of locales) {
     await page.goto(locale.home);
 
-    const themeTrigger = page.locator('[data-theme-preview-open]').first();
+    const themeTrigger = page.locator('[data-theme-showcase] [data-theme-preview-open]').first();
     const themeDialogId = await themeTrigger.getAttribute('data-theme-preview-open');
     expect(themeDialogId).toBeTruthy();
     const themeDialog = page.locator(`#${themeDialogId}`);
@@ -223,7 +223,7 @@ test('all twelve theme popups and all six workspace popups are wired in both lan
         ? `${locale.prefix}/demos/${slug}/?embed=theme`
         : `${locale.prefix}/${locale.route.webs}/${slug}/?embed=theme`
     ));
-    const themeConnections = await page.locator('[data-theme-preview-open]').evaluateAll((triggers) => triggers.map((trigger) => {
+    const themeConnections = await page.locator('[data-theme-showcase] [data-theme-preview-open]').evaluateAll((triggers) => triggers.map((trigger) => {
       const dialogId = trigger.getAttribute('data-theme-preview-open') ?? '';
       const dialog = document.getElementById(dialogId);
       const frame = dialog?.querySelector<HTMLIFrameElement>('[data-theme-preview-frame]');
@@ -241,7 +241,7 @@ test('all twelve theme popups and all six workspace popups are wired in both lan
       sandbox: 'allow-scripts',
     })));
 
-    const originalTrigger = page.locator('[data-theme-preview-open]').nth(3);
+    const originalTrigger = page.locator('[data-theme-showcase] [data-theme-preview-open]').nth(3);
     const originalDialog = page.locator('#theme-preview-linde');
     await originalTrigger.click();
     await expect(originalDialog).toBeVisible();

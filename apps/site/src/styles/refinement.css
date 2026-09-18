@@ -214,6 +214,9 @@ html.preview-open { overflow:hidden; scrollbar-gutter:stable; }
   .home-closing-panel { top:150px; left:16px; right:16px; }
   .home-closing-phone { width:44%; right:12px; }
 }
+@media(max-width:640px) {
+  .panel-preview-shell { grid-template-columns:minmax(0,1fr); }
+}
 @media(max-width:520px) {
   .portfolio-grid { grid-template-columns:minmax(0,1fr); }
   .catalog-preview-trigger .web-miniature { min-height:270px; }

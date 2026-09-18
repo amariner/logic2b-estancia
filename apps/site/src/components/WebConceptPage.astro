@@ -14,8 +14,8 @@ const portfolioHref = en ? '/en/webs/' : '/webs/';
 const contactHref = en ? '/en/#contacto' : '/#contacto';
 const portfolioCount = getWebPortfolio(locale).length;
 const sourceSet = concept.status === 'canonical'
-  ? `/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w, /media/${concept.slug}/hero-1600.avif 1600w`
-  : `/media/${concept.slug}/hero-640.avif 640w, /media/${concept.slug}/hero-960.avif 960w, /media/${concept.slug}/hero-1280.avif 1280w`;
+  ? `${concept.image.replace('.webp', '')}-640.avif 640w, ${concept.image.replace('.webp', '')}-960.avif 960w, ${concept.image.replace('.webp', '')}-1600.avif 1600w`
+  : `${concept.image.replace('.webp', '')}-640.avif 640w, ${concept.image.replace('.webp', '')}-960.avif 960w, ${concept.image.replace('.webp', '')}-1280.avif 1280w`;
 ---
 <PortfolioViewAnalytics event="web_view" locale={locale} web={concept.slug} plan={concept.plan} />
 <article class={`web-concept web-concept-${concept.slug}`} data-web-concept={concept.slug}>

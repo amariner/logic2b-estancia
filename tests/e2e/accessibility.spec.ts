@@ -89,18 +89,25 @@ async function gotoStable(page: Page, path: string) {
   });
 }
 
-test('representative ES/EN routes have no automated WCAG 2.2 AA violations', async ({ page }) => {
-  test.setTimeout(240_000);
-  const violations = [];
-  for (const path of [...auditedRoutes, ...deepStateRoutes]) {
-    await gotoStable(page, path);
-    const result = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-      .analyze();
-    violations.push(...formatViolations(path, result.violations));
-  }
-  expect(violations).toEqual([]);
-});
+// Keep every route, but bound the browser context and failure trace to ten pages.
+const wcagRoutes = [...auditedRoutes, ...deepStateRoutes];
+const wcagRouteGroups = Array.from({ length: Math.ceil(wcagRoutes.length / 10) }, (_, index) => wcagRoutes.slice(index * 10, (index + 1) * 10));
+
+for (const [index, paths] of wcagRouteGroups.entries()) {
+  test(`representative ES/EN routes have no automated WCAG 2.2 AA violations · group ${index + 1}/${wcagRouteGroups.length} · ${paths[0]}`, async ({ page }) => {
+    test.setTimeout(90_000);
+    for (const path of paths) {
+      await test.step(`WCAG 2.2 AA: ${path}`, async () => {
+        await gotoStable(page, path);
+        const result = await new AxeBuilder({ page })
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+          .analyze();
+        // Report the exact route and keep auditing the remaining pages in this group.
+        expect.soft(formatViolations(path, result.violations), path).toEqual([]);
+      }, { timeout: 30_000 });
+    }
+  });
+}
 
 test('recovered assessment context stays accessible and reflows at 320px', async ({ page }) => {
   await gotoStable(page, '/');

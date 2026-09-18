@@ -96,7 +96,7 @@ for (const prefix of ['', '/en']) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${prefix}/`);
     for (const slug of slugs) {
-      const trigger = page.locator(`[data-theme-preview-open="theme-preview-${slug}"]`);
+      const trigger = page.locator(`[data-theme-showcase] [data-theme-preview-open="theme-preview-${slug}"]`);
       await trigger.click();
       const dialog = page.locator(`#theme-preview-${slug}`);
       await expect(dialog).toBeVisible();
