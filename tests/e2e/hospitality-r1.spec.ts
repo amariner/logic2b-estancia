@@ -79,6 +79,8 @@ for (const prefix of ['', '/en']) {
     await page.locator('[data-sales-link]').click();
     const form = page.locator('[data-lead]');
     await expect(form).toHaveCount(1);
+    await expect(form.locator('[data-lead-context]')).not.toHaveAttribute('open');
+    await form.locator('[data-lead-context] > summary').click();
     await expect(form.locator('[data-assessment-handoff]')).toBeVisible();
     await expect(form.locator('[name="plan"]')).toHaveValue('gestion');
     await expect(form.locator('[name="accommodationType"]')).toHaveValue('rural');

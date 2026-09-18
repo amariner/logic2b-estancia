@@ -205,14 +205,29 @@
 .faq-list details[open] summary span { transform: rotate(45deg); }
 .faq-list details p { max-width: 650px; margin: -4px 44px 24px 0; color: var(--slate); font-size: .88rem; line-height: 1.65; }
 .contact-wrap { display: grid; grid-template-columns: .85fr 1.15fr; gap: 70px; }
-.contact-promises { display: grid; gap: 10px; margin: 28px 0; padding: 0; color: var(--slate); font-size: .78rem; line-height: 1.5; list-style: none; }
-.contact-promises li { display: grid; grid-template-columns: 16px 1fr; gap: 8px; }
-.contact-promises li::before { color: var(--sienna); content: '✓'; }
-.lead-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.assessment-handoff { display: grid; gap: 18px; border: 1px solid rgb(122 62 45 / .24); border-radius: 22px; padding: 24px; background: var(--peach); }
+.lead-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; min-width: 0; }
+.lead-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; min-width: 0; margin: 0; border: 0; padding: 0; }
+.lead-fields legend { margin-bottom: 16px; padding: 0; color: var(--ink); font-size: .85rem; font-weight: 600; }
+.lead-disclosure { min-width: 0; border: 1px solid var(--line); border-radius: 18px; background: white; }
+.lead-disclosure > summary { display: flex; min-height: 64px; align-items: flex-start; justify-content: space-between; gap: 16px; border-radius: inherit; padding: 18px; cursor: pointer; list-style: none; }
+.lead-disclosure > summary::-webkit-details-marker { display: none; }
+.lead-disclosure > summary:focus-visible { outline: 3px solid var(--sienna); outline-offset: 3px; }
+.lead-disclosure-title { min-width: 0; color: var(--ink); font-size: .85rem; font-weight: 600; line-height: 1.4; }
+.lead-disclosure-title > span { display: block; margin-top: 6px; color: var(--slate); font-size: .75rem; font-weight: 400; line-height: 1.6; }
+.lead-disclosure-title [data-lead-context-summary] { display: flex; flex-wrap: wrap; gap: 2px 12px; }
+.lead-disclosure-title [data-lead-context-summary] > span { overflow-wrap: anywhere; }
+.lead-disclosure-action { display: inline-flex; flex: none; align-items: center; gap: 7px; color: var(--sienna); font-size: .75rem; line-height: 1.6; }
+.lead-disclosure [data-assessment-included][hidden], .lead-disclosure[open] [data-assessment-included], .lead-disclosure:not([open]) .when-open, .lead-disclosure[open] .when-closed, .lead-disclosure[open] [data-lead-context-summary] { display: none; }
+.lead-disclosure-plus { color: var(--sienna); font-size: 1.25rem; line-height: 1; }
+.lead-disclosure[open] > summary .lead-disclosure-plus { transform: rotate(45deg); }
+.lead-disclosure-body { min-width: 0; padding: 0 18px 20px; }
+.lead-form input, .lead-form select, .lead-form textarea, .lead-form button, .lead-form summary { scroll-margin-block: 80px 24px; }
+.lead-context-removed { margin: 16px 0 0; color: var(--slate); font-size: .75rem; line-height: 1.6; }
+.lead-context-removed[hidden] { display: none; }
+.assessment-handoff { display: grid; gap: 12px; margin-top: 20px; border-top: 1px solid var(--line); padding-top: 20px; }
 .assessment-handoff[hidden] { display: none; }
 .assessment-handoff .eyebrow { margin-bottom: 8px; color: #7a3e2d; }
-.assessment-handoff h3 { margin: 0; font-family: var(--serif); font-size: 1.75rem; font-weight: 400; line-height: 1.05; }
+.assessment-handoff h3 { margin: 0; font-family: var(--serif); font-size: 1.35rem; font-weight: 400; line-height: 1.15; }
 .assessment-handoff p:not(.eyebrow) { max-width: 620px; margin: 10px 0 0; color: var(--slate); font-size: .8rem; line-height: 1.6; }
 .assessment-handoff details { border-top: 1px solid rgb(122 62 45 / .2); border-bottom: 1px solid rgb(122 62 45 / .2); }
 .assessment-handoff summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; cursor: pointer; font-size: .78rem; font-weight: 700; list-style: none; }
@@ -226,7 +241,7 @@
 .runtime-lead-note { margin: 0 0 6px; border-left: 3px solid var(--sienna); padding: 12px 14px; color: var(--slate); background: color-mix(in srgb, var(--sienna) 8%, white); font-size: .78rem; line-height: 1.55; }
 .runtime-lead-note strong { color: var(--ink); }
 .runtime-lead-note[data-mode='real'] { border-left-color: #24643c; background: #eef7f0; }
-.lead-form label { display: grid; gap: 7px; color: var(--slate); font-size: .75rem; }
+.lead-form label { min-width: 0; display: grid; gap: 7px; color: var(--slate); font-size: .75rem; }
 .lead-form input, .lead-form select, .lead-form textarea { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; color: var(--ink); background: var(--fog); }
 .lead-form input:focus, .lead-form select:focus, .lead-form textarea:focus { border-color: var(--sienna); outline: 2px solid rgb(156 81 54 / .2); outline-offset: 1px; background: white; }
 .lead-form .wide { grid-column: 1 / -1; }
@@ -253,11 +268,11 @@
 .contact-dialog::backdrop { background: rgb(16 19 17 / .7); backdrop-filter: blur(7px); }
 .contact-dialog-panel { min-height: min(720px, calc(100dvh - 32px)); }
 .contact-dialog-bar { position: sticky; z-index: 4; top: 0; display: flex; min-height: 58px; align-items: center; justify-content: space-between; gap: 18px; padding: 0 22px; color: white; background: var(--ink); }
-.contact-dialog-bar > span { font-size: .69rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
-.contact-dialog-bar button { min-height: 38px; border: 1px solid rgb(255 255 255 / .28); border-radius: 999px; padding: 0 14px; color: white; background: transparent; cursor: pointer; }
+.contact-dialog-bar > span { min-width: 0; flex: 1; overflow-wrap: anywhere; font-size: .69rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.contact-dialog-bar button { flex-shrink: 0; white-space: nowrap; min-height: 38px; border: 1px solid rgb(255 255 255 / .28); border-radius: 999px; padding: 0 14px; color: white; background: transparent; cursor: pointer; }
 .contact-dialog-bar button:hover { border-color: white; background: rgb(255 255 255 / .08); }
 .contact-dialog-bar button span { margin-left: 6px; font-size: 1.05rem; }
-.contact-in-dialog { width: min(calc(100% - 56px), var(--shell)); padding-block: clamp(44px, 6vw, 76px); }
+.contact-in-dialog { width: min(calc(100% - 56px), var(--shell)); padding-block: clamp(30px, 4vw, 48px); }
 .contact-in-dialog .contact-wrap { gap: clamp(40px, 5vw, 68px); }
 .contact-dialog-open { overflow: hidden; }
 .contact-dialog-open .whatsapp,
@@ -614,14 +629,16 @@ body:has([data-commercial-tour]:not([data-state='ready'])) .whatsapp { opacity: 
   .scope-controls, .scope-result { padding: 24px; }
   .scope-counts { grid-template-columns: 1fr; }
   .scope-result { min-height: 390px; }
-  .lead-form { grid-template-columns: 1fr; }
+  .lead-form, .lead-fields { grid-template-columns: minmax(0, 1fr); }
   .contact-dialog { width: calc(100vw - 18px); max-height: calc(100dvh - 18px); border-radius: 21px; }
   .contact-dialog-panel { min-height: calc(100dvh - 18px); }
   .contact-dialog-bar { min-height: 54px; padding-inline: 15px; }
-  .contact-dialog-bar > span { font-size: .6rem; }
+  .contact-dialog-bar > span { min-width: 0; flex: 1; overflow-wrap: anywhere; font-size: .6rem; }
   .contact-dialog-bar button { min-height: 40px; padding-inline: 12px; }
   .contact-in-dialog { width: calc(100% - 28px); padding-block: 30px 38px; }
-  .contact-in-dialog .heading { font-size: clamp(2.55rem, 13vw, 3.25rem); }
+  .contact-in-dialog .heading { font-size: clamp(2rem, 9vw, 2.5rem); }
+  .contact-in-dialog .contact-wrap { gap: 24px; }
+  .contact-in-dialog .eyebrow { margin-bottom: 12px; }
   .commercial-hero { padding-top: 80px; }
   .solution-hero { padding: 62px 0 72px; }
   .solution-hero .display { font-size: clamp(3rem, 14vw, 4.4rem); }
@@ -652,7 +669,9 @@ body:has([data-commercial-tour]:not([data-state='ready'])) .whatsapp { opacity: 
   .diagnostic-card { min-height: 580px; padding: 26px; }
   .result-links { align-items: stretch; flex-direction: column; }
   .lead-form .wide { grid-column: auto; }
-  .assessment-handoff { padding: 20px; }
+  .assessment-handoff { padding-top: 16px; }
+  .lead-disclosure > summary { gap: 10px; padding: 16px; }
+  .lead-disclosure-body { padding: 0 16px 18px; }
   .assessment-handoff dl { grid-template-columns: 1fr; gap: 3px; }
   .assessment-handoff dd + dt { margin-top: 8px; }
   .activation-steps li { grid-template-columns: 40px 1fr; }

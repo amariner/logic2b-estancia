@@ -1010,6 +1010,7 @@ test('rich plan cards expose canonical previews and carry evidence context into 
   expect(localContext).toContain('"panel":"terrava"');
   expect(localContext).toContain('"sourcePath":"/"');
   await page.getByRole('link', { name: /Continuar con este contexto/ }).click();
+  await page.locator('[data-lead-context] > summary').click();
   await expect(page.locator('[data-assessment-handoff]')).toContainText('Evidencia web');
   await expect(page.locator('[data-assessment-handoff]')).toContainText('terrava');
 });
@@ -1313,14 +1314,15 @@ test('assessment keeps context local until the single sales form is reviewed and
   await expect(page).toHaveURL(/\/\?assessment=1#contacto$/);
   const form = page.locator('[data-lead]');
   const handoff = form.locator('[data-assessment-handoff]');
+  await expect(form.locator('[data-lead-context]')).not.toHaveAttribute('open');
+  await form.locator('[data-lead-context] > summary').click();
   await expect(handoff).toBeVisible();
-  await expect(handoff.getByRole('heading', { name: 'No tienes que empezar de nuevo.' })).toBeVisible();
   await expect(form.locator('[name="accommodationType"]')).toHaveValue('apartment');
   await expect(form.locator('[name="plan"]')).toHaveValue('gestion');
   await expect(form.locator('[name="timeline"]')).toHaveValue('3-6');
   await expect(form.locator('[name="propertyCount"]')).toHaveValue('3');
   await expect(form.locator('[name="unitCount"]')).toHaveValue('12');
-  await handoff.getByText('Revisar el contexto que se adjuntará').click();
+  await handoff.locator('details > summary').click();
   await expect(handoff).toContainText('Email y hojas de cálculo');
   await expect(handoff).toContainText('Reservas, Planning');
   expect(leadRequests).toBe(0);
@@ -1351,10 +1353,12 @@ test('English assessment context is reviewable and can be discarded before conta
   await page.goto('/en/?assessment=1#contacto');
   const form = page.locator('[data-lead]');
   const handoff = form.locator('[data-assessment-handoff]');
-  await expect(handoff.getByRole('heading', { name: 'You do not have to start again.' })).toBeVisible();
+  await expect(form.locator('[data-lead-context]')).not.toHaveAttribute('open');
+  await form.locator('[data-lead-context] > summary').click();
+  await expect(handoff).toBeVisible();
   await expect(form.locator('[name="accommodationType"]')).toHaveValue('hotel');
   await expect(form.locator('[name="plan"]')).toHaveValue('inteligente');
-  await handoff.getByText('Review the context that will be attached').click();
+  await handoff.locator('details > summary').click();
   await expect(handoff).toContainText('Maintenance');
   await expect(handoff).toContainText('To be defined');
   await handoff.getByRole('button', { name: 'Do not attach these answers' }).click();
@@ -1382,6 +1386,7 @@ test('only the home landing exposes and submits the real commercial lead form', 
   await form.locator('[name="name"]').fill('Ada Demo');
   await form.locator('[name="businessName"]').fill('Casa Demo');
   await form.locator('[name="email"]').fill('ada@example.test');
+  await form.locator('[data-lead-optional] > summary').click();
   await form.locator('[name="message"]').fill('Solicitud comercial de prueba.');
   await form.locator('[name="accept"]').check();
   await form.getByRole('button', { name: /Solicitar información/ }).click();
@@ -1493,6 +1498,9 @@ test('the sales form explains rate limiting and re-enables itself in both locale
     await form.getByRole('button', { name: item.submit }).click();
     await expect(form.locator('[data-lead-receipt]')).toBeHidden();
     await expect(form.locator('.form-status')).toHaveText(item.status);
+    await expect(form.locator('[name="name"]')).toHaveValue('Ada Demo');
+    await expect(form.locator('[name="businessName"]')).toHaveValue('Casa Demo');
+    await expect(form.locator('[name="email"]')).toHaveValue('ada@example.test');
     await expect(form.getByRole('button', { name: item.waiting })).toBeDisabled();
     await page.clock.fastForward(2_000);
     await expect(form.getByRole('button', { name: item.submit })).toBeEnabled();
@@ -1519,9 +1527,12 @@ test('the sales form bounds a stalled request and can retry without claiming del
   await expect(form.locator('[data-lead-receipt]')).toBeHidden();
   await expect(form.locator('.form-status')).toHaveText('La conexión está tardando demasiado y no podemos confirmar la entrega. Vuelve a intentarlo: si la solicitud ya llegó, conservaremos una única referencia.');
   await expect(form.getByRole('button', { name: /Solicitar información/ })).toBeEnabled();
+  await expect(form.locator('[name="name"]')).toHaveValue('Ada Demo');
+  await expect(form.locator('[name="businessName"]')).toHaveValue('Casa Demo');
+  await expect(form.locator('[name="email"]')).toHaveValue('ada@example.test');
   expect(requests).toBe(1);
 
-  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await page.unroute('**/api/leads');
   await page.route('**/api/leads', (route) => route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ ok: true, outcome: 'delivered', ref: 'retry-ref', meetingUrl: null }) }));
   await form.getByRole('button', { name: /Solicitar información/ }).click();
   await expect(form.locator('[data-lead-receipt]')).toContainText('retry-ref');

@@ -131,25 +131,19 @@ export function clearAssessmentContext(storage: Pick<Storage, 'removeItem'>): vo
 
 const copy = {
   es: {
-    status: 'Hemos recuperado el contexto de tu diagnóstico.', removed: 'El diagnóstico ya no se adjuntará.',
-    labels: ['Plan recomendado', 'Tipo de alojamiento', 'Escala', 'Situación actual', 'Capacidades solicitadas', 'Plazo', 'Inversión orientativa'],
-    empty: 'Ninguna seleccionada', properties: 'propiedades', units: 'unidades',
-    plans: { basico: 'Básico', gestion: 'Gestión', inteligente: 'Inteligente' },
-    types: { apartment: 'Apartamentos', rural: 'Alojamiento rural', hotel: 'Hotel' },
+    status: 'Hemos recuperado el contexto de tu diagnóstico.', removed: 'Diagnóstico retirado. Conservamos tu contacto y los datos del alojamiento para que puedas revisarlos.',
+    labels: ['Situación actual', 'Capacidades solicitadas', 'Inversión orientativa'],
+    empty: 'Ninguna seleccionada',
     stacks: { website: 'Web', email: 'Email y hojas de cálculo', 'booking-engine': 'Motor de reservas', calendar: 'Calendario compartido', channels: 'OTA / canales', pms: 'PMS' },
     capabilities: { enquiries: 'Solicitudes y alternativas', bookings: 'Reservas', planning: 'Planning', guests: 'Perfiles de huéspedes', rates: 'Tarifas', 'web-editor': 'Editor web', cleaning: 'Limpieza', teams: 'Equipos y roles', maintenance: 'Mantenimiento', channels: 'Canales', automation: 'Automatización', ai: 'IA supervisada', metrics: 'Métricas avanzadas' },
-    timelines: { '0-3': '0–3 meses', '3-6': '3–6 meses', '6-12': '6–12 meses', exploring: 'Explorando' },
     investments: { 'under-3k': 'Menos de 3.000 €', '3k-8k': '3.000–8.000 €', '8k-20k': '8.000–20.000 €', '20k-plus': 'Más de 20.000 €', unknown: 'Por definir' },
   },
   en: {
-    status: 'We recovered your assessment context.', removed: 'The assessment will no longer be attached.',
-    labels: ['Recommended plan', 'Accommodation type', 'Scale', 'Current setup', 'Requested capabilities', 'Timeframe', 'Indicative investment'],
-    empty: 'None selected', properties: 'properties', units: 'units',
-    plans: { basico: 'Basic', gestion: 'Management', inteligente: 'Intelligent' },
-    types: { apartment: 'Apartments', rural: 'Rural stays', hotel: 'Hotel' },
+    status: 'We recovered your assessment context.', removed: 'Assessment removed. Your contact and accommodation details are kept so you can review them.',
+    labels: ['Current setup', 'Requested capabilities', 'Indicative investment'],
+    empty: 'None selected',
     stacks: { website: 'Website', email: 'Email and spreadsheets', 'booking-engine': 'Booking engine', calendar: 'Shared calendar', channels: 'OTA / channels', pms: 'PMS' },
     capabilities: { enquiries: 'Enquiries and alternatives', bookings: 'Bookings', planning: 'Planning', guests: 'Guest profiles', rates: 'Rates', 'web-editor': 'Website editor', cleaning: 'Cleaning', teams: 'Teams and roles', maintenance: 'Maintenance', channels: 'Channels', automation: 'Automation', ai: 'Supervised AI', metrics: 'Advanced metrics' },
-    timelines: { '0-3': '0–3 months', '3-6': '3–6 months', '6-12': '6–12 months', exploring: 'Exploring' },
     investments: { 'under-3k': 'Under €3,000', '3k-8k': '€3,000–8,000', '8k-20k': '€8,000–20,000', '20k-plus': 'More than €20,000', unknown: 'To be defined' },
   },
 } as const;
@@ -185,11 +179,9 @@ function renderLeadContext(context: AssessmentContext): void {
   const c = copy[context.locale];
   const labels: string[] = [...c.labels];
   const values = [
-    c.plans[context.plan], c.types[context.accommodationType],
-    `${context.propertyCount} ${c.properties} · ${context.unitCount} ${c.units}`,
     context.currentStack.map((value) => c.stacks[value]).join(', ') || c.empty,
     context.requestedCapabilities.map((value) => c.capabilities[value]).join(', ') || c.empty,
-    c.timelines[context.timeline], c.investments[context.investmentRange],
+    c.investments[context.investmentRange],
   ];
   if (context.web) { labels.push(context.locale === 'en' ? 'Web evidence' : 'Evidencia web'); values.push(context.web); }
   if (context.panel && context.panel !== 'none') { labels.push(context.locale === 'en' ? 'Panel evidence' : 'Evidencia de gestor'); values.push(context.panel); }
@@ -200,6 +192,10 @@ function renderLeadContext(context: AssessmentContext): void {
   }));
   activeLeadContext = context;
   handoff.hidden = false;
+  const included = form.querySelector<HTMLElement>('[data-assessment-included]');
+  if (included) included.hidden = false;
+  const group = form.querySelector<HTMLDetailsElement>('[data-lead-context]');
+  if (group) group.open = false;
   const status = form.querySelector<HTMLElement>('[data-assessment-context-status]');
   if (status) status.textContent = c.status;
 }
@@ -218,6 +214,12 @@ function initialiseLeadContext(): void {
     if (storage) clearAssessmentContext(storage);
     activeLeadContext = null; withoutAssessmentMarker();
     if (handoff) handoff.hidden = true;
+    const included = form.querySelector<HTMLElement>('[data-assessment-included]');
+    if (included) included.hidden = true;
+    const group = form.querySelector<HTMLDetailsElement>('[data-lead-context]');
+    if (group) group.open = true;
+    const removed = form.querySelector<HTMLElement>('[data-assessment-removed]');
+    if (removed) { removed.hidden = false; removed.textContent = copy[locale].removed; }
     if (status) status.textContent = copy[locale].removed;
     (form.elements.namedItem('accommodationType') as HTMLSelectElement | null)?.focus();
   });
