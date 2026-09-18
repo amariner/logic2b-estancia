@@ -46,6 +46,8 @@ La cadencia comercial, la taxonomía de GA4 y el guion de entrevistas están doc
 
 La orden `/goal continua con el desarrollo de este proyecto` reanuda el trabajo desde el último punto verificado. Las reglas persistentes están en [`AGENTS.md`](AGENTS.md) y el estado, las prioridades y el registro de continuaciones se mantienen en [`plans/PROJECT_CONTINUATION.md`](plans/PROJECT_CONTINUATION.md). Ambos deben actualizarse cuando cambien el objetivo o el siguiente punto de desarrollo.
 
+El roadmap estratégico vigente es la [paridad comercial, demostrativa y operativa condicionada con SuperHote, Cloudbeds y Mews](plans/HOSPITALITY_PARITY_ROADMAP.md), basada en la [investigación del 14 de septiembre de 2026](docs/research/HOSPITALITY_BENCHMARK_2026-09-14.md). La cola comienza por R0: reconciliar límites visibles de conexiones, rutas de temas y pruebas del árbol local.
+
 Cada incremento pasa además por el [`consejo multidisciplinar`](docs/MULTIDISCIPLINARY_REVIEW.md): estrategia de marketing, diseño de producto, UX, UI y dirección visual, SEO, arquitectura frontend, ingeniería full stack y controles transversales de QA, accesibilidad, rendimiento y confianza comercial.
 
 La baseline WCAG 2.2 AA automatizada, sus hallazgos y los recorridos manuales todavía pendientes se mantienen en [`docs/ACCESSIBILITY_AUDIT.md`](docs/ACCESSIBILITY_AUDIT.md).
