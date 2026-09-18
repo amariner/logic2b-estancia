@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { enlargeTextTo200Percent } from './helpers/text-resize';
 
 for (const prefix of ['', '/en']) {
   const en = Boolean(prefix);
@@ -25,10 +26,7 @@ for (const prefix of ['', '/en']) {
       const homeAxe = await new AxeBuilder({ page }).include('[data-hero]').include('[data-commercial-evidence]').include('[data-plan-showcase]').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
       expect(homeAxe.violations.map(({ id, nodes }) => ({ id, targets: nodes.map(n => n.target) }))).toEqual([]);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-      await page.evaluate(async () => {
-        document.documentElement.style.fontSize = '200%';
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      });
+      await enlargeTextTo200Percent(page);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
       await page.goto(rural);
@@ -45,10 +43,7 @@ for (const prefix of ['', '/en']) {
       await page.locator('[data-tour-workspace]').screenshot({ path: testInfo.outputPath('journey.png') });
       expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations.map(({ id }) => id)).toEqual([]);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-      await page.evaluate(async () => {
-        document.documentElement.style.fontSize = '200%';
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      });
+      await enlargeTextTo200Percent(page);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       expect(writes).toEqual([]);
     });

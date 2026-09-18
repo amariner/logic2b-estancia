@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { enlargeTextTo200Percent } from './helpers/text-resize';
 
 for (const prefix of ['', '/en']) {
   for (const width of [320, 390, 1440]) {
@@ -55,7 +56,7 @@ for (const prefix of ['', '/en']) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
       const violations = (await new AxeBuilder({ page }).options({ preload: false }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()).violations;
       expect(violations.map(({ id, nodes }) => ({ id, targets: nodes.map(({ target }) => target) }))).toEqual([]);
-      await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+      await enlargeTextTo200Percent(page);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       expect(writes).toEqual([]);
       expect(resourceFailures).toEqual([]);

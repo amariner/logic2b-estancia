@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { enlargeTextTo200Percent } from './helpers/text-resize';
 
 const contextKey = 'logic-estancia-assessment-v1';
 const operationalMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -298,10 +299,7 @@ for (const prefix of ['', '/en']) {
       const scan = await new AxeBuilder({ page }).include('[data-lead]').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
       expect(scan.violations.map(({ id, nodes }) => ({ id, targets: nodes.map(node => node.target) }))).toEqual([]);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-      await page.evaluate(async () => {
-        document.documentElement.style.fontSize = '200%';
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      });
+      await enlargeTextTo200Percent(page);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       expect(await form.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
       const closeBounds = await page.locator('[data-contact-dialog-close]').evaluate(button => {

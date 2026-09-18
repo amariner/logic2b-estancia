@@ -800,7 +800,7 @@ body:has([data-commercial-tour]:not([data-state='ready'])) .whatsapp { opacity: 
 .commercial-tour-hero aside li { display: grid; min-width: 0; grid-template-columns: 34px 1fr; gap: 13px; align-items: center; border-top: 1px solid rgb(255 255 255 / .14); padding: 14px 0; }
 .commercial-tour-hero aside li > span { color: #9da1a8; font-size: .58rem; }
 .commercial-tour-hero aside li div { display: grid; min-width: 0; gap: 4px; }
-.commercial-tour-hero aside strong { font-family: var(--serif); font-size: 1.28rem; font-weight: 400; }
+.commercial-tour-hero aside strong { overflow-wrap: anywhere; font-family: var(--serif); font-size: 1.28rem; font-weight: 400; }
 .commercial-tour-hero aside small { overflow: hidden; color: #bfc3c8; font-size: .61rem; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
 .commercial-tour-noscript { margin-block: 28px; border-left: 2px solid var(--sienna); padding-left: 14px; color: var(--slate); font-size: .76rem; line-height: 1.6; }
 .commercial-tour [hidden] { display: none; }

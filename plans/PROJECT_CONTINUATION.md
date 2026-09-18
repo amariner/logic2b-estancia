@@ -6,6 +6,14 @@ SHA de producto verificado R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Simpl
 
 Rama: `main`
 
+## Publicación autorizada · preparación · 2026-09-18
+
+El usuario ha pedido explícitamente integrar, subir a GitHub y desplegar en producción. R2 ya estaba integrado en `main` y sincronizado con `origin/main` (`4120518`). Se usa el workflow existente `Deploy production`, con tag único sobre la revisión exacta de main. Esta autorización no cambia los límites de demos, HubSpot, analítica ni proveedores.
+
+La revisión de Quality en GitHub (`35363220398`) detectó tres fallos de reflow móvil al 200 % en R0/R1 (245 casos correctos y un caso sin JavaScript intermitente que pasó al reintentar). Se reprodujo que las mediciones locales podían adelantarse a la actualización efectiva de `rem`: la evidencia histórica no bastaba para descartar esos desbordamientos. Se permite el salto de palabras en el título de temas relacionados y las etapas del recorrido; R0/R1/R2 esperan ahora que una sonda de `1rem` duplique realmente su ancho antes de comprobar el layout. Las aserciones de ancho siguen intactas.
+
+Revisión previa y posterior del ajuste: marketing **correcto**, sin nuevas promesas; producto **correcto**, sin cambio de alcance; UX y UI **corregido**, títulos legibles con texto ampliado; SEO **correcto**, rutas/semántica intactas; frontend **corregido**, dos reglas CSS acotadas y espera E2E compartida; full stack **correcto**, sin cambios de API, secretos, migraciones o proveedores; QA/accesibilidad **corregido**, fallo reproducido y comprobación basada en tamaño efectivo. Verificación previa: `pnpm check` correcto y **38/38 E2E R0/R1/R2** con Chromium 151 de Playwright, ES/EN y 320/390/1440 px, usando el build integrado. Logs `/tmp/estancia-production-check.log` y `/tmp/estancia-production-e2e.log`; capturas en `docs/qa/assets/production-2026-09-18/`. La publicación y su smoke se registrarán después del resultado del workflow.
+
 ## Checkpoint vigente · R2 cerrado en local · 2026-09-18
 
 **R2 implementado y verificado. Siguiente incremento: R3.** Este apartado prevalece sobre el histórico inferior. Producto: `2418a521ef03d7369bd148e3c035df45757bbbe1`; rama `main`. Sin despliegue de producción ni operaciones reales desde demos.
