@@ -1,6 +1,6 @@
 # Logic2B Estancias · Roadmap de paridad con SuperHote, Cloudbeds y Mews
 
-Versión: **1.1 · 2026-09-18**. Estado: **R0 cerrado; R1 siguiente**. SHA de producto R0: `d10dd5580e626e715e577e609bee1d82cb112db8`. Baseline histórico: `b84f4c071958f4d4f79618724fb3b4194d830456` más el trabajo local consolidado por R0. No equivale a una versión desplegada.
+Versión: **1.2 · 2026-09-18**. Estado: **R0 y R1 cerrados en local; R2 siguiente**. SHA de producto R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Las cinco sesiones humanas de comprensión siguen pendientes. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`. No equivale a una versión desplegada ni a conversión comercial validada.
 
 Este es el roadmap estratégico vigente solicitado por el usuario. Sustituye la cola de [paridad Camp](./CAMP_PARITY_ROADMAP.md), que se conserva como histórico. La fuente operativa de continuidad sigue siendo [PROJECT_CONTINUATION.md](./PROJECT_CONTINUATION.md). Investigación: [síntesis y evidencia](../docs/research/HOSPITALITY_BENCHMARK_2026-09-14.md), [SuperHote](../docs/research/SUPERHOTE_2026-09-14.md), [Cloudbeds](../docs/research/CLOUDBEDS_2026-09-14.md), [Mews](../docs/research/MEWS_2026-09-14.md).
 
@@ -69,7 +69,7 @@ El orden combina impacto, riesgo y dependencias. Las estimaciones son **rangos d
 | ID | Incremento terminado | Impacto / confianza inicial | Dependencia | Esfuerzo orientativo | Estado |
 |---|---|---|---|---:|---|
 | R0 | Baseline, límites visibles y rutas coherentes | Crítico / alta: evidencia de código y E2E | Ninguna | 1–3 días | **Cerrado · 2026-09-18** |
-| R1 | Entrada comercial centrada en prueba y decisión | Alto / media: hipótesis de benchmark | R0 | 4–7 días | Pendiente |
+| R1 | Entrada comercial centrada en prueba y decisión | Alto / media: hipótesis de benchmark | R0 | 4–7 días | **Cerrado en local · 2026-09-18**; comprensión humana pendiente |
 | R2 | Solicitud comercial con menos repetición | Alto / media: requiere observar usuarios | R0, contrato de R1 | 3–5 días | Pendiente |
 | R3 | Estancia y planning ficticios coherentes | Alto / alta sobre brecha técnica; media comercial | R0; R1 para entrada al caso | 7–12 días | Pendiente |
 | R4 | Preparación y trabajo móvil por rol | Alto / media | R3 | 5–8 días | Pendiente |
@@ -93,7 +93,11 @@ Responsables: frontend + QA; marketing y UI validan el límite legible. Riesgo: 
 
 ### R1 · Hacer que se entienda y se pueda comprobar
 
-Entregar una revisión acotada de hero, entrada al recorrido, fichas de plan y primera solución; reutilizar las once familias de contenido. Un CTA de evaluación concreta y otro de exploración. Propuesta de copy para evaluar, no publicada todavía: «Tu web y la gestión de tu alojamiento, con un alcance claro»; secundario «Explorar una demo»; acción comercial «Valorar mi proyecto». El usuario debe saber qué recibirá después de cada clic. La elección final del copy debe basarse en comprensión, no en copiar titulares de competidores.
+**Estado: cerrado en local el 18/09/2026.** Evidencia técnica y visual en el [informe R1](../docs/qa/HOSPITALITY_R1_2026-09-18.md) y SHA en el [checkpoint](./PROJECT_CONTINUATION.md). Las cinco sesiones de comprensión y la medición de conversión siguen pendientes.
+
+Entregado: revisión de hero, entrada al recorrido, fichas de plan y solución rural ES/EN, reutilizando las familias existentes. «Una web con carácter. Una gestión a tu medida.» introduce evaluación con resultado explícito y exploración directa de una solicitud ficticia. Cada etapa permite evaluar su necesidad; el contacto directo sigue disponible sin diagnóstico obligatorio. Se conserva contexto cerrado hasta el formulario único.
+
+La petición del 18/09 añade popups de tema/panel con mayor preview y detalle progresivo, accesos desde el hero, doce temas diferenciados y recorrido breve con progreso veraz. Camp aporta principios de interacción observados, sin sustituir este roadmap. Una imagen original de OpenAI mejora Nivora; no se añade vídeo ni se adelantan funciones operacionales.
 
 Dar protagonismo a una web y una vista del gestor con una pregunta real. Recuperar el escenario relevante desde segmento/capacidad sin hacer que cada visitante recorra todo el catálogo. Los cinco pasos existentes siguen siendo la base; el propósito del caso y su resultado deben resultar evidentes. Conservar precios, límites y mapeo canónico. No añadir un plazo de llamada o promesa de soporte sin capacidad confirmada.
 
@@ -104,6 +108,10 @@ Responsables: marketing + producto + UX/UI, implementación frontend. Métricas:
 ### R2 · Mejorar el formulario único y su recuperación
 
 Revisar cada campo actual según su uso real en cualificación. Prototipar agrupación de contacto esencial y contexto adicional; mantener precarga del diagnóstico, edición y descarte. Conservar teléfono opcional. Evitar introducir cinco pasos porque otro sitio los usa: decidir entre agrupación progresiva y formulario único breve mediante observación de tareas.
+
+**Primer incremento concreto tras R1:** reorganizar la presentación sin cambiar obligatoriedad ni API. Mantener nombre, empresa/alojamiento y email visibles; tras diagnóstico, mostrar tipo, plan, propiedades, unidades y plazo una sola vez como contexto editable. En entrada directa, tipo y escala siguen visibles mientras sean obligatorios. No duplicar resumen y controles ni pedir otro diagnóstico para contactar. Teléfono y mensaje conservan su carácter opcional; el plan sin elegir debe poder leerse como «Aún no lo sé» sin inventar una recomendación.
+
+La acción de retirar el diagnóstico debe explicar qué contexto deja de adjuntarse y permitir revisar las precargas ya editadas, sin borrar el contacto escrito. Cualquier grupo con un error debe abrirse y recibir foco. Comparar entrada directa, tema y diagnóstico en ES/EN; mantener los datos durante errores y reintentos, sin persistir PII ni enviar borradores. Esta primera entrega reduce repetición visual; la comprensión y el efecto sobre conversión requieren validación separada.
 
 Si se reduce obligatoriedad, actualizar esquema, tipos, plantillas del email y pruebas; no rellenar datos ausentes con valores inventados. Mantener privacidad obligatoria para responder y seguimiento comercial separado/opcional. No transmitir borradores ni respuestas parciales. La captación sigue siendo una sola instancia de la landing, incluso cuando se presenta en diálogo.
 

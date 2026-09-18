@@ -2,11 +2,51 @@
 
 Última actualización: 2026-09-18
 
-SHA de producto verificado R0: `d10dd5580e626e715e577e609bee1d82cb112db8`. Consolida el trabajo local anterior de UI/UX y las correcciones de baseline. Base histórica: `b84f4c071958f4d4f79618724fb3b4194d830456`.
+SHA de producto verificado R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Consolida la entrada comercial, temas, popups y recorrido. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`; base de sesión: `8b77857717864080255e545f0d1671bb8f3033ad`.
 
 Rama: `main`
 
-## Checkpoint vigente · R0 cerrado · 2026-09-18
+## Checkpoint vigente · R1 cerrado en local · 2026-09-18
+
+**R1 implementado y verificado. Siguiente incremento: R2.** Este apartado prevalece sobre los estados históricos inferiores. SHA de producto: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`; rama `main`. No hay despliegue de producción ni acciones reales desde las demos. El roadmap Hospitality sigue vigente; Camp se utiliza como referencia de interacción para esta petición, sin sustituir la prioridad estratégica ni copiar su contenido.
+
+**Reconciliación:** el árbol recibido sobre `8b77857717864080255e545f0d1671bb8f3033ad` contenía R1 sin consolidar (hero, recorrido, planes, solución rural, contexto y QA incompleto). Se contrastó con código y pruebas, se conservó y se terminó; no se repitió R0. Se revisaron en Camp home, popup de tema, popup de panel y comienzo del recorrido.
+
+**Entregado:** hero ES/EN breve y estable, evaluación con resultado explícito y exploración directa de Solicitudes en el popup; accesos secundarios desplegables. Evidencia de web y solicitud con preguntas concretas; planes y solución rural enlazan a la prueba pertinente. El contacto directo sigue disponible y el diagnóstico es opcional. Las entradas por tema o etapa se enlazan con el único formulario mediante contexto cerrado y editable, sin PII en URL/analítica.
+
+Los popups dan protagonismo a la preview, con selector de dispositivo, un CTA y detalles progresivos; los límites ficticios permanecen fuera del iframe. Escape funciona desde la demo interior, respeta búsquedas/diálogos propios y devuelve el foco; cerrar limpia la carga y el estado. El puente comprueba el iframe de origen y no amplía sandbox/CSP. Los doce temas muestran títulos y secciones propios en tres composiciones visuales. Nueva imagen de Nivora generada por OpenAI integrado, con AVIF/WebP locales y preloads/metadatos coherentes; una imagen, cero vídeos y cero llamadas a Higgsfield. [Procedencia y prompt](../docs/assets/NIVORA_OPENAI_2026-09-18.md).
+
+El recorrido conserva cinco etapas en tres casos independientes; muestra posición y etapas realmente vistas por separado, migra progreso antiguo sin inventarlo y solo completa por acción explícita tras ver las cinco. Evaluar sigue accesible sin completarlo. Se corrigieron el foco oculto por el footer en 1280 × 720, una columna móvil de 42 px, Escape interior, pérdida de intención al evaluar paneles y desbordamiento de la FAQ inglesa con texto ampliado. La versión sin JavaScript conserva evidencias y enlaces.
+
+Encuadre previo: reducir esfuerzo para reconocer el alcance y comprobarlo antes de entregar datos. Marketing exige promesas y CTA claros; producto respeta capacidades/planes; UX mantiene elección y contexto; UI prioriza preview, legibilidad y jerarquía; SEO conserva intención/rutas; frontend reutiliza contratos; full stack protege la captación y el aislamiento; QA revisa teclado, ES/EN, reflow, privacidad y veracidad. Revisión independiente antes y después, sin bloqueantes conocidos al cierre.
+
+### Verificación exacta
+
+- `pnpm check` final correcto: 7/7 tareas de lint (6 desde caché), 21/21 de typecheck/test/build (15 desde caché), más 33 pruebas de scripts ejecutadas. Contratos: site 31, Worker 95, dominio 20, dashboard 7, web 2 y scripts 33: **188 pruebas**. Build de 100 páginas comerciales y 10 demos; Astro 117 archivos sin errores, avisos ni hints. No se afirma ejecución forzada de las tareas cacheadas.
+- Regresión completa Chromium: **227/233**. Se corrigieron cuatro selecciones antiguas de catálogo tras añadir accesos en el hero, una expectativa geométrica del contacto flotante y el overflow real de FAQ EN a 320 px/texto al 200 %. El test de texto ampliado espera dos frames para medir el layout definitivo, sin relajar el límite.
+- Cierre sobre el build final: **28/28** —dos de accesibilidad, dos Camp, una de contacto flotante, catorce R1, siete de previews y dos de los doce temas móviles ES/EN—. En conjunto quedan acreditados los **233 casos únicos**; no se afirma una ejecución final única 233/233. Los 98 recorridos de reflow y las familias con texto ampliado pasan de nuevo.
+- Logs: `/tmp/estancia-r1-verified-check.log`, `/tmp/estancia-r1-verified-e2e.log`; regresión en `/tmp/estancia-r1-closure-e2e.log`. Un intento previo agotó el test monolítico de 98 rutas Axe: se dividió en diez grupos sin quitar rutas, reglas ni contraste; la auditoría completa pasó en la regresión. Capturas de cierre en `/tmp/estancia-r1-verified-results/`.
+- QA visual de home, recorrido, temas, paneles y planes en ES/EN, 320/390/1440 px y 1280 × 720; teclado, Escape anidado, retorno de foco, texto al 200 % y comprobación geométrica del foco. [Informe y capturas persistentes](../docs/qa/HOSPITALITY_R1_2026-09-18.md). Sin nueva puntuación Lighthouse ni afirmación de comprensión/conversión validada.
+- `git diff --check` correcto. Puerto de Playwright configurable: se emplearon 8794/9244 porque 8790 pertenece a otro proyecto; no se modificó ese servidor.
+
+### Revisión multidisciplinar posterior
+
+- Marketing estratégico: **corregido** — dos intenciones claras y resultado anticipado; no se atribuye uplift ni operación real.
+- Diseño de producto: **corregido** — prueba por capacidad y siguiente decisión; Básico/Nivora sin dashboard, Gestión/Terrava e Inteligente/Aurem intactos.
+- UX: **corregido** — contexto editable, evaluación opcional, progreso veraz, detalles progresivos y foco visible.
+- UI/dirección visual: **corregido** — popups amplios, móvil legible, tres composiciones de temas y fotografía propia de Nivora.
+- SEO: **correcto** — intención, canonical/hreflang/sitemap y metadatos verificados; previews/demos noindex y sin páginas duplicadas nuevas.
+- Arquitectura frontend: **corregido** — contratos de entrada compartidos, estado acotado, iframe diferido y sin dependencias nuevas.
+- Full stack: **correcto** — API/captación única, consentimiento, idempotencia y fronteras de demo conservados; ningún envío externo de QA.
+- QA/accesibilidad/rendimiento/confianza: **corregido** — regresión y cierre focal acreditados; imágenes responsive locales; deuda humana explícita.
+
+**Deuda y bloqueos:** cinco sesiones de comprensión preparadas y pendientes; zoom nativo, dispositivos físicos y lectores de pantalla humanos; quince entrevistas y cinco propuestas para validar precios/margen; activación analítica, proveedores, piloto y producción. Nada de ello se presenta como completado ni bloquea el siguiente incremento local. HubSpot y las operaciones externas de demos continúan fuera de alcance. Los precios orientativos autorizados y sus condiciones se mantienen.
+
+**Siguiente tarea exacta: R2, primera entrega de presentación sin cambiar obligatoriedad ni API.** En el formulario único, mantener nombre, empresa y email visibles; mostrar una sola vez tipo, plan, propiedades, unidades y plazo precargados, con edición dentro del formulario. La entrada directa mantiene visibles sus campos obligatorios. Conservar teléfono/mensaje opcionales, explicar retirada del diagnóstico frente a precargas editadas y preservar el contacto escrito. Abrir y enfocar cualquier grupo con error; verificar entrada directa, diagnóstico y tema, descarte, timeout, 429, idempotencia y recibo ES/EN, sin correos reales. No añadir pasos, nuevas captaciones ni persistencia de PII. R3–R5 esperan su turno; investigación humana/comercial sigue separada.
+
+Git: remoto comprobado sin divergencia antes de consolidar; producto en `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. La entrega documental registra ese SHA y el push a `origin/main` se verifica al cerrar. Push a main ejecuta Quality; producción requiere activación manual/tag específico y no se ha solicitado.
+
+## Checkpoint anterior · R0 cerrado · 2026-09-18
 
 **R0 implementado y verificado. Siguiente incremento: R1.** Este apartado prevalece sobre los estados históricos inferiores. SHA de código: `d10dd5580e626e715e577e609bee1d82cb112db8`; rama `main`. Se preserva y consolida el trabajo local previo de UI/UX y la investigación de septiembre. No hay despliegue de producción.
 
