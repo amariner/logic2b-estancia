@@ -1,6 +1,6 @@
 # Logic2B Estancias · Roadmap de paridad con SuperHote, Cloudbeds y Mews
 
-Versión: **1.3 · 2026-09-18**. Estado: **R0–R2 cerrados en local; R3 siguiente**. SHA de producto R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Base R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Las cinco sesiones humanas de comprensión siguen pendientes. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`. No equivale a una versión desplegada ni a conversión comercial validada.
+Versión: **1.4 · 2026-09-18**. Estado: **R0–R2 publicados; R3 siguiente**. SHA de producto R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Base R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Las cinco sesiones humanas de comprensión siguen pendientes. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`. Publicación autorizada el 18/09: revisión `d4811d1b21a574e1b7c37353ef840b1368f89fb9`, con correcciones de reflow; [evidencia](../docs/qa/PRODUCTION_2026-09-18.md). No equivale a conversión comercial validada.
 
 Este es el roadmap estratégico vigente solicitado por el usuario. Sustituye la cola de [paridad Camp](./CAMP_PARITY_ROADMAP.md), que se conserva como histórico. La fuente operativa de continuidad sigue siendo [PROJECT_CONTINUATION.md](./PROJECT_CONTINUATION.md). Investigación: [síntesis y evidencia](../docs/research/HOSPITALITY_BENCHMARK_2026-09-14.md), [SuperHote](../docs/research/SUPERHOTE_2026-09-14.md), [Cloudbeds](../docs/research/CLOUDBEDS_2026-09-14.md), [Mews](../docs/research/MEWS_2026-09-14.md).
 
@@ -68,9 +68,9 @@ El orden combina impacto, riesgo y dependencias. Las estimaciones son **rangos d
 
 | ID | Incremento terminado | Impacto / confianza inicial | Dependencia | Esfuerzo orientativo | Estado |
 |---|---|---|---|---:|---|
-| R0 | Baseline, límites visibles y rutas coherentes | Crítico / alta: evidencia de código y E2E | Ninguna | 1–3 días | **Cerrado · 2026-09-18** |
-| R1 | Entrada comercial centrada en prueba y decisión | Alto / media: hipótesis de benchmark | R0 | 4–7 días | **Cerrado en local · 2026-09-18**; comprensión humana pendiente |
-| R2 | Solicitud comercial con menos repetición | Alto / media: requiere observar usuarios | R0, contrato de R1 | 3–5 días | Cerrado en local; observación humana pendiente |
+| R0 | Baseline, límites visibles y rutas coherentes | Crítico / alta: evidencia de código y E2E | Ninguna | 1–3 días | **Publicado · 2026-09-18** |
+| R1 | Entrada comercial centrada en prueba y decisión | Alto / media: hipótesis de benchmark | R0 | 4–7 días | **Publicado · 2026-09-18**; comprensión humana pendiente |
+| R2 | Solicitud comercial con menos repetición | Alto / media: requiere observar usuarios | R0, contrato de R1 | 3–5 días | Publicado; observación humana pendiente |
 | R3 | Estancia y planning ficticios coherentes | Alto / alta sobre brecha técnica; media comercial | R0; R1 para entrada al caso | 7–12 días | Pendiente |
 | R4 | Preparación y trabajo móvil por rol | Alto / media | R3 | 5–8 días | Pendiente |
 | R5 | Motor y portal de huésped simulados | Medio-alto / media | R3, R4 para estados de preparación | 6–10 días | Pendiente |
@@ -243,6 +243,6 @@ La revisión documental queda completada; quedan pendientes implementación, inv
 
 ## 9. Siguiente incremento exacto
 
-**R3: un caso de estancia completo en Terrava.** R0, R1 y R2 están cerrados y verificados en local. No repetir hero, temas, popups, recorrido ni la presentación del formulario. La validación humana y comercial permanece separada.
+**R3: un caso de estancia completo en Terrava.** R0, R1 y R2 están cerrados y publicados. Recoger primero el resultado de Quality indicado en el checkpoint operativo. No repetir hero, temas, popups, recorrido ni la presentación del formulario. La validación humana y comercial permanece separada.
 
 Crear primero un contrato común en memoria para solicitud y estancia: identificador ficticio, propiedad/unidad, fechas, ocupantes, estado y desglose en céntimos. Derivar planning y detalle de esa colección; una solicitud en conflicto debe permitir consultar disponibilidad, comparar una alternativa, confirmar la estancia ficticia, modificarla o cancelarla con recuperación. Incluir una unidad fuera de servicio, dos escenarios sin disponibilidad/alternativa y filtro real por propiedad. Reutilizar shell, navegación y tour; cero escrituras HTTP, persistencia o proveedores. Actualizar capacidades y guías para distinguir interacción local de activación real. Ver criterios detallados de R3 antes de implementar; comprobar dominio, cuatro flujos, aislamiento, móvil y accesibilidad.
