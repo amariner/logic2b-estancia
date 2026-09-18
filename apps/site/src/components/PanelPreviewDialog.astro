@@ -1,0 +1,39 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import type { PanelPortfolioItem } from '../panel-portfolio';
+import InterfaceIcon from './InterfaceIcon.astro';
+import { getPlanCards, planHandoffHref, type PlanHandoffSource } from '../plan-contract';
+const { locale, panel, sourcePath } = Astro.props as { locale: Locale; panel: PanelPortfolioItem; sourcePath: PlanHandoffSource };
+const en = locale === 'en';
+const plan = getPlanCards(locale).find(item => item.id === panel.plan)!;
+---
+<dialog id={`home-panel-dialog-${panel.id}`} class="home-panel-dialog refined-preview" aria-labelledby={`home-panel-dialog-title-${panel.id}`} aria-describedby={`home-panel-dialog-summary-${panel.id}`} data-home-panel-dialog data-preview-dialog>
+  <div class="refined-preview-layout">
+    <div class="preview-toolbar">
+      <span class="preview-toolbar-title">{panel.title}</span>
+      <div class="preview-device-controls" role="group" aria-label={en ? 'Preview size' : 'Tamaño de vista previa'}>
+        <button type="button" data-preview-device="desktop" aria-pressed="true" aria-label={en ? 'Desktop preview' : 'Vista de escritorio'}><InterfaceIcon name="web" /></button>
+        <button type="button" data-preview-device="mobile" aria-pressed="false" aria-label={en ? 'Mobile preview' : 'Vista móvil'}><InterfaceIcon name="phone" /></button>
+      </div>
+      <a class="preview-external" href={panel.evidenceHref!} target="_blank" rel="noopener noreferrer" aria-label={en ? 'Open demo in a new tab' : 'Abrir demo en otra pestaña'}><InterfaceIcon name="external" /></a>
+      <button class="home-panel-dialog-close" type="button" data-home-panel-dialog-close data-preview-close aria-label={en ? 'Close workspace preview' : 'Cerrar vista previa del panel'}><InterfaceIcon name="close" /></button>
+    </div>
+    <div class="preview-workarea">
+      <div class="preview-stage" data-preview-stage>
+        <div class="preview-loading" role="status" data-preview-loading hidden>{en ? 'Loading workspace…' : 'Cargando gestor…'}</div>
+        <iframe src="about:blank" data-preview-frame data-preview-src={panel.evidenceHref!} title={panel.title} sandbox="allow-scripts" loading="lazy"></iframe>
+      </div>
+      <aside class="preview-sidebar">
+        <p class="eyebrow">{panel.planLabel}</p><h2 id={`home-panel-dialog-title-${panel.id}`}>{panel.title}</h2>
+        <p id={`home-panel-dialog-summary-${panel.id}`}>{panel.summary}</p>
+        <div class="preview-actions">
+          <a class="pill" href={planHandoffHref(locale, plan, sourcePath)}>{en ? 'Request this workspace' : 'Solicitar este panel'}<InterfaceIcon name="arrow" /></a>
+          <a class="text-link home-panel-dialog-detail" href={panel.detailHref!}>{en ? 'More information' : 'Más información'}<InterfaceIcon name="external" /></a>
+          <a class="text-link home-panel-dialog-evidence" href={panel.evidenceHref!} target="_blank" rel="noopener noreferrer">{en ? 'Explore the demo' : 'Explorar la demo'}<InterfaceIcon name="external" /></a>
+        </div>
+        <p class="preview-help" data-preview-help hidden>{en ? 'Taking longer than expected. You can open the demo in another tab.' : 'La carga está tardando. Puedes abrir la demo en otra pestaña.'}</p>
+      </aside>
+    </div>
+  </div>
+</dialog>
+<script>import '../scripts/preview-dialogs';</script>

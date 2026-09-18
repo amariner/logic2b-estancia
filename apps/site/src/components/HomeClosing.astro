@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import PanelPreview from './PanelPreview.astro';
+import WebsitePreview from './WebsitePreview.astro';
 
 const { locale } = Astro.props as { locale: Locale };
 const en = locale === 'en';
@@ -13,10 +14,10 @@ const copy = en ? {
   badges: ['A website with your identity', 'A supervised workspace', 'A real team alongside you'],
   visual: 'Fictitious Terrava planning preview next to a mobile operations summary',
   phone: 'Local mobile view',
-  today: 'Today · fictional scenario',
+  today: 'Today’s overview',
   arrivals: 'Arrivals to review',
   preparation: 'Preparation',
-  noEffects: 'Local evidence · no live actions',
+  noEffects: 'Your workspace · no live actions',
 } : {
   kicker: 'Logic2B Estancias · demostración guiada',
   title: 'Tu próxima etapa empieza aquí.',
@@ -25,10 +26,10 @@ const copy = en ? {
   badges: ['Web con tu identidad', 'Gestor supervisado', 'Un equipo real a tu lado'],
   visual: 'Vista ficticia del planning de Terrava junto a un resumen operativo móvil',
   phone: 'Vista móvil local',
-  today: 'Hoy · escenario ficticio',
+  today: 'Resumen de hoy',
   arrivals: 'Llegadas a revisar',
   preparation: 'Preparación',
-  noEffects: 'Evidencia local · sin acciones reales',
+  noEffects: 'Tu gestor · sin acciones reales',
 };
 ---
 
@@ -46,13 +47,14 @@ const copy = en ? {
 
     <div class="home-closing-visual" role="img" aria-label={copy.visual}>
       <img src="/media/remanso/hero.webp" alt="" width="1536" height="1024" loading="lazy" decoding="async" aria-hidden="true" />
-      <div class="home-closing-panel"><PanelPreview locale={locale} kind="planning" compact /></div>
+      <div class="home-closing-web"><WebsitePreview locale={locale} slug="terrava" /></div>
+      <div class="home-closing-panel"><PanelPreview locale={locale} kind="planning" /></div>
       <div class="home-closing-phone" aria-hidden="true">
         <div class="home-closing-phone-status"><b>9:41</b><span></span></div>
         <header><div><small>Logic2B Estancias</small><strong>{copy.phone}</strong></div><i>L2B</i></header>
         <p class="home-closing-phone-date">{copy.today}</p>
         <div class="home-closing-phone-metrics"><article><small>{copy.arrivals}</small><strong>3</strong><i style="--phone-value:62%"></i></article><article><small>{copy.preparation}</small><strong>14/18</strong><i style="--phone-value:78%"></i></article></div>
-        <div class="home-closing-phone-list"><span></span><span></span><span></span></div>
+        <div class="home-closing-phone-list">{['Aira', 'Bruma', 'Cauce'].map((name, index) => <div><i>{index === 0 ? '✓' : '○'}</i><span><b>Casa {name}</b><small>{en ? 'Arrival' : 'Llegada'} · {15 + index}:00</small></span><em>{index === 0 ? (en ? 'Ready' : 'Lista') : (en ? 'Review' : 'Revisar')}</em></div>)}</div>
         <div class="home-closing-phone-note">{copy.noEffects}</div>
       </div>
     </div>

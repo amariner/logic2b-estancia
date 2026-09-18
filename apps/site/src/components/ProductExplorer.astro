@@ -3,11 +3,17 @@ import type { Locale } from '@logic-estancia/config';
 import { getHomeContract } from '../home-contract';
 import { getPublishedPanels } from '../panel-portfolio';
 import PanelPreview from './PanelPreview.astro';
+import WebsitePreview from './WebsitePreview.astro';
+import InterfaceIcon from './InterfaceIcon.astro';
 
 const { locale } = Astro.props as { locale: Locale };
 const home = getHomeContract(locale);
 const en = locale === 'en';
 const panelCount = getPublishedPanels(locale).length;
+const icons = ['web', 'mail', 'calendar', 'users', 'check'] as const;
+const titles = en
+  ? ['A website that feels like you.', 'Every enquiry, in context.', 'Your stays at a glance.', 'Guest information, together.', 'A coordinated working day.']
+  : ['Una web que habla de ti.', 'Cada consulta, con contexto.', 'Tus estancias, de un vistazo.', 'La información del huésped, reunida.', 'Un día a día coordinado.'];
 const previewByArea = {
   solicitudes: 'enquiries',
   planning: 'planning',
@@ -16,13 +22,13 @@ const previewByArea = {
 } as const;
 ---
 
-<section id="producto" class="section product-explorer" aria-labelledby="product-explorer-title" data-product-explorer>
+<section id="producto" class="section product-explorer" aria-labelledby="product-explorer-title" data-product-explorer data-commercial-actions>
   <span id="gestor" class="anchor-target" aria-hidden="true"></span>
   <div class="shell">
     <div class="section-head product-explorer-heading">
       <p class="eyebrow">{en ? 'Explore the product' : 'Explora el producto'}</p>
       <h2 id="product-explorer-title" class="heading">{en ? 'Your accommodation, organised from start to finish.' : 'Tu alojamiento, organizado de principio a fin.'}</h2>
-      <p>{en ? 'A website to attract guests, a workspace to coordinate and a clear view of daily work. Explore it with sample data.' : 'Una web para atraer, un gestor para coordinar y una visión clara del trabajo diario. Explóralo con datos de ejemplo.'}</p>
+      <p>{en ? 'A website to attract guests, a workspace to coordinate and a clear view of daily work.' : 'Una web para atraer, un gestor para coordinar y una visión clara del trabajo diario.'}</p>
       <a class="text-link" href={en ? '/en/panels/' : '/paneles/'}>{en ? `Explore ${panelCount} workspace views` : `Explorar ${panelCount} vistas del gestor`} <span aria-hidden="true">→</span></a>
     </div>
     <div class="product-explorer-tabs" role="tablist" aria-label={en ? 'Logic2B Stays product areas' : 'Áreas del producto Logic2B Estancias'}>
@@ -35,7 +41,7 @@ const previewByArea = {
           aria-controls={`product-panel-${area.id}`}
           tabindex={index === 0 ? 0 : -1}
           data-product-tab={area.id}
-        ><span>{area.number}</span>{area.title}</button>
+        ><InterfaceIcon name={icons[index]} />{area.title}</button>
       ))}
     </div>
     <div class="product-explorer-list">
@@ -49,19 +55,14 @@ const previewByArea = {
           hidden={index !== 0}
         >
           <div class="product-explorer-detail">
-            <span class="product-explorer-index">{area.number}</span>
-            <h3>{area.title}</h3>
+            <span class="product-explorer-index">{en ? 'From' : 'Desde'} {area.plan}</span>
+            <h3>{titles[index]}</h3>
             <p>{area.text}</p>
-            <dl><div><dt>{en ? 'Starting plan' : 'Plan de partida'}</dt><dd>{area.plan}</dd></div><div><dt>{en ? 'Boundary' : 'Límite'}</dt><dd>{area.boundary}</dd></div></dl>
             <a class="text-link" href={area.href}>{area.cta} <span aria-hidden="true">→</span></a>
           </div>
           <figure class="product-explorer-visual">
             {area.id === 'web' ? (
-              <div class="product-web-preview" role="img" aria-label={en ? 'Fictitious Nivora website preview' : 'Vista ficticia de la web de Nivora'}>
-                <div><i></i><i></i><i></i><span>Nivora One</span></div>
-                <picture><source type="image/avif" srcset="/media/nivora/hero-640.avif 640w, /media/nivora/hero-960.avif 960w" sizes="(max-width: 800px) calc(100vw - 48px), 48vw" /><img src="/media/nivora/hero.webp" alt="" width="2016" height="1344" loading="lazy" decoding="async" /></picture>
-                <p>{en ? 'Brand website · no availability or booking' : 'Web de marca · sin disponibilidad ni reserva'}</p>
-              </div>
+              <WebsitePreview locale={locale} />
             ) : (
               <PanelPreview locale={locale} kind={previewByArea[area.id]} />
             )}

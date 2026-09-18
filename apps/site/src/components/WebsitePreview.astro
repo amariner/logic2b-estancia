@@ -1,0 +1,46 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getWebPortfolio } from '../web-portfolio';
+const { locale, slug = 'nivora' } = Astro.props as { locale: Locale; slug?: string };
+const concept = getWebPortfolio(locale).find(item => item.slug === slug)!;
+const en = locale === 'en';
+---
+<div class="website-preview" role="img" aria-label={`${en ? 'Fictional website preview' : 'Vista de web ficticia'} · ${concept.brand}`}>
+  <div class="website-browser"><span><i></i><i></i><i></i></span><small>{concept.slug}.example</small><span>↗</span></div>
+  <div class="website-canvas" aria-hidden="true">
+    <div class="website-nav"><b>{concept.brand}</b><span>{en ? 'The stay' : 'El alojamiento'} &nbsp; {en ? 'Surroundings' : 'Entorno'}</span><i>{en ? 'Contact' : 'Contacto'} ↗</i></div>
+    <div class="website-hero">
+      <picture><source type="image/avif" srcset={`/media/${slug}/hero-640.avif 640w, /media/${slug}/hero-960.avif 960w`} sizes="(max-width:760px) 90vw, 600px" /><img src={concept.image} alt="" width="960" height="640" loading="lazy" decoding="async" /></picture>
+      <div><small>{concept.showcase.eyebrow}</small><strong>{en ? 'A place to slow down.' : 'Un lugar para bajar el ritmo.'}</strong><span>{en ? 'Discover your stay' : 'Descubre tu estancia'} <b>→</b></span></div>
+    </div>
+    <div class="website-intro"><span>01 / {en ? 'THE EXPERIENCE' : 'LA EXPERIENCIA'}</span><strong>{en ? 'Make yourself at home.' : 'Siéntete en tu lugar.'}</strong><p>{en ? 'Spaces with character. Time for you.' : 'Espacios con carácter. Tiempo para ti.'}</p></div>
+    <div class="website-rooms">{[0,1,2].map((_,index) => <div><img src={`/media/${slug}/${index === 1 ? 'hero' : 'detail'}-640.avif`} alt="" width="640" height="427" loading="lazy" decoding="async" style={`object-position:${index * 50}% center`} /><span>{[en ? 'Your space' : 'Tu espacio', en ? 'The surroundings' : 'El entorno', en ? 'The details' : 'Los detalles'][index]}<b>↗</b></span></div>)}</div>
+    <div class="website-bottom"><b>{concept.brand}</b><span>{en ? 'Your brand · your website' : 'Tu marca · tu web'}</span></div>
+  </div>
+</div>
+<style>
+  .website-preview { container-type: inline-size; width:100%; min-width:0; overflow:hidden; border:1px solid #d6ded4; border-radius:14px; color:#283d2d; background:#fffefa; box-shadow:0 18px 40px #1b35281a; }
+  .website-browser { display:flex; align-items:center; justify-content:space-between; min-height:30px; padding:8px 12px; border-bottom:1px solid #e1e5df; background:#f5f6f3; font:10px var(--sans); }
+  .website-browser > span:first-child { display:flex; gap:4px; }
+  .website-browser i { width:5px; height:5px; border-radius:50%; background:#bfc9be; }
+  .website-browser small { font-size:9px; color:#5e695f; }
+  .website-canvas { font-family:var(--sans); }
+  .website-nav { display:flex; gap:12px; align-items:center; padding:3cqw 4cqw; font-size:1.7cqw; }
+  .website-nav b { margin-right:auto; font-family:var(--serif); font-size:3cqw; font-weight:400; }
+  .website-nav i { padding:1.3cqw 2cqw; border:1px solid #c6cdbf; border-radius:99px; font-style:normal; }
+  .website-hero { position:relative; margin:0 2cqw; height:47cqw; overflow:hidden; border-radius:2cqw; isolation:isolate; color:white; }
+  .website-hero picture, .website-hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
+  .website-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg,#15241fbd,#15241f18); z-index:-1; }
+  .website-hero > div { display:grid; align-content:center; justify-items:start; height:100%; padding:6cqw; }
+  .website-hero small { font-size:1.8cqw; text-transform:uppercase; letter-spacing:.08em; }
+  .website-hero strong { max-width:65%; margin:3cqw 0; font:400 7cqw/.98 var(--serif); letter-spacing:-.03em; }
+  .website-hero span { display:flex; gap:4cqw; padding:1.5cqw 2.5cqw; border:1px solid #ffffff85; border-radius:99px; font-size:1.7cqw; }
+  .website-intro { padding:5cqw 4cqw 3cqw; text-align:center; }
+  .website-intro > span { display:block; font-size:1.4cqw; letter-spacing:.1em; }
+  .website-intro strong { display:block; margin:1.6cqw 0; font:400 4.2cqw var(--serif); }
+  .website-intro p { margin:0; color:#62715e; font-size:1.8cqw; }
+  .website-rooms { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:2cqw; padding:0 4cqw 4cqw; }
+  .website-rooms img { display:block; width:100%; height:12cqw; object-fit:cover; border-radius:1cqw; }
+  .website-rooms span { display:flex; justify-content:space-between; margin-top:1.6cqw; font-size:1.7cqw; }
+  .website-bottom { display:flex; justify-content:space-between; padding:2.4cqw 4cqw; border-top:1px solid #e3e8dd; color:#53634f; font-size:1.5cqw; }
+</style>

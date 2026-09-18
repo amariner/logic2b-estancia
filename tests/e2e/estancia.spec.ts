@@ -504,10 +504,11 @@ test('portfolio exposes twelve truthful navigable directions in both languages',
 
     for (const slug of webConcepts) {
       const card = page.locator(`[data-portfolio-card="${slug}"]`);
-      await expect(card).toContainText(slug === 'nivora' || slug === 'terrava' || slug === 'aurem'
-        ? (path === '/webs/' ? 'Caso canónico' : 'Canonical case')
-        : (path === '/webs/' ? 'Concepto navegable' : 'Navigable concept'));
-      const href = `${prefix}/webs/${slug}/`;
+      await expect(page.locator('.portfolio-intro')).toContainText(path === '/webs/' ? 'Todos los ejemplos son ficticios' : 'All examples are fictional');
+      await expect(card.locator('[data-theme-preview-open]')).toHaveAttribute('aria-controls', `theme-preview-${slug}`);
+      await expect(page.locator(`#theme-preview-${slug} [data-preview-frame]`)).toHaveAttribute('data-preview-src',
+        ['nivora', 'terrava', 'aurem'].includes(slug) ? `${prefix}/demos/${slug}/?embed=theme` : `${prefix}/webs/${slug}/?embed=theme`);
+      const href = `${prefix}/temas/${slug}/`;
       await expect(card.locator(`[data-portfolio-open="${slug}"]`)).toHaveAttribute('href', href);
       await card.scrollIntoViewIfNeeded();
       await expect.poll(() => card.locator('img').evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
@@ -1022,17 +1023,22 @@ test('web portfolio exposes localized collections and accessible filters', async
     for (const [index, slug] of ['nivora', 'terrava', 'aurem'].entries()) {
       const card = portfolio.locator(`[data-portfolio-card="${slug}"]`);
       await expect(card).toContainText(labels[index]);
-      await expect(card.locator(`[data-portfolio-detail="${slug}"]`)).toHaveAttribute('href', `${prefix}/webs/${slug}/`);
-      await expect(card.locator(`[data-portfolio-open="${slug}"]`)).toHaveAttribute('href', `${prefix}/webs/${slug}/`);
-      const assessmentHref = await card.locator(`[data-portfolio-assess="${slug}"]`).getAttribute('href');
+      await expect(card.locator(`[data-portfolio-detail="${slug}"]`)).toHaveAttribute('href', `${prefix}/temas/${slug}/`);
+      await expect(card.locator(`[data-portfolio-open="${slug}"]`)).toHaveAttribute('href', `${prefix}/temas/${slug}/`);
+      await card.locator('[data-theme-preview-open]').click();
+      const preview = page.locator(`#theme-preview-${slug}`);
+      await expect(preview).toBeVisible();
+      const assessmentHref = await preview.locator('.preview-actions .pill').getAttribute('href');
       expect(assessmentHref).toBeTruthy();
       const target = new URL(assessmentHref ?? '', appOrigin);
-      expect(target.searchParams.get('web')).toBe(slug);
-      expect(target.searchParams.get('panel')).toBe(slug === 'nivora' ? 'none' : slug);
-      expect(target.searchParams.get('segment')).toBe(slug === 'nivora' ? 'apartments' : slug === 'terrava' ? 'rural' : 'hotels');
+      expect(target.pathname).toBe(`${prefix}/`);
+      expect(target.hash).toBe('#contacto');
+      expect(target.searchParams.get('theme')).toBe(slug);
+      expect(target.searchParams.get('plan')).toBe(slug === 'nivora' ? 'basico' : slug === 'terrava' ? 'gestion' : 'inteligente');
       expect(target.searchParams.get('sourcePath')).toBe(sourcePath);
       expect((await request.get(`${prefix}/demos/${slug}/`)).status()).toBe(200);
       expect((await request.get(assessmentHref ?? '')).status()).toBe(200);
+      await preview.locator('[data-preview-close]').click();
     }
     await portfolio.locator('[data-portfolio-vertical-filter="rural"]').click();
     await expect(portfolio.locator('[data-portfolio-card]:not([hidden])')).toHaveCount(4);
@@ -1056,13 +1062,13 @@ test('offscreen portfolio media keeps its responsive aspect ratio before lazy lo
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/webs/');
 
-  const image = page.locator('[data-portfolio-card="boscara"] .portfolio-card-media img');
+  const image = page.locator('[data-portfolio-card="boscara"] .web-miniature');
   const box = await image.boundingBox();
 
   expect(box).not.toBeNull();
   expect(box?.width).toBeGreaterThan(300);
-  expect(box?.height).toBeLessThan(240);
-  expect(Math.abs((box?.width ?? 0) / (box?.height ?? 1) - 1.6)).toBeLessThan(0.02);
+  expect(box?.height).toBeLessThan(300);
+  expect(Math.abs((box?.width ?? 0) / (box?.height ?? 1) - 1.3)).toBeLessThan(0.04);
 });
 
 test('floating contact stays withdrawn over portfolio actions on mobile', async ({ page }) => {
@@ -1071,8 +1077,8 @@ test('floating contact stays withdrawn over portfolio actions on mobile', async 
   await page.goto('/webs/');
 
   const card = page.locator('[data-portfolio-card="cendra"]');
-  await card.locator('.portfolio-card-links').scrollIntoViewIfNeeded();
-  await expect(card.locator('.portfolio-card-links')).toBeInViewport();
+  await card.locator('.catalog-card-caption').scrollIntoViewIfNeeded();
+  await expect(card.locator('.catalog-card-caption')).toBeInViewport();
   await expect(page.locator('[data-whatsapp]')).toHaveAttribute('data-visible', 'false');
 });
 
@@ -1188,6 +1194,18 @@ test('capability evidence and its boundary remain readable inside the optional f
   await expect(capability.getByRole('link', { name: /Ver evidencia visual en Aurem/ })).toBeVisible();
   await expect(capability).toContainText('No toma decisiones ni ejecuta acciones de forma autónoma');
   await expect(capability.locator('.capability-boundary')).toBeVisible();
+  for (const [path, question, boundary] of [
+    ['/soluciones/hoteles/', '¿La IA toma decisiones o envía mensajes?', 'no hay IA conectada ni se envían mensajes'],
+    ['/en/solutions/hotels/', 'Does AI make decisions or send messages?', 'no AI provider is connected and no messages are sent'],
+  ]) {
+    await page.goto(path);
+    const answer = page.locator('.faq details').filter({ hasText: question });
+    await answer.locator('summary').click();
+    await expect(answer.locator('p')).toBeVisible();
+    await expect(answer.locator('p')).toContainText(boundary);
+    const schema = await page.locator('script[type="application/ld+json"]').allTextContents();
+    expect(schema.some(value => value.includes('FAQPage') && value.includes(boundary))).toBe(true);
+  }
 });
 
 test('scope configurator recommends progressively and prefills the commercial form', async ({ page }) => {

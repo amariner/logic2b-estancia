@@ -1,0 +1,27 @@
+---
+import { PLATFORM_MARKS } from '../platform-marks';
+const { group, en } = Astro.props as { group: 'channels' | 'payments' | 'tools'; en: boolean };
+const keys = { channels: ['bookingdotcom', 'airbnb', 'googlecalendar'], payments: ['stripe', 'paypal'], tools: ['whatsapp', 'resend', 'googlemaps'] } as const;
+---
+<div class={`connection-visual connection-visual-${group}`}>
+  <small>{en ? 'References · not connected' : 'Referencias · sin conexión'}</small>
+  <div class="connection-hub" aria-hidden="true"><span>L2B</span><i></i><i></i><i></i></div>
+  <ul aria-label={en ? 'Platforms to evaluate' : 'Plataformas a evaluar'}>{keys[group].map(key => <li><span class="connection-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={PLATFORM_MARKS[key].path} /></svg></span><span>{PLATFORM_MARKS[key].name}</span></li>)}</ul>
+</div>
+<style>
+  .connection-visual { display:grid; gap:18px; margin:-8px -8px 28px; padding:20px 10px 16px; background:radial-gradient(ellipse at 50% 30%,#e7eddf,transparent 75%); border-bottom:1px solid var(--line); }
+  .connection-hub { position:relative; display:grid; justify-items:center; height:80px; }
+  .connection-hub > span { display:grid; place-items:center; width:54px; height:46px; border:1px solid #b8c8b2; border-radius:14px; background:#fffefa; box-shadow:0 5px 14px #28492e12; font-size:14px; font-weight:750; }
+  .connection-hub::after { content:''; width:1px; height:34px; background:#bccdb4; }
+  .connection-hub i { position:absolute; width:calc(33.33% - 2px); bottom:0; height:18px; border-top:1px solid #bccdb4; }
+  .connection-hub i:first-of-type { left:16.66%; border-left:1px solid #bccdb4; border-radius:10px 0 0; }
+  .connection-hub i:last-of-type { right:16.66%; border-right:1px solid #bccdb4; border-radius:0 10px 0 0; }
+  ul { display:flex; justify-content:space-around; gap:8px; padding:0; margin:0; list-style:none; }
+  li { display:grid; justify-items:center; gap:12px; min-width:0; flex:1; color:#3e5945; font:500 11px/1.4 var(--sans); text-align:center; }
+  .connection-mark { display:grid; place-items:center; width:56px; height:56px; border:1px solid #d9e1d4; border-radius:16px; background:white; box-shadow:0 6px 14px #28492e0c; }
+  svg { width:28px; height:28px; }
+  small { text-align:center; color:var(--slate); font-size:.6875rem; }
+  .connection-visual-payments .connection-hub i { width:25%; }
+  .connection-visual-payments .connection-hub i:first-of-type { left:25%; }
+  .connection-visual-payments .connection-hub i:last-of-type { right:25%; }
+</style>

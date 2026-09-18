@@ -20,6 +20,30 @@ const demoEnv = {
 describe('worker runtime isolation', () => {
   afterEach(() => vi.restoreAllMocks());
 
+  it.each([
+    ['/_astro/client.hash.js', 'text/javascript; charset=utf-8', 'GET', 200, '*'],
+    ['/_astro/font.hash.woff2', 'font/woff2', 'HEAD', 200, '*'],
+    ['/fonts/poppins-600-latin.woff2', 'font/woff2', 'GET', 200, '*'],
+    ['/fonts/poppins-800-logo.woff2', 'font/woff2', 'HEAD', 200, '*'],
+    ['/fonts/unlisted.woff2', 'font/woff2', 'GET', 200, null],
+    ['/fonts/poppins-600-latin.woff2', 'text/html', 'GET', 200, null],
+    ['/fonts/poppins-800-logo.woff2', 'font/woff2', 'GET', 404, null],
+    ['/fonts/poppins-600-latin.woff2', 'font/woff2', 'POST', 200, null],
+    ['/_astro/font.hash.woff2', 'text/javascript', 'GET', 200, null],
+    ['/_astro/client.hash.js', 'font/woff2', 'GET', 200, null],
+    ['/_astro/fallback.js', 'text/html', 'GET', 200, null],
+    ['/_astro/missing.js', 'text/javascript', 'GET', 404, null],
+    ['/_astro/client.hash.js', 'text/javascript', 'POST', 200, null],
+    ['/webs/linde/', 'text/html', 'GET', 200, null],
+    ['/api/capabilities', 'application/json', 'GET', 200, null],
+  ])('limits preview CORS to public module/font assets: %s %s %s %i', async (path, contentType, method, status, allowedOrigin) => {
+    const scopedAssets = { fetch: vi.fn(async () => new Response('public asset', { status, headers: { 'content-type': contentType } })) } as unknown as Fetcher;
+    const response = await worker.fetch(new Request(`https://test${path}`, { method }), { ...demoEnv, ASSETS: scopedAssets });
+    expect(response.headers.get('access-control-allow-origin')).toBe(allowedOrigin);
+    expect(response.headers.get('access-control-allow-credentials')).toBeNull();
+    expect(response.headers.get('x-frame-options')).toBe('DENY');
+  });
+
   it('publishes a secret-free demo manifest and starts without provider credentials', async () => {
     const response = await worker.fetch(new Request('https://test/api/capabilities'), { DEMO_MODE: 'true', ASSETS: assets });
     expect(response.status).toBe(200);

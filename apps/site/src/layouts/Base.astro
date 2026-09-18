@@ -7,6 +7,7 @@ import '@logic-estancia/ui/theme.css';
 import '../styles/site.css';
 import '../styles/commercial.css';
 import '../styles/catalog.css';
+import '../styles/refinement.css';
 import { CONSENT, PRODUCT, type Locale } from '@logic-estancia/config';
 import { logic2bContact } from '@logic-estancia/config/contact';
 import analyticsContract from '@logic-estancia/config/analytics-contract';
@@ -89,6 +90,8 @@ const structuredData = [
     <meta name="twitter:image:alt" content={socialImageAlt} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
     <script is:inline>
+      const isThemePreview = /^\/(?:en\/)?webs\/[^/]+\/$/.test(location.pathname) && new URLSearchParams(location.search).get('embed') === 'theme';
+      if (isThemePreview) document.documentElement.classList.add('theme-is-embedded');
       const runtimeManifestTimeoutMs = 4_000;
       const safeRuntimeCapabilities = Object.freeze({ schemaVersion: '1.0.0', manifestAvailable: false, mode: 'demo', demoMode: true, commercialLeadsEnabled: false, sideEffects: false, durableWrites: false, jobs: false, providers: { analytics: 'disabled', email: 'disabled', payments: 'disabled', webhooks: 'disabled', externalStorage: 'disabled' }, operations: { commercialLead: 'blocked', payments: 'unavailable', webhooks: 'unavailable', automations: 'unavailable' } });
       const normalizeRuntimeCapabilities = (candidate) => {
@@ -113,6 +116,7 @@ const structuredData = [
         };
       };
       window.estanciaRuntimeReady = (async () => {
+        if (isThemePreview) return safeRuntimeCapabilities;
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), runtimeManifestTimeoutMs);
         try {
@@ -126,6 +130,16 @@ const structuredData = [
         }
       })();
     </script>
+    <style is:global>
+      /* Commercial navigation belongs to the outer preview; the case stays local. */
+      .theme-is-embedded [data-site-header],
+      .theme-is-embedded [data-site-footer],
+      .theme-is-embedded [data-whatsapp],
+      .theme-is-embedded [data-consent-banner],
+      .theme-is-embedded .web-concept-notice > a,
+      .theme-is-embedded .web-concept-next,
+      .theme-is-embedded [data-guide-context] { display: none !important; }
+    </style>
     <title>{title}</title>
   </head>
   <body>
@@ -144,11 +158,8 @@ const structuredData = [
       function setMobileMenu(open, moveFocus = false) {
         if (!(menu instanceof HTMLButtonElement) || !(mobile instanceof HTMLElement)) return;
         menu.setAttribute('aria-expanded', String(open));
+        menu.setAttribute('aria-label', open ? menu.dataset.closeLabel : menu.dataset.openLabel);
         mobile.hidden = !open;
-        document.body.classList.toggle('site-menu-open', open);
-        for (const region of [document.querySelector('main'), document.querySelector('footer'), document.querySelector('[data-whatsapp]')]) {
-          if (region instanceof HTMLElement) region.inert = open;
-        }
         const focusTarget = open ? mobile.querySelector('a') : menu;
         if (moveFocus && focusTarget instanceof HTMLElement) focusTarget.focus();
       }
@@ -157,6 +168,8 @@ const structuredData = [
         if (event.target === mobile || event.target instanceof HTMLAnchorElement || event.target.closest?.('a')) setMobileMenu(false);
       });
       document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') setMobileMenu(false, true); });
+      document.addEventListener('click', (event) => { if (event.target instanceof Node && !document.querySelector('[data-site-header]')?.contains(event.target)) setMobileMenu(false); });
+      document.addEventListener('focusin', (event) => { if (event.target instanceof Node && !document.querySelector('[data-site-header]')?.contains(event.target)) setMobileMenu(false); });
       const desktopMenu = matchMedia('(min-width: 1280px)');
       desktopMenu.addEventListener?.('change', (event) => { if (event.matches) setMobileMenu(false); });
       const contactSection = document.querySelector('#contacto');
@@ -291,7 +304,7 @@ const structuredData = [
       });
       const wa = document.querySelector('[data-whatsapp]');
       const footer = document.querySelector('footer');
-      const commercialActions = document.querySelectorAll('[data-commercial-actions], [data-guide-context], .portfolio-card-links, .web-concept-next');
+      const commercialActions = document.querySelectorAll('[data-commercial-actions], [data-guide-context], .catalog-card-caption, .portfolio-card-links, .web-concept-next');
       const visibleCommercialActions = new Set();
       let footerVisible = false; let contactVisible = false;
       const toggleWa = () => {
@@ -305,7 +318,7 @@ const structuredData = [
           entries.forEach((entry) => {
             if (entry.target === footer) footerVisible = entry.isIntersecting;
             if (entry.target === contactSection) contactVisible = entry.isIntersecting;
-            if (entry.target instanceof HTMLElement && entry.target.matches('[data-commercial-actions], [data-guide-context], .portfolio-card-links, .web-concept-next')) {
+            if (entry.target instanceof HTMLElement && entry.target.matches('[data-commercial-actions], [data-guide-context], .catalog-card-caption, .portfolio-card-links, .web-concept-next')) {
               if (entry.isIntersecting) visibleCommercialActions.add(entry.target);
               else visibleCommercialActions.delete(entry.target);
             }

@@ -1,6 +1,6 @@
 ---
-import { CAPABILITIES, hasLevel, type PlanLevel } from '@logic-estancia/domain';
 import type { Locale } from '@logic-estancia/config';
+import { CAPABILITIES, hasLevel, type PlanLevel } from '@logic-estancia/domain';
 import {
   capabilityEvidenceHref,
   capabilityEvidenceLabel,
@@ -24,14 +24,25 @@ const sourcePath = en ? '/en/plans/' : '/planes/';
 
 <section class="section soft">
   <div class="shell">
-    <div class="section-head">
-      <p class="eyebrow">{en ? 'Compare the details' : 'Compara los detalles'}</p>
-      <h2 class="heading">{en ? 'What each plan covers.' : 'Qué contempla cada plan.'}</h2>
-      <p>{en ? 'Check the features and try their demos. We confirm the live setup in your proposal.' : 'Consulta las funciones y prueba sus demos. La puesta en marcha real se concreta en tu propuesta.'}</p>
+    <div class="section-head"><p class="eyebrow">{en ? 'Compare the plans' : 'Compara los planes'}</p><h2 class="heading">{en ? 'What we design with each plan.' : 'Qué diseñamos con cada plan.'}</h2><p>{en ? 'Choose the areas your project needs. We define the scope together before starting.' : 'Elige las áreas que necesita tu proyecto. Concretamos juntos el alcance antes de empezar.'}</p></div>
+    <div class="plan-comparison-scroll" tabindex="0" role="region" aria-label={en ? 'Plan comparison' : 'Comparación de planes'} data-plan-summary>
+      <table class="plan-scope-table">
+        <caption class="sr-only">{en ? 'Project areas by starting plan' : 'Áreas del proyecto por plan de partida'}</caption>
+        <thead><tr><th scope="col">{en ? 'Project area' : 'Área del proyecto'}</th>{plans.map(plan => <th scope="col">{plan.name}</th>)}</tr></thead>
+        <tbody>{[
+          [en ? 'Brand website and responsive design' : 'Web de marca y diseño responsive', 0],
+          [en ? 'SEO and content foundations' : 'Fundamentos SEO y contenido', 0],
+          [en ? 'Implementation and support' : 'Implantación y acompañamiento', 0],
+          [en ? 'Enquiries and planning' : 'Solicitudes y planning', 1],
+          [en ? 'Guest management' : 'Gestión de huéspedes', 1],
+          [en ? 'Team and task coordination' : 'Coordinación de equipo y tareas', 2],
+          [en ? 'Revenue overview and supervised copilot' : 'Visión de ingresos y copiloto supervisado', 2],
+        ].map(([label, minimum]) => <tr><th scope="row">{label}</th>{plans.map((_,index) => <td aria-label={index >= Number(minimum) ? (en ? 'Project area' : 'Área del proyecto') : (en ? 'Not in this plan' : 'No corresponde a este plan')}>{index >= Number(minimum) ? '✓' : '—'}</td>)}</tr>)}</tbody>
+      </table>
     </div>
     <details class="commercial-disclosure" data-plan-comparison><summary>{en ? 'Compare every capability and its availability' : 'Comparar todas las capacidades y su disponibilidad'}</summary>
     <p class="table-scroll-hint">{en ? 'Swipe to view evidence, plan fit, status and boundaries.' : 'Desliza para ver evidencia, encaje por plan, estado y límites.'}</p>
-    <div class="capability-table" role="table">
+    <div class="capability-table" role="table" data-commercial-actions>
       <div class="capability-row header" role="row">
         <span role="columnheader">{en ? 'Capability' : 'Capacidad'}</span>
         <span role="columnheader">{en ? 'Evidence and boundary' : 'Evidencia y límite'}</span>

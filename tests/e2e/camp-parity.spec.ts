@@ -71,6 +71,8 @@ test('indicative pricing stays consistent across home and plans, with scope visi
     await page.goto(locale.home);
     await expect(page.locator('[data-technical-details]')).not.toHaveAttribute('open');
     await expect(page.locator('.connection-note')).toBeVisible();
+    await expect(page.locator('.connection-note')).toContainText(locale.prefix ? 'no confirmed integration or partnership' : 'ninguna integración ni colaboración confirmada');
+    await expect(page.locator('.connection-visual > small')).toHaveText(Array(3).fill(locale.prefix ? 'References · not connected' : 'Referencias · sin conexión'));
     await page.locator('[data-technical-details] > summary').focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('[data-provider-validation-gate]')).toBeVisible();
@@ -257,10 +259,15 @@ test('all twelve theme popups and all six workspace popups are wired in both lan
       const trigger = panelTriggers.nth(index);
       const dialog = page.locator(`#${dialogId}`);
       await expect(dialog).toHaveCount(1);
-      await expect(dialog.locator('[data-panel-preview]')).toHaveCount(1);
+      const frame = dialog.locator('[data-preview-frame]');
+      await expect(frame).toHaveCount(1);
+      await expect(frame).toHaveAttribute('sandbox', 'allow-scripts');
       await trigger.click();
       await expect(dialog).toHaveAttribute('open', '');
+      await expect(frame).toHaveAttribute('src', (await frame.getAttribute('data-preview-src'))!);
+      await expect(page.frameLocator(`#${dialogId} [data-preview-frame]`).locator('h1')).toBeVisible();
       await dialog.locator('[data-home-panel-dialog-close]').click();
+      await expect(frame).toHaveAttribute('src', 'about:blank');
       await expect(trigger).toBeFocused();
     }
 
@@ -321,7 +328,7 @@ test('the home keeps one live lead form, form-free previews, and canonical local
     ].join(', '))).toHaveCount(0);
 
     const websiteRoot = `${locale.prefix}/${locale.route.webs}`;
-    const expectedWebsiteDetails = webSlugs.map((slug) => `${websiteRoot}/${slug}/`);
+    const expectedWebsiteDetails = webSlugs.map((slug) => `${locale.prefix}/temas/${slug}/`);
     const expectedWebsitePreviews = webSlugs.map((slug, index) => (
       index < 3 ? `${locale.prefix}/demos/${slug}/` : `${websiteRoot}/${slug}/`
     ));

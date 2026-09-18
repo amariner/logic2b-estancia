@@ -1,10 +1,12 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { getHomeContract } from '../home-contract';
+import InterfaceIcon from './InterfaceIcon.astro';
 
 const { locale } = Astro.props as { locale: Locale };
 const home = getHomeContract(locale);
 const en = locale === 'en';
+const icons = ['spark', 'web', 'mail', 'calendar', 'check', 'users', 'chart'] as const;
 ---
 
 <section id="recorrido" class="section home-journey" aria-labelledby="home-journey-title" data-home-journey>
@@ -23,9 +25,9 @@ const en = locale === 'en';
     </div>
     <div class="home-journey-viewport" data-journey-viewport tabindex="0">
       <ol class="home-journey-list">
-        {home.journey.map((moment) => (
+        {home.journey.map((moment, index) => (
           <li class="home-journey-moment" data-flow-moment={moment.number}>
-            <div class="home-journey-top"><span>{moment.number}</span><i>{moment.phase}</i></div>
+            <div class="home-journey-top"><span class="journey-icon"><InterfaceIcon name={icons[index]} /></span><i>{moment.number} · {moment.phase}</i></div>
             <h3>{moment.title}</h3>
             <p>{moment.text}</p>
             <a href={moment.href}>{moment.cta} <span aria-hidden="true">→</span></a>
@@ -33,7 +35,6 @@ const en = locale === 'en';
         ))}
       </ol>
     </div>
-    <p class="home-journey-note" role="note">{en ? 'Illustrative product journey · fictional data · no external effects' : 'Recorrido ilustrativo del producto · datos ficticios · sin efectos externos'}</p>
   </div>
 </section>
 

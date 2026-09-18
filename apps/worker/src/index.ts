@@ -45,6 +45,17 @@ const worker = {
     const response = await env.ASSETS.fetch(request);
     const headers = new Headers(response.headers);
     Object.entries(commonSecurityHeaders).forEach(([key, value]) => headers.set(key, value));
+    // Opaque-origin sandbox previews need CORS for public modules and fonts.
+    // Never expose API/HTML responses or credentials through this asset-only rule.
+    const assetType = headers.get('content-type') ?? '';
+    const publicPreviewAsset = (/^\/_astro\/[^/]+\.js$/.test(url.pathname)
+      && /^(?:text|application)\/javascript(?:;|$)/i.test(assetType))
+      || ((/^\/_astro\/[^/]+\.woff2$/.test(url.pathname)
+        || ['/fonts/poppins-600-latin.woff2', '/fonts/poppins-800-logo.woff2'].includes(url.pathname))
+        && /^font\/woff2(?:;|$)/i.test(assetType));
+    if (response.ok && publicPreviewAsset && ['GET', 'HEAD'].includes(request.method)) {
+      headers.set('access-control-allow-origin', '*');
+    }
     headers.set('content-security-policy', capabilities.providers.analytics === 'live'
       ? analyticsContentSecurityPolicy
       : isolatedContentSecurityPolicy);

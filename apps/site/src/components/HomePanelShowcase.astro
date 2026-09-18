@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import { getPanelPortfolio, type PanelPortfolioItem, type PanelPreviewKind } from '../panel-portfolio';
+import PanelPreviewDialog from './PanelPreviewDialog.astro';
 import PanelPreview from './PanelPreview.astro';
 
 const { locale } = Astro.props as { locale: Locale };
@@ -19,7 +20,7 @@ if (panels.length !== 6) throw new Error(`home_panel_showcase_expected_six:${loc
 const labels = en ? {
   eyebrow: 'Inside the workspace',
   title: 'Every task in its place.',
-  intro: 'Enquiries, planning, arrivals and teams. Six views to discover how you could work, with fictional data.',
+  intro: 'Enquiries, planning, arrivals and teams. Six views to discover how you could work.',
   all: 'See all six workspaces',
   previous: 'Show previous workspaces',
   next: 'Show next workspaces',
@@ -35,7 +36,7 @@ const labels = en ? {
 } : {
   eyebrow: 'El gestor, por dentro',
   title: 'Cada tarea, en su sitio.',
-  intro: 'Solicitudes, planning, llegadas y equipo. Seis vistas para descubrir cómo trabajarías, con datos ficticios.',
+  intro: 'Solicitudes, planning, llegadas y equipo. Seis vistas para descubrir cómo trabajarías.',
   all: 'Ver los seis paneles',
   previous: 'Mostrar paneles anteriores',
   next: 'Mostrar paneles siguientes',
@@ -86,7 +87,7 @@ const labels = en ? {
               <span class="home-panel-card-plan">{panel.planLabel}</span>
             </div>
             <div class="home-panel-card-copy">
-              <p class="home-panel-card-meta">{panel.number} · {panel.statusLabel}</p>
+              <p class="home-panel-card-meta">{panel.number} · {panel.planLabel}</p>
               <h3 class="home-panel-card-title">{panel.title}</h3>
               <p class="home-panel-card-summary">{panel.summary}</p>
               <div class="home-panel-card-actions">
@@ -106,53 +107,7 @@ const labels = en ? {
     </div>
   </div>
 
-  {panels.map((panel) => (
-    <dialog
-      id={`home-panel-dialog-${panel.id}`}
-      class="home-panel-dialog"
-      aria-labelledby={`home-panel-dialog-title-${panel.id}`}
-      aria-describedby={`home-panel-dialog-summary-${panel.id}`}
-      data-home-panel-dialog
-    >
-      <article class="home-panel-dialog-frame">
-        <header class="home-panel-dialog-header">
-          <div class="home-panel-dialog-heading">
-            <p class="home-panel-dialog-meta">{panel.number} · {panel.planLabel}</p>
-            <h2 id={`home-panel-dialog-title-${panel.id}`} class="home-panel-dialog-title">{panel.title}</h2>
-          </div>
-          <button class="home-panel-dialog-close" type="button" data-home-panel-dialog-close aria-label={`${labels.close}: ${panel.title}`}>
-            <span aria-hidden="true">×</span>
-          </button>
-        </header>
-
-        <div class="home-panel-dialog-layout">
-          <div class="home-panel-dialog-preview">
-            <PanelPreview locale={locale} kind={panel.preview} />
-          </div>
-          <div class="home-panel-dialog-copy">
-            <p id={`home-panel-dialog-summary-${panel.id}`} class="home-panel-dialog-summary">{panel.summary}</p>
-            <dl class="home-panel-dialog-facts">
-              <div class="home-panel-dialog-fact">
-                <dt>{labels.decision}</dt>
-                <dd>{panel.decision}</dd>
-              </div>
-              <div class="home-panel-dialog-fact">
-                <dt>{labels.boundary}</dt>
-                <dd>{panel.evidenceCapability.evidence.boundary[locale]}</dd>
-              </div>
-            </dl>
-            <div class="home-panel-dialog-actions">
-              <a class="home-panel-dialog-detail" href={panel.detailHref}>{labels.detail} <span aria-hidden="true">→</span></a>
-              <a class="home-panel-dialog-evidence" href={panel.evidenceHref} target="_blank" rel="noopener noreferrer">
-                {labels.exact} <span class="home-panel-new-tab">({labels.newTab})</span><span aria-hidden="true">↗</span>
-              </a>
-            </div>
-            <p class="home-panel-dialog-note" role="note">{labels.note}</p>
-          </div>
-        </div>
-      </article>
-    </dialog>
-  ))}
+  {panels.map((panel) => <PanelPreviewDialog locale={locale} panel={panel} sourcePath={en ? '/en/' : '/'} />)}
 </section>
 
 <script>
@@ -186,31 +141,4 @@ const labels = en ? {
     updateControls();
   });
 
-  let homePanelReturnTarget: HTMLElement | null = null;
-  document.querySelectorAll<HTMLButtonElement>('[data-home-panel-dialog-open]').forEach((trigger) => {
-    trigger.addEventListener('click', () => {
-      const dialogId = trigger.dataset.homePanelDialogOpen;
-      const dialog = dialogId ? document.getElementById(dialogId) : null;
-      if (!(dialog instanceof HTMLDialogElement) || typeof dialog.showModal !== 'function') return;
-      homePanelReturnTarget = trigger;
-      dialog.showModal();
-      queueMicrotask(() => dialog.querySelector<HTMLButtonElement>('[data-home-panel-dialog-close]')?.focus());
-    });
-  });
-
-  document.querySelectorAll<HTMLDialogElement>('[data-home-panel-dialog]').forEach((dialog) => {
-    dialog.querySelector<HTMLButtonElement>('[data-home-panel-dialog-close]')?.addEventListener('click', () => dialog.close('button'));
-    dialog.addEventListener('click', (event) => {
-      if (event.target === dialog) dialog.close('backdrop');
-    });
-    dialog.addEventListener('cancel', (event) => {
-      event.preventDefault();
-      dialog.close('escape');
-    });
-    dialog.addEventListener('close', () => {
-      const target = homePanelReturnTarget;
-      homePanelReturnTarget = null;
-      if (target?.isConnected) target.focus();
-    });
-  });
 </script>

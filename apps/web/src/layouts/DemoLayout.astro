@@ -14,4 +14,16 @@ const other = locale === 'es' ? `/en/demos/${slug}/${dashboard ? 'gestion/' : ''
   {!dashboard && <div class="fiction" role="note" aria-label={locale === 'es' ? 'Límite de la demostración' : 'Demonstration boundary'}><span>{locale === 'es' ? 'MODO DEMO SEGURO · Datos ficticios · Sin efectos externos' : 'SAFE DEMO MODE · Fictitious data · No external effects'}</span><a href={`${prefix}/`}>{locale === 'es' ? 'Salir de la demo' : 'Leave demo'} ↗</a></div>}
   <slot />
   {!dashboard && <footer class="demo-footer"><span>{demo.brand}</span><small>{locale === 'es' ? 'Marca ficticia · Solo visualización' : 'Fictitious brand · View only'}</small><div><a href={other}>{locale === 'es' ? 'English' : 'Español'}</a><a href={`${prefix}/legal/`}>Legal</a><a href={`${prefix}/#contacto`}>Logic2B ↗</a></div></footer>}
+  <script is:inline>
+    if (window.self !== window.top) document.documentElement.classList.add('demo-is-embedded');
+  </script>
 </body></html>
+<style is:global>
+  /* Preview actions belong to the outer dialog; keep embedded navigation local. */
+  .demo-is-embedded .demo-conversion,
+  .demo-is-embedded .sidebar-foot a,
+  .demo-is-embedded .fiction a,
+  .demo-is-embedded .demo-footer,
+  .demo-is-embedded a[href*="/diagnostico/"],
+  .demo-is-embedded a[href*="/assessment/"] { display:none; }
+</style>

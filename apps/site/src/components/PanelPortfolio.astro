@@ -3,6 +3,7 @@ import type { Locale } from '@logic-estancia/config';
 import { getPanelPortfolio, getPublishedPanels } from '../panel-portfolio';
 import PanelPreview from './PanelPreview.astro';
 import ContextualGuides from './ContextualGuides.astro';
+import PanelPreviewDialog from './PanelPreviewDialog.astro';
 
 const { locale } = Astro.props as { locale: Locale };
 const en = locale === 'en';
@@ -26,8 +27,8 @@ const filters = en ? {
         <h1 class="display">{en ? 'A clearer view of every working day.' : 'El día a día, más claro.'}</h1>
       </div>
       <div>
-        <p>{en ? 'Enquiries, planning, arrivals and operations. Six workspace views to explore with fictional data, without changing real bookings.' : 'Solicitudes, planning, llegadas y operación. Seis vistas del gestor para explorar con datos ficticios, sin modificar reservas reales.'}</p>
-        <dl><div><dt>{en ? 'Demo views' : 'Vistas de demo'}</dt><dd>{publishedCount}/6</dd></div><div><dt>{en ? 'External actions' : 'Acciones externas'}</dt><dd>{en ? 'None' : 'Ninguna'}</dd></div></dl>
+        <p>{en ? 'Enquiries, planning, arrivals and operations. Six views to organise your working day.' : 'Solicitudes, planning, llegadas y operación. Seis vistas para organizar tu día a día.'}</p>
+        <dl><div><dt>{en ? 'Workspace views' : 'Vistas del gestor'}</dt><dd>{publishedCount}</dd></div><div><dt>{en ? 'Plans' : 'Planes'}</dt><dd>2</dd></div></dl>
       </div>
     </div>
   </section>
@@ -52,18 +53,19 @@ const filters = en ? {
       <div class="panel-portfolio-grid">
         {panels.map((panel) => (
           <article class:list={['panel-portfolio-card', { 'is-published': panel.status === 'published' }]} data-panel-card={panel.id} data-panel-status={panel.status} data-panel-plan={panel.plan}>
-            <header><span>{panel.number}</span><small>{panel.statusLabel}</small></header>
+            <header><span>{panel.number}</span><small>{panel.planLabel}</small></header>
             <div class="panel-portfolio-card-title"><div><p>{panel.planLabel}</p><h2>{panel.title}</h2></div><span aria-hidden="true">{panel.status === 'published' ? '↗' : '·'}</span></div>
             <p>{panel.summary}</p>
             {panel.preview ? <PanelPreview locale={locale} kind={panel.preview} compact /> : <div class="panel-preview-pending" aria-hidden="true"><i></i><i></i><i></i><span>{en ? 'Page structure in preparation' : 'Estructura de ficha en preparación'}</span></div>}
             <div class="panel-portfolio-card-foot">
-              <p><strong>{en ? 'Decision it supports' : 'Decisión que acompaña'}</strong>{panel.decision}</p>
+              {panel.detailHref && <button class="catalog-panel-preview" type="button" data-home-panel-dialog-open={`home-panel-dialog-${panel.id}`} aria-controls={`home-panel-dialog-${panel.id}`} aria-haspopup="dialog">{en ? 'Preview' : 'Vista previa'} <span aria-hidden="true">↗</span></button>}
               {panel.detailHref ? <a class="text-link" href={panel.detailHref} data-panel-open={panel.id}>{en ? `Explore ${panel.title}` : `Explorar ${panel.title}`} <span aria-hidden="true">→</span></a> : <span>{en ? 'Not counted as navigable yet' : 'Todavía no cuenta como navegable'}</span>}
             </div>
           </article>
         ))}
       </div>
       <p class="portfolio-filter-empty" data-panel-filter-empty hidden>{filters.empty}</p>
+      {panels.filter(panel => panel.detailHref && panel.evidenceHref).map(panel => <PanelPreviewDialog locale={locale} panel={panel} sourcePath={en ? '/en/panels/' : '/paneles/'} />)}
     </div>
   </section>
 

@@ -1,7 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const origin = 'https://estancia.logic2b.com';
+const themePairs = ['nivora', 'terrava', 'aurem', 'linde', 'cobalto', 'oria', 'boscara', 'velares', 'nocta', 'riscoa', 'solerna', 'cendra'].map(slug => [`/temas/${slug}/`, `/en/temas/${slug}/`] as const);
 const translatedPairs = [
+  ...themePairs,
   ['/', '/en/'],
   ['/docs/', '/en/docs/'],
   ['/docs/direccion-propiedad/', '/en/docs/ownership-direction/'],
@@ -157,6 +159,7 @@ test('sitemap contains every indexable final URL exactly once and excludes demos
 
 test('commercial search surfaces use specific, unique metadata and people-first headings', async ({ page }) => {
   const commercialRoutes = [
+    ...themePairs.flat(),
     '/', '/en/', '/planes/', '/en/plans/', '/webs/', '/en/webs/',
     '/docs/', '/en/docs/', '/docs/direccion-propiedad/', '/en/docs/ownership-direction/', '/docs/reservas-recepcion/', '/en/docs/reservations-reception/', '/docs/operaciones/', '/en/docs/operations/', '/docs/marketing-ingresos/', '/en/docs/marketing-revenue/', '/docs/tecnica-privacidad/', '/en/docs/technical-privacy/',
     '/paneles/', '/en/panels/', '/paneles/solicitudes/', '/en/panels/enquiries/', '/paneles/planning/', '/en/panels/planning/',

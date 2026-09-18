@@ -1,0 +1,136 @@
+---
+import type { Locale } from '@logic-estancia/config';
+import { getWebPortfolio, type WebPortfolioConcept } from '../web-portfolio';
+import { themeBenefits, themeDetailHref, themeRequestHref } from '../theme-detail';
+import WebMiniature from './WebMiniature.astro';
+import InterfaceIcon from './InterfaceIcon.astro';
+import HomeClosing from './HomeClosing.astro';
+import PortfolioViewAnalytics from './PortfolioViewAnalytics.astro';
+
+const { locale, concept } = Astro.props as { locale: Locale; concept: WebPortfolioConcept };
+const en = locale === 'en';
+const portfolio = getWebPortfolio(locale);
+const related = portfolio.filter(item => item.slug !== concept.slug).sort((a, b) => Number(b.vertical === concept.vertical) - Number(a.vertical === concept.vertical)).slice(0, 3);
+const benefits = themeBenefits(locale, concept);
+const requestHref = themeRequestHref(locale, concept);
+const indexHref = en ? '/en/webs/' : '/webs/';
+const previewLabel = `${en ? 'Website preview' : 'Vista previa de la web'} ${concept.brand}`;
+const tags = [concept.planLabel, concept.verticalLabel, 'Responsive'];
+---
+<PortfolioViewAnalytics event="web_view" locale={locale} web={concept.slug} plan={concept.plan} />
+<article class="theme-detail-page" data-theme-detail={concept.slug}>
+  <header class="theme-detail-head shell">
+    <nav aria-label={en ? 'Theme catalogue' : 'Catálogo de temas'}><a href={indexHref}><span aria-hidden="true">←</span>{en ? 'Back to all themes' : 'Volver a todos los temas'}</a></nav>
+    <div class="theme-detail-heading">
+      <div><p class="eyebrow">{en ? `Website theme · ${concept.verticalLabel}` : `Tema web · ${concept.verticalLabel}`}</p><h1>{concept.brand}<span class="theme-detail-subtitle">{en ? 'Website design for your accommodation' : 'Diseño web para tu alojamiento'}</span></h1></div>
+      <p>{concept.summary}</p>
+    </div>
+    <p class="theme-detail-boundary" role="note">{en ? 'Fictional design · no real property or customer. ' : 'Diseño ficticio · no representa un alojamiento ni un cliente real. '}{concept.boundary}</p>
+  </header>
+  <section class="theme-detail-preview shell" aria-label={previewLabel}>
+    <dialog open class="theme-detail-stage" data-theme-detail-stage aria-label={previewLabel}>
+      <div class="theme-detail-browser">
+        <div class="theme-detail-bar">
+          <span class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>{concept.slug}.{en ? 'yourdomain.com' : 'tudominio.com'}</span>
+          <button type="button" data-theme-detail-expand aria-expanded="false" aria-label={en ? 'Expand preview' : 'Ampliar vista previa'} data-open-label={en ? 'Expand preview' : 'Ampliar vista previa'} data-close-label={en ? 'Close expanded preview' : 'Cerrar vista ampliada'}><span class="expand-icon"><InterfaceIcon name="external" /></span><span class="collapse-icon"><InterfaceIcon name="close" /></span></button>
+        </div>
+        <div class="theme-detail-screen"><iframe src={`${concept.demoHref}?embed=theme`} sandbox="allow-scripts" title={previewLabel} data-theme-detail-frame loading="lazy"></iframe></div>
+      </div>
+      <aside class="theme-detail-side">
+        <p class="eyebrow">{en ? 'Your next website' : 'Tu próxima web'}</p><h2>{concept.brand}</h2><p>{concept.visualIntent}</p>
+        <div class="theme-detail-tags">{tags.map(tag => <span>{tag}</span>)}</div>
+        <ul>{benefits.map(point => <li><InterfaceIcon name="check" /><span>{point}</span></li>)}</ul>
+        <div class="theme-detail-side-actions" data-commercial-actions>
+          <a class="pill" href={concept.demoHref} target="_blank" rel="noopener noreferrer" data-theme-open={concept.slug}>{en ? 'Explore the website' : 'Explorar la web'}<InterfaceIcon name="external" /></a>
+          <a class="pill ghost" href={requestHref} data-theme-request={concept.slug}>{en ? 'I want this website' : 'Quiero esta web'}<InterfaceIcon name="arrow" /></a>
+        </div>
+        <p class="theme-detail-boundary" role="note">{concept.boundary}</p>
+        <small>{en ? 'We adapt it to your brand, your spaces and the way you welcome guests.' : 'La adaptamos a tu marca, tus espacios y tu forma de recibir a los huéspedes.'}</small>
+      </aside>
+    </dialog>
+  </section>
+  <section class="theme-detail-info shell">
+    <div class="theme-detail-story">
+      <p class="eyebrow">{en ? 'What this design brings' : 'Qué aporta este diseño'}</p><h2>{en ? 'An identity that makes your accommodation stand out.' : 'Una identidad que pone en valor tu alojamiento.'}</h2>
+      <p>{concept.businessProblem} {en ? 'We tailor the imagery, content and calls to action around your property.' : 'Adaptamos las imágenes, el contenido y las llamadas a la acción alrededor de tu alojamiento.'}</p>
+      <ol>{benefits.map((point, index) => <li><b>{String(index + 1).padStart(2, '0')}</b><span>{point}</span></li>)}</ol>
+    </div>
+    <aside class="theme-detail-facts">
+      <h3>{en ? 'Details' : 'Detalles'}</h3><dl><div><dt>{en ? 'Starting plan' : 'Plan de partida'}</dt><dd>{concept.planLabel}</dd></div><div><dt>{en ? 'Accommodation' : 'Alojamiento'}</dt><dd>{concept.verticalLabel}</dd></div><div><dt>{en ? 'Delivery' : 'Entrega'}</dt><dd>{en ? 'Your own domain' : 'Tu propio dominio'}</dd></div></dl>
+      <h3>{en ? 'Includes' : 'Incluye'}</h3><div class="theme-detail-tags">{(en ? ['Responsive design', 'Brand identity', 'Contact routes'] : ['Diseño responsive', 'Identidad propia', 'Accesos al contacto']).map(tag => <span>{tag}</span>)}</div>
+      <a class="pill" href={requestHref} data-commercial-actions>{en ? 'I want this website' : 'Quiero esta web'}<InterfaceIcon name="arrow" /></a>
+    </aside>
+  </section>
+  <section class="theme-detail-related shell" aria-labelledby="theme-related-title">
+    <header><h2 id="theme-related-title">{en ? 'Related themes' : 'Temas relacionados'}</h2><a class="text-link" href={indexHref}>{en ? 'See all themes' : 'Ver todos los temas'}<InterfaceIcon name="arrow" /></a></header>
+    <div>{related.map(item => <a class="theme-related-card" href={themeDetailHref(locale, item.slug)}><WebMiniature concept={item} /><span><b>{item.brand}</b><small>{item.planLabel} · {item.verticalLabel}</small><i aria-hidden="true">→</i></span></a>)}</div>
+  </section>
+</article>
+<HomeClosing locale={locale} />
+
+<script>
+  document.querySelectorAll<HTMLDialogElement>('[data-theme-detail-stage]').forEach(stage => {
+    const trigger = stage.querySelector<HTMLButtonElement>('[data-theme-detail-expand]');
+    const restore = () => {
+      if (stage.matches(':modal')) return;
+      stage.classList.remove('is-expanded');
+      document.documentElement.classList.remove('theme-detail-locked');
+      if (!stage.open) stage.show();
+      trigger?.setAttribute('aria-expanded', 'false');
+      trigger?.setAttribute('aria-label', trigger.dataset.openLabel ?? '');
+      trigger?.focus({ preventScroll: true });
+    };
+    trigger?.addEventListener('click', () => {
+      if (stage.matches(':modal')) { stage.close(); return; }
+      stage.close();
+      stage.classList.add('is-expanded');
+      stage.showModal();
+      document.documentElement.classList.add('theme-detail-locked');
+      trigger.setAttribute('aria-expanded', 'true');
+      trigger.setAttribute('aria-label', trigger.dataset.closeLabel ?? '');
+      trigger.focus({ preventScroll: true });
+    });
+    stage.addEventListener('close', restore);
+  });
+</script>
+
+<style>
+  :global(html.theme-detail-locked){overflow:hidden}
+  .theme-detail-page{background:#fffefa;color:var(--ink);padding-bottom:1px}
+  .theme-detail-page>.shell{width:min(calc(100% - 64px),1600px)}
+  .theme-detail-head{padding:clamp(46px,6vw,84px) 0 clamp(36px,5vw,62px)}
+  .theme-detail-head nav a{display:inline-flex;min-height:44px;align-items:center;gap:10px;color:var(--slate);font-size:.8125rem;font-weight:600;text-decoration:none}
+  .theme-detail-heading{display:grid;grid-template-columns:1.08fr .92fr;gap:clamp(32px,8vw,120px);align-items:end;margin-top:clamp(40px,5vw,66px)}
+  .theme-detail-heading h1{margin:15px 0 0;font:400 clamp(4rem,9vw,8.625rem)/.9 var(--serif);letter-spacing:-.055em;overflow-wrap:normal}
+  .theme-detail-heading>p{max-width:600px;margin:0;color:var(--slate);font-size:clamp(1rem,1.35vw,1.25rem);line-height:1.65}
+  .theme-detail-subtitle{display:block;margin-top:20px;font:500 1rem/1.5 var(--sans);letter-spacing:normal}
+  .theme-detail-boundary{max-width:900px;margin:24px 0 0;color:var(--slate);font-size:.875rem;line-height:1.6}
+  .theme-detail-preview{padding-bottom:clamp(70px,8vw,118px)}
+  .theme-detail-stage{position:relative;display:grid;grid-template-columns:minmax(0,1fr) clamp(310px,26vw,390px);gap:16px;width:100%;max-width:none;max-height:none;margin:0;border:0;border-radius:24px;padding:16px;background:#eaf0e7;color:inherit;overflow:visible}
+  .theme-detail-browser{min-width:0;overflow:hidden;border:1px solid #cdd8c8;border-radius:16px;background:#fff;box-shadow:0 18px 50px #183e1c14}
+  .theme-detail-bar{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 9px 0 16px;border-bottom:1px solid #dde4d7;background:#fffefa}
+  .browser-dots{display:flex;gap:6px}.browser-dots i{width:9px;height:9px;border-radius:50%;background:#c8d1c4}
+  .theme-detail-bar>span:not(.browser-dots){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#596b52;font-size:.75rem}
+  .theme-detail-bar button{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;margin-left:auto;padding:0;border:0;border-radius:10px;background:transparent;color:var(--ink);cursor:pointer}
+  .theme-detail-bar button:hover{background:#e4eddd}.theme-detail-bar button .collapse-icon{display:none}
+  .theme-detail-screen{height:clamp(530px,55vw,760px);overflow:hidden;background:white}.theme-detail-screen iframe{display:block;width:100%;height:100%;border:0;background:white}
+  .theme-detail-side{display:flex;flex-direction:column;min-width:0;padding:clamp(26px,3vw,42px) clamp(18px,2vw,28px)}
+  .theme-detail-side .eyebrow{margin:0;font-size:.6875rem}.theme-detail-side h2{margin:12px 0 0;font:400 clamp(2.375rem,4vw,3.625rem)/1 var(--serif);letter-spacing:-.04em;overflow-wrap:normal}
+  .theme-detail-side>p:not(.eyebrow){margin:18px 0 0;color:var(--slate);font-size:.875rem;line-height:1.6}
+  .theme-detail-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}.theme-detail-tags span{border:1px solid #bacbb4;border-radius:99px;padding:6px 10px;color:#405c39;font-size:.6875rem}
+  .theme-detail-side ul{display:grid;gap:14px;margin:25px 0 0;padding:0;list-style:none}.theme-detail-side li{display:grid;grid-template-columns:20px 1fr;gap:8px;color:var(--slate);font-size:.8125rem;line-height:1.5}
+  .theme-detail-side-actions{display:grid;gap:10px;margin-top:auto;padding-top:28px}.theme-detail-side-actions a,.theme-detail-facts>.pill{display:flex;justify-content:space-between;gap:12px;min-height:48px;font-size:.8125rem;text-decoration:none;white-space:normal}
+  .theme-detail-side>small{margin-top:14px;color:var(--slate);font-size:.75rem;line-height:1.5}
+  .theme-detail-stage.is-expanded{position:fixed;inset:12px;z-index:100;width:calc(100% - 24px);height:calc(100dvh - 24px);padding:14px;border-radius:20px;overflow:hidden}.theme-detail-stage::backdrop{background:#142a1dcc;backdrop-filter:blur(6px)}
+  .is-expanded .theme-detail-browser{display:grid;grid-template-rows:46px minmax(0,1fr)}.is-expanded .theme-detail-screen{height:100%;min-height:0}.is-expanded .theme-detail-side{overflow-y:auto}.is-expanded .theme-detail-bar button .expand-icon{display:none}.is-expanded .theme-detail-bar button .collapse-icon{display:block}
+  .theme-detail-info{display:grid;grid-template-columns:minmax(0,1fr) minmax(290px,.4fr);gap:clamp(48px,10vw,150px);padding-bottom:clamp(80px,10vw,145px)}
+  .theme-detail-story{min-width:0}
+  .theme-detail-story h2{overflow-wrap:anywhere;max-width:900px;margin:18px 0 0;font:400 clamp(2.8rem,6vw,5.375rem)/1 var(--serif);letter-spacing:-.045em}.theme-detail-story>p:not(.eyebrow){max-width:760px;margin-top:27px;color:var(--slate);font-size:clamp(1rem,1.35vw,1.25rem);line-height:1.65}
+  .theme-detail-story ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 30px;margin:50px 0 0;padding:0;list-style:none}.theme-detail-story li{display:grid;grid-template-columns:42px 1fr;gap:12px;border-top:1px solid var(--line);padding:20px 0}.theme-detail-story li b{font:400 1.5rem var(--serif);color:#527448}.theme-detail-story li span{font-size:.875rem;line-height:1.6;color:var(--slate)}
+  .theme-detail-facts{align-self:start;min-width:0;border:1px solid var(--line);border-radius:20px;background:white;padding:28px;box-shadow:0 16px 44px #183e1c0c}.theme-detail-facts h3{margin:0;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}.theme-detail-facts dl{display:grid;gap:13px;margin:20px 0 28px}.theme-detail-facts dl>div{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);padding-bottom:11px;font-size:.8125rem}.theme-detail-facts dt{color:var(--slate)}.theme-detail-facts dd{margin:0;font-weight:600;text-align:right}.theme-detail-facts>.pill{margin-top:25px}
+  .theme-detail-related{padding-bottom:clamp(85px,10vw,145px)}.theme-detail-related>header{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:30px}.theme-detail-related h2{margin:0;font:400 clamp(2.25rem,4vw,3.625rem)/1.1 var(--serif);letter-spacing:-.035em}.theme-detail-related header>a{display:inline-flex;align-items:center;gap:10px;min-height:44px;font-size:.875rem}.theme-detail-related>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .theme-related-card{display:flex;flex-direction:column;min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:white;color:inherit;text-decoration:none}.theme-related-card :global(.web-miniature){flex:none;height:auto;aspect-ratio:1.45;min-height:0}.theme-related-card>span{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:8px 15px;flex:1;padding:20px}.theme-related-card b{font:400 1.5rem/1.15 var(--serif);min-height:2.3em}.theme-related-card small{grid-column:1;align-self:end;color:var(--slate);font-size:.75rem}.theme-related-card i{grid-row:1 / span 2;grid-column:2;align-self:center;font-style:normal}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--sienna);outline-offset:3px}
+  @media(max-width:1000px){.theme-detail-stage{grid-template-columns:1fr}.theme-detail-side{min-height:0}.theme-detail-info{grid-template-columns:minmax(0,1fr)}.theme-detail-facts{width:100%}.theme-detail-stage.is-expanded{grid-template-columns:1fr;grid-template-rows:minmax(0,55%) minmax(0,1fr)}}
+  @media(max-width:760px){.theme-detail-page>.shell{width:calc(100% - 32px)}.theme-detail-heading{grid-template-columns:1fr;gap:28px}.theme-detail-heading h1{font-size:clamp(2.8rem,13vw,4.5rem);overflow-wrap:anywhere}.theme-detail-stage{padding:0;gap:0}.theme-detail-browser{border-radius:18px 18px 0 0}.theme-detail-screen{height:350px}.theme-detail-side{padding:28px 20px}.theme-detail-side ul{display:none}.theme-detail-stage.is-expanded{inset:8px;width:calc(100% - 16px);height:calc(100dvh - 16px);padding:0}.theme-detail-story ol{grid-template-columns:1fr}.theme-detail-related>header{align-items:flex-start;flex-direction:column}.theme-detail-related>div{grid-template-columns:1fr}.theme-related-card b{min-height:0}.theme-detail-facts dl>div{flex-wrap:wrap}.theme-detail-facts{padding:22px}}
+</style>

@@ -1,4 +1,5 @@
 ---
+import ThemePreviewDialog from './ThemePreviewDialog.astro';
 import WebMiniature from './WebMiniature.astro';
 import type { Locale } from '@logic-estancia/config';
 import { getWebPortfolio } from '../web-portfolio';
@@ -10,24 +11,24 @@ const prefix = en ? '/en' : '';
 const labels = en ? {
   eyebrow: 'Twelve website directions',
   title: 'Your stay should not look like anyone else’s.',
-  intro: 'Twelve fictional stays, twelve ways to welcome your guests. Find a visual direction that feels like yours.',
+  intro: 'Explore each design, try its mobile view and choose the style that fits.',
   all: 'See all twelve websites',
   previous: 'Show previous website directions',
   next: 'Show next website directions',
   preview: 'Preview',
-  full: 'Open full page',
+  full: 'View theme',
   close: 'Close preview',
   frame: 'Navigable preview',
   note: 'Fictional visual direction. It checks no availability and sends no enquiry.',
 } : {
   eyebrow: 'Doce direcciones web',
   title: 'Tu alojamiento no tiene que parecerse a ningún otro.',
-  intro: 'Doce alojamientos ficticios, doce formas de dar la bienvenida. Encuentra una dirección visual que se sienta tuya.',
+  intro: 'Explora cada diseño, prueba su vista móvil y elige el estilo que encaja contigo.',
   all: 'Ver las doce webs',
   previous: 'Ver direcciones web anteriores',
   next: 'Ver direcciones web siguientes',
   preview: 'Vista previa',
-  full: 'Abrir página completa',
+  full: 'Ver tema',
   close: 'Cerrar vista previa',
   frame: 'Vista previa navegable',
   note: 'Dirección visual ficticia. No consulta disponibilidad ni envía solicitudes.',
@@ -43,6 +44,7 @@ const labels = en ? {
       </div>
       <div>
         <p>{labels.intro}</p>
+        <p>{labels.note}</p>
         <a class="text-link demo-portfolio-link" href={`${prefix}/webs/`}>{labels.all} <span aria-hidden="true">→</span></a>
       </div>
     </header>
@@ -68,10 +70,10 @@ const labels = en ? {
             <div class="home-theme-card-copy">
               <span>{concept.number} · {concept.verticalLabel}</span>
               <h3>{concept.brand}</h3>
-              <p>{concept.summary}</p>
+              <p>{concept.showcase.eyebrow}</p>
               <div>
                 <button type="button" data-theme-preview-open={`theme-preview-${concept.slug}`} aria-haspopup="dialog">{labels.preview} <span aria-hidden="true">↗</span></button>
-                <a href={`${prefix}/webs/${concept.slug}/`}>{labels.full} <span aria-hidden="true">→</span></a>
+                <a href={`${prefix}/temas/${concept.slug}/`}>{labels.full} <span aria-hidden="true">→</span></a>
               </div>
             </div>
           </article>
@@ -80,35 +82,7 @@ const labels = en ? {
     </div>
   </div>
 
-  {concepts.map((concept) => (
-    <dialog id={`theme-preview-${concept.slug}`} class="portfolio-preview-dialog" aria-labelledby={`theme-preview-title-${concept.slug}`} data-theme-preview-dialog>
-      <div class="portfolio-preview-layout">
-        <button class="portfolio-preview-close" type="button" data-theme-preview-close aria-label={labels.close}>×</button>
-        <div class="portfolio-preview-browser">
-          <div class="portfolio-preview-bar" aria-hidden="true"><i></i><i></i><i></i><span>estancia.logic2b.com</span></div>
-          <iframe
-            src="about:blank"
-            data-theme-preview-frame
-            data-theme-preview-src={`${concept.demoHref}?embed=theme`}
-            title={`${labels.frame}: ${concept.brand}`}
-            loading="lazy"
-            sandbox="allow-scripts"
-          ></iframe>
-        </div>
-        <aside class="portfolio-preview-side">
-          <p class="eyebrow">{concept.verticalLabel} · {concept.planLabel}</p>
-          <h2 id={`theme-preview-title-${concept.slug}`}>{concept.brand}</h2>
-          <p>{concept.visualIntent}</p>
-          <dl>
-            <div><dt>{concept.visibleLabel}</dt><dd>{concept.visiblePages.join(' · ')}</dd></div>
-            <div><dt>{concept.boundaryLabel}</dt><dd>{concept.boundary}</dd></div>
-          </dl>
-          <a class="pill" href={`${prefix}/webs/${concept.slug}/`}>{labels.full} <span aria-hidden="true">→</span></a>
-          <small>{labels.note}</small>
-        </aside>
-      </div>
-    </dialog>
-  ))}
+  {concepts.map((concept) => <ThemePreviewDialog locale={locale} concept={concept} sourcePath={en ? "/en/" : "/"} />)}
 </section>
 
 <script>
@@ -136,24 +110,4 @@ const labels = en ? {
     update();
   });
 
-  let themeReturnTarget: HTMLElement | null = null;
-  document.querySelectorAll<HTMLButtonElement>('[data-theme-preview-open]').forEach((trigger) => {
-    trigger.addEventListener('click', () => {
-      const id = trigger.dataset.themePreviewOpen;
-      const dialog = id ? document.getElementById(id) : null;
-      if (!(dialog instanceof HTMLDialogElement)) return;
-      const frame = dialog.querySelector<HTMLIFrameElement>('[data-theme-preview-frame]');
-      if (frame?.dataset.themePreviewSrc && frame.src === 'about:blank') frame.src = frame.dataset.themePreviewSrc;
-      themeReturnTarget = trigger;
-      dialog.showModal();
-    });
-  });
-  document.querySelectorAll<HTMLDialogElement>('[data-theme-preview-dialog]').forEach((dialog) => {
-    dialog.querySelector<HTMLButtonElement>('[data-theme-preview-close]')?.addEventListener('click', () => dialog.close());
-    dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
-    dialog.addEventListener('close', () => {
-      if (themeReturnTarget?.isConnected) themeReturnTarget.focus();
-      themeReturnTarget = null;
-    });
-  });
 </script>

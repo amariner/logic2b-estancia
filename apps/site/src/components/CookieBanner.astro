@@ -201,7 +201,8 @@ const copy = en ? {
   .consent__toggle input:checked + i { background: var(--sienna); }
   .consent__toggle input:checked + i::before { transform: translateX(20px); }
   .consent__toggle input:focus-visible + i { outline: 3px solid var(--sienna); outline-offset: 3px; }
-  @keyframes consent-in { from { opacity: 0; transform: translateY(12px); } }
+  /* Keep text and controls at full contrast from the first visible frame. */
+  @keyframes consent-in { from { transform: translateY(12px); } }
   @media (max-width: 480px) {
     .consent { padding: 20px; }
     .consent__actions { flex-direction: column-reverse; }

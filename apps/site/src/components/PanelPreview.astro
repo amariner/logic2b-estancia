@@ -1,13 +1,14 @@
 ---
 import type { Locale } from '@logic-estancia/config';
 import type { PanelPreviewKind } from '../panel-portfolio';
+import InterfaceIcon from './InterfaceIcon.astro';
 
 const { locale, kind, compact = false } = Astro.props as { locale: Locale; kind: PanelPreviewKind; compact?: boolean };
 const en = locale === 'en';
 const properties = ['Aira', 'Bruma', 'Cauce', 'Duna', 'Era'];
 const labels: Record<PanelPreviewKind, string> = {
   enquiries: en ? 'Fictitious Terrava enquiry comparison in read-only mode' : 'Comparación ficticia de una solicitud de Terrava en solo lectura',
-  planning: en ? 'Fictitious fourteen-day Terrava planning in read-only mode' : 'Planning ficticio de Terrava de catorce días en solo lectura',
+  planning: en ? 'Fictitious ten-day Terrava planning in read-only mode' : 'Planning ficticio de Terrava de diez días en solo lectura',
   'guests-arrivals': en ? 'Fictitious Terrava guest context table in read-only mode' : 'Tabla ficticia de contexto de huéspedes de Terrava en solo lectura',
   preparation: en ? 'Fictitious Aurem room preparation checklist in read-only mode' : 'Checklist ficticio de preparación de habitación de Aurem en solo lectura',
   'operations-revenue': en ? 'Explainable fictitious Aurem revenue scenario with forecasting unavailable' : 'Escenario ficticio explicable de ingresos de Aurem con previsión no disponible',
@@ -22,34 +23,33 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
   aria-label={labels[kind]}
   data-panel-preview={kind}
 >
-  <div class="panel-preview-bar"><span>{brand}</span><small>{en ? 'Local demo · read-only' : 'Demo local · solo lectura'}</small></div>
+  <div class="panel-preview-bar"><span>{brand}</span><small>{en ? 'Workspace' : 'Gestor de estancias'}</small></div>
   <div class="panel-preview-shell">
-    <aside aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></aside>
+    <aside aria-hidden="true"><b>L</b>{(['grid', 'calendar', 'users', 'check', 'chart'] as const).map(icon => <InterfaceIcon name={icon} />)}</aside>
     {kind === 'enquiries' ? (
       <div class="panel-preview-content panel-preview-enquiry">
-        <header><div><span>{en ? 'Fictitious case' : 'Caso ficticio'}</span><strong>Marina Costa · 4 {en ? 'guests' : 'huéspedes'}</strong><small>{en ? '21–24 Aug' : '21–24 ago'} · Casa Aira</small></div><b>REQ-024</b></header>
+        <header><div><span>{en ? 'Enquiry' : 'Solicitud'}</span><strong>Marina Costa · 4 {en ? 'guests' : 'huéspedes'}</strong><small>{en ? '21–24 Aug' : '21–24 ago'} · Casa Aira</small></div><b>REQ-024</b></header>
         <p>{en ? 'Casa Aira has no fit for the first night.' : 'Casa Aira no encaja la primera noche.'}</p>
         <div class="panel-preview-comparison"><section><span>Casa Aira</span><strong>{en ? 'No fit' : 'Sin encaje'}</strong><small>{en ? 'First night occupied' : 'Primera noche ocupada'}</small></section><section><span>Casa Bruma</span><strong>€ 612</strong><small>{en ? 'Full stay available' : 'Estancia completa disponible'}</small></section></div>
-        <div class="panel-preview-footer">{en ? 'Compare only · no booking or message' : 'Solo compara · sin reserva ni mensaje'}</div>
       </div>
     ) : kind === 'planning' ? (
       <div class="panel-preview-content panel-preview-planning">
-        <header><div><strong>{en ? 'August · 14 days' : 'Agosto · 14 días'}</strong><small>{en ? 'All properties' : 'Todas las propiedades'}</small></div><span>{en ? 'Fictitious calendar · EUR' : 'Calendario ficticio · EUR'}</span></header>
+        <header><div><strong>{en ? 'August · 10 days' : 'Agosto · 10 días'}</strong><small>{en ? 'All properties' : 'Todas las propiedades'}</small></div><span>{en ? 'Calendar · EUR' : 'Calendario · EUR'}</span></header>
+        <div class="panel-planning-summary"><span><b>05</b>{en ? 'Properties' : 'Alojamientos'}</span><span><b>03</b>{en ? 'Arrivals today' : 'Llegadas hoy'}</span><span><b>02</b>{en ? 'To review' : 'Por revisar'}</span></div>
         <div class="panel-preview-calendar">
           <div class="panel-preview-days"><span></span>{Array.from({ length: 10 }, (_, index) => <b>{18 + index}</b>)}</div>
           {properties.map((property, row) => <div class="panel-preview-row"><span>Casa {property}</span>{Array.from({ length: 10 }, (_, day) => <i class:list={{ occupied: day >= row % 4 && day < (row % 4) + 3, alternative: property === 'Bruma' && day === 6 }}></i>)}</div>)}
         </div>
-        <div class="panel-preview-footer"><strong>Marina Costa · Casa Bruma</strong><span>{en ? 'View only · no inventory changes' : 'Solo visualización · sin cambios de inventario'}</span></div>
+        <div class="panel-planning-legend"><span><i></i>{en ? 'Stay' : 'Estancia'}</span><span><i></i>{en ? 'Alternative' : 'Alternativa'}</span><span>{en ? 'August' : 'Agosto'}</span></div>
       </div>
     ) : kind === 'guests-arrivals' ? (
       <div class="panel-preview-content panel-preview-guests">
-        <header><div><span>{en ? 'Stay context' : 'Contexto de estancia'}</span><strong>{en ? 'Guests' : 'Huéspedes'}</strong><small>{en ? 'Two fictitious records' : 'Dos registros ficticios'}</small></div><b>{en ? 'Read only' : 'Solo lectura'}</b></header>
+        <header><div><span>{en ? 'Stay context' : 'Contexto de estancia'}</span><strong>{en ? 'Guests' : 'Huéspedes'}</strong><small>{en ? 'Arrivals and stays' : 'Llegadas y estancias'}</small></div><b>{en ? 'Overview' : 'Resumen'}</b></header>
         <div class="panel-preview-guest-table">
-          <div class="panel-preview-guest-head"><span>{en ? 'Guest' : 'Huésped'}</span><span>{en ? 'Fictitious email' : 'Email ficticio'}</span><span>{en ? 'Source' : 'Origen'}</span><span>{en ? 'Status' : 'Estado'}</span></div>
-          <div><strong>Marina Costa</strong><span>marina@example.test</span><span>{en ? 'Demo data' : 'Dato de la demo'}</span><b>{en ? 'Enquiry received' : 'Consulta recibida'}</b></div>
+          <div class="panel-preview-guest-head"><span>{en ? 'Guest' : 'Huésped'}</span><span>{en ? 'Email' : 'Email'}</span><span>{en ? 'Source' : 'Origen'}</span><span>{en ? 'Status' : 'Estado'}</span></div>
+          <div><strong>Marina Costa</strong><span>marina@example.test</span><span>{en ? 'Website' : 'Web'}</span><b>{en ? 'Enquiry received' : 'Consulta recibida'}</b></div>
           <div><strong>M. Laurent</strong><span>laurent@example.test</span><span>{en ? 'France' : 'Francia'}</span><b>{en ? 'In house' : 'En casa'}</b></div>
         </div>
-        <div class="panel-preview-footer"><span>{en ? 'No profile, traveller report or message' : 'Sin perfil, registro de viajeros ni mensaje'}</span></div>
       </div>
     ) : kind === 'preparation' ? (
       <div class="panel-preview-content panel-preview-preparation">
@@ -59,27 +59,24 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
           <p><i aria-hidden="true"></i><span><strong>{en ? 'Surfaces and minibar' : 'Superficies y minibar'}</strong><small>{en ? 'Housekeeping review' : 'Revisión de limpieza'}</small></span></p>
           <p><i aria-hidden="true"></i><span><strong>{en ? 'Reception validation' : 'Validación de recepción'}</strong><small>{en ? 'Human final check' : 'Comprobación humana final'}</small></span></p>
         </div>
-        <div class="panel-preview-footer"><span>{en ? 'Sample checklist · no assignment or room update' : 'Checklist de muestra · sin asignación ni cambio de habitación'}</span></div>
       </div>
     ) : kind === 'operations-revenue' ? (
       <div class="panel-preview-content panel-preview-revenue">
-        <header><div><span>{en ? 'Explainable local scenario' : 'Escenario local explicable'}</span><strong>{en ? 'Revenue · 28 days' : 'Ingresos · 28 días'}</strong><small>{en ? '96 fictitious rooms' : '96 habitaciones ficticias'}</small></div><b>{en ? 'No forecast' : 'Sin previsión'}</b></header>
+        <header><div><span>{en ? 'Revenue overview' : 'Resumen de ingresos'}</span><strong>{en ? 'Revenue · 28 days' : 'Ingresos · 28 días'}</strong><small>{en ? '96 rooms' : '96 habitaciones'}</small></div><b>{en ? '28 days' : '28 días'}</b></header>
         <div class="panel-preview-metrics">
-          <p><span>{en ? 'Simulated revenue' : 'Ingresos simulados'}</span><strong>{en ? '€296,608' : '€296.608'}</strong></p>
+          <p><span>{en ? 'Revenue' : 'Ingresos'}</span><strong>{en ? '€296,608' : '€296.608'}</strong></p>
           <p><span>{en ? 'Occupancy' : 'Ocupación'}</span><strong>89%</strong></p>
           <p><span>ADR</span><strong>€124</strong></p>
           <p><span>RevPAR</span><strong>€110</strong></p>
         </div>
         <div class="panel-preview-weeks" aria-hidden="true"><i style="--bar: 88%"><span>88%</span></i><i style="--bar: 92%"><span>92%</span></i><i style="--bar: 86%"><span>86%</span></i><i style="--bar: 90%"><span>90%</span></i></div>
-        <div class="panel-preview-footer"><span>{en ? 'Formulas and sample ledger · no PMS, accounting or forecast' : 'Fórmulas y libro de muestra · sin PMS, contabilidad ni previsión'}</span></div>
       </div>
     ) : (
       <div class="panel-preview-content panel-preview-copilot">
-        <header><div><span>{en ? 'Local copilot · no model' : 'Copiloto local · sin modelo'}</span><strong>{en ? 'Reply for Marina Costa' : 'Respuesta para Marina Costa'}</strong><small>{en ? 'Version 1 · local edit' : 'Versión 1 · edición local'}</small></div><b>{en ? 'Draft' : 'Borrador'}</b></header>
+        <header><div><span>{en ? 'Supervised copilot' : 'Copiloto supervisado'}</span><strong>{en ? 'Reply for Marina Costa' : 'Respuesta para Marina Costa'}</strong><small>{en ? 'Version 1' : 'Versión 1'}</small></div><b>{en ? 'Draft' : 'Borrador'}</b></header>
         <p class="panel-preview-draft">{en ? 'Hello Marina, your Terrace room will be ready from 15:00…' : 'Hola Marina, tu habitación Terrace estará lista a partir de las 15:00…'}</p>
-        <div class="panel-preview-sources"><span>{en ? 'Fixture sources' : 'Fuentes fixture'}</span><b>AUR-812</b><b>{en ? 'Arrival policy' : 'Política de entrada'}</b><b>408 · {en ? 'pending' : 'pendiente'}</b></div>
-        <div class="panel-preview-trace"><span class="done">✓ {en ? 'Fixture draft' : 'Borrador de fixture'}</span><span>○ {en ? 'Human review' : 'Revisión humana'}</span><span class="blocked">× {en ? 'Delivery blocked' : 'Envío bloqueado'}</span></div>
-        <div class="panel-preview-footer"><span>{en ? 'No model, provider, message or automation' : 'Sin modelo, proveedor, mensaje ni automatización'}</span></div>
+        <div class="panel-preview-sources"><span>{en ? 'Sources' : 'Fuentes'}</span><b>AUR-812</b><b>{en ? 'Arrival policy' : 'Política de entrada'}</b><b>408 · {en ? 'pending' : 'pendiente'}</b></div>
+        <div class="panel-preview-trace"><span class="done">✓ {en ? 'Draft' : 'Borrador'}</span><span>○ {en ? 'Human review' : 'Revisión humana'}</span><span class="blocked">× {en ? 'Pending approval' : 'Por aprobar'}</span></div>
       </div>
     )}
   </div>

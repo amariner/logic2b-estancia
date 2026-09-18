@@ -6,6 +6,7 @@ import { getHomeContract } from '../home-contract';
 import { getPlanCards } from '../plan-contract';
 import { pricingTerms } from '../pricing';
 import { getWebPortfolio } from '../web-portfolio';
+import { THEME_HANDOFF_SOURCES } from '../theme-detail';
 import WebMiniature from './WebMiniature.astro';
 import CapabilityBand from './CapabilityBand.astro';
 import HomeAftercare from './HomeAftercare.astro';
@@ -21,6 +22,7 @@ const { locale } = Astro.props as { locale: Locale };
 const c = content[locale];
 const home = getHomeContract(locale);
 const heroConcepts = getWebPortfolio(locale);
+const themeOptions = heroConcepts.map(({ slug, brand, plan, vertical }) => ({ slug, brand, plan, accommodationType: vertical === 'apartments' ? 'apartment' : vertical === 'hotels' ? 'hotel' : 'rural' }));
 const planCards = getPlanCards(locale);
 const prefix = locale === 'en' ? '/en' : '';
 const heroShortcutHrefs = [
@@ -95,10 +97,10 @@ const serviceSchema = {
       <div class="hero-case-gallery-top"><div><p class="eyebrow">{c.hero.rail}</p><h2 id="hero-case-gallery-title">{c.hero.railTitle}</h2></div><button type="button" class="hero-motion-toggle" data-hero-motion-toggle aria-pressed="false"><span data-hero-motion-label>{c.hero.pause}</span><span aria-hidden="true">Ⅱ</span></button></div>
       <div class="hero-case-rails" data-hero-rail>
         <div class="hero-case-rail"><div class="hero-case-track hero-case-track-up">
-          {[...heroConcepts, ...heroConcepts].map((concept, index) => index < heroConcepts.length ? <a class="hero-gallery-case" href={concept.demoHref} aria-label={`${concept.brand} · ${concept.planLabel}`} data-hero-proof={concept.status === 'canonical' ? concept.slug : undefined}><WebMiniature concept={concept} eager={index < 2} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong><span>{locale === 'es' ? 'Demo ficticia' : 'Fictional demo'}</span></div></a> : <div class="hero-gallery-case" aria-hidden="true" data-hero-case-clone={concept.status === 'canonical' ? '' : undefined}><WebMiniature concept={concept} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong></div></div>)}
+          {[...heroConcepts, ...heroConcepts].map((concept, index) => index < heroConcepts.length ? <a class="hero-gallery-case" href={concept.demoHref} aria-label={`${concept.brand} · ${concept.planLabel}`} data-hero-proof={concept.status === 'canonical' ? concept.slug : undefined}><WebMiniature concept={concept} eager={index < 2} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong><span>{concept.verticalLabel}</span></div></a> : <div class="hero-gallery-case" aria-hidden="true" data-hero-case-clone={concept.status === 'canonical' ? '' : undefined}><WebMiniature concept={concept} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong></div></div>)}
         </div></div>
         <div class="hero-case-rail hero-case-rail-secondary" aria-hidden="true"><div class="hero-case-track hero-case-track-down">
-          {[...heroConcepts].reverse().concat([...heroConcepts].reverse()).map((concept) => <div class="hero-gallery-case"><WebMiniature concept={concept} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong><span>{locale === 'es' ? 'Demo ficticia' : 'Fictional demo'}</span></div></div>)}
+          {[...heroConcepts].reverse().concat([...heroConcepts].reverse()).map((concept) => <div class="hero-gallery-case"><WebMiniature concept={concept} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong><span>{concept.verticalLabel}</span></div></div>)}
         </div></div>
       </div>
       <a class="hero-case-gallery-all" href={`${prefix}/webs/`}>{locale === 'es' ? 'Ver las doce direcciones web' : 'See all twelve website directions'} <span aria-hidden="true">↗</span></a>
@@ -130,7 +132,7 @@ const serviceSchema = {
     <div class="section-head"><p class="eyebrow">{c.levels.eyebrow}</p><h2 class="heading">{c.levels.title}</h2><p>{locale === 'es' ? 'Una web con tu marca, el nivel de gestión que necesitas y un equipo que te acompaña.' : 'Your own website, the management tools you need and a team to support you.'}</p></div>
     <div class="plans-grid" data-commercial-actions data-plan-showcase>{planCards.map((plan, index) => <PlanCard locale={locale} plan={plan} sourcePath={locale === 'en' ? '/en/' : '/'} featured={index === 1} />)}</div>
     <p class="pricing-note">{pricingTerms(locale)}</p>
-    <a class="text-link" href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{locale === 'es' ? 'Comparar los tres planes y sus límites' : 'Compare all three plans and their boundaries'} <span aria-hidden="true">→</span></a>
+    <a class="text-link" href={`${prefix}/${locale === 'es' ? 'planes' : 'plans'}/`}>{locale === 'es' ? 'Comparar los tres planes' : 'Compare all three plans'} <span aria-hidden="true">→</span></a>
 
     <details id="alcance" class="home-plan-assist commercial-disclosure" aria-labelledby="home-plan-assist-title"><summary>{locale === 'es' ? '¿No sabes qué plan elegir? Te ayudamos' : 'Not sure which plan to choose? Let us help'}</summary>
       <div class="section-head"><p class="eyebrow">{c.scope.eyebrow}</p><h3 id="home-plan-assist-title" class="heading">{c.scope.title}</h3><p>{c.scope.body}</p></div>
@@ -206,6 +208,24 @@ const serviceSchema = {
 </section>
 </div>
 
+<script is:inline define:vars={{ themeOptions, themeLocale: locale, themeSources: THEME_HANDOFF_SOURCES }}>
+  {
+    const themeParams = new URLSearchParams(location.search);
+    const selection = themeParams.get('assessment') === '1' ? null : themeOptions.find(theme => theme.slug === themeParams.get('theme'));
+    const lead = document.querySelector('[data-lead]');
+    if (selection && lead) {
+      const source = themeParams.get('sourcePath');
+      lead.dataset.themeSourcePath = themeSources.includes(source) ? source : (themeLocale === 'en' ? '/en/webs/' : '/webs/');
+      const message = lead.querySelector('[name=message]');
+      if (message instanceof HTMLTextAreaElement && !message.value) message.value = themeLocale === 'es' ? `Me interesa el tema ${selection.brand} para mi alojamiento.` : `I am interested in the ${selection.brand} theme for my accommodation.`;
+      for (const name of ['plan', 'accommodationType']) {
+        const input = lead.querySelector(`[name=${name}]`);
+        if (input instanceof HTMLSelectElement) input.value = selection[name];
+      }
+    }
+  }
+</script>
+
 <dialog class="contact-dialog" data-contact-dialog aria-labelledby="contact-dialog-title" aria-describedby="contact-dialog-description">
   <div class="contact-dialog-panel">
     <div class="contact-dialog-bar"><span>{locale === 'es' ? 'Empecemos por tu proyecto' : 'Let’s start with your project'}</span><button type="button" data-contact-dialog-close aria-label={locale === 'es' ? 'Cerrar formulario de contacto' : 'Close contact form'}>{locale === 'es' ? 'Cerrar' : 'Close'} <span aria-hidden="true">×</span></button></div>
@@ -258,7 +278,7 @@ const serviceSchema = {
     }
     const d = Object.fromEntries(new FormData(form));
     const assessmentFields = window.estanciaAssessment?.leadFields() || {};
-    const payload = { ...assessmentFields, ...d, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: assessmentFields.sourcePath || contactContext?.sourcePath || location.pathname };
+    const payload = { ...assessmentFields, ...d, propertyCount: Number(d.propertyCount), unitCount: Number(d.unitCount), accept: d.accept === 'on', marketingConsent: d.marketingConsent === 'on', lang: locale, sourcePath: assessmentFields.sourcePath || form.dataset.themeSourcePath || contactContext?.sourcePath || location.pathname };
     const controller = new AbortController();
     const requestTimeout = setTimeout(() => controller.abort(), leadRequestTimeoutMs);
     let retryAfter = 0;

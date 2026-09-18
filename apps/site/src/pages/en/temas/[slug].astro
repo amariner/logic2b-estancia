@@ -1,0 +1,10 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ThemeDetail from '../../../components/ThemeDetail.astro';
+import { getWebPortfolio, type WebPortfolioConcept } from '../../../web-portfolio';
+import { themeMetadata } from '../../../theme-detail';
+export function getStaticPaths() { return getWebPortfolio('en').map(concept => ({ params: { slug: concept.slug }, props: { concept } })); }
+const { concept } = Astro.props as { concept: WebPortfolioConcept };
+const metadata = themeMetadata('en', concept);
+---
+<Base locale="en" route={`temas/${concept.slug}`} alternateRoute={`temas/${concept.slug}`} title={metadata.title} description={metadata.description} image={concept.image} imageAlt={concept.imageAlt}><ThemeDetail locale="en" concept={concept} /></Base>

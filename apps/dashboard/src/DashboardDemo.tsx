@@ -345,7 +345,10 @@ export function DashboardDemo({
   };
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && utility) closeUtility();
+      if (event.key === "Escape" && utility) {
+        event.preventDefault();
+        closeUtility();
+      }
       const target = event.target as HTMLElement | null;
       if (
         event.key === "/" &&
