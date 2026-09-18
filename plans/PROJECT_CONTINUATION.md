@@ -2,11 +2,48 @@
 
 Última actualización: 2026-09-18
 
-SHA de producto verificado R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Consolida la entrada comercial, temas, popups y recorrido. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`; base de sesión: `8b77857717864080255e545f0d1671bb8f3033ad`.
+SHA de producto verificado R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Simplifica el formulario comercial y su recuperación. Base R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`; base de sesión: `a0362f7`.
 
 Rama: `main`
 
-## Checkpoint vigente · R1 cerrado en local · 2026-09-18
+## Checkpoint vigente · R2 cerrado en local · 2026-09-18
+
+**R2 implementado y verificado. Siguiente incremento: R3.** Este apartado prevalece sobre el histórico inferior. Producto: `2418a521ef03d7369bd148e3c035df45757bbbe1`; rama `main`. Sin despliegue de producción ni operaciones reales desde demos.
+
+**Reconciliación:** R1 recibido limpio en `a0362f7`, con mejoras de temas, popups, recorrido e imagen OpenAI ya acreditadas. Se preservan. La sección 9 del roadmap aún pedía R1; se corrigió y la revisión documental inicial se identificó como histórica. Camp se ha revisado de nuevo en home, tema L’Olivar, panel Planning y entrada/primera etapa del recorrido: referencia de jerarquía y detalle progresivo, sin sustituir Hospitality ni copiar contenidos.
+
+**Entregado:** contacto esencial visible; alojamiento agrupado una sola vez, abierto en entrada directa/tema y resumido tras diagnóstico válido. El resumen toma los valores actuales y desaparece al editar. Plan vacío «Aún no lo sé»; teléfono/mensaje opcionales, con mensaje de tema visible. Respuestas adicionales del diagnóstico revisables, con indicación visible aun plegadas. Retirarlas limpia adjuntos/sessionStorage/marcador y conserva contacto y precargas editadas. Los errores abren sus grupos antes del foco nativo; bloqueo de doble envío durante petición y cooldown 429; recibo y reintento conservados. Copy e introducción móvil más breves. Sin cambios de API/obligatoriedad, dependencias, captación o almacenamiento de PII.
+
+No se necesitaban recursos generativos nuevos para R2: se conserva la imagen OpenAI de Nivora de R1. **Cero generaciones de imagen/vídeo y cero llamadas a Higgsfield en esta sesión.**
+
+**Encuadre previo:** reducir repetición entre exploración y solicitud. Marketing: siguiente paso concreto sin promesas nuevas; producto: planes/capacidades y captación única; UX: contexto editable, descarte y recuperación; UI: jerarquía calma y móvil; SEO: semántica/rutas; frontend: controles como fuente única; full stack: consentimiento, payload e idempotencia; QA: teclado, ES/EN, reflow y privacidad. Revisiones independientes antes/después.
+
+### Verificación exacta
+
+- `pnpm check` final correcto: 7/7 tareas de lint (6 cacheadas), 21/21 de typecheck/test/build (15 cacheadas), más 33 pruebas de scripts. Contratos: site 31, Worker 95, dominio 20, dashboard 7, web 2 y scripts 33: **188 pruebas**. Astro: 118 archivos, cero errores/avisos/hints. No se afirma ejecución forzada de tareas cacheadas.
+- Focal R2/formulario: **27/27** (16 R2, continuidad R1, diagnóstico, accesibilidad, formulario único, recibos, 429 y timeout/reintento). Regresión: **50/50** (analítica, Camp, demo, R0 y previews). **77 casos únicos acreditados**, no una suite completa del repositorio.
+- Cierre visual tras ajustar el botón de cerrar: **6/6**, ES/EN a 320/390/1440 px, Axe WCAG 2.2 AA y texto 200 %, con límites geométricos del cierre. La pasada previa había superado reflow global, pero revisión de capturas encontró clipping interno a 320 px/texto 200 %; corregido y añadido control geométrico específico.
+- QA visual en navegador a 320/390 px y capturas de escritorio, contexto plegado/abierto, teclado y retorno de foco. La revisión del consejo también corrigió el aviso de respuestas adjuntas oculto y el exceso de introducción móvil. [Informe y capturas](../docs/qa/HOSPITALITY_R2_2026-09-18.md).
+- Logs: `/tmp/estancia-r2-verified-check.log`, `/tmp/estancia-r2-final-e2e.log`, `/tmp/estancia-r2-regression-e2e.log`, `/tmp/estancia-r2-visual-e2e.log`. Artefactos finales: `/tmp/estancia-r2-visual-results/`. Puertos 8794/9244; ningún servidor ajeno modificado. `git diff --check` correcto.
+
+### Revisión multidisciplinar posterior
+
+- Marketing estratégico: **corregido** — copy breve, una decisión clara y ningún uplift atribuido.
+- Diseño de producto: **correcto** — captación única y contratos/planes intactos; diagnóstico opcional.
+- UX: **corregido** — resumen actual, adjuntos transparentes y descarte sin pérdida.
+- UI/dirección visual: **corregido** — grupos consistentes, introducción compacta y cierre íntegro en móvil/texto ampliado.
+- SEO: **correcto** — rutas/metadatos sin cambios; semántica del contacto reforzada.
+- Arquitectura frontend: **corregido** — resumen desde controles reales, sin nuevas dependencias o fuente duplicada de valores.
+- Full stack: **correcto** — API/idempotencia/consentimiento e aislamiento conservados; ningún correo de QA.
+- QA/accesibilidad/rendimiento/confianza: **corregido** — pruebas relevantes, foco y geometría verificados; sin assets nuevos ni afirmación de conversión validada.
+
+**Deuda/bloqueos:** cinco sesiones humanas de comprensión, dispositivos físicos, zoom nativo y lectores de pantalla humanos; quince entrevistas y cinco propuestas reales para validar precios/margen; analítica, proveedores, piloto y producción requieren actividad/autorización externas. No bloquean R3 local. HubSpot continúa fuera de alcance.
+
+**Siguiente tarea exacta: R3, primer caso de estancia en Terrava.** Definir colección/contrato en memoria común a solicitud, planning y estancia con identificador, propiedad/unidad, fechas, ocupantes, estado e importes en céntimos. Implementar conflicto → alternativa → confirmación ficticia → modificación/cancelación con recuperación; incluir unidad fuera de servicio, dos escenarios sin disponibilidad/alternativa y filtro real de propiedad. Reutilizar shell/tour; actualizar capacidades/guías al pasar de lectura a interacción ficticia. Pruebas de dominio y cuatro flujos E2E, aislamiento y QA 320/390/1440. Cero HTTP writes, persistencia o proveedores. No iniciar R4/R5 antes del contrato R3.
+
+Git: remoto comprobado sin divergencia; producto en `2418a521ef03d7369bd148e3c035df45757bbbe1`. El push a `origin/main` se verifica al cerrar la sesión; solo activa Quality, no producción.
+
+## Checkpoint anterior · R1 cerrado en local · 2026-09-18
 
 **R1 implementado y verificado. Siguiente incremento: R2.** Este apartado prevalece sobre los estados históricos inferiores. SHA de producto: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`; rama `main`. No hay despliegue de producción ni acciones reales desde las demos. El roadmap Hospitality sigue vigente; Camp se utiliza como referencia de interacción para esta petición, sin sustituir la prioridad estratégica ni copiar su contenido.
 
