@@ -4,7 +4,7 @@
 
 Revisión publicada: `d4811d1b21a574e1b7c37353ef840b1368f89fb9` (R0–R2 y correcciones de reflow). SHA de producto verificado R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Simplifica el formulario comercial y su recuperación. Base R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`; base de sesión: `a0362f7`.
 
-Rama: `main` (el rediseño del 2026-09-30 vive en `claude/inspiring-allen-ylda58` hasta su integración)
+Rama: `main` (rediseño del 2026-09-30 integrado desde `claude/inspiring-allen-ylda58` por petición del usuario; sin despliegue de producción)
 
 ## Checkpoint vigente · Rediseño serio/técnico, gráficos explicativos, gestor unificado y fichas de tema · 2026-09-30
 
@@ -23,7 +23,7 @@ Petición explícita del usuario: rehacer el diseño con «un pelín» más de s
 
 **Consejo posterior:** marketing **corregido**, producto **correcto**, UX **corregido**, UI **corregido**, SEO **correcto**, frontend **correcto**, full stack **no aplica**, QA/accesibilidad/rendimiento/confianza **corregido**. Detalle en el informe.
 
-**Deuda/bloqueos:** comprensión humana del esquema, Lighthouse sin re-medir (carga local ~+12 %, home ~+200 ms), lector de pantalla humano. Integrar esta rama en `main` requiere revisión/PR; producción sigue sin autorizar.
+**Deuda/bloqueos:** comprensión humana del esquema, Lighthouse sin re-medir (carga local ~+12 %, home ~+200 ms), lector de pantalla humano. Integrado en `main` el 2026-09-30 por petición explícita del usuario; producción sigue sin autorizar y la rama `rediseno-home` queda sin integrar.
 
 **Siguiente tarea exacta:** sin cambios de roadmap — **R3, primer caso de estancia en Terrava** (ver checkpoint R2). Al implementarlo, reutilizar los tokens `--l2b-*` y la capa `.dash` del gestor en lugar de nuevos estilos.
 
