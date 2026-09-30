@@ -12,6 +12,20 @@ const steps = en ? [
   ['Lo configuramos por ti', 'Preparamos tu web, el contenido y las vistas de trabajo. Revisamos el resultado contigo antes de publicar.'],
   ['Seguimos cuando ya está en marcha', 'Hosting, seguridad, mantenimiento técnico y soporte base forman parte del servicio. Revisamos cómo funciona y acotamos mejoras cuando el negocio las necesita.'],
 ];
+const phases = en ? [
+  ['Discover', 'You answer six questions or write to us.', 'We recommend a plan based on capabilities.'],
+  ['Define', 'You validate scope, timing and budget.', 'We prepare the proposal with you.'],
+  ['Prepare', 'You share photos, copy and how you work.', 'We configure the website and workspaces.'],
+  ['Launch', 'You review the result before it goes live.', 'We publish it on your domain.'],
+  ['Stay alongside', 'You tell us what to improve.', 'Hosting, technical maintenance and base support.'],
+] : [
+  ['Descubrir', 'Respondes seis preguntas o nos escribes.', 'Recomendamos un plan por capacidades.'],
+  ['Definir', 'Validas alcance, plazos y presupuesto.', 'Preparamos la propuesta contigo.'],
+  ['Preparar', 'Nos das fotos, textos y tu forma de trabajar.', 'Configuramos la web y las vistas de trabajo.'],
+  ['Publicar', 'Revisas el resultado antes de publicar.', 'Lo publicamos en tu dominio.'],
+  ['Acompañar', 'Nos cuentas qué conviene mejorar.', 'Hosting, mantenimiento técnico y soporte base.'],
+];
+const lanes = en ? ['You', 'Logic2B'] : ['Tú', 'Logic2B'];
 ---
 <section class="section activation human-service">
   <div class="shell activation-wrap">
@@ -23,4 +37,52 @@ const steps = en ? [
     </div>
     <ol class="activation-steps">{steps.map(([name, text], index) => <li><span>0{index + 1}</span><div><h3>{name}</h3><p>{text}</p></div></li>)}</ol>
   </div>
+  <figure class="shell service-lanes" data-service-lanes>
+    <figcaption><span>{en ? 'Who does what, stage by stage' : 'Quién hace qué, etapa a etapa'}</span><small>{en ? 'Timing and scope are confirmed in the proposal.' : 'Plazos y alcance se confirman en la propuesta.'}</small></figcaption>
+    <div class="service-lanes-grid">
+      <div class="service-lanes-legend" aria-hidden="true"><span></span><span><i></i>{lanes[0]}</span><span><i></i>{lanes[1]}</span></div>
+      <ol>{phases.map(([phase, you, team], index) => (
+        <li>
+          <span class="service-lanes-phase"><b>{String(index + 1).padStart(2, '0')}</b>{phase}</span>
+          <p class="service-lanes-you"><span>{lanes[0]}</span>{you}</p>
+          <p class="service-lanes-team"><span>{lanes[1]}</span>{team}</p>
+        </li>
+      ))}</ol>
+    </div>
+  </figure>
 </section>
+<style>
+  .service-lanes { margin-top: clamp(40px, 5vw, 64px); margin-bottom: 0; }
+  .service-lanes figcaption { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; margin-bottom: 14px; }
+  .service-lanes figcaption span { font: 500 .75rem var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--l2b-slate); }
+  .service-lanes figcaption small { color: var(--l2b-muted); font-size: .75rem; }
+  .service-lanes-grid { display: grid; grid-template-columns: 96px minmax(0, 1fr); border: 1px solid var(--l2b-line); border-radius: var(--l2b-radius-lg); overflow: hidden; background: var(--l2b-surface); }
+  .service-lanes-legend { display: grid; grid-template-rows: 52px 1fr 1fr; border-right: 1px solid var(--l2b-line); background: var(--l2b-mist); }
+  .service-lanes-legend span { display: flex; align-items: center; gap: 8px; padding: 0 14px; font: 500 .6875rem var(--mono); color: var(--l2b-slate); }
+  .service-lanes-legend span + span { border-top: 1px solid var(--l2b-line); }
+  .service-lanes-legend i { width: 8px; height: 8px; border-radius: 2px; background: var(--l2b-data); }
+  .service-lanes-legend span:last-child i { background: var(--l2b-signal); }
+  .service-lanes ol { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; }
+  .service-lanes li { display: grid; grid-template-rows: 52px 1fr 1fr; min-width: 0; border-left: 1px solid var(--l2b-line); }
+  .service-lanes li:first-child { border-left: 0; }
+  .service-lanes-phase { position: relative; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--l2b-line); padding: 0 14px; font-size: .8125rem; font-weight: 600; }
+  .service-lanes-phase b { color: var(--l2b-signal-text); font: 500 .6875rem var(--mono); }
+  .service-lanes li:not(:last-child) .service-lanes-phase::after { position: absolute; z-index: 1; top: 50%; right: -5px; width: 9px; height: 9px; border-top: 1px solid var(--l2b-line-strong); border-right: 1px solid var(--l2b-line-strong); background: var(--l2b-surface); transform: translateY(-50%) rotate(45deg); content: ''; }
+  .service-lanes li p { min-width: 0; overflow-wrap: anywhere; margin: 0; padding: 14px; color: var(--slate); font-size: .8125rem; line-height: 1.5; }
+  .service-lanes li p > span { display: none; }
+  .service-lanes-you { border-bottom: 1px solid var(--l2b-line); box-shadow: inset 3px 0 0 var(--l2b-data-soft); }
+  .service-lanes-team { box-shadow: inset 3px 0 0 var(--l2b-signal-soft); }
+  @media (max-width: 900px) {
+    .service-lanes-grid { grid-template-columns: minmax(0, 1fr); }
+    .service-lanes-legend { display: none; }
+    .service-lanes ol { grid-template-columns: minmax(0, 1fr); }
+    .service-lanes li { grid-template-rows: auto; border-left: 0; border-top: 1px solid var(--l2b-line); }
+    .service-lanes li:first-child { border-top: 0; }
+    .service-lanes-phase { min-height: 44px; border-bottom: 0; padding-top: 12px; }
+    .service-lanes-phase::after { display: none; }
+    .service-lanes li p { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; padding: 6px 14px; }
+    .service-lanes li p:last-child { padding-bottom: 14px; }
+    .service-lanes li p > span { display: block; font: 500 .6875rem/1.9 var(--mono); color: var(--l2b-slate); }
+    .service-lanes-you { border-bottom: 0; }
+  }
+</style>

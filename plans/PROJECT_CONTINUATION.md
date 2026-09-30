@@ -1,12 +1,33 @@
 # Logic2B Estancias · Checkpoint de continuidad
 
-Última actualización: 2026-09-18
+Última actualización: 2026-09-30
 
 Revisión publicada: `d4811d1b21a574e1b7c37353ef840b1368f89fb9` (R0–R2 y correcciones de reflow). SHA de producto verificado R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Simplifica el formulario comercial y su recuperación. Base R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`; base de sesión: `a0362f7`.
 
-Rama: `main`
+Rama: `main` (el rediseño del 2026-09-30 vive en `claude/inspiring-allen-ylda58` hasta su integración)
 
-## Checkpoint vigente · R2 en producción · 2026-09-18
+## Checkpoint vigente · Rediseño serio/técnico, gráficos explicativos, gestor unificado y fichas de tema · 2026-09-30
+
+Petición explícita del usuario: rehacer el diseño con «un pelín» más de seriedad y tecnología, añadir gráficos detallados que expliquen el servicio de forma sencilla, revisar todas las páginas, unificar el diseño del backend (gestor demo) y mejorar después las fichas de tema. Rama de trabajo: `claude/inspiring-allen-ylda58` (no `main`). Sin despliegue de producción, sin proveedores nuevos, sin cambios de API, captación ni contratos de planes. R3 (estancia en memoria de Terrava) sigue siendo la siguiente tarea del roadmap.
+
+**Entregado:**
+
+- **Sistema visual compartido.** `packages/ui/src/brand.css` define tokens `--l2b-*` (verde forestal, superficies, señal, datos, ámbar, radios, sombras, rejilla y mono) consumidos por el sitio y por el gestor; namespaced para que las marcas demo no los hereden. `apps/site/src/styles/system.css` es la última capa del sitio: etiquetas en IBM Plex Mono 500 (subset latino local vía `@fontsource/ibm-plex-mono`, única dependencia nueva), botones rectangulares redondeados, cabecera flotante precisa, rejilla técnica sutil en el hero, una sola familia de fondos claros y un único oscuro forestal (se retiran charcoal y melocotón de grandes superficies), cifras tabulares.
+- **Gráficos explicativos.** `HomeServiceMap` (home, `/planes/` y recursos): recorrido Huésped → Tu web → Solicitud → Gestor → Operación con traspasos, ejemplo de solicitud ficticia (Casa Aira/Casa Bruma), barras de cobertura alineadas por plan (Básico 2 etapas, Gestión 4, Inteligente 5) y capa de servicio Logic2B (implantación, hosting/mantenimiento, soporte base). Contrato en `service-map.ts` con pruebas que derivan la cobertura de las etapas y garantizan Básico sin gestor. `HumanService` añade un diagrama de carriles «Quién hace qué» (Tú/Logic2B × Descubrir, Definir, Preparar, Publicar, Acompañar) sin plazos inventados.
+- **Gestor unificado.** `dashboard.css` añade capa `.dash` con los mismos tokens: sidebar forestal con indicador de vista activa, etiquetas mono, métricas tabulares, paneles con borde nítido y radios contenidos, botones y CTA en verde de marca; el aviso «MODO DEMO SEGURO» se mantiene visible con tono ámbar de atención.
+- **Fichas de tema `/temas/:slug/`.** Cabecera con ficha técnica (plan, alojamiento, composición, secciones, entrega) y paleta real del tema con hex; nueva «Anatomía del tema»: wireframe con los colores y la composición del tema (dividida/paisaje/enmarcada), imagen propia y cinco bloques numerados enlazados con una leyenda; «Del tema a tu web» en cuatro pasos; plan de partida sugerido con precio orientativo autorizado, escalera de planes y enlace a comparar. Se elimina la lista de beneficios duplicada. Helpers `themeAnatomy`, `themeProcess`, `themeCompositionLabel` con pruebas ES/EN para los doce temas.
+
+**Veracidad:** todos los gráficos indican «ilustrativo»/«datos ficticios»; ninguna métrica, plazo, cliente ni integración inventados. Precios solo los autorizados, con «orientativos», «sin IVA» y remisión a la propuesta. Sin indicadores «en vivo» en el gestor (se retiró un punto de estado que podía sugerir datos reales).
+
+**Verificación:** `pnpm check` correcto (192 pruebas de contrato; site 31→35). E2E completa 241/249 en primera pasada; se corrigieron el contraste del botón del recorrido guiado de Aurem y cuatro desbordamientos con texto al 200 % a 320 px. Tres pruebas SEO agotan 30 s también sobre la base sin cambios en este contenedor (lentitud del entorno); con timeout ampliado pasan. Repetición focal sobre el build final 117/117 (accesibilidad, R0/R1/R2, SEO, temas, paridad). 249 casos únicos acreditados, no una única ejecución 249/249. [Informe y capturas](../docs/qa/REDESIGN_2026-09-30.md).
+
+**Consejo posterior:** marketing **corregido**, producto **correcto**, UX **corregido**, UI **corregido**, SEO **correcto**, frontend **correcto**, full stack **no aplica**, QA/accesibilidad/rendimiento/confianza **corregido**. Detalle en el informe.
+
+**Deuda/bloqueos:** comprensión humana del esquema, Lighthouse sin re-medir (carga local ~+12 %, home ~+200 ms), lector de pantalla humano. Integrar esta rama en `main` requiere revisión/PR; producción sigue sin autorizar.
+
+**Siguiente tarea exacta:** sin cambios de roadmap — **R3, primer caso de estancia en Terrava** (ver checkpoint R2). Al implementarlo, reutilizar los tokens `--l2b-*` y la capa `.dash` del gestor en lugar de nuevos estilos.
+
+## Checkpoint anterior · R2 en producción · 2026-09-18
 
 El usuario ha pedido explícitamente integrar, subir a GitHub y desplegar en producción. R2 ya estaba integrado en `main` y sincronizado con `origin/main` (`4120518`). Se creó el tag `deploy-production-20260918-d4811d1` sobre la revisión exacta de main. El workflow pasó sus comprobaciones, pero no pudo publicar por ausencia de `CLOUDFLARE_API_TOKEN`. Se completó mediante la sesión OAuth local existente y `pnpm deploy`, alternativa documentada en README. Esta autorización no cambia los límites de demos, HubSpot, analítica ni proveedores.
 

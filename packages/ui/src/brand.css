@@ -1,0 +1,34 @@
+/* Logic2B Estancias · brand tokens shared by the commercial site and the demo workspace.
+   Namespaced (--l2b-*) so the fictional demo brands never inherit them by accident. */
+:root {
+  --l2b-ink: #15251c;
+  --l2b-forest: #1f3b2b;
+  --l2b-forest-hover: #2c5039;
+  --l2b-forest-deep: #0f1c15;
+  --l2b-slate: #4d5b51;
+  --l2b-muted: #5e6b62;
+  --l2b-paper: #fbfbf8;
+  --l2b-surface: #ffffff;
+  --l2b-mist: #f1f3ee;
+  --l2b-sand: #f0ece3;
+  --l2b-line: #dce1d9;
+  --l2b-line-strong: #c3cbbf;
+  /* Signal colours are for graphics, status dots and large type; text uses the -text variants. */
+  --l2b-signal: #3a9468;
+  --l2b-signal-text: #22694a;
+  --l2b-signal-soft: #dcefe3;
+  --l2b-data: #3d6385;
+  --l2b-data-text: #2f5070;
+  --l2b-data-soft: #e1eaf2;
+  --l2b-amber: #c07a3c;
+  --l2b-amber-text: #7f4a1f;
+  --l2b-amber-soft: #f5e7d7;
+  --l2b-radius-lg: 18px;
+  --l2b-radius-md: 12px;
+  --l2b-radius-sm: 8px;
+  --l2b-mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', 'Cascadia Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --l2b-shadow-sm: 0 1px 2px rgb(15 28 21 / .06), 0 1px 1px rgb(15 28 21 / .04);
+  --l2b-shadow-md: 0 1px 2px rgb(15 28 21 / .05), 0 12px 28px -12px rgb(15 28 21 / .18);
+  --l2b-grid-line: rgb(21 37 28 / .055);
+  --l2b-grid: linear-gradient(var(--l2b-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--l2b-grid-line) 1px, transparent 1px);
+}

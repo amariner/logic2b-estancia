@@ -1,0 +1,98 @@
+/* Logic2B Estancias · sistema visual 2026-09.
+   Última capa del sitio comercial: un punto más de seriedad y precisión técnica
+   (etiquetas mono, radios contenidos, rejilla sutil y superficies unificadas)
+   sin perder la calidez editorial. Las demos ficticias conservan su propio diseño. */
+:root {
+  --ink: var(--l2b-ink);
+  --slate: var(--l2b-slate);
+  --ash: var(--l2b-muted);
+  --paper: var(--l2b-paper);
+  --mist: var(--l2b-mist);
+  --fog: #f6f7f3;
+  --line: var(--l2b-line);
+  --peach: var(--l2b-sand);
+  --sienna: #6b3a22;
+  --mono: 'IBM Plex Mono', var(--l2b-mono);
+}
+
+body { background: var(--paper); font-feature-settings: 'cv11', 'ss01'; }
+.heading, .display { text-wrap: balance; }
+
+/* Etiquetas: mono, con marcador cuadrado. Solo decoración visual; el texto no cambia. */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--l2b-signal-text);
+  font-family: var(--mono);
+  font-size: .6875rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+}
+.eyebrow::before { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 1.5px; background: currentColor; content: ''; }
+.hero-copy .eyebrow { justify-content: center; }
+.tension-section .eyebrow, .home-panel-showcase .eyebrow, .home-closing .eyebrow, .site-footer .eyebrow { color: #a9d5bb; }
+
+/* Acciones: rectángulos redondeados en lugar de cápsulas, más sobrios. */
+.pill, .header-actions a, .hero-start .pill, .plan-card-links .pill { border-radius: var(--l2b-radius-md) !important; }
+.pill { background: var(--l2b-forest); border-color: var(--l2b-forest); font-weight: 550; letter-spacing: .005em; }
+.pill:hover { background: var(--l2b-forest-hover); border-color: var(--l2b-forest-hover); }
+.pill.ghost { background: transparent; color: var(--l2b-forest); border-color: var(--l2b-line-strong); }
+.pill.ghost:hover { background: var(--l2b-mist); }
+.header-actions .header-tour { background: var(--l2b-forest) !important; border-color: var(--l2b-forest) !important; }
+
+/* Cabecera: barra flotante precisa en lugar de cápsula. */
+body .parity-header, body .parity-header:has(.mobile-nav:not([hidden])) { border-color: var(--l2b-line); border-radius: 16px; background: rgb(252 252 249 / .94); box-shadow: var(--l2b-shadow-md); backdrop-filter: blur(10px); }
+
+/* Hero: rejilla técnica muy sutil sobre el degradado existente. */
+.hero { background: radial-gradient(ellipse at 50% 0%, rgb(58 148 104 / .09), transparent 60%), linear-gradient(180deg, #f4f6f0, var(--paper)); }
+.hero::before {
+  position: absolute; inset: 0; z-index: 0; width: auto; height: auto; left: 0; content: '';
+  background-image: var(--l2b-grid); background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 75%);
+  pointer-events: none;
+}
+.hero-case-gallery { border-radius: var(--l2b-radius-lg); background: #dbe3dd; }
+.hero-gallery-case { border-radius: 12px; }
+.hero-word-stack { border-bottom-color: var(--l2b-signal-soft); }
+
+/* Superficies: una sola familia de fondos claros y un único oscuro forestal. */
+.home-ecosystem-band.home-ecosystem-band, .tension-section { background: var(--l2b-forest-deep); }
+.home-ecosystem-band .sector-band { background: transparent; }
+.product-explorer, .levels, .modes { background: var(--l2b-mist); }
+.site-footer.site-footer.site-footer { background: var(--l2b-forest-deep); }
+
+/* Tarjetas y contenedores con radio contenido y borde nítido. */
+.card { border-radius: var(--l2b-radius-lg); }
+.artifact { border-radius: var(--l2b-radius-lg); }
+.plan-card, .home-journey-moment, .product-explorer-item, .connection-overview article,
+.portfolio-card, .guide-card, .home-theme-card, .theme-related-card, .panel-portfolio-card { border-radius: var(--l2b-radius-lg) !important; }
+.plan-card { border-color: var(--l2b-line); box-shadow: var(--l2b-shadow-sm); }
+.plan-visual-stage, .product-explorer-visual { border-radius: var(--l2b-radius-md); }
+.product-explorer-tabs button { border-radius: var(--l2b-radius-md); }
+.product-explorer-tabs button[aria-selected='true'] { background: var(--l2b-forest); }
+.product-explorer-index, .home-journey-top > i { border-radius: 6px !important; font-family: var(--mono); font-size: .6875rem !important; letter-spacing: .02em; }
+
+/* Números y precios con cifras tabulares. */
+.plan-price, .plan-price *, .panel-preview-metrics strong, .panel-planning-summary b { font-variant-numeric: tabular-nums; }
+
+/* Enlaces de texto: subrayado técnico fino. */
+.text-link { text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
+/* Formularios: esquinas contenidas. */
+#contacto input:not([type='checkbox']):not([type='radio']), #contacto select, #contacto textarea { border-radius: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::before { mask-image: none; opacity: .6; }
+}
+
+/* Servicio gestionado: misma familia de líneas y numeración mono. */
+.human-service .activation-steps li { border-color: var(--line); }
+.activation-steps > li > span { color: var(--l2b-signal-text); font-family: var(--mono); font-weight: 500; }
+
+/* Workflow por sector: tablero en la misma familia forestal, radios contenidos. */
+.workflow-section { background: var(--l2b-forest-deep); }
+.workflow-board { border-radius: var(--l2b-radius-lg); background: #0b1510; }
+.workflow-step { border-radius: var(--l2b-radius-md); }
+.workflow-result { background: color-mix(in srgb, var(--flow-accent) 22%, #0b1510); }
+.workflow-step-top > i { border-radius: 6px; }

@@ -375,3 +375,58 @@ blockquote { margin: 20px 0; border-left: 2px solid var(--ink); padding: 4px 0 4
   .tour-choice > div { align-items: stretch; flex-direction: column; }
   .demo-conversion { right: 12px; bottom: 12px; max-width: calc(100% - 24px); }
 }
+
+/* Logic2B Estancias · capa de marca del gestor.
+   Comparte tokens (--l2b-*) con el sitio comercial: mismo verde forestal,
+   etiquetas mono, radios contenidos y lectura de datos tabular. */
+.dash {
+  --ink: var(--l2b-ink, #15251c);
+  --slate: var(--l2b-slate, #4d5b51);
+  --ash: var(--l2b-muted, #5e6b62);
+  --paper: var(--l2b-surface, #fff);
+  --fog: #f4f6f1;
+  --mist: var(--l2b-mist, #f1f3ee);
+  --line: var(--l2b-line, #dce1d9);
+  --peach: var(--l2b-amber-soft, #f5e7d7);
+  --sienna: var(--l2b-amber-text, #7f4a1f);
+  --mono: 'IBM Plex Mono', var(--l2b-mono, monospace);
+  background: var(--fog);
+  font-feature-settings: 'cv11', 'ss01';
+}
+.dash .sidebar { border-right: 0; color: rgb(255 255 255 / .74); background: var(--l2b-forest-deep, #0f1c15); }
+.dash .dash-brand { border-bottom: 1px solid rgb(255 255 255 / .1); margin: 0 0 14px; padding-bottom: 18px; }
+.dash .dash-brand span { color: #fff; }
+.dash .dash-brand small { color: #a9d5bb; font-family: var(--mono); font-size: .625rem; letter-spacing: .03em; }
+.dash .sidebar nav button { position: relative; border-radius: 10px; color: rgb(255 255 255 / .74); }
+.dash .sidebar nav button:hover { color: #fff; background: rgb(255 255 255 / .06); }
+.dash .sidebar nav button.active { color: #fff; background: rgb(255 255 255 / .1); }
+.dash .sidebar nav button.active::before { position: absolute; top: 10px; bottom: 10px; left: 0; width: 3px; border-radius: 0 3px 3px 0; background: var(--l2b-signal, #3a9468); content: ''; }
+.dash .sidebar-foot { border-top-color: rgb(255 255 255 / .1); }
+.dash .sidebar-foot a { color: #fff; }
+.dash .sidebar-foot span { color: rgb(255 255 255 / .6); font-family: var(--mono); font-size: .5625rem; letter-spacing: .02em; }
+.dash .sidebar-close { color: #fff; }
+.dash .sidebar :focus-visible { outline-color: #a9d5bb; }
+.dash .dash-top { background: rgb(255 255 255 / .94); }
+.dash .dash-top select, .dash .dash-top button, .dash .page-meta button { border-radius: 10px; }
+.dash .tour-button { border-color: var(--l2b-forest, #1f3b2b) !important; background: var(--l2b-forest, #1f3b2b) !important; }
+.dash .demo-banner { border-bottom-color: #ead8c2; }
+.dash .demo-banner strong { font-family: var(--mono); font-size: .6875rem; font-weight: 600; letter-spacing: .05em; }
+.dash .page-head p { color: var(--l2b-signal-text, #22694a); font-family: var(--mono); font-size: .6875rem; font-weight: 500; letter-spacing: .06em; }
+.dash .metric-grid button, .dash .panel, .dash .revenue-metrics button, .dash .channel-metrics button { border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--l2b-shadow-sm, none); }
+.dash .metric-grid button { transition: border-color .16s ease, box-shadow .16s ease; }
+.dash .metric-grid button:hover { border-color: var(--l2b-line-strong, #c3cbbf); box-shadow: var(--l2b-shadow-md, none); }
+.dash .metric-grid button > span { color: var(--slate); font-family: var(--mono); font-size: .625rem; letter-spacing: .05em; text-transform: uppercase; }
+.dash .metric-grid strong { font-family: var(--sans); font-size: 2.2rem; font-weight: 500; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.dash .task.urgent i { background: var(--l2b-amber, #c07a3c); }
+.dash .decision-list span, .dash .tape-days b, .dash .editor-workflow span { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.dash .tag { border-radius: 6px; }
+.dash .journey-note, .dash .alert { border-radius: 12px; }
+.dash .comparison div, .dash .website-readiness-zero { border-radius: 12px; }
+.dash .comparison .recommended { outline-color: var(--l2b-signal-text, #22694a); }
+.dash .actions button, .dash button.primary { border-radius: 10px; }
+.dash .tape-row i { border-radius: 5px; }
+.dash .tape-row i.occupied { background: #b5cbb4; }
+.dash .website-preview { border-radius: 14px; }
+.dash .utility-panel { border-radius: 16px; }
+.dash .demo-conversion { border-color: var(--l2b-forest, #1f3b2b); border-radius: 12px; color: #fff; background: var(--l2b-forest, #1f3b2b); font-weight: 500; }
+.dash .demo-conversion:hover { background: var(--l2b-forest-hover, #2c5039); }
