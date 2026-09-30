@@ -40,6 +40,7 @@ const icons = ['spark', 'web', 'mail', 'calendar', 'check', 'users', 'chart'] as
         ))}
       </ol>
     </div>
+    <div class="lx-journey-progress" aria-hidden="true" data-journey-progress><i></i></div>
   </div>
 </section>
 
@@ -49,11 +50,14 @@ const icons = ['spark', 'web', 'mail', 'calendar', 'check', 'users', 'chart'] as
     const previous = journey.querySelector<HTMLButtonElement>('[data-journey-previous]');
     const next = journey.querySelector<HTMLButtonElement>('[data-journey-next]');
     const card = journey.querySelector<HTMLElement>('[data-flow-moment]');
+    const progress = journey.querySelector<HTMLElement>('[data-journey-progress]');
     if (!viewport || !previous || !next || !card) return;
     const update = () => {
       const maximum = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
       previous.disabled = viewport.scrollLeft <= 2;
       next.disabled = viewport.scrollLeft >= maximum - 2;
+      const visible = viewport.clientWidth / Math.max(viewport.scrollWidth, 1);
+      progress?.style.setProperty('--p', `${Math.min(100, (visible + (maximum ? viewport.scrollLeft / maximum : 1) * (1 - visible)) * 100)}%`);
     };
     const move = (direction: number) => {
       const track = viewport.querySelector<HTMLElement>('.home-journey-list');

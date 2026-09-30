@@ -19,6 +19,8 @@ import HomeThemeShowcase from './HomeThemeShowcase.astro';
 import HomeTourDialog from './HomeTourDialog.astro';
 import PlanCard from './PlanCard.astro';
 import ProductExplorer from './ProductExplorer.astro';
+import '@fontsource-variable/source-serif-4/wght-italic.css';
+import '../styles/home.css';
 const { locale } = Astro.props as { locale: Locale };
 const c = content[locale];
 const home = getHomeContract(locale);
@@ -32,6 +34,17 @@ const heroShortcutHrefs = [
   `${prefix}/demos/terrava/gestion/?vista=enquiries`,
 ] as const;
 const wa = logic2bContact(locale, 'commercial');
+const [heroTitleBefore = '', ...heroTitleRest] = c.hero.label.split(c.hero.accent);
+const heroTitle = { before: heroTitleBefore, after: heroTitleRest.join(c.hero.accent) };
+const heroFacts = locale === 'es'
+  ? [['12', 'direcciones web navegables'], ['3', 'planes, desde 49 €/mes'], ['1', 'equipo que lo implanta contigo']]
+  : [['12', 'navigable website directions'], ['3', 'plans, from €49/month'], ['1', 'team that sets it up with you']];
+const contactSteps = locale === 'es'
+  ? [['Revisamos tu contexto', 'Leemos lo que gestionas hoy y qué te frena.'], ['Te respondemos en un día laborable', 'Con una propuesta de plan y alcance orientativo.'], ['Te enseñamos una demostración', 'Pensada para tu tipo de alojamiento, sin compromiso.']]
+  : [['We review your context', 'We read what you manage today and what gets in the way.'], ['We reply within one business day', 'With a suggested plan and an indicative scope.'], ['We show you a demonstration', 'Tailored to your type of accommodation, with no commitment.']];
+const heroFloat = locale === 'es'
+  ? { enquiryLabel: 'Nueva solicitud', guests: '4 huéspedes', enquiryMeta: '21–24 ago · Casa Aira', weekLabel: 'Planning · semana', days: ['L', 'M', 'X', 'J', 'V', 'S', 'D'], ready: 'Llegada preparada · 15:00', demo: 'Demo' }
+  : { enquiryLabel: 'New enquiry', guests: '4 guests', enquiryMeta: '21–24 Aug · Casa Aira', weekLabel: 'Planning · week', days: ['M', 'T', 'W', 'T', 'F', 'S', 'S'], ready: 'Arrival ready · 15:00', demo: 'Demo' };
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -77,22 +90,38 @@ const serviceSchema = {
   },
 };
 ---
+<div class="lx" data-home-redesign>
 <section class="hero" data-hero data-hero-pause={c.hero.pause} data-hero-resume={c.hero.resume}>
+  <div class="lx-hero-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="hero-layout shell">
     <div class="hero-copy">
-      <p class="eyebrow">{c.hero.eyebrow}</p>
-      <h1 class="display hero-title">{c.hero.label}</h1>
-      <p>{c.hero.body}</p>
+      <p class="eyebrow lx-hero-kicker"><span class="lx-live-dot" aria-hidden="true"></span>{c.hero.eyebrow}</p>
+      <h1 class="display hero-title">{heroTitle.before}<em>{c.hero.accent}</em>{heroTitle.after}</h1>
+      <p class="lx-hero-body">{c.hero.body}</p>
       <div class="hero-start" aria-label={locale === 'es' ? 'Siguiente paso' : 'Next step'}>
-        <a class="pill" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/?sourcePath=${encodeURIComponent(`${prefix}/`)}`} data-track="cta_click" data-section="hero">{c.hero.primary} <span aria-hidden="true">→</span></a>
-        <a class="hero-start-link" data-estancia-tour-trigger data-tour-entry-step="enquiries" aria-haspopup="dialog" href={`${prefix}/${locale === 'es' ? 'recorrido' : 'journey'}/?step=enquiries&sourcePath=${encodeURIComponent(`${prefix}/`)}`}>{c.hero.secondary} <span aria-hidden="true">→</span></a>
+        <a class="pill lx-cta" href={`${prefix}/${locale === 'es' ? 'diagnostico' : 'assessment'}/?sourcePath=${encodeURIComponent(`${prefix}/`)}`} data-track="cta_click" data-section="hero"><span>{c.hero.primary}</span> <span class="lx-cta-orb" aria-hidden="true">→</span></a>
+        <a class="hero-start-link" data-estancia-tour-trigger data-tour-entry-step="enquiries" aria-haspopup="dialog" href={`${prefix}/${locale === 'es' ? 'recorrido' : 'journey'}/?step=enquiries&sourcePath=${encodeURIComponent(`${prefix}/`)}`}><span class="lx-play" aria-hidden="true"></span>{c.hero.secondary} <span aria-hidden="true">→</span></a>
       </div>
-      <p class="hero-note" data-evaluation-expectation>{c.hero.expectation}</p>
+      <p class="hero-note lx-hero-expectation" data-evaluation-expectation>{c.hero.expectation}</p>
+      <ul class="lx-hero-facts" aria-label={locale === 'es' ? 'Qué incluye' : 'What is included'}>
+        {heroFacts.map(([value, label]) => <li><strong>{value}</strong><span>{label}</span></li>)}
+      </ul>
       <details class="hero-direct-views"><summary>{locale === 'es' ? 'Ir a una vista concreta' : 'Go to a specific view'} <span aria-hidden="true">+</span></summary><ul class="hero-shortcuts" aria-label={locale === 'es' ? 'Accesos al recorrido' : 'Journey shortcuts'}>{c.hero.shortcuts.map((shortcut, index) => <li><a href={heroShortcutHrefs[index]} data-hero-shortcut>{shortcut} <span aria-hidden="true">↗</span></a></li>)}</ul></details>
-      <p class="hero-note">{c.hero.note}</p>
+      <p class="hero-note lx-hero-disclaimer">{c.hero.note}</p>
     </div>
     <aside id="webs" class="hero-case-gallery" aria-labelledby="hero-case-gallery-title">
       <div class="hero-case-gallery-top"><div><p class="eyebrow">{c.hero.rail}</p><h2 id="hero-case-gallery-title">{c.hero.railTitle}</h2></div><button type="button" class="hero-motion-toggle" data-hero-motion-toggle aria-pressed="false"><span data-hero-motion-label>{c.hero.pause}</span><span aria-hidden="true">Ⅱ</span></button></div>
+      <div class="lx-float lx-float-enquiry" aria-hidden="true">
+        <span class="lx-float-icon">✉</span>
+        <div><small>{heroFloat.enquiryLabel}</small><strong>Marina Costa · {heroFloat.guests}</strong><em>{heroFloat.enquiryMeta}</em></div>
+        <b>{heroFloat.demo}</b>
+      </div>
+      <div class="lx-float lx-float-week" aria-hidden="true">
+        <div class="lx-float-week-head"><small>{heroFloat.weekLabel}</small><b>{heroFloat.demo}</b></div>
+        <div class="lx-float-week-bars">{[46, 62, 58, 80, 92, 100, 74].map((height, index) => <i style={`--h:${height}%`} class={index === 5 ? 'is-peak' : undefined}></i>)}</div>
+        <div class="lx-float-week-days">{heroFloat.days.map((day) => <span>{day}</span>)}</div>
+      </div>
+      <div class="lx-float lx-float-ready" aria-hidden="true"><span>✓</span><div><strong>Casa Aira</strong><small>{heroFloat.ready}</small></div></div>
       <div class="hero-case-rails" data-hero-rail>
         <div class="hero-case-rail"><div class="hero-case-track hero-case-track-up">
           {[...heroConcepts, ...heroConcepts].map((concept, index) => index < heroConcepts.length ? <a class="hero-gallery-case" href={concept.demoHref} data-theme-preview-open={`theme-preview-${concept.slug}`} aria-haspopup="dialog" aria-label={`${concept.brand} · ${concept.planLabel}`} data-hero-proof={concept.status === 'canonical' ? concept.slug : undefined}><WebMiniature concept={concept} eager={index < 2} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong><span>{concept.verticalLabel}</span></div></a> : <div class="hero-gallery-case" aria-hidden="true" data-hero-case-clone={concept.status === 'canonical' ? '' : undefined}><WebMiniature concept={concept} /><div class="hero-miniature-caption"><strong>{concept.brand}</strong></div></div>)}
@@ -174,7 +203,7 @@ const serviceSchema = {
 
 <div data-contact-origin>
 <section id="contacto" class="section shell" aria-labelledby="contact-dialog-title">
-  <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 id="contact-dialog-title" class="heading" tabindex="-1" data-contact-dialog-title>{c.contact.title}</h2><p id="contact-dialog-description">{c.contact.body}</p><p><a href={wa.href} target="_blank" rel="noopener noreferrer">WhatsApp · {wa.phone} →</a></p></div>
+  <div class="contact-wrap"><div class="section-head"><p class="eyebrow">{c.contact.eyebrow}</p><h2 id="contact-dialog-title" class="heading" tabindex="-1" data-contact-dialog-title>{c.contact.title}</h2><p id="contact-dialog-description">{c.contact.body}</p><ol class="lx-next-steps" aria-label={locale === 'es' ? 'Qué ocurre después' : 'What happens next'}>{contactSteps.map(([title, text], index) => <li><span aria-hidden="true">0{index + 1}</span><div><strong>{title}</strong><small>{text}</small></div></li>)}</ol><p class="lx-contact-alt"><a href={wa.href} target="_blank" rel="noopener noreferrer"><span class="lx-wa-dot" aria-hidden="true"></span>WhatsApp · {wa.phone} →</a></p></div>
   <form class="lead-form" data-lead method="dialog" novalidate>
     <p class="sr-only" role="status" aria-live="polite" data-assessment-context-status></p>
     <p class="form-expectation wide">{c.contact.expectation}</p>
@@ -249,6 +278,7 @@ const serviceSchema = {
     <div data-contact-dialog-slot></div>
   </div>
 </dialog>
+</div>
 
 <script is:inline define:vars={{ locale, sending: c.contact.sending, ok: c.contact.ok, error: c.contact.error, timeout: c.contact.timeout, rateLimited: c.contact.rateLimited, retrying: c.contact.retrying, submit: c.contact.submit, meetingAvailable: c.contact.meetingAvailable, meetingFallback: c.contact.meetingFallback, leadRequestTimeoutMs, demoLabel: runtimeCopy.demoLabel, demoNote: runtimeCopy.demoNote, demoOutcome: runtimeCopy.demoOutcome, unavailableLabel: runtimeCopy.unavailableLabel, unavailableNote: runtimeCopy.unavailableNote, unavailableOutcome: runtimeCopy.unavailableOutcome, liveLabel: runtimeCopy.liveLabel, liveNote: runtimeCopy.liveNote }}>
   const form = document.querySelector('[data-lead]');
@@ -351,6 +381,31 @@ const serviceSchema = {
       else { delete form.dataset.submitting; if (button && !form.dataset.submitted) button.disabled = false; if (label) label.textContent = submit; }
     }
   });
+</script>
+
+<script>
+  const redesign = document.querySelector<HTMLElement>('[data-home-redesign]');
+  if (redesign && 'IntersectionObserver' in window && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+    const selectors = '.section-head, .home-journey-heading, .commercial-evidence article, .journey-track-heading, .product-explorer-tabs, .product-explorer-list, .connection-note, .connection-overview article, .plan-card, .pricing-note, .home-showcase-heading, .home-panel-heading, .activation-steps li, .contextual-guides header, .contextual-guide-list a, .faq-list, .home-closing-copy, .home-closing-visual';
+    const targets = [...redesign.querySelectorAll<HTMLElement>(selectors)].filter((element) => !element.closest('dialog, #contacto, .hero') && element.getBoundingClientRect().top > innerHeight);
+    const siblings = new Map<Element, number>();
+    for (const element of targets) {
+      const parent = element.parentElement ?? redesign;
+      const order = siblings.get(parent) ?? 0;
+      siblings.set(parent, order + 1);
+      element.style.setProperty('--reveal-delay', `${Math.min(order, 5) * 90}ms`);
+      element.dataset.reveal = '';
+    }
+    document.documentElement.classList.add('lx-js');
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('is-revealed');
+        observer.unobserve(entry.target);
+      }
+    }, { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
+    targets.forEach((element) => observer.observe(element));
+  }
 </script>
 
 <script>

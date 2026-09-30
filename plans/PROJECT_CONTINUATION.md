@@ -23,9 +23,37 @@ Petición explícita del usuario: rehacer el diseño con «un pelín» más de s
 
 **Consejo posterior:** marketing **corregido**, producto **correcto**, UX **corregido**, UI **corregido**, SEO **correcto**, frontend **correcto**, full stack **no aplica**, QA/accesibilidad/rendimiento/confianza **corregido**. Detalle en el informe.
 
-**Deuda/bloqueos:** comprensión humana del esquema, Lighthouse sin re-medir (carga local ~+12 %, home ~+200 ms), lector de pantalla humano. Integrado en `main` el 2026-09-30 por petición explícita del usuario; producción sigue sin autorizar y la rama `rediseno-home` queda sin integrar.
+**Deuda/bloqueos:** comprensión humana del esquema, Lighthouse sin re-medir (carga local ~+12 %, home ~+200 ms), lector de pantalla humano. Integrado en `main` el 2026-09-30 por petición explícita del usuario; producción sigue sin autorizar; `rediseno-home` también se integró después (ver su checkpoint): la home combina su hoja editorial `.lx` con la capa `system.css`, pendiente de armonizar.
 
 **Siguiente tarea exacta:** sin cambios de roadmap — **R3, primer caso de estancia en Terrava** (ver checkpoint R2). Al implementarlo, reutilizar los tokens `--l2b-*` y la capa `.dash` del gestor en lugar de nuevos estilos.
+
+## Checkpoint anterior · rediseño editorial de la home (rama `rediseno-home`, integrada en `main` el 2026-09-30) · 2026-09-26
+
+Rama `rediseno-home` creada desde `main` (`0b88bd0`) por petición explícita del usuario: pasada experta de UX/UI, producto y conversión sobre la home conservando esencia y estructura. **No integrado en `main`, no desplegado.** Este apartado no sustituye al checkpoint vigente de `main`; la siguiente tarea de `main` sigue siendo R3.
+
+**Entregado:** hoja `apps/site/src/styles/home.css` acotada bajo `.lx` (solo la carga `Landing.astro`); hero editorial con acento en cursiva real de Source Serif 4, CTA con orbe, fila de hechos verificables (12 direcciones, 3 planes desde 49 €/mes, un equipo), galería enmarcada con señales de producto flotantes marcadas «Demo» y `aria-hidden`; banda de sectores; cabeceras partidas; recorrido como línea temporal con barra de progreso; explorador con control segmentado y escenario de producto; diagrama de conexiones refinado; planes con tarjeta central invertida y checklist; carruseles de webs y gestor con acciones en píldora; acompañamiento en stepper; FAQ en dos columnas; contacto con «qué ocurre después» (tres pasos coherentes con la promesa existente de respuesta en un día laborable). Revelado al hacer scroll solo con transformaciones (nunca opacidad sobre texto) y desactivado con `prefers-reduced-motion`. Contrato visual documentado en `docs/DESIGN.md`.
+
+**Contratos preservados:** todos los `data-*`, orden de bloques, textos del h1 (ES/EN), CTAs y enlaces, formulario comercial único y su script, tour, popups y carruseles. Sin nuevas dependencias, sin nuevas promesas comerciales, sin clientes, integraciones ni resultados inventados; los datos de las tarjetas flotantes reutilizan los ficticios ya presentes en las demos.
+
+### Verificación
+
+- `astro check`: 118 archivos, 0 errores/avisos/hints. Vitest site: 31/31. ESLint site correcto. `pnpm build`: 7/7 tareas.
+- Axe WCAG 2.2 AA propio sobre el build estático: **0 violaciones** en `/` y `/en/` a 320/390/1024/1440 px, con y sin movimiento reducido; desbordamiento horizontal 0; contrato geométrico del hero (columnas, posición de galería, altura de raíl, casos dentro del raíl) correcto en todos los anchos.
+- E2E (máquina saturada, carga 30–70; timeout ampliado a 150 s): la pasada amplia inicial expiró por tiempo y no es concluyente. Se detectó y corrigió un fallo real: desbordamiento horizontal con texto al 200 % a 320/390 px (rejillas `1fr` y eyebrow `inline-flex` ampliando el ancho mínimo; ahora `minmax(0, 1fr)` y corte de palabra solo cuando no cabe). Tras la corrección, la re-ejecución enfocada (`home-tour-focus`, `hospitality-r1`, `hospitality-r2`, `home-exploration`, `ui-refinement`, `camp-parity`) llevaba **31 casos superados y 1 fallo de 32 ejecutados** cuando se interrumpió la sesión: `R1 contextual journey reaches one editable commercial form en` no llegó a hacer visible `[data-tour-assess="enquiries"]` en `/en/solutions/rural-stays/`, página que este cambio no modifica; pendiente de reproducir en una máquina descargada para descartar que sea por carga. Los 25 casos restantes no llegaron a ejecutarse.
+- QA visual por capturas headless de las 12 secciones a 1440, 1024 y 390 px; corregidos durante la revisión: salto del punto tras el acento, conectores discontinuos, acciones desalineadas, marco residual del bloque de acompañamiento, contraste de eyebrows sobre fondos oscuros y del tono arcilla en texto pequeño.
+
+### Revisión multidisciplinar
+
+- Marketing estratégico: **corregido** — propuesta de valor más legible, prueba verificable en el hero y reducción de incertidumbre antes de enviar; ningún uplift atribuido.
+- Diseño de producto: **correcto** — planes, capacidades y límites de demo intactos.
+- UX: **corregido** — jerarquía por sección, progreso visible en el recorrido y siguiente paso explícito en contacto.
+- UI/dirección visual: **corregido** — sistema editorial coherente con la paleta existente, un único acento en cursiva y elevación solo en interacción.
+- SEO: **correcto** — rutas, h1, metadatos y JSON-LD sin cambios.
+- Arquitectura frontend: **correcto** — CSS aislado bajo `.lx`, scripts progresivos sin dependencias.
+- Full stack: **correcto** — API, formulario e aislamiento de demos sin cambios.
+- QA/accesibilidad/rendimiento/confianza: **corregido** — Axe limpio y movimiento sin opacidad; pendiente la suite E2E completa en una máquina sin saturación.
+
+**Deuda:** ejecutar la suite E2E completa en CI o en una máquina descargada antes de integrar; revisión humana del rediseño; Lighthouse móvil tras integrar.
 
 ## Checkpoint anterior · R2 en producción · 2026-09-18
 
