@@ -27,6 +27,8 @@ Petición explícita del usuario: rehacer el diseño con «un pelín» más de s
 
 **Siguiente tarea exacta:** sin cambios de roadmap — **R3, primer caso de estancia en Terrava** (ver checkpoint R2). Al implementarlo, reutilizar los tokens `--l2b-*` y la capa `.dash` del gestor en lugar de nuevos estilos.
 
+**Integración de `rediseno-home` en `main` (2026-09-30).** Merge sin conflictos de código (solo este checkpoint). La E2E pendiente de esa rama detectó dos fallos reales, corregidos en `home.css`: `.lx .text-link { display: inline-flex }` hacía visible el enlace de reunión del recibo pese a `hidden` (se añade `.lx [hidden] { display: none !important }`), y el formulario desbordaba a 320 px con texto al 200 % (botón de envío y título del bloque de alojamiento ahora pueden partir línea). Verificación: `pnpm check` correcto; E2E de home 165/168 en primera pasada y, tras corregir, 134/134 (R1, R2, suite principal, accesibilidad, paridad y exploración). La home combina la hoja editorial `.lx` con la capa `system.css`; armonizar ambos lenguajes queda como deuda de diseño.
+
 ## Checkpoint anterior · rediseño editorial de la home (rama `rediseno-home`, integrada en `main` el 2026-09-30) · 2026-09-26
 
 Rama `rediseno-home` creada desde `main` (`0b88bd0`) por petición explícita del usuario: pasada experta de UX/UI, producto y conversión sobre la home conservando esencia y estructura. **No integrado en `main`, no desplegado.** Este apartado no sustituye al checkpoint vigente de `main`; la siguiente tarea de `main` sigue siendo R3.

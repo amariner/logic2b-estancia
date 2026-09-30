@@ -46,6 +46,9 @@
 }
 .lx .heading em, .lx .display em { font-style: italic; font-weight: 380; color: var(--lx-moss); }
 .lx .section-head > p:not(.eyebrow) { color: var(--lx-slate); font-size: 1.0625rem; line-height: 1.7; }
+/* Elements hidden by the page scripts (e.g. the receipt meeting link) must stay hidden despite display overrides. */
+.lx [hidden] { display: none !important; }
+
 .lx .text-link {
   display: inline-flex;
   align-items: center;
@@ -669,7 +672,10 @@
 .lx .lead-form { border-radius: 26px; padding: clamp(20px, 3vw, 34px); background: var(--lx-paper); box-shadow: 0 30px 60px -40px rgb(21 40 29 / .4), inset 0 0 0 1px var(--lx-line); }
 .lx .lead-form input, .lx .lead-form select, .lx .lead-form textarea { border-color: var(--lx-line); border-radius: 14px; background: #fbfaf6; transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease; }
 .lx .lead-form input:focus, .lx .lead-form select:focus, .lx .lead-form textarea:focus { border-color: var(--lx-moss); background: white; box-shadow: 0 0 0 4px rgb(76 112 80 / .14); }
-.lx .lead-form [data-lead-submit] { min-height: 56px; padding-left: 26px; }
+.lx .lead-form [data-lead-submit] { min-height: 56px; max-width: 100%; height: auto; padding-left: 26px; white-space: normal; text-align: left; overflow-wrap: anywhere; }
+@media (max-width: 420px) { .lx .lead-form [data-lead-submit] { gap: 8px; padding-left: 18px; } }
+.lx .lead-form .lead-disclosure > summary { flex-wrap: wrap; }
+.lx .lead-form .lead-disclosure-title { min-width: 0; overflow-wrap: anywhere; }
 
 /* ——— Scroll reveal (progressive enhancement) ——— */
 @media (prefers-reduced-motion: no-preference) {
