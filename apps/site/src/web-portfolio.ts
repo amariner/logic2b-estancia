@@ -99,13 +99,13 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       visualIntent: 'Calma, precisión y jerarquía para que la experiencia del huésped y las prioridades del equipo hablen el mismo idioma.',
       businessProblem: 'Un equipo hotelero necesita detectar llegadas, habitaciones e incidencias antes de que la urgencia marque el turno.',
       visibleLabel: 'Páginas y superficies visibles', visiblePages: ['Habitaciones', 'Servicios', 'Centro operativo', 'Revenue visual'],
-      boundaryLabel: 'Límite de la evidencia', boundary: 'Caso local con datos ficticios; no ejecuta tareas, canales, IA, pagos ni cambios en sistemas reales.',
+      boundaryLabel: 'Límite de la evidencia', boundary: 'Tareas y preparación ficticias en memoria; el selector simula roles sin autenticación real. Recargar reinicia el caso, sin notificaciones ni conexiones externas.',
       image: '/media/aurem/hero.webp', imageAlt: 'Escena visual ficticia de Aurem Hotel', demoHref: '/demos/aurem/', demoCta: 'Explorar web demo', assessmentCta: 'Evaluar este punto de partida',
       showcase: {
         eyebrow: 'La calma también se prepara', title: 'Todo dispuesto antes de llegar.', intro: 'Aurem une una presencia hotelera contemporánea con una lectura operativa explicable, sin convertir el escenario en automatización o inteligencia activa.',
         moments: [
           { number: '01', title: 'La experiencia empieza en la web', text: 'Habitaciones y servicios construyen una promesa visual sin disponibilidad, checkout o pago.' },
-          { number: '02', title: 'La operación hace visible la prioridad', text: 'Llegadas, preparación e incidencias se leen en fixtures locales y con responsabilidad humana.' },
+          { number: '02', title: 'La operación hace visible la prioridad', text: 'Salida, tarea aceptada, checklist e incidencia comparten estado en memoria. Otro rol revisa antes de dar la habitación por preparada.' },
           { number: '03', title: 'Inteligente no significa autónomo', text: 'Revenue y copiloto muestran fórmulas, fuentes y revisión; no predicen, ejecutan ni envían.' },
         ],
       },
@@ -305,13 +305,13 @@ const concepts: Record<Locale, readonly WebPortfolioConcept[]> = {
       visualIntent: 'Calm, precision and hierarchy let the guest experience and the team’s priorities speak the same language.',
       businessProblem: 'A hotel team needs to spot arrivals, rooms and incidents before urgency takes over the shift.',
       visibleLabel: 'Visible pages and surfaces', visiblePages: ['Rooms', 'Services', 'Operations centre', 'Visual revenue'],
-      boundaryLabel: 'Evidence boundary', boundary: 'Local case with fictitious data; it runs no task, channel, AI, payment or live system change.',
+      boundaryLabel: 'Evidence boundary', boundary: 'Fictitious tasks and preparation in memory; the selector simulates roles without real authentication. Reloading resets the case, with no notifications or external connections.',
       image: '/media/aurem/hero.webp', imageAlt: 'Fictional visual scene for Aurem Hotel', demoHref: '/en/demos/aurem/', demoCta: 'Explore website demo', assessmentCta: 'Assess this starting point',
       showcase: {
         eyebrow: 'Calm is prepared too', title: 'Everything ready before arrival.', intro: 'Aurem joins a contemporary hotel presence to an explainable operating view without presenting the scenario as active automation or intelligence.',
         moments: [
           { number: '01', title: 'The experience starts on the website', text: 'Rooms and services build a visual promise without availability, checkout or payment.' },
-          { number: '02', title: 'Operations make the priority visible', text: 'Arrivals, preparation and incidents are read from local fixtures with human ownership.' },
+          { number: '02', title: 'Operations make the priority visible', text: 'Departure, accepted task, checklist and incident share in-memory state. Another role reviews before marking the room ready.' },
           { number: '03', title: 'Intelligent does not mean autonomous', text: 'Revenue and copilot show formulas, sources and review; they predict, execute or send nothing.' },
         ],
       },

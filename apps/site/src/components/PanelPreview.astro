@@ -10,7 +10,7 @@ const labels: Record<PanelPreviewKind, string> = {
   enquiries: en ? 'Static preview of a fictitious Terrava enquiry and its alternative' : 'Vista previa estática de una solicitud ficticia de Terrava y su alternativa',
   planning: en ? 'Static preview of five of the eight Terrava homes over ten days' : 'Vista previa estática de cinco de las ocho casas de Terrava durante diez días',
   'guests-arrivals': en ? 'Static preview of sample guest context in Terrava' : 'Vista previa estática del contexto de huéspedes de muestra en Terrava',
-  preparation: en ? 'Fictitious Aurem room preparation checklist in read-only mode' : 'Checklist ficticio de preparación de habitación de Aurem en solo lectura',
+  preparation: en ? 'Static preview of a fictitious room preparation checklist in Aurem' : 'Vista previa estática de un checklist ficticio de preparación en Aurem',
   'operations-revenue': en ? 'Explainable fictitious Aurem revenue scenario with forecasting unavailable' : 'Escenario ficticio explicable de ingresos de Aurem con previsión no disponible',
   copilot: en ? 'Fictitious Aurem copilot draft with sources and external delivery blocked' : 'Borrador ficticio del copiloto de Aurem con fuentes y envío externo bloqueado',
 };
@@ -53,11 +53,11 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
       </div>
     ) : kind === 'preparation' ? (
       <div class="panel-preview-content panel-preview-preparation">
-        <header><div><span>{en ? 'Housekeeping' : 'Limpieza'}</span><strong>408 · Terrace</strong><small>{en ? 'Departure 11:08 · arrival 15:00' : 'Salida 11:08 · llegada 15:00'}</small></div><b>{en ? 'Pending' : 'Pendiente'}</b></header>
+        <header><div><span>{en ? 'Housekeeping' : 'Limpieza'}</span><strong>408 · {en ? 'Preparation' : 'Preparación'}</strong><small>{en ? 'Previous departure pending · arrival today' : 'Salida previa pendiente · llegada hoy'}</small></div><b>{en ? 'Pending' : 'Pendiente'}</b></header>
         <div class="panel-preview-checklist">
-          <p><i aria-hidden="true"></i><span><strong>{en ? 'Linen and bathroom' : 'Ropa y baño'}</strong><small>{en ? 'Housekeeping review' : 'Revisión de limpieza'}</small></span></p>
-          <p><i aria-hidden="true"></i><span><strong>{en ? 'Surfaces and minibar' : 'Superficies y minibar'}</strong><small>{en ? 'Housekeeping review' : 'Revisión de limpieza'}</small></span></p>
-          <p><i aria-hidden="true"></i><span><strong>{en ? 'Reception validation' : 'Validación de recepción'}</strong><small>{en ? 'Human final check' : 'Comprobación humana final'}</small></span></p>
+          <p><i aria-hidden="true"></i><span><strong>{en ? 'Bed linen and towels' : 'Ropa de cama y toallas'}</strong><small>{en ? 'Housekeeping review' : 'Revisión de limpieza'}</small></span></p>
+          <p><i aria-hidden="true"></i><span><strong>{en ? 'Bathroom cleaned and checked' : 'Baño limpio y revisado'}</strong><small>{en ? 'Housekeeping review' : 'Revisión de limpieza'}</small></span></p>
+          <p><i aria-hidden="true"></i><span><strong>{en ? 'Supplies and final check' : 'Reposición y revisión final'}</strong><small>{en ? 'Then another role reviews' : 'Después revisa otro rol'}</small></span></p>
         </div>
       </div>
     ) : kind === 'operations-revenue' ? (

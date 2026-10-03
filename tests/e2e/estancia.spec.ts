@@ -603,7 +603,7 @@ test('all ten demo routes are non-operational and the landing panels collect no 
   for (const path of demoDashboardPaths) {
     const response = await page.goto(path);
     expect(response?.headers()['content-security-policy']).toContain("form-action 'none'");
-    await expect(page.locator('.demo-banner')).toContainText(path.includes('terrava') ? /solo en memoria|in memory only/i : /solo lectura|read-only/i);
+    await expect(page.locator('.demo-banner')).toContainText(/solo en memoria|in memory only/i);
     await expect(page.locator('form, dialog')).toHaveCount(0);
     await expect(page.locator('[name="name"], [name="email"], [type="email"], [type="tel"], textarea')).toHaveCount(0);
   }
@@ -1205,7 +1205,8 @@ test('capability evidence and its boundary remain readable inside the optional f
   await page.locator('[data-solution-capabilities] > summary').click();
   const capability = page.locator('[data-capability="operations-centre"]');
   await expect(capability.getByRole('link', { name: /Ver evidencia visual en Aurem/ })).toBeVisible();
-  await expect(capability).toContainText('No toma decisiones ni ejecuta acciones de forma autónoma');
+  await expect(capability).toContainText('Cambios solo en memoria, con deshacer y reinicio.');
+  await expect(capability).toContainText('No ejecuta operaciones reales ni sincroniza equipos o dispositivos');
   await expect(capability.locator('.capability-boundary')).toBeVisible();
   for (const [path, question, boundary] of [
     ['/soluciones/hoteles/', '¿La IA toma decisiones o envía mensajes?', 'no hay IA conectada ni se envían mensajes'],
@@ -1652,10 +1653,10 @@ test('dashboard filters are ephemeral and reload restores the fixture', async ({
 
   await expect(page.getByLabel('Rol')).toHaveValue('direction');
   await expect(page.locator('.dash-content')).toContainText('Elena Rossi');
-  await expect(page.locator('.demo-banner')).toContainText('Panel de solo lectura con datos ficticios');
+  await expect(page.locator('.demo-banner')).toContainText('Preparación ficticia e interactiva, solo en memoria');
 });
 
-test('Aurem guided journey connects read-only evidence to the assessment', async ({ page }) => {
+test('Aurem guided journey connects local preparation evidence to the assessment', async ({ page }) => {
   const externalWrites: string[] = [];
   page.on('request', (request) => {
     if (operationalMethods.has(request.method())) externalWrites.push(request.url());
@@ -1939,7 +1940,7 @@ test('Aurem supervised copilot remains localized and blocked in English', async 
   expect(externalWrites).toEqual([]);
 });
 
-test('Aurem cleaning and maintenance expose fixed states without operational controls', async ({ page }) => {
+test('Aurem cleaning and maintenance expose connected local preparation with explicit review guards', async ({ page }) => {
   const externalWrites: string[] = [];
   page.on('request', (request) => {
     if (operationalMethods.has(request.method())) externalWrites.push(request.url());
@@ -1947,14 +1948,19 @@ test('Aurem cleaning and maintenance expose fixed states without operational con
 
   await page.goto('/demos/aurem/gestion/?vista=cleaning');
   await expect(page.getByRole('heading', { level: 1, name: 'Limpieza' })).toBeVisible();
-  await expect(page.getByText('Checklist de ejemplo · no asigna, valida ni actualiza habitaciones')).toBeVisible();
-  await expect(page.locator('.dash-content .actions button')).toHaveCount(0);
+  await expect(page.locator('[data-operations-workspace]')).toBeVisible();
+  await expect(page.locator('[data-operation-task]')).toHaveCount(3);
+  await page.locator('[data-operation-task="PREP-408"]').click();
+  const preparation = page.locator('[data-operation-detail="PREP-408"]');
+  await expect(preparation).toHaveAttribute('data-task-readiness', 'blocked');
+  await expect(preparation.getByRole('button', { name: 'Confirmar salida', exact: true })).toBeEnabled();
+  await expect(preparation.getByRole('button', { name: 'Validar habitación preparada', exact: true })).toBeDisabled();
 
   await page.getByRole('button', { name: 'Mantenimiento', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Mantenimiento' })).toBeVisible();
-  await expect(page.getByText('Timeline ficticio · no asigna ni resuelve incidencias')).toBeVisible();
-  await expect(page.getByText('No modifica inventario ni comunica con proveedores.')).toBeVisible();
-  await expect(page.locator('.dash-content .actions button')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'La preparación no tiene incidencias registradas', exact: true })).toBeVisible();
+  await expect(page.locator('[data-operations-workspace]')).toContainText('No se envían avisos, no se actualiza un hotel real y no se guardan datos.');
+  await expect(page.locator('input[type="file"]')).toHaveCount(0);
   expect(externalWrites).toEqual([]);
 });
 
@@ -1971,5 +1977,7 @@ test('operational notifications only navigate to the related fixture', async ({ 
   await notifications.getByRole('button', { name: /Habitación 408 requiere atención/ }).click();
   await expect(page.getByRole('heading', { name: 'Limpieza', exact: true })).toBeVisible();
   await expect(page).toHaveURL(/vista=cleaning/);
+  await expect(page.locator('[data-operation-detail="PREP-408"]')).toBeVisible();
+  await expect(page.locator('[data-operation-detail="PREP-408"]').getByRole('heading', { level: 2 })).toBeFocused();
   expect(externalWrites).toEqual([]);
 });

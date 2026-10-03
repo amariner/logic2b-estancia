@@ -438,12 +438,15 @@ blockquote { margin: 20px 0; border-left: 2px solid var(--ink); padding: 4px 0 4
 .dash .utility-results button strong { font-weight: 500; }
 .dash .utility-results button small { color: var(--slate); font-size: .7rem; line-height: 1.5; }
 .dash .notice-list > p { padding: 20px; color: var(--slate); font-size: .85rem; line-height: 1.6; }
-:where(.dash[data-scenario='terrava']) .demo-conversion { position: static; display: flex; width: fit-content; margin: 0 24px 24px auto; }
+:where(.dash) .demo-conversion { position: static; display: flex; width: fit-content; margin: 0 24px 24px auto; }
 @media (max-width: 620px) {
   .dash[data-scenario='terrava'] .property-select { display: block; min-width: 0; flex: 1; margin-right: 0; }
   .dash[data-scenario='terrava'] .property-select select { width: 100%; max-width: 100%; }
   .dash[data-scenario='terrava'] .dash-top > button { flex-shrink: 0; }
   .dash[data-scenario='terrava'] .dash-top:has(.role-select) .property-select { display: none; }
+  .dash[data-scenario='aurem'] .role-select { display: block; min-width: 0; flex: 1; margin-right: 0; }
+  .dash[data-scenario='aurem'] .role-select select { width: 100%; max-width: 100%; min-height: 44px; }
+  .dash[data-scenario='aurem'] .dash-top > button { flex-shrink: 0; }
 }
 @media (max-width: 900px) {
   .dash .sidebar.open .dash-brand { padding-right: 36px; }

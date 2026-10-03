@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { TerravaWorkspace, type TerravaView } from "./StayWorkspace";
 import { StayReport } from "./StayReport";
+import { AuremOperations, type AuremOperationsView } from "./OperationsWorkspace";
+import { createOperationsWorkspace, taskReadiness, type OperationsWorkspace } from "./operations";
 import { checkAvailability, createStayWorkspace, properties as stayProperties, selectStays, STAY_DEMO_DATE } from "./stays";
 import {
   Activity,
@@ -61,7 +63,7 @@ type View =
   | "reports"
   | "settings";
 type Utility = "search" | "notifications" | null;
-type Notice = { title: string; detail: string; view: View; urgent?: boolean; enquiryId?: string };
+type Notice = { title: string; detail: string; view: View; urgent?: boolean; enquiryId?: string; taskId?: string };
 type RevenueMetric = "revenue" | "occupancy" | "adr" | "revpar";
 type AutomationRuleId = "arrival" | "turnover" | "incident";
 
@@ -293,8 +295,27 @@ export function DashboardDemo({
   scenario: Scenario;
   locale?: Locale;
 }) {
-  const { state, patch } = useDemoState(scenario);
+  const { state: demoState, patch } = useDemoState(scenario);
   const [workspace, setWorkspace] = useState(createStayWorkspace);
+  const [operations, setOperations] = useState(createOperationsWorkspace);
+  const [operationsChanged, setOperationsChanged] = useState(false);
+  const [requestedTask, setRequestedTask] = useState<{ id: string; key: number }>();
+  const featuredTask = operations.tasks.find((task) => task.id === "PREP-408")!;
+  const featuredStay = operations.stays.find((stay) => stay.id === featuredTask.stayId)!;
+  const readiness = taskReadiness(operations, featuredTask.id)!;
+  // The shared operation is authoritative; legacy sources receive a derived view.
+  const state: DemoState = scenario === "aurem" ? {
+    ...demoState,
+    cleaning: readiness.status === "ready" ? "ready" : readiness.status === "review" ? "review" : featuredTask.status === "accepted" ? "in_progress" : "pending",
+    arrivalRisk: readiness.status === "ready" ? "resolved" : featuredTask.departureConfirmed ? "coordinating" : "detected",
+    maintenance: operations.incidents.find((incident) => incident.id === featuredTask.incidentId)?.status === "resolved" ? "resolved" : "new",
+    stay: { name: featuredStay.guestName, email: featuredStay.email, from: featuredStay.startDate, to: featuredStay.endDate, guests: featuredStay.guests, amount: featuredStay.quote.totalCents / 100, source: "fixture" },
+  } : demoState;
+  const updateOperations = (next: OperationsWorkspace) => {
+    setOperations(next);
+    setOperationsChanged(true);
+    patch({ aiReview: "draft", completedFlows: demoState.completedFlows.filter((flow) => flow !== "supervised-ai") });
+  };
   const [requestedStay, setRequestedStay] = useState<{ id: string; key: number }>();
   const [requestedEnquiry, setRequestedEnquiry] = useState<{ id: string; key: number }>();
   const [view, setView] = useState<View>("home");
@@ -322,6 +343,7 @@ export function DashboardDemo({
   const go = (next: View, focusHeading = true) => {
     if (next !== "bookings") setRequestedStay(undefined);
     if (next !== "enquiries") setRequestedEnquiry(undefined);
+    if (next !== "cleaning") setRequestedTask(undefined);
     setView(next);
     setMobile(false);
     setUtility(null);
@@ -432,7 +454,20 @@ export function DashboardDemo({
       terravaNotices.push({ title: unit.name, detail: locale === "es" ? "Fuera de servicio · revisa el planning ficticio." : "Out of service · review the fictitious planning.", view: "planning", urgent: true });
     }
   }
-  const notices = scenario === "terrava" ? terravaNotices : noticesFor(scenario, state, locale);
+  const operationNotices: Notice[] = operations.tasks
+    .filter((task) => taskReadiness(operations, task.id)?.status !== "ready")
+    .map((task) => {
+      const preparation = taskReadiness(operations, task.id)!;
+      const stay = operations.stays.find((item) => item.id === task.stayId)!;
+      return {
+        title: locale === "es" ? `Habitación ${task.unitId} requiere atención` : `Room ${task.unitId} needs attention`,
+        detail: `${stay.guestName} · ${task.id} · ${preparation.status === "review" ? locale === "es" ? "Pendiente de revisión" : "Awaiting review" : preparation.reason === "incident" ? locale === "es" ? "Incidencia abierta" : "Open incident" : locale === "es" ? "Preparación pendiente" : "Preparation pending"}`,
+        view: "cleaning",
+        taskId: task.id,
+        urgent: preparation.status === "blocked",
+      };
+    });
+  const notices = scenario === "terrava" ? terravaNotices : [...operationNotices, ...noticesFor(scenario, state, locale).filter((notice) => notice.view === "channels")];
   const normalizedQuery = searchKey(query);
   const searchResults = availableViews.filter((item) =>
     searchKey(labelFor(scenario, locale, item)).includes(normalizedQuery),
@@ -445,6 +480,12 @@ export function DashboardDemo({
   const enquirySearchResults = scenario === "terrava" && normalizedQuery
     ? workspace.enquiries.filter((enquiry) => enquiry.status === "new" && scopedUnits.some((unit) => unit.id === enquiry.preferredUnitId)
       && searchKey(`${enquiry.id} ${enquiry.guestName} ${workspace.units.find((unit) => unit.id === enquiry.preferredUnitId)?.name ?? ""}`).includes(normalizedQuery))
+    : [];
+  const operationSearchResults = scenario === "aurem" && normalizedQuery
+    ? operations.tasks.filter((task) => {
+      const stay = operations.stays.find((item) => item.id === task.stayId)!;
+      return searchKey(`${task.id} ${task.unitId} ${stay.id} ${stay.guestName}`).includes(normalizedQuery);
+    })
     : [];
 
   const tourSteps: TourStep[] =
@@ -525,8 +566,8 @@ export function DashboardDemo({
                 : "Cleaning prepares room 408",
             description:
               locale === "es"
-                ? "La vista representa cómo los roles ordenarían la preparación y la revisión, sin ejecutar tareas."
-                : "The view represents how roles would structure preparation and review without executing tasks.",
+                ? "Acepta una tarea de muestra, completa el checklist y pasa a revisión con otro rol. Los cambios solo existen durante esta visita."
+                : "Accept a sample task, complete the checklist and hand over to another role for review. Changes only exist during this visit.",
             evidence:
               locale === "es"
                 ? "Permisos de muestra · sin avisos enviados"
@@ -813,8 +854,8 @@ export function DashboardDemo({
                   ? "Estancias ficticias e interactivas, solo en memoria. Los cambios se reinician al recargar; no hay reservas, cobros, mensajes ni conexiones reales."
                   : "Interactive fictitious stays, in memory only. Changes reset on reload; there are no real bookings, payments, messages or connections."
               : locale === "es"
-                ? "Panel de solo lectura con datos ficticios. No da de alta alojamientos ni ejecuta cobros, reservas, mensajes, publicaciones o sincronizaciones."
-                : "Read-only panel with fictitious data. It does not register stays or perform payments, bookings, messages, publishing or synchronisation."}
+                ? "Preparación ficticia e interactiva, solo en memoria. Roles simulados y cambios que se reinician al recargar; no hay reservas, cobros, mensajes ni sincronizaciones reales."
+                : "Interactive fictitious preparation, in memory only. Simulated roles and changes that reset on reload; there are no real bookings, payments, messages or synchronisations."}
           </span>
         </div>
         <section className="dash-content">
@@ -852,7 +893,23 @@ export function DashboardDemo({
               </button>
             </div>
           </div>
-          {scenario === "terrava" && ["home", "enquiries", "planning", "bookings", "guests"].includes(view) ? (
+          {scenario === "aurem" && view === "automation" && operationsChanged && state.aiDraft !== null && state.aiReview !== "reviewed" && (
+            <div className="integration-note" data-preparation-source-change role="note">
+              {locale === "es" ? "La preparación ha cambiado. Tu borrador se conserva; contrástalo con las fuentes actuales y vuelve a revisarlo." : "Preparation has changed. Your draft is preserved; check it against the current sources and review it again."}
+            </div>
+          )}
+          {scenario === "aurem" && ["home", "control", "cleaning", "maintenance", "planning", "bookings", "guests"].includes(view) ? (
+            <AuremOperations
+              locale={locale}
+              view={view as AuremOperationsView}
+              role={state.role}
+              workspace={operations}
+              onChange={updateOperations}
+              go={go}
+              onRoleChange={(role) => patch({ role })}
+              requestedTask={requestedTask}
+            />
+          ) : scenario === "terrava" && ["home", "enquiries", "planning", "bookings", "guests"].includes(view) ? (
             <TerravaWorkspace
               locale={locale}
               view={view as TerravaView}
@@ -1103,9 +1160,7 @@ export function DashboardDemo({
                 <label>
                   <Search size={17} />
                   <span className="sr-only">
-                    {scenario === "terrava"
-                      ? locale === "es" ? "Buscar sección, huésped o estancia" : "Search section, guest or stay"
-                      : locale === "es" ? "Buscar una sección" : "Search a section"}
+                    {locale === "es" ? "Buscar sección, huésped o estancia" : "Search section, guest or stay"}
                   </span>
                   <input
                     autoFocus
@@ -1115,8 +1170,8 @@ export function DashboardDemo({
                       scenario === "terrava"
                         ? locale === "es" ? "Nombre, referencia, casa o sección…" : "Name, reference, home or section…"
                         : locale === "es"
-                        ? "Reservas, limpieza, informes…"
-                        : "Bookings, cleaning, reports…"
+                        ? "Habitación, huésped, tarea o sección…"
+                        : "Room, guest, task or section…"
                     }
                   />
                 </label>
@@ -1151,7 +1206,17 @@ export function DashboardDemo({
                       <ChevronRight size={16} />
                     </button>
                   ))}
-                  {searchResults.length === 0 && staySearchResults.length === 0 && enquirySearchResults.length === 0 && (
+                  {operationSearchResults.map((task) => (
+                    <button type="button" key={task.id} onClick={() => {
+                      setRequestedTask((previous) => ({ id: task.id, key: (previous?.key ?? 0) + 1 }));
+                      go("cleaning", false);
+                    }}>
+                      <ClipboardCheck size={18} />
+                      <span><strong>{operations.stays.find((stay) => stay.id === task.stayId)?.guestName}</strong><small>{task.stayId} · {locale === "es" ? "Habitación" : "Room"} {task.unitId} · {task.id}</small></span>
+                      <ChevronRight size={16} />
+                    </button>
+                  ))}
+                  {searchResults.length === 0 && staySearchResults.length === 0 && enquirySearchResults.length === 0 && operationSearchResults.length === 0 && (
                     <p>
                       {locale === "es"
                         ? "No hay resultados con estos términos y el filtro actual."
@@ -1174,7 +1239,8 @@ export function DashboardDemo({
                     key={`${notice.view}-${notice.title}`}
                     onClick={() => {
                       if (notice.enquiryId) setRequestedEnquiry((previous) => ({ id: notice.enquiryId!, key: (previous?.key ?? 0) + 1 }));
-                      go(notice.view);
+                      if (notice.taskId) setRequestedTask((previous) => ({ id: notice.taskId!, key: (previous?.key ?? 0) + 1 }));
+                      go(notice.view, !notice.taskId);
                     }}
                   >
                     <i className={notice.urgent ? "urgent" : ""}></i>
@@ -2431,8 +2497,8 @@ function Automations({
 
 function Automation({ locale, state, patch }: { locale: Locale; state: DemoState; patch: (next: Partial<DemoState>) => void }) {
   const generated = locale === "es"
-    ? `Hola ${firstName(state.stay.name)}, tu habitación Terrace estará lista a partir de las 15:00. Hemos preparado el pre-check-in, pero todavía necesitamos que confirmes tu hora de llegada.`
-    : `Hello ${firstName(state.stay.name)}, your Terrace room will be ready from 15:00. We prepared pre-check-in, but still need you to confirm your arrival time.`;
+    ? `Hola ${firstName(state.stay.name)}, tu llegada de muestra está prevista a las 15:00. ${state.cleaning === "ready" ? "La habitación 408 ha superado la revisión en este escenario ficticio." : "La habitación 408 sigue pendiente de preparación y revisión; Recepción debe comprobar su disponibilidad antes de confirmar una hora."} Este borrador local requiere revisión humana y no se enviará.`
+    : `Hello ${firstName(state.stay.name)}, your sample arrival is expected at 15:00. ${state.cleaning === "ready" ? "Room 408 has passed review in this fictitious scenario." : "Room 408 still needs preparation and review; Reception must check its readiness before confirming a time."} This local draft requires human review and will not be sent.`;
   const saved = state.aiDraft ?? generated;
   const [draft, setDraft] = useState(saved);
   useEffect(() => setDraft(saved), [saved]);
@@ -2649,8 +2715,8 @@ function Reports({
           <strong>{locale === "es" ? "Escenario local explicable" : "Explainable local scenario"}</strong>
           <span>
             {locale === "es"
-              ? "Todas las cifras se calculan con 96 habitaciones ficticias durante 28 días. No proceden de PMS, canales, contabilidad ni pagos reales."
-              : "Every figure is calculated from 96 fictitious rooms over 28 days. Nothing comes from a live PMS, channel, accounting or payment provider."}
+              ? "Todas las cifras se calculan con 96 habitaciones ficticias durante 28 días. Es un ejemplo matemático independiente de los tres casos de preparación; las tareas locales no modifican estas cifras. No proceden de PMS, canales, contabilidad ni pagos reales."
+              : "Every figure is calculated from 96 fictitious rooms over 28 days. This is a separate mathematical example from the three preparation cases; local tasks do not change these figures. Nothing comes from a live PMS, channel, accounting or payment provider."}
           </span>
         </div>
         <div className="revenue-metrics" aria-label={locale === "es" ? "Indicadores de ingresos simulados" : "Simulated revenue indicators"}>
