@@ -1,0 +1,190 @@
+{
+  "results": [
+    {
+      "name": "home-1440",
+      "width": 1440,
+      "scroll": 1440,
+      "height": 1359,
+      "rootFont": "16px",
+      "role": {
+        "x": 1173.296875,
+        "y": 13.5,
+        "width": 108,
+        "height": 38,
+        "top": 13.5,
+        "right": 1281.296875,
+        "bottom": 51.5,
+        "left": 1173.296875
+      },
+      "overflow": [],
+      "unexpected": []
+    },
+    {
+      "name": "planning-1440",
+      "width": 1440,
+      "scroll": 1440,
+      "height": 1044,
+      "rootFont": "16px",
+      "role": {
+        "x": 1173.296875,
+        "y": 13.5,
+        "width": 108,
+        "height": 38,
+        "top": 13.5,
+        "right": 1281.296875,
+        "bottom": 51.5,
+        "left": 1173.296875
+      },
+      "overflow": [],
+      "unexpected": []
+    },
+    {
+      "name": "cleaning-390",
+      "width": 390,
+      "scroll": 390,
+      "height": 1669,
+      "rootFont": "16px",
+      "role": {
+        "x": 60,
+        "y": 10.5,
+        "width": 270,
+        "height": 44,
+        "top": 10.5,
+        "right": 330,
+        "bottom": 54.5,
+        "left": 60
+      },
+      "overflow": [],
+      "unexpected": []
+    },
+    {
+      "name": "cleaning-detail-390",
+      "width": 390,
+      "scroll": 390,
+      "height": 3453,
+      "rootFont": "16px",
+      "role": {
+        "x": 60,
+        "y": 10.5,
+        "width": 270,
+        "height": 44,
+        "top": 10.5,
+        "right": 330,
+        "bottom": 54.5,
+        "left": 60
+      },
+      "overflow": [],
+      "unexpected": []
+    },
+    {
+      "name": "risk-408-390",
+      "width": 390,
+      "scroll": 390,
+      "height": 4337,
+      "rootFont": "16px",
+      "role": {
+        "x": 60,
+        "y": 10.5,
+        "width": 270,
+        "height": 44,
+        "top": 10.5,
+        "right": 330,
+        "bottom": 54.5,
+        "left": 60
+      },
+      "overflow": [],
+      "unexpected": []
+    },
+    {
+      "name": "risk-408-320-text200",
+      "width": 320,
+      "scroll": 320,
+      "height": 9875,
+      "rootFont": "32px",
+      "role": {
+        "x": 60,
+        "y": 10,
+        "width": 200,
+        "height": 45,
+        "top": 10,
+        "right": 260,
+        "bottom": 55,
+        "left": 60
+      },
+      "overflow": [],
+      "unexpected": []
+    }
+  ],
+  "focus": [
+    {
+      "action": "open PREP-312",
+      "id": "ops-detail-title",
+      "text": "Habitación 312 · Hugo Vidal",
+      "top": 551.828125,
+      "scrollY": 953
+    },
+    {
+      "action": "departure PREP-312",
+      "id": "ops-assignment-heading",
+      "text": "02 · Persona responsable",
+      "top": 638.84375,
+      "scrollY": 1621
+    },
+    {
+      "action": "assign PREP-312",
+      "id": "ops-assignment-heading",
+      "text": "02 · Persona responsable",
+      "top": 638.84375,
+      "scrollY": 1621
+    },
+    {
+      "action": "accept PREP-312",
+      "id": "ops-checklist-heading",
+      "text": "03 · Checklist de preparación",
+      "top": 560.140625,
+      "scrollY": 1652
+    },
+    {
+      "action": "check linen PREP-312",
+      "id": "",
+      "text": "",
+      "top": 608.140625,
+      "scrollY": 1652
+    },
+    {
+      "action": "open PREP-408",
+      "id": "ops-detail-title",
+      "text": "Habitación 408 · Elena Rossi",
+      "top": 551.828125,
+      "scrollY": 953
+    },
+    {
+      "action": "departure PREP-408",
+      "id": "ops-assignment-heading",
+      "text": "02 · Persona responsable",
+      "top": 638.84375,
+      "scrollY": 1621
+    },
+    {
+      "action": "assign PREP-408",
+      "id": "ops-assignment-heading",
+      "text": "02 · Persona responsable",
+      "top": 638.84375,
+      "scrollY": 1621
+    },
+    {
+      "action": "accept PREP-408",
+      "id": "ops-checklist-heading",
+      "text": "03 · Checklist de preparación",
+      "top": 560.140625,
+      "scrollY": 1652
+    },
+    {
+      "action": "report PREP-408",
+      "id": "ops-incident-title",
+      "text": "Incidencia de muestra",
+      "top": 240.109375,
+      "scrollY": 2747
+    }
+  ]
+}

@@ -2,7 +2,51 @@
 
 Última actualización: 2026-10-04
 
-## Checkpoint vigente · R3 cerrado · Gestor de estancias ficticias · 2026-10-04
+## Checkpoint vigente · R4, preparación y roles de Aurem · 2026-10-04
+
+**R4 implementado y verificado. Siguiente incremento: R5.** Continúa la petición de pulir el gestor con fixtures. Base `3e36183929a4a96a6a51925baae855a9981de818`, rama de entorno `work`, inicialmente limpia y coincidente con `origin/main`. Producto: `13c2de9b515272302f623db7d8d96cd42e1631c7`. Este checkpoint prevalece sobre los históricos inferiores. Sin despliegue de producción.
+
+**Reconciliación:** R3 estaba terminado y no se repite. La siguiente brecha era la preparación de Aurem, antes de lectura. El [Quality de R3](https://github.com/amariner/logic2b-estancia/actions/runs/37159965979) seguía `in_progress`, sin conclusión, en la última consulta de esta sesión; no se presenta como aprobado. Se mantiene separada la evidencia local de la CI remota.
+
+**Entregado:**
+
+- Tres llegadas ficticias comparten preparación entre Inicio, Centro operativo, Limpieza, Mantenimiento, Planning, Reservas y Huéspedes. Tipos, noches e importes reutilizan el contrato R3. La 408 permite practicar una incidencia; la 312, el flujo normal; la 205 parte preparada.
+- Salida previa confirmada por Recepción o Dirección; asignación por Dirección; aceptación o rechazo por la persona de Limpieza asignada; tres comprobaciones y solicitud de revisión; aprobación o devolución por Recepción o Dirección. Reasignar reinicia aceptación y checklist.
+- Incidencia de baño preparada, sin cámara ni subida de archivos. Abrirla bloquea la llegada y la revisión; resolverla no prepara automáticamente la habitación. Se exige completar limpieza y una nueva revisión, también si la incidencia aparece después de validar.
+- Hoy, pendientes, incidencias y tareas propias; roles visibles en móvil. Causa y siguiente responsable, historial de la visita, deshacer del último cambio y reinicio. Búsqueda y avisos abren la tarea exacta con foco recuperable; cambiar de viewport conserva el contexto.
+- Copiloto con preparación derivada, sin promesa de disponibilidad anticipada. Los cambios invalidan su revisión y conservan el borrador manual guardado. El informe histórico de 96 habitaciones declara que su dataset es independiente de los tres casos de preparación.
+- Guías, capacidades, fichas, previews y metadescripciones ES/EN reconciliados con la nueva interacción. Nivora/Básico sigue sin dashboard; Terrava/Gestión conserva R3.
+
+**Límites:** solo memoria, identidades y responsabilidades simuladas; no autenticación ni permisos de producción. Cero HTTP writes, API, WebSockets, conexiones externas o escrituras de Web Storage/IndexedDB en los recorridos R4. Recargar restaura los fixtures. No se ejecutan reservas, cobros, mensajes, tareas reales o sincronización entre dispositivos. CSP, sandbox, noindex, API y captación comercial única conservados; sin dependencias nuevas.
+
+**Consejo previo:** marketing exigió una tarea demostrable con límites veraces; producto separó ejecución, incidencia y revisión; UX pidió causa, siguiente responsable, reversión y foco estable; UI priorizó trabajo móvil y estados expandidos; SEO conservó intención/rutas/noindex; frontend derivó las fuentes de una colección; full stack verificó actor/transición sin persistencia/red; QA cubrió flujo normal, bloqueo, devolución, reasignación, recuperación, roles y aislamiento.
+
+### Verificación R4
+
+- `pnpm check` definitivo correcto: **257 contratos** — dominio 20, dashboard 72 (27 nuevos de preparación), web 2, site 35, Worker 95 y scripts 33. Lint 7/7, 6 cacheados; typecheck/test/build 21/21, 12 cacheados. No se afirma ejecución forzada de tareas cacheadas.
+- **76 casos E2E únicos acreditados entre ejecuciones**, no una única pasada 76/76: amplia 53/55, foco corregido 2/2, contenido 20/21 y límite de capacidad actualizado 1/1. Incluyen 18 R4, 21 R3, 8 de aislamiento demo, 7 de UI/previews, 1 de foco del tour y 21 de contenido/navegación. Las repeticiones no se cuentan como casos nuevos. El último ajuste reconcilia una aserción con el texto vigente de memoria, recuperación y ausencia de operaciones reales; ESLint y repetición correctos.
+- Primera pasada R4: 10 correctos, 3 fallidos y 5 sin ejecutar. El selector exacto del textarea de IA se corrigió usando su rol y nombre accesible. El foco se intentaba antes de montar el título de la ficha; separar selección y enfoque tras el commit de React resolvió el fallo ES/EN, conservando las aserciones. Los avisos de tareas tampoco compiten con el foco general del shell.
+- Matriz R4 ES/EN a 320/390/1440 px: seis casos con texto al 200 %, teclado, cambio de viewport, rechazo/historial/incidencia/devolución/reinicio abiertos y Axe WCAG 2.2 AA sin violaciones. Seis capturas inspeccionadas, sin desbordamiento global; selector de rol móvil de 44–45 px. [Informe y capturas](../docs/qa/HOSPITALITY_R4_2026-10-04.md).
+- Logs: `/tmp/estancia-r4-release-check.log`, `/tmp/estancia-r4-verified-e2e.log`, `/tmp/estancia-r4-focus-e2e.log`, `/tmp/estancia-r4-content-e2e.log` y `/tmp/estancia-r4-boundary-e2e.log`. Chromium 151; servidor local 8794/9244. `git diff --check` correcto. Ningún correo real de QA.
+
+### Consejo posterior R4
+
+- Marketing: **corregido** — interacción local acreditada y copy preciso, sin atribuir operación real ni resultados comerciales.
+- Producto: **corregido** — tarea completa, roles separados, incidencia bloqueante, revisión y recuperación.
+- UX: **corregido** — contexto, siguiente responsable, reasignación, borrador preservado y carrera de foco resuelta.
+- UI/dirección visual: **corregido** — jerarquía compartida, móvil y paneles expandidos legibles sin desbordamiento.
+- SEO: **correcto** — rutas/intención/noindex preservados y contenido localizado coherente.
+- Frontend: **corregido** — dominio independiente, fuentes derivadas y foco posterior al montaje, sin nuevas dependencias.
+- Full stack: **correcto** — guardas del dominio, límites de la simulación y API comercial intacta.
+- QA/accesibilidad/rendimiento/confianza: **corregido** — gestor, contenido, aislamiento, accesibilidad y visual acreditados; Lighthouse y validación humana siguen declarados pendientes.
+
+**Deuda/bloqueos:** cinco sesiones humanas de comprensión; dispositivo físico, zoom nativo y lector de pantalla humano; nueva medición Lighthouse; quince entrevistas y cinco propuestas para validar precios y margen. Analítica, proveedores, piloto, operación real y producción conservan autorizaciones separadas. HubSpot fuera de alcance. La evidencia de demo no acredita superioridad de mercado ni paridad operacional.
+
+**Siguiente tarea exacta: R5, motor y portal de huésped simulados.** Definir el contenedor local que conserve un caso en memoria dentro del mismo documento aislado: búsqueda de disponibilidad → unidad/tarifa → condiciones/desglose → confirmación ficticia → portal de esa estancia. Reutilizar contrato R3 y preparación R4 donde corresponda; sin inventario duplicado, PII en URL, persistencia, relajación de CSP/sandbox o comunicación con el shell comercial. Probar ida/vuelta, recarga al fixture, alternativas, cancelación y falta de disponibilidad. Nivora no recibe motor de reservas ni dashboard. No iniciar R5 en este cierre ni repetir R3/R4.
+
+**Git y publicación:** consolidación en `origin/main` autorizada por `AGENTS.md` tras verificar y comprobar divergencia. El commit documental registra el SHA de producto anterior. El remoto se comprobó coincidente con la base antes de consolidar; el push activa Quality; recoger su resultado en la próxima continuación, sin declararlo aprobado antes de concluir. Producción continúa en `d4811d1b21a574e1b7c37353ef840b1368f89fb9`; no se despliega.
+
+## Checkpoint anterior · R3 cerrado · Gestor de estancias ficticias · 2026-10-04
 
 **R3 implementado y verificado. Siguiente incremento: R4.** Petición del usuario: continuar el desarrollo y pulir el gestor, recordando que todo el dashboard usa fixtures. Base real del árbol: `25f21af0c03ca5d2e862f48942dbcb415bb4a006`, rama de entorno `work`, inicialmente limpia. Producto verificado: `b428cea15672219cafc0a8c245a5a6dc034e3950`. Este checkpoint prevalece sobre los históricos inferiores. Sin despliegue de producción.
 
