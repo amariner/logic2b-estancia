@@ -1,12 +1,50 @@
 # Logic2B Estancias · Checkpoint de continuidad
 
-Última actualización: 2026-09-30
+Última actualización: 2026-10-04
 
-Revisión publicada: `d4811d1b21a574e1b7c37353ef840b1368f89fb9` (R0–R2 y correcciones de reflow). SHA de producto verificado R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Simplifica el formulario comercial y su recuperación. Base R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`; base de sesión: `a0362f7`.
+## Checkpoint vigente · R3 cerrado · Gestor de estancias ficticias · 2026-10-04
 
-Rama: `main` (rediseño del 2026-09-30 integrado desde `claude/inspiring-allen-ylda58` por petición del usuario; sin despliegue de producción)
+**R3 implementado y verificado. Siguiente incremento: R4.** Petición del usuario: continuar el desarrollo y pulir el gestor, recordando que todo el dashboard usa fixtures. Base real del árbol: `25f21af0c03ca5d2e862f48942dbcb415bb4a006`, rama de entorno `work`, inicialmente limpia. Producto verificado: `b428cea15672219cafc0a8c245a5a6dc034e3950`. Este checkpoint prevalece sobre los históricos inferiores. Sin despliegue de producción.
 
-## Checkpoint vigente · Rediseño serio/técnico, gráficos explicativos, gestor unificado y fichas de tema · 2026-09-30
+**Reconciliación:** el rediseño de septiembre ya estaba integrado y se conservó. R3 era la primera brecha pendiente: solicitudes, planning y reservas usaban representaciones de lectura independientes. El [Quality pendiente de R2](https://github.com/amariner/logic2b-estancia/actions/runs/35365607591) se consultó en GitHub: `success`, incluidos check y E2E. La consulta remota inicial falló por la red restringida; con permiso de red se comprobó después que `origin/main` seguía en la base indicada.
+
+**Entregado:**
+
+- Terrava comparte una colección exclusivamente en memoria entre Inicio, Solicitudes, Planning, Reservas, Huéspedes e Informes. Ocho casas, quince estancias iniciales, mantenimiento y cuatro solicitudes con disponibilidad normal, conflicto con alternativa, colección ocupada y capacidad insuficiente.
+- Comprobación de fechas/capacidad, comparación y presupuesto; confirmación ficticia, modificación, cancelación, deshacer del último cambio y reinicio. Noches UTC, salida exclusiva e importes en céntimos. La recuperación vuelve a comprobar disponibilidad. Borradores con guardado/descarte explícito; reiniciar también los descarta.
+- Planning de catorce días, ficha común, filtros efectivos por propiedad también en móvil, estados vacíos, búsqueda sin distinguir acentos y avisos que abren el caso exacto. Foco recuperable, navegación con teclado y Escape por contexto.
+- Informes derivados de las estancias confirmadas, con desglose y tabla diaria accesible. Baseline independiente: 15 estancias, 8.040 €, 39 noches ocupadas / 242 disponibles (16,1 %); mantenimiento excluido del denominador. Son importes ficticios, no cobros.
+- Tokens visuales compartidos, densidad y jerarquía ajustadas, controles táctiles y CTA al pie sin cubrir datos; previews conservan sus acciones externas al iframe. Guías, capacidades, metadescripciones y contrato de demo ES/EN actualizados.
+
+**Límites:** Nivora/Básico sigue sin dashboard; Aurem conserva sus experiencias existentes. Cero HTTP writes, llamadas API, WebSockets, proveedores o escrituras en Web Storage/IndexedDB en R3. CSP, noindex y aislamiento del iframe conservados. Solo fechas/unidad/número de huéspedes de fixtures; recargar restaura el escenario. No hay datos reales, PMS, pagos, mensajes, CRM ni sincronización. Sin dependencias nuevas ni cambios de API comercial.
+
+**Revisión previa:** marketing exigió evidencia y límites visibles; producto, coherencia solicitud/estancia; UX, recuperación y filtros efectivos; UI, tokens compartidos y detalle progresivo; SEO, enlaces/noindex conservados; frontend, una colección y cálculos de dominio; full stack, cero conexiones o persistencia; QA, bordes de fechas/importes, cuatro flujos, ES/EN, teclado y móvil. Implementación y revisión independientes por dominio, UI, contenido e integración.
+
+### Verificación exacta
+
+- `pnpm check` final correcto: 7/7 tareas de lint (6 cacheadas), 21/21 de typecheck/test/build (12 cacheadas) y 33 pruebas de scripts. **230 contratos**: dominio 20, dashboard 45 (38 nuevos), web 2, site 35, Worker 95 y scripts 33. Astro sin errores. No se afirma ejecución forzada de tareas cacheadas.
+- **270 casos E2E únicos acreditados entre ejecuciones; no una única pasada 270/270.** Regresión inicial: 195 correctos, un fallo de foco de Aurem; interrumpida al terminar R2 para reconstruir correcciones. Continuación: 67/75; detectó semántica de métricas y CTA del iframe. Focal posterior: 4/8; encontró desbordamiento al abrir la tabla ampliada en móvil. Cierre sobre el build definitivo: **6/6**, ES/EN a 320/390/1440 px, incluyendo teclado, foco, edición inválida, planning, informe expandido, etiquetas del eje, texto al 200 % y Axe WCAG 2.2 AA limpio. Dos casos de escritorio se repiten entre las últimas pasadas.
+- Los 21 casos R3 comprueban tareas, errores, recuperación, filtros y ausencia de efectos externos. Regresión de accesibilidad, captación, consentimiento, analítica, demos, recorridos, SEO, temas y previews. Siete capturas inspeccionadas; tabla ampliada con scroll propio sin ensanchar el documento. [Informe y capturas](../docs/qa/HOSPITALITY_R3_2026-10-04.md).
+- Logs finales: `/tmp/estancia-r3-final-verified-check.log` y `/tmp/estancia-r3-final-verified-e2e.log`; el informe referencia las demás pasadas. Chromium 151, puertos locales 8794/9244. `git diff --check` correcto. Ningún correo real de QA.
+
+### Consejo posterior
+
+- Marketing: **corregido** — prueba de tarea completa y copy veraz, sin atribuir resultados comerciales.
+- Producto: **corregido** — colección común, excepciones y recuperación; planes conservados.
+- UX: **corregido** — borradores explícitos, filtros, búsqueda, foco y deshacer; sin reaperturas involuntarias.
+- UI/dirección visual: **corregido** — calendario alineado, móvil, cifras y tabla ampliada sin desbordamiento.
+- SEO: **correcto** — intención, rutas, canonical/hreflang/sitemap y noindex verificados.
+- Frontend: **corregido** — dominio separado de vistas, estado derivado y ninguna dependencia nueva.
+- Full stack: **correcto** — fronteras, API comercial y aislamiento conservados; sin proveedores.
+- QA/accesibilidad/rendimiento/confianza: **corregido** — verificaciones acreditadas, fallos resueltos y evidencia visual; Lighthouse y validación humana no se presentan como realizados.
+
+**Deuda/bloqueos:** cinco sesiones humanas de comprensión; dispositivo físico, zoom nativo y lector de pantalla humano; nueva medición Lighthouse; quince entrevistas y cinco propuestas para validar precios/margen. Operación real, analítica, proveedores, piloto y producción necesitan actividad/autorización externas. HubSpot permanece fuera de alcance. No bloquean R4 local; no se acredita superioridad de mercado por pruebas de demo.
+
+**Siguiente tarea exacta: R4, preparación y móvil de Aurem por responsabilidad.** Reutilizar el contrato de estancia para una llegada ficticia en riesgo: salida previa → tarea de limpieza → aceptación → checklist → incidencia → revisión → habitación preparada. Cada cambio actualiza la preparación y muestra causa/responsable de muestra; proporcionar reversión y reinicio. Dirección revisa excepciones, Recepción consulta llegadas y Limpieza ve «Mis tareas». Roles simulados; memoria local, cero persistencia/proveedores. Priorizar hoy/pendientes/incidencias en móvil y conservar el contexto al cambiar de viewport. Ver criterios del roadmap y probar tarea normal, bloqueo, rechazo/reasignación, roles, aislamiento, teclado y reflow. No repetir R3 ni adelantar R5.
+
+**Git y publicación:** consolidación autorizada en `origin/main` desde la rama del entorno `work`, comprobando antes que el remoto no haya divergido. El commit documental registra el SHA de producto anterior. El nuevo push activa Quality; recoger su resultado en la próxima continuación, sin declararlo verde anticipadamente. Producción continúa en la revisión publicada `d4811d1b21a574e1b7c37353ef840b1368f89fb9`; esta sesión no autoriza ni ejecuta un despliegue.
+
+## Checkpoint anterior · Rediseño serio/técnico, gráficos explicativos, gestor unificado y fichas de tema · 2026-09-30
 
 Petición explícita del usuario: rehacer el diseño con «un pelín» más de seriedad y tecnología, añadir gráficos detallados que expliquen el servicio de forma sencilla, revisar todas las páginas, unificar el diseño del backend (gestor demo) y mejorar después las fichas de tema. Rama de trabajo: `claude/inspiring-allen-ylda58` (no `main`). Sin despliegue de producción, sin proveedores nuevos, sin cambios de API, captación ni contratos de planes. R3 (estancia en memoria de Terrava) sigue siendo la siguiente tarea del roadmap.
 

@@ -1,6 +1,6 @@
 # Logic2B Estancias · Roadmap de paridad con SuperHote, Cloudbeds y Mews
 
-Versión: **1.4 · 2026-09-18**. Estado: **R0–R2 publicados; R3 siguiente**. SHA de producto R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Base R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Las cinco sesiones humanas de comprensión siguen pendientes. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`. Publicación autorizada el 18/09: revisión `d4811d1b21a574e1b7c37353ef840b1368f89fb9`, con correcciones de reflow; [evidencia](../docs/qa/PRODUCTION_2026-09-18.md). No equivale a conversión comercial validada.
+Versión: **1.5 · 2026-10-04**. Estado: **R0–R2 publicados en producción; R3 verificado, sin despliegue; R4 siguiente**. Evidencia y resultado final de R3: [informe QA](../docs/qa/HOSPITALITY_R3_2026-10-04.md). SHA de producto R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Base R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Las cinco sesiones humanas de comprensión siguen pendientes. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`. Publicación autorizada el 18/09: revisión `d4811d1b21a574e1b7c37353ef840b1368f89fb9`, con correcciones de reflow; [evidencia](../docs/qa/PRODUCTION_2026-09-18.md). No equivale a conversión comercial validada.
 
 Este es el roadmap estratégico vigente solicitado por el usuario. Sustituye la cola de [paridad Camp](./CAMP_PARITY_ROADMAP.md), que se conserva como histórico. La fuente operativa de continuidad sigue siendo [PROJECT_CONTINUATION.md](./PROJECT_CONTINUATION.md). Investigación: [síntesis y evidencia](../docs/research/HOSPITALITY_BENCHMARK_2026-09-14.md), [SuperHote](../docs/research/SUPERHOTE_2026-09-14.md), [Cloudbeds](../docs/research/CLOUDBEDS_2026-09-14.md), [Mews](../docs/research/MEWS_2026-09-14.md).
 
@@ -31,9 +31,11 @@ No se suman estos niveles en un porcentaje total. Una captura, un fixture, un co
 
 Existen doce direcciones web, seis fichas de panel, cinco guías por rol, tres planes, diagnóstico, tour comercial de cinco pasos, portfolio, previews y rutas ES/EN. Existen contratos de capacidades, preparación de proveedores, informe analítico y expediente offline de GTM. El editor web supervisado, las reglas inspeccionables, el copiloto ficticio editable y las métricas explicables ya están implementados.
 
-Las vistas de solicitudes, planning, reservas, huéspedes, limpieza y mantenimiento actuales son mayoritariamente de lectura. La presencia de estados como `booked`, `ready` o `resolved` en tipos heredados no acredita un control que los active. `useDemoState` usa memoria; los tipos de almacenamiento no prueban persistencia. El planning presenta ocupación ilustrativa, no un cálculo común desde una colección de reservas. Esa es la brecha de profundidad que se aborda en R3/R4.
+Desde R3, Terrava comparte una colección en memoria entre solicitudes, planning, reservas, huéspedes e informes: permite comprobar conflictos y capacidad, confirmar una alternativa ficticia, modificar o cancelar la estancia, deshacer cambios y restablecer el escenario. El filtro de propiedad y los importes se derivan de esa colección; las unidades fuera de servicio bloquean su disponibilidad de muestra. Búsqueda y avisos abren el caso correspondiente. Esta interacción es local y se pierde al recargar; no acredita persistencia ni operación real.
 
-Evidencia de revisión: [dashboard](../apps/dashboard/src/DashboardDemo.tsx), [estado](../apps/dashboard/src/state.ts), [capacidades](../packages/domain/src/index.ts), [recorrido](../apps/site/src/commercial-tour.ts), [precios](../apps/site/src/pricing.ts).
+Las vistas operativas de Aurem, incluida la preparación, limpieza y mantenimiento, conservan su alcance mayoritariamente de lectura; R4 debe conectar tareas y preparación con una estancia ficticia. La presencia de estados como `booked`, `ready` o `resolved` en tipos heredados no acredita un control que los active. `useDemoState` usa memoria; los tipos de almacenamiento no prueban persistencia. No se reconstruye el núcleo de Terrava ya implementado.
+
+Evidencia de revisión: [dashboard](../apps/dashboard/src/DashboardDemo.tsx), [contrato de estancia](../apps/dashboard/src/stays.ts), [gestor de Terrava](../apps/dashboard/src/StayWorkspace.tsx), [informe R3](../docs/qa/HOSPITALITY_R3_2026-10-04.md), [estado heredado](../apps/dashboard/src/state.ts), [capacidades](../packages/domain/src/index.ts), [recorrido](../apps/site/src/commercial-tour.ts), [precios](../apps/site/src/pricing.ts).
 
 **Corrección del checkpoint anterior:** la home actual no renderiza la nota y puerta técnica de conexiones que figuraban como verificadas. Sus fichas de temas enlazan a `/temas/`, mientras una prueba espera `/webs/`. `pnpm check` pasa, pero E2E focal queda en **14/16**, con esas dos discrepancias. La madurez y aislamiento demostrativo no equivalen a una aprobación global del árbol. R0 precede a todo cierre de producto. **Actualización 18/09:** discrepancias reconciliadas; ver checkpoint e informe QA R0. Este párrafo conserva la observación de partida.
 
@@ -47,13 +49,13 @@ Las referencias remiten a los anexos con fuentes primarias. «Documentado» sign
 | Evaluar sin entregar datos | SuperHote vídeo abierto; demos públicas propias | Diagnóstico y tour abierto ya existentes | Progresión por intención y contexto conservado | R1–R3 |
 | Solicitar información con contexto | Cloudbeds/Mews: cualificación consultiva | Formulario único, diez campos y recibo | Menor carga inicial, mismo contrato fiable | R2 |
 | Comparar alcance/coste | Tres referentes: presupuesto adaptado | Precios y exclusiones ya publicados | Coste total orientativo y decisión por capacidades | R1/R6 |
-| Solicitud → estancia | SuperHote: reserva desde varios contextos | Alternativa y tablas de muestra, sin ciclo interactivo completo | Un caso que avance y pueda deshacerse en memoria | R3 |
-| Calendarizar y detectar conflicto | Cloudbeds/Mews: calendario contextual | Cuadrícula ilustrativa, filtro de propiedad limitado | Fechas/unidades derivadas de las estancias; conflicto explicable | R3 |
+| Solicitud → estancia | SuperHote: reserva desde varios contextos | Terrava confirma, modifica y cancela estancias ficticias con recuperación en memoria | Conservar el contrato compartido al ampliar preparación y portal | R3 implementado; R4/R5 siguientes |
+| Calendarizar y detectar conflicto | Cloudbeds/Mews: calendario contextual | Planning de Terrava derivado de estancias, con filtro real de propiedad, conflictos y bloqueos de servicio | Reutilizar fechas y unidades al conectar preparación | R3 implementado; R4 siguiente |
 | Preparar llegada con equipo | SuperHote tareas; Mews Operations | Preparación/incidencias y roles ilustrativos | Tarea, revisión, incidencia y repercusión en llegada | R4 |
 | Trabajar desde móvil | Apps de los tres proveedores con alcance por tarea | Responsive y menú ya existentes | «Hoy» por rol y controles táctiles/teclado útiles | R4 |
 | Reservar desde la web | Motores de los tres proveedores | Simulaciones locales y webs, sin operación | Búsqueda → tarifa → resumen → resultado ficticio coherente | R5 |
 | Preparar viaje como huésped | SuperHote Guest Page; Mews portal | Sin portal vinculado acreditado en baseline revisado | Portal ficticio de una estancia, sin PII ni pago | R5 |
-| Comprender ingresos | Cloudbeds/Mews: revenue; fórmulas propias | Dataset y métricas explicables ya existen | Enlaces al origen y consistencia del caso; sin forecasting | R3/R6 |
+| Comprender ingresos | Cloudbeds/Mews: revenue; fórmulas propias | Informes de Terrava derivados de sus estancias y filtro; métricas explicables de Aurem conservadas | Mantener trazabilidad y explicar alcance; sin forecasting | R3 implementado; R6 pendiente |
 | Editar web / revisar IA / reglas | Producto de referencia y demo propia | Ya utilizable de forma local y supervisada | Reutilizar; solo ampliar ante tarea validada | Conservación |
 | Migrar y pedir ayuda | Onboarding/formación de los tres | Guías y servicio humano ya existentes | Entregables, responsables y criterios de aceptación concretos | R6 |
 | Generar confianza propia | Casos, documentación y condiciones | Escenarios ficticios y evidencia técnica | Estudios de caso reales cuando existan y estén autorizados | R6/R7 |
@@ -71,8 +73,8 @@ El orden combina impacto, riesgo y dependencias. Las estimaciones son **rangos d
 | R0 | Baseline, límites visibles y rutas coherentes | Crítico / alta: evidencia de código y E2E | Ninguna | 1–3 días | **Publicado · 2026-09-18** |
 | R1 | Entrada comercial centrada en prueba y decisión | Alto / media: hipótesis de benchmark | R0 | 4–7 días | **Publicado · 2026-09-18**; comprensión humana pendiente |
 | R2 | Solicitud comercial con menos repetición | Alto / media: requiere observar usuarios | R0, contrato de R1 | 3–5 días | Publicado; observación humana pendiente |
-| R3 | Estancia y planning ficticios coherentes | Alto / alta sobre brecha técnica; media comercial | R0; R1 para entrada al caso | 7–12 días | Pendiente |
-| R4 | Preparación y trabajo móvil por rol | Alto / media | R3 | 5–8 días | Pendiente |
+| R3 | Estancia y planning ficticios coherentes | Alto / alta sobre brecha técnica; media comercial | R0; R1 para entrada al caso | 7–12 días | **Completado y verificado · 2026-10-04**; [evidencia](../docs/qa/HOSPITALITY_R3_2026-10-04.md); sin despliegue |
+| R4 | Preparación y trabajo móvil por rol | Alto / media | R3 | 5–8 días | **Siguiente incremento** |
 | R5 | Motor y portal de huésped simulados | Medio-alto / media | R3, R4 para estados de preparación | 6–10 días | Pendiente |
 | R6 | Contenido de decisión e implantación | Alto / media | R1; puede avanzar junto a R3 | 4–7 días | Pendiente |
 | R7 | Validación comercial y experimentación | Alto / pendiente de evidencia real | R1/R2; activación externa para GA4 | Continuo | Preparación local disponible; ejecución externa pendiente |
@@ -122,6 +124,8 @@ Aceptación: rutas directas y contextualizadas, envío válido, errores de valid
 Responsables: UX + marketing + full stack + QA. Métricas: inicio→entrega y calidad de solicitud; eventos adicionales solo si el contrato actual no responde la pregunta y tras consentimiento. Las reuniones celebradas se verifican aparte.
 
 ### R3 · Un caso de estancia completo en Terrava
+
+**Estado 04/10/2026:** completado y verificado, sin despliegue de producción. Producto `b428cea15672219cafc0a8c245a5a6dc034e3950`: 230 contratos y 270 E2E únicos acreditados entre ejecuciones. La evidencia exacta, revisión del consejo y deuda se registran en el [informe QA R3](../docs/qa/HOSPITALITY_R3_2026-10-04.md) y el [checkpoint](./PROJECT_CONTINUATION.md). El contrato y los criterios siguientes se conservan como referencia de aceptación y regresión.
 
 **Primer núcleo demostrativo:** una solicitud ficticia pide fechas que entran en conflicto; se consulta planning, se compara alternativa, se confirma únicamente en memoria, se abre la estancia y se modifica o cancela con recuperación visible. La cuadrícula se deriva de los mismos datos que el detalle y el resumen.
 
@@ -226,7 +230,7 @@ Una ficha de avance debe incluir: ID, tarea del usuario, plan, ruta, escenario n
 
 ### Revisión inicial de la investigación · 14/09 · histórica
 
-Los estados siguientes registran la investigación inicial. Los cierres R0–R2 y sus informes posteriores prevalecen sobre estos bloqueos ya resueltos.
+Los estados siguientes registran la investigación inicial. Los cierres R0–R2 y la evidencia local de R3 en sus informes posteriores prevalecen sobre estos bloqueos históricos.
 
 | Perfil | Revisión previa del roadmap | Resultado de la revisión documental |
 |---|---|---|
@@ -243,6 +247,8 @@ La revisión documental queda completada; quedan pendientes implementación, inv
 
 ## 9. Siguiente incremento exacto
 
-**R3: un caso de estancia completo en Terrava.** R0, R1 y R2 están cerrados y publicados. Recoger primero el resultado de Quality indicado en el checkpoint operativo. No repetir hero, temas, popups, recorrido ni la presentación del formulario. La validación humana y comercial permanece separada.
+**R4: preparación y trabajo móvil de Aurem por responsabilidad.** R0, R1 y R2 están cerrados y publicados. R3 está completado y verificado, sin despliegue; consultar la evidencia y deuda en el [informe QA](../docs/qa/HOSPITALITY_R3_2026-10-04.md). El [Quality previo 35365607591](https://github.com/amariner/logic2b-estancia/actions/runs/35365607591) ya fue consultado en GitHub y terminó con `success`, incluidos check y E2E; no queda pendiente de consulta ni sustituye la validación de R3.
 
-Crear primero un contrato común en memoria para solicitud y estancia: identificador ficticio, propiedad/unidad, fechas, ocupantes, estado y desglose en céntimos. Derivar planning y detalle de esa colección; una solicitud en conflicto debe permitir consultar disponibilidad, comparar una alternativa, confirmar la estancia ficticia, modificarla o cancelarla con recuperación. Incluir una unidad fuera de servicio, dos escenarios sin disponibilidad/alternativa y filtro real por propiedad. Reutilizar shell, navegación y tour; cero escrituras HTTP, persistencia o proveedores. Actualizar capacidades y guías para distinguir interacción local de activación real. Ver criterios detallados de R3 antes de implementar; comprobar dominio, cuatro flujos, aislamiento, móvil y accesibilidad.
+Reutilizar el contrato de estancia de R3 para conectar una llegada ficticia en riesgo de Aurem con salida previa, tarea de limpieza, aceptación, checklist, incidencia, revisión y habitación preparada. Cada cambio debe actualizar la preparación de la misma estancia, mostrar causa y responsable de muestra, y permitir reversión y reinicio. Dirección revisa excepciones, Recepción consulta llegadas y Limpieza dispone de «Mis tareas»; son roles simulados, no permisos de producción.
+
+Priorizar hoy, pendientes e incidencias en móvil sin perder el contexto al cambiar de viewport. Mantener controles táctiles y de teclado, estados legibles, foco recuperable y las restricciones de red existentes. Todo vive solo en memoria: cero escrituras HTTP, persistencia, comunicaciones o proveedores. No añadir cuentas, datos reales, notificaciones, acceso a cámara ni sincronización entre dispositivos. Ver criterios detallados de R4; probar tarea normal, bloqueo, rechazo/reasignación, recuperación, roles, aislamiento y accesibilidad, además de `pnpm check` y QA visual. No repetir el núcleo de Terrava, hero, temas, recorrido o formulario, ni adelantar R5. La validación humana, comercial y operativa permanece separada.
