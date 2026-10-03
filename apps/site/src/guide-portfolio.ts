@@ -82,7 +82,7 @@ const definitions: readonly GuideDefinition[] = [
         boundaries: [
           'La guía no sustituye decisiones legales, fiscales, financieras ni de protección de datos.',
           'La demo no conecta inventario, reservas, pagos, mensajes, canales o proveedores reales.',
-          'No se publican precios hasta completar la validación comercial prevista.',
+          'Los precios publicados son orientativos; la propuesta confirma alcance y condiciones. La validación comercial sigue pendiente.',
         ],
       },
       en: {
@@ -106,7 +106,7 @@ const definitions: readonly GuideDefinition[] = [
         boundaries: [
           'This guide does not replace legal, tax, financial or data-protection decisions.',
           'The demo connects no live inventory, booking, payment, message, channel or provider.',
-          'Prices are not published before the planned commercial validation is complete.',
+          'Published prices are indicative; the proposal confirms scope and terms. Commercial validation is still pending.',
         ],
       },
     },
@@ -126,15 +126,15 @@ const definitions: readonly GuideDefinition[] = [
       es: {
         slug: 'reservas-recepcion', role: 'Reservas y recepción', title: 'Conservar el contexto sin fingir una reserva real',
         question: '¿Qué necesita recepción para continuar una solicitud y preparar una llegada sin reconstruir la historia?',
-        summary: 'Una guía para ordenar solicitudes, alternativas, planning y datos mínimos de llegada con responsabilidad humana visible.',
-        outcome: 'Un recorrido revisable desde la solicitud hasta la preparación, sin confirmar, cobrar, registrar o comunicar nada fuera de la demo.',
+        summary: 'Una guía para revisar solicitudes, resolver conflictos y seguir una estancia ficticia con el mismo contexto en planning y huéspedes.',
+        outcome: 'Un recorrido local desde la solicitud hasta la confirmación ficticia, con modificación, cancelación y opción de deshacer el último cambio.',
         responsibilities: [
           'Conservar fechas, alojamiento, origen y alternativa junto a cada solicitud.',
           'Contrastar disponibilidad y tarifa en la fuente acordada antes de responder.',
           'Revisar el contexto mínimo de huésped y llegada con permisos adecuados.',
           'Escalar excepciones y dejar la confirmación, el cobro y el mensaje en manos autorizadas.',
         ],
-        handoff: ['Solicitud con contexto', 'Alternativa y planning revisados', 'Llegada preparada por el equipo', 'Acción real solo tras validación'],
+        handoff: ['Solicitud con contexto', 'Disponibilidad y alternativa revisadas', 'Estancia ficticia con detalle compartido', 'Cambios locales con opción de deshacer el último cambio'],
         validations: [
           'Qué canal y sistema son fuente de verdad para disponibilidad, tarifa y estado.',
           'Qué datos personales son imprescindibles, quién accede y cuánto tiempo se conservan.',
@@ -142,7 +142,7 @@ const definitions: readonly GuideDefinition[] = [
           'Quién puede confirmar, cobrar, comunicar o realizar un registro obligatorio.',
         ],
         boundaries: [
-          'Terrava muestra datos ficticios de solo lectura y no confirma ni modifica reservas.',
+          'Terrava permite confirmar, modificar y cancelar estancias ficticias solo en memoria. Recargar reinicia el caso; no se crea ninguna reserva real.',
           'Nivora muestra 0/13 condiciones de entrega validadas y Terrava no envía email o mensajería, no cobra y no sincroniza inventario o tarifas.',
           'No realiza registro de viajeros; ese flujo exige validación legal, proveedor y aceptación separadas.',
         ],
@@ -150,15 +150,15 @@ const definitions: readonly GuideDefinition[] = [
       en: {
         slug: 'reservations-reception', role: 'Reservations and reception', title: 'Keep context without pretending a live booking',
         question: 'What does reception need to continue an enquiry and prepare an arrival without rebuilding the story?',
-        summary: 'A guide for organising enquiries, alternatives, planning and minimum arrival data with visible human ownership.',
-        outcome: 'A reviewable journey from enquiry to preparation without confirming, charging, reporting or communicating outside the demo.',
+        summary: 'A guide for reviewing enquiries, resolving conflicts and following a fictitious stay with the same context in planning and guests.',
+        outcome: 'A local journey from enquiry to fictitious confirmation, with amendments, cancellation and an option to undo the last change.',
         responsibilities: [
           'Keep dates, property, source and alternative with each enquiry.',
           'Check availability and rate in the agreed source before replying.',
           'Review minimum guest and arrival context with suitable permissions.',
           'Escalate exceptions and leave confirmation, payment and delivery to authorised people.',
         ],
-        handoff: ['Enquiry with context', 'Alternative and planning reviewed', 'Arrival prepared by the team', 'Live action only after validation'],
+        handoff: ['Enquiry with context', 'Availability and alternative reviewed', 'Fictitious stay with shared detail', 'Local changes with an option to undo the last change'],
         validations: [
           'Which channel and system are the source of truth for availability, rate and status.',
           'Which personal data is essential, who accesses it and how long it is retained.',
@@ -166,7 +166,7 @@ const definitions: readonly GuideDefinition[] = [
           'Who may confirm, charge, communicate or complete mandatory guest reporting.',
         ],
         boundaries: [
-          'Terrava shows fictitious read-only data and confirms or changes no booking.',
+          'Terrava lets you confirm, amend and cancel fictitious stays in memory only. Reloading resets the case; no live booking is created.',
           'Nivora shows 0/13 validated delivery conditions and Terrava sends no email or message, takes no payment and synchronises no inventory or rate.',
           'It performs no guest reporting; that flow needs separate legal, provider and acceptance validation.',
         ],

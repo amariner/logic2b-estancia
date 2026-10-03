@@ -34,7 +34,7 @@ El despliegue ejecuta siempre el build completo del workspace antes de invocar W
 
 El smoke de Resend es seco por defecto y requiere autorización explícita para enviar dos correos inequívocamente marcados como prueba. El procedimiento seguro, la repetición idempotente y la comprobación manual en Resend están en [`docs/COMMERCIAL_PLAYBOOK.md`](docs/COMMERCIAL_PLAYBOOK.md#smoke-reproducible-de-resend).
 
-Las integraciones, reservas, pagos, canales, mensajería, SES.Hospedajes e IA de Nivora, Terrava, Aurem y sus dashboards son demostraciones locales, nunca ejecuciones externas. Sus formularios de producto no existen: la única captación permitida es la de la landing principal descrita arriba.
+Las integraciones, reservas, pagos, canales, mensajería, SES.Hospedajes e IA de Nivora, Terrava, Aurem y sus dashboards son demostraciones locales, nunca ejecuciones externas. Los controles de producto solo editan fixtures en memoria y no recogen datos reales de visitantes: la única captación permitida es la de la landing principal descrita arriba.
 
 El contrato técnico completo, la matriz de efectos, los estados de capacidades, las pruebas de aislamiento y el procedimiento de activación/rollback están en [`docs/DEMO_MODE.md`](docs/DEMO_MODE.md).
 
@@ -46,7 +46,9 @@ La cadencia comercial, la taxonomía de GA4 y el guion de entrevistas están doc
 
 La orden `/goal continua con el desarrollo de este proyecto` reanuda el trabajo desde el último punto verificado. Las reglas persistentes están en [`AGENTS.md`](AGENTS.md) y el estado, las prioridades y el registro de continuaciones se mantienen en [`plans/PROJECT_CONTINUATION.md`](plans/PROJECT_CONTINUATION.md). Ambos deben actualizarse cuando cambien el objetivo o el siguiente punto de desarrollo.
 
-El roadmap estratégico vigente es la [paridad comercial, demostrativa y operativa condicionada con SuperHote, Cloudbeds y Mews](plans/HOSPITALITY_PARITY_ROADMAP.md), basada en la [investigación del 14 de septiembre de 2026](docs/research/HOSPITALITY_BENCHMARK_2026-09-14.md). La cola comienza por R0: reconciliar límites visibles de conexiones, rutas de temas y pruebas del árbol local.
+El roadmap estratégico vigente es la [paridad comercial, demostrativa y operativa condicionada con SuperHote, Cloudbeds y Mews](plans/HOSPITALITY_PARITY_ROADMAP.md), basada en la [investigación del 14 de septiembre de 2026](docs/research/HOSPITALITY_BENCHMARK_2026-09-14.md). R0–R2 están completados; el estado y la siguiente tarea se mantienen en el checkpoint de continuidad.
+
+Terrava incluye un gestor interactivo de estancias ficticias: disponibilidad de ocho casas, solicitud, confirmación, edición, cancelación y recuperación del último cambio. Inicio, planning, reservas, huéspedes e informes se derivan de la misma colección en memoria. El escenario se sitúa en agosto de 2026; fechas, capacidades y precios son de muestra. Los filtros funcionan también en móvil y recargar restaura los casos iniciales. No utiliza almacenamiento ni servicios externos.
 
 Cada incremento pasa además por el [`consejo multidisciplinar`](docs/MULTIDISCIPLINARY_REVIEW.md): estrategia de marketing, diseño de producto, UX, UI y dirección visual, SEO, arquitectura frontend, ingeniería full stack y controles transversales de QA, accesibilidad, rendimiento y confianza comercial.
 

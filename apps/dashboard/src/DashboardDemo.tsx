@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { TerravaWorkspace, type TerravaView } from "./StayWorkspace";
+import { StayReport } from "./StayReport";
+import { checkAvailability, createStayWorkspace, properties as stayProperties, selectStays, STAY_DEMO_DATE } from "./stays";
 import {
   Activity,
   BedDouble,
@@ -58,7 +61,7 @@ type View =
   | "reports"
   | "settings";
 type Utility = "search" | "notifications" | null;
-type Notice = { title: string; detail: string; view: View; urgent?: boolean };
+type Notice = { title: string; detail: string; view: View; urgent?: boolean; enquiryId?: string };
 type RevenueMetric = "revenue" | "occupancy" | "adr" | "revpar";
 type AutomationRuleId = "arrival" | "turnover" | "incident";
 
@@ -71,16 +74,7 @@ type TourStep = {
 };
 
 const properties = {
-  terrava: [
-    "Casa Aira",
-    "Casa Bruma",
-    "Casa Cauce",
-    "Casa Duna",
-    "Casa Era",
-    "Casa Faya",
-    "Casa Linde",
-    "Casa Umbral",
-  ],
+  terrava: stayProperties.map((property) => property.name),
   aurem: ["Aurem Hotel"],
 };
 
@@ -179,6 +173,7 @@ const track = (event: string, parameters: Record<string, string | number>) =>
   ).estanciaTrack?.(event, parameters);
 
 const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name;
+const searchKey = (value: string) => value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 const stayRange = (state: DemoState, locale: Locale) => {
   const format = new Intl.DateTimeFormat(locale === "es" ? "es-ES" : "en-GB", {
     day: "numeric",
@@ -299,12 +294,20 @@ export function DashboardDemo({
   locale?: Locale;
 }) {
   const { state, patch } = useDemoState(scenario);
+  const [workspace, setWorkspace] = useState(createStayWorkspace);
+  const [requestedStay, setRequestedStay] = useState<{ id: string; key: number }>();
+  const [requestedEnquiry, setRequestedEnquiry] = useState<{ id: string; key: number }>();
   const [view, setView] = useState<View>("home");
   const [mobile, setMobile] = useState(false);
+  const [compactNavigation, setCompactNavigation] = useState(false);
   const [tour, setTour] = useState<number | null>(state.tourStep);
   const [utility, setUtility] = useState<Utility>(null);
   const [query, setQuery] = useState("");
   const utilityTrigger = useRef<HTMLElement | null>(null);
+  const utilityPanel = useRef<HTMLElement | null>(null);
+  const navigation = useRef<HTMLElement | null>(null);
+  const menuTrigger = useRef<HTMLButtonElement | null>(null);
+  const pageHeading = useRef<HTMLHeadingElement | null>(null);
   const brand = scenario === "aurem" ? "Aurem Hotel" : "Terrava Collection";
   const level =
     scenario === "aurem"
@@ -316,13 +319,16 @@ export function DashboardDemo({
         : "Management";
   const availableViews = viewsFor(scenario);
 
-  const go = (next: View) => {
+  const go = (next: View, focusHeading = true) => {
+    if (next !== "bookings") setRequestedStay(undefined);
+    if (next !== "enquiries") setRequestedEnquiry(undefined);
     setView(next);
     setMobile(false);
     setUtility(null);
     const url = new URL(location.href);
     url.searchParams.set("vista", next);
     history.replaceState(null, "", url);
+    if (focusHeading) requestAnimationFrame(() => pageHeading.current?.focus());
   };
   useEffect(() => {
     const candidate = new URLSearchParams(location.search).get(
@@ -333,6 +339,16 @@ export function DashboardDemo({
   useEffect(() => {
     track("demo_open", { locale, demo: scenario, source_section: "dashboard" });
   }, [locale, scenario]);
+  useEffect(() => {
+    const media = matchMedia("(max-width: 900px)");
+    const sync = () => {
+      setCompactNavigation(media.matches);
+      if (!media.matches) setMobile(false);
+    };
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
   const closeUtility = () => {
     setUtility(null);
     requestAnimationFrame(() => utilityTrigger.current?.focus());
@@ -343,33 +359,93 @@ export function DashboardDemo({
     setQuery("");
     setUtility(next);
   };
+  const closeMobile = () => {
+    setMobile(false);
+    requestAnimationFrame(() => menuTrigger.current?.focus());
+  };
+  useEffect(() => {
+    if (!utility && !mobile) return;
+    const panel = utility ? utilityPanel.current : navigation.current;
+    if (!panel) return;
+    const focusables = () => Array.from(panel.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex="0"]',
+    )).filter((element) => element.getClientRects().length > 0);
+    if (utility === "notifications" || mobile) focusables()[0]?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && mobile && !utility) {
+        event.preventDefault();
+        closeMobile();
+      }
+      if (event.key !== "Tab") return;
+      const elements = focusables();
+      const first = elements[0];
+      const last = elements.at(-1);
+      if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [utility, mobile]);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && utility) {
         event.preventDefault();
+        event.stopPropagation();
         closeUtility();
+        return;
       }
       const target = event.target as HTMLElement | null;
       if (
         event.key === "/" &&
+        !target?.isContentEditable &&
         !["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName ?? "")
       ) {
         event.preventDefault();
         openUtility("search");
       }
     };
-    addEventListener("keydown", onKey);
-    return () => removeEventListener("keydown", onKey);
+    addEventListener("keydown", onKey, true);
+    return () => removeEventListener("keydown", onKey, true);
   }, [utility]);
-  const notices = noticesFor(scenario, state, locale);
-  const normalizedQuery = query
-    .trim()
-    .toLocaleLowerCase(locale === "es" ? "es-ES" : "en-GB");
+  const scopedUnits = workspace.units.filter((unit) => state.selectedProperty === "all" || unit.name === state.selectedProperty);
+  const terravaNotices: Notice[] = workspace.enquiries
+    .filter((enquiry) => enquiry.status === "new" && scopedUnits.some((unit) => unit.id === enquiry.preferredUnitId))
+    .map((enquiry) => {
+      const available = checkAvailability(workspace, { ...enquiry, unitId: enquiry.preferredUnitId }).available;
+      return {
+        title: `${enquiry.id} · ${enquiry.guestName}`,
+        detail: available
+          ? locale === "es" ? "Disponible para revisar y confirmar en la demo." : "Available to review and confirm in the demo."
+          : locale === "es" ? "Revisa disponibilidad y alternativas." : "Review availability and alternatives.",
+        view: "enquiries",
+        urgent: !available,
+        enquiryId: enquiry.id,
+      };
+    });
+  for (const unit of scopedUnits) {
+    if (unit.outOfService.some((interval) => interval.startDate <= STAY_DEMO_DATE && STAY_DEMO_DATE < interval.endDate)) {
+      terravaNotices.push({ title: unit.name, detail: locale === "es" ? "Fuera de servicio · revisa el planning ficticio." : "Out of service · review the fictitious planning.", view: "planning", urgent: true });
+    }
+  }
+  const notices = scenario === "terrava" ? terravaNotices : noticesFor(scenario, state, locale);
+  const normalizedQuery = searchKey(query);
   const searchResults = availableViews.filter((item) =>
-    labelFor(scenario, locale, item)
-      .toLocaleLowerCase(locale === "es" ? "es-ES" : "en-GB")
-      .includes(normalizedQuery),
+    searchKey(labelFor(scenario, locale, item)).includes(normalizedQuery),
   );
+  const staySearchResults = scenario === "terrava" && normalizedQuery
+    ? selectStays(workspace, { propertyId: state.selectedProperty }).filter((stay) =>
+      searchKey(`${stay.id} ${stay.guestName} ${workspace.units.find((unit) => unit.id === stay.unitId)?.name ?? ""}`).includes(normalizedQuery),
+    )
+    : [];
+  const enquirySearchResults = scenario === "terrava" && normalizedQuery
+    ? workspace.enquiries.filter((enquiry) => enquiry.status === "new" && scopedUnits.some((unit) => unit.id === enquiry.preferredUnitId)
+      && searchKey(`${enquiry.id} ${enquiry.guestName} ${workspace.units.find((unit) => unit.id === enquiry.preferredUnitId)?.name ?? ""}`).includes(normalizedQuery))
+    : [];
 
   const tourSteps: TourStep[] =
     scenario === "terrava"
@@ -411,12 +487,12 @@ export function DashboardDemo({
             phase: locale === "es" ? "03 · Resultado" : "03 · Outcome",
             title:
               locale === "es"
-                ? "Observa la alternativa"
-                : "Review the alternative",
+                ? "Confirma y revisa la estancia"
+                : "Confirm and review the stay",
             description:
               locale === "es"
-                ? "La reserva ficticia cierra el relato visual de Gestión sin crear ni confirmar nada."
-                : "The fictitious booking closes the visual Management story without creating or confirming anything.",
+                ? "Confirma una alternativa en Solicitudes y abre su ficha en Reservas. Puedes modificarla, cancelarla y deshacer el último cambio durante esta visita."
+                : "Confirm an alternative in Enquiries and open its detail in Bookings. Modify it, cancel it and undo the last change during this visit.",
             evidence:
               locale === "es"
                 ? "Sin cobro ni confirmación externa"
@@ -542,19 +618,19 @@ export function DashboardDemo({
   useEffect(() => {
     if (tour === null) return;
     const step = tourSteps[Math.min(tour, tourSteps.length - 1)];
-    if (step && step.view !== view) go(step.view);
+    if (step && step.view !== view) go(step.view, false);
   }, []);
 
   const startTour = () => {
     setTour(0);
-    go(tourSteps[0]!.view);
+    go(tourSteps[0]!.view, false);
     patch({ tourMode: "guided", tourStep: 0 });
     track("demo_mode_select", { locale, demo: scenario, flow: "guided" });
   };
   const resumeTour = () => {
     const step = state.tourStep ?? 0;
     setTour(step);
-    go(tourSteps[Math.min(step, tourSteps.length - 1)]!.view);
+    go(tourSteps[Math.min(step, tourSteps.length - 1)]!.view, false);
   };
   const closeTour = () => {
     patch({ tourStep: tour });
@@ -579,7 +655,7 @@ export function DashboardDemo({
     } else {
       setTour(next);
       patch({ tourStep: next });
-      go(tourSteps[next]!.view);
+      go(tourSteps[next]!.view, false);
     }
   };
   const finishTour = (destination: "workspace" | "assessment") => {
@@ -599,16 +675,16 @@ export function DashboardDemo({
   };
 
   return (
-    <div className="dash">
-      <aside className={mobile ? "sidebar open" : "sidebar"}>
+    <div className="dash" data-scenario={scenario}>
+      <aside ref={navigation} className={mobile ? "sidebar open" : "sidebar"} inert={Boolean(utility) || (compactNavigation && !mobile)}>
         <div className="dash-brand">
           <span>{brand}</span>
           <small>Logic2B Estancias · {level}</small>
         </div>
         <button
           className="sidebar-close"
-          onClick={() => setMobile(false)}
-          aria-label="Cerrar"
+          onClick={closeMobile}
+          aria-label={locale === "es" ? "Cerrar menú" : "Close menu"}
         >
           <X size={20} />
         </button>
@@ -619,6 +695,7 @@ export function DashboardDemo({
               <button
                 key={item}
                 className={item === view ? "active" : ""}
+                aria-current={item === view ? "page" : undefined}
                 onClick={() => go(item)}
               >
                 <Icon size={17} />
@@ -645,16 +722,19 @@ export function DashboardDemo({
       {mobile && (
         <button
           className="backdrop"
-          onClick={() => setMobile(false)}
-          aria-label="Cerrar menú"
+          onClick={closeMobile}
+          aria-label={locale === "es" ? "Cerrar menú" : "Close menu"}
+          tabIndex={-1}
         />
       )}
-      <main className="dash-main">
+      <main className="dash-main" inert={Boolean(utility) || mobile}>
         <header className="dash-top">
           <button
+            ref={menuTrigger}
             className="mobile-menu"
             onClick={() => setMobile(true)}
-            aria-label="Menu"
+            aria-label={locale === "es" ? "Abrir menú" : "Open menu"}
+            aria-expanded={mobile}
           >
             <Menu size={20} />
           </button>
@@ -728,6 +808,10 @@ export function DashboardDemo({
                 ? locale === "es"
                   ? "Reglas ficticias para inspección y revisión local. La ejecución permanece inactiva: no hay jobs, colas, cron, webhooks, mensajes ni proveedores."
                   : "Fictitious rules for local inspection and review. Execution remains inactive: there are no jobs, queues, cron, webhooks, messages or providers."
+              : scenario === "terrava"
+                ? locale === "es"
+                  ? "Estancias ficticias e interactivas, solo en memoria. Los cambios se reinician al recargar; no hay reservas, cobros, mensajes ni conexiones reales."
+                  : "Interactive fictitious stays, in memory only. Changes reset on reload; there are no real bookings, payments, messages or connections."
               : locale === "es"
                 ? "Panel de solo lectura con datos ficticios. No da de alta alojamientos ni ejecuta cobros, reservas, mensajes, publicaciones o sincronizaciones."
                 : "Read-only panel with fictitious data. It does not register stays or perform payments, bookings, messages, publishing or synchronisation."}
@@ -739,7 +823,7 @@ export function DashboardDemo({
               <p>
                 {level} · {brand}
               </p>
-              <h1>{labelFor(scenario, locale, view)}</h1>
+              <h1 ref={pageHeading} tabIndex={-1}>{labelFor(scenario, locale, view)}</h1>
             </div>
             <div className="page-meta">
               <button
@@ -768,14 +852,27 @@ export function DashboardDemo({
               </button>
             </div>
           </div>
-          <ViewContent
+          {scenario === "terrava" && ["home", "enquiries", "planning", "bookings", "guests"].includes(view) ? (
+            <TerravaWorkspace
+              locale={locale}
+              view={view as TerravaView}
+              selectedProperty={state.selectedProperty}
+              workspace={workspace}
+              onChange={setWorkspace}
+              requestedStay={requestedStay}
+              requestedEnquiry={requestedEnquiry}
+              go={go}
+            />
+          ) : scenario === "terrava" && view === "reports" ? (
+            <StayReport workspace={workspace} selectedProperty={state.selectedProperty} locale={locale} onOpenBookings={() => go("bookings")} />
+          ) : <ViewContent
             scenario={scenario}
             locale={locale}
             view={view}
             state={state}
             patch={patch}
             go={go}
-          />
+          />}
           {(view === "website" || view === "automations" || view === "channels") && (
             <a
               className={
@@ -933,6 +1030,7 @@ export function DashboardDemo({
       {view !== "website" && view !== "automations" && view !== "channels" && (
         <a
           className="demo-conversion"
+          inert={Boolean(utility) || mobile}
           href={assessmentHref}
           onClick={() =>
             track("demo_cta", {
@@ -953,9 +1051,11 @@ export function DashboardDemo({
             className="utility-backdrop"
             type="button"
             onClick={closeUtility}
+            tabIndex={-1}
             aria-label={locale === "es" ? "Cerrar panel" : "Close panel"}
           />
           <aside
+            ref={utilityPanel}
             className="utility-panel"
             role="dialog"
             aria-modal="true"
@@ -1003,16 +1103,18 @@ export function DashboardDemo({
                 <label>
                   <Search size={17} />
                   <span className="sr-only">
-                    {locale === "es"
-                      ? "Buscar una sección"
-                      : "Search a section"}
+                    {scenario === "terrava"
+                      ? locale === "es" ? "Buscar sección, huésped o estancia" : "Search section, guest or stay"
+                      : locale === "es" ? "Buscar una sección" : "Search a section"}
                   </span>
                   <input
                     autoFocus
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder={
-                      locale === "es"
+                      scenario === "terrava"
+                        ? locale === "es" ? "Nombre, referencia, casa o sección…" : "Name, reference, home or section…"
+                        : locale === "es"
                         ? "Reservas, limpieza, informes…"
                         : "Bookings, cleaning, reports…"
                     }
@@ -1029,11 +1131,31 @@ export function DashboardDemo({
                       </button>
                     );
                   })}
-                  {searchResults.length === 0 && (
+                  {staySearchResults.map((stay) => (
+                    <button type="button" key={stay.id} onClick={() => {
+                      setRequestedStay((previous) => ({ id: stay.id, key: (previous?.key ?? 0) + 1 }));
+                      go("bookings");
+                    }}>
+                      <BookOpen size={18} />
+                      <span><strong>{stay.guestName}</strong><small>{stay.id} · {workspace.units.find((unit) => unit.id === stay.unitId)?.name} · {stay.status === "cancelled" ? locale === "es" ? "Cancelada" : "Cancelled" : locale === "es" ? "Confirmada" : "Confirmed"}</small></span>
+                      <ChevronRight size={16} />
+                    </button>
+                  ))}
+                  {enquirySearchResults.map((enquiry) => (
+                    <button type="button" key={enquiry.id} onClick={() => {
+                      setRequestedEnquiry((previous) => ({ id: enquiry.id, key: (previous?.key ?? 0) + 1 }));
+                      go("enquiries");
+                    }}>
+                      <MessageSquareText size={18} />
+                      <span><strong>{enquiry.guestName}</strong><small>{enquiry.id} · {locale === "es" ? "Solicitud pendiente" : "Pending enquiry"}</small></span>
+                      <ChevronRight size={16} />
+                    </button>
+                  ))}
+                  {searchResults.length === 0 && staySearchResults.length === 0 && enquirySearchResults.length === 0 && (
                     <p>
                       {locale === "es"
-                        ? "No hay secciones que coincidan."
-                        : "No matching sections."}
+                        ? "No hay resultados con estos términos y el filtro actual."
+                        : "No results match these terms and the current filter."}
                     </p>
                   )}
                 </div>
@@ -1045,11 +1167,15 @@ export function DashboardDemo({
               </div>
             ) : (
               <div className="notice-list">
+                {notices.length === 0 && <p>{locale === "es" ? "Sin avisos pendientes para esta propiedad." : "No pending notifications for this property."}</p>}
                 {notices.map((notice) => (
                   <button
                     type="button"
                     key={`${notice.view}-${notice.title}`}
-                    onClick={() => go(notice.view)}
+                    onClick={() => {
+                      if (notice.enquiryId) setRequestedEnquiry((previous) => ({ id: notice.enquiryId!, key: (previous?.key ?? 0) + 1 }));
+                      go(notice.view);
+                    }}
                   >
                     <i className={notice.urgent ? "urgent" : ""}></i>
                     <span>

@@ -82,8 +82,8 @@ test('capability maps expose truthful evidence and exact localized targets', asy
   await expect(page.locator('[data-capability-evidence]')).toHaveCount(7);
   const planning = page.locator('[data-capability="planning"]');
   await expect(planning).toContainText('Desde Gestión');
-  await expect(planning).toContainText('Calendario ficticio de solo lectura');
-  await expect(planning).toContainText('No cambia inventario o tarifas ni conecta PMS, disponibilidad o pagos');
+  await expect(planning).toContainText('Calendario de ocho casas con filtro por propiedad');
+  await expect(planning).toContainText('No modifica inventario o tarifas reales ni conecta PMS o pagos');
   await expect(planning.locator('[data-capability-evidence]')).toHaveAttribute('href', '/demos/terrava/gestion/?vista=planning');
 
   await page.goto('/soluciones/hoteles/');
@@ -603,7 +603,7 @@ test('all ten demo routes are non-operational and the landing panels collect no 
   for (const path of demoDashboardPaths) {
     const response = await page.goto(path);
     expect(response?.headers()['content-security-policy']).toContain("form-action 'none'");
-    await expect(page.locator('.demo-banner')).toContainText(/solo lectura|read-only/i);
+    await expect(page.locator('.demo-banner')).toContainText(path.includes('terrava') ? /solo en memoria|in memory only/i : /solo lectura|read-only/i);
     await expect(page.locator('form, dialog')).toHaveCount(0);
     await expect(page.locator('[name="name"], [name="email"], [type="email"], [type="tel"], textarea')).toHaveCount(0);
   }
@@ -1612,39 +1612,33 @@ test('the cookie choice and complete legal surfaces are localized in English', a
   await expect(page.getByRole('button', { name: 'Change my cookie choice' })).toBeVisible();
 });
 
-test('Terrava workspace keeps enquiries, planning and bookings read-only', async ({ page }) => {
+test('Terrava connects local enquiries, planning and bookings without external writes', async ({ page }) => {
   const externalWrites: string[] = [];
   page.on('request', (request) => {
     if (operationalMethods.has(request.method())) externalWrites.push(request.url());
   });
-
   await page.goto('/demos/terrava/gestion/?vista=enquiries');
   await expect(page.getByRole('heading', { level: 1, name: 'Solicitudes' })).toBeVisible();
-  await expect(page.getByText('Marina Costa · 4 huéspedes')).toBeVisible();
-  await expect(page.getByText('Vista de solo lectura: compara el caso y la alternativa sin crear ni convertir reservas.')).toBeVisible();
-  await expect(page.locator('.dash-content .actions button')).toHaveCount(0);
-
-  await page.getByRole('button', { name: 'Planning', exact: true }).click();
-  await expect(page).toHaveURL(/vista=planning/);
-  await expect(page.getByText('Calendario ficticio · EUR')).toBeVisible();
-  await expect(page.getByText('Solo visualización · sin cambios de inventario o tarifa')).toBeVisible();
-
-  await page.getByRole('button', { name: 'Reservas', exact: true }).click();
-  await expect(page).toHaveURL(/vista=bookings/);
+  await expect(page.locator('[data-stay-workspace]')).toContainText('Marina Costa');
+  await expect(page.locator('.demo-banner')).toContainText('solo en memoria');
+  await page.getByRole('button', { name: 'Confirmar estancia ficticia', exact: true }).click();
+  await page.getByRole('button', { name: 'Ver estancia', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Reservas' })).toBeVisible();
-  await expect(page.getByText('TER-101')).toBeVisible();
+  await expect(page.locator('[data-stay-workspace]')).toContainText('EST-025');
+  await page.getByRole('navigation', { name: 'Gestor', exact: true }).getByRole('button', { name: 'Planning', exact: true }).click();
+  await expect(page).toHaveURL(/vista=planning/);
+  await expect(page.locator('[data-stay-workspace]')).toContainText('Marina Costa');
   expect(externalWrites).toEqual([]);
 });
 
-test('Terrava read-only boundaries remain localized in English', async ({ page }) => {
+test('Terrava local interaction boundaries remain localized in English', async ({ page }) => {
   await page.goto('/en/demos/terrava/gestion/?vista=enquiries');
   await expect(page.getByRole('heading', { level: 1, name: 'Enquiries' })).toBeVisible();
-  await expect(page.getByText('Read-only view: compare the case and alternative without creating or converting bookings.')).toBeVisible();
-  await expect(page.getByText('The panel represents dates, guests and preferences with a preloaded fixture; it does not move or store visitor data.')).toBeVisible();
-
-  await page.getByRole('button', { name: 'Planning', exact: true }).click();
-  await expect(page.getByText('Fictitious calendar · EUR')).toBeVisible();
-  await expect(page.getByText('View only · no inventory or rate changes')).toBeVisible();
+  await expect(page.locator('.demo-banner')).toContainText('in memory only');
+  await expect(page.locator('.demo-banner')).toContainText('no real bookings, payments, messages or connections');
+  await expect(page.getByRole('button', { name: 'Confirm fictitious stay', exact: true })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Workspace', exact: true }).getByRole('button', { name: 'Planning', exact: true }).click();
+  await expect(page.locator('[data-stay-workspace]')).toContainText('Fictitious data');
 });
 
 test('dashboard filters are ephemeral and reload restores the fixture', async ({ page }) => {

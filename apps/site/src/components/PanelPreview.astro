@@ -7,9 +7,9 @@ const { locale, kind, compact = false } = Astro.props as { locale: Locale; kind:
 const en = locale === 'en';
 const properties = ['Aira', 'Bruma', 'Cauce', 'Duna', 'Era'];
 const labels: Record<PanelPreviewKind, string> = {
-  enquiries: en ? 'Fictitious Terrava enquiry comparison in read-only mode' : 'Comparación ficticia de una solicitud de Terrava en solo lectura',
-  planning: en ? 'Fictitious ten-day Terrava planning in read-only mode' : 'Planning ficticio de Terrava de diez días en solo lectura',
-  'guests-arrivals': en ? 'Fictitious Terrava guest context table in read-only mode' : 'Tabla ficticia de contexto de huéspedes de Terrava en solo lectura',
+  enquiries: en ? 'Static preview of a fictitious Terrava enquiry and its alternative' : 'Vista previa estática de una solicitud ficticia de Terrava y su alternativa',
+  planning: en ? 'Static preview of five of the eight Terrava homes over ten days' : 'Vista previa estática de cinco de las ocho casas de Terrava durante diez días',
+  'guests-arrivals': en ? 'Static preview of sample guest context in Terrava' : 'Vista previa estática del contexto de huéspedes de muestra en Terrava',
   preparation: en ? 'Fictitious Aurem room preparation checklist in read-only mode' : 'Checklist ficticio de preparación de habitación de Aurem en solo lectura',
   'operations-revenue': en ? 'Explainable fictitious Aurem revenue scenario with forecasting unavailable' : 'Escenario ficticio explicable de ingresos de Aurem con previsión no disponible',
   copilot: en ? 'Fictitious Aurem copilot draft with sources and external delivery blocked' : 'Borrador ficticio del copiloto de Aurem con fuentes y envío externo bloqueado',
@@ -23,7 +23,7 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
   aria-label={labels[kind]}
   data-panel-preview={kind}
 >
-  <div class="panel-preview-bar"><span>{brand}</span><small>{en ? 'Workspace' : 'Gestor de estancias'}</small></div>
+  <div class="panel-preview-bar"><span>{brand}</span><small>{en ? 'Static preview' : 'Vista previa estática'}</small></div>
   <div class="panel-preview-shell">
     <aside aria-hidden="true"><b>L</b>{(['grid', 'calendar', 'users', 'check', 'chart'] as const).map(icon => <InterfaceIcon name={icon} />)}</aside>
     {kind === 'enquiries' ? (
@@ -35,7 +35,7 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
     ) : kind === 'planning' ? (
       <div class="panel-preview-content panel-preview-planning">
         <header><div><strong>{en ? 'August · 10 days' : 'Agosto · 10 días'}</strong><small>{en ? 'All properties' : 'Todas las propiedades'}</small></div><span>{en ? 'Calendar · EUR' : 'Calendario · EUR'}</span></header>
-        <div class="panel-planning-summary"><span><b>05</b>{en ? 'Properties' : 'Alojamientos'}</span><span><b>03</b>{en ? 'Arrivals today' : 'Llegadas hoy'}</span><span><b>02</b>{en ? 'To review' : 'Por revisar'}</span></div>
+        <div class="panel-planning-summary"><span><b>5 / 8</b>{en ? 'Homes shown' : 'Casas visibles'}</span><span><b>03</b>{en ? 'Arrivals today' : 'Llegadas hoy'}</span><span><b>02</b>{en ? 'To review' : 'Por revisar'}</span></div>
         <div class="panel-preview-calendar">
           <div class="panel-preview-days"><span></span>{Array.from({ length: 10 }, (_, index) => <b>{18 + index}</b>)}</div>
           {properties.map((property, row) => <div class="panel-preview-row"><span>Casa {property}</span>{Array.from({ length: 10 }, (_, day) => <i class:list={{ occupied: day >= row % 4 && day < (row % 4) + 3, alternative: property === 'Bruma' && day === 6 }}></i>)}</div>)}
@@ -47,8 +47,8 @@ const brand = ['preparation', 'operations-revenue', 'copilot'].includes(kind) ? 
         <header><div><span>{en ? 'Stay context' : 'Contexto de estancia'}</span><strong>{en ? 'Guests' : 'Huéspedes'}</strong><small>{en ? 'Arrivals and stays' : 'Llegadas y estancias'}</small></div><b>{en ? 'Overview' : 'Resumen'}</b></header>
         <div class="panel-preview-guest-table">
           <div class="panel-preview-guest-head"><span>{en ? 'Guest' : 'Huésped'}</span><span>{en ? 'Email' : 'Email'}</span><span>{en ? 'Source' : 'Origen'}</span><span>{en ? 'Status' : 'Estado'}</span></div>
-          <div><strong>Marina Costa</strong><span>marina@example.test</span><span>{en ? 'Website' : 'Web'}</span><b>{en ? 'Enquiry received' : 'Consulta recibida'}</b></div>
-          <div><strong>M. Laurent</strong><span>laurent@example.test</span><span>{en ? 'France' : 'Francia'}</span><b>{en ? 'In house' : 'En casa'}</b></div>
+          <div><strong>Marina Costa</strong><span>marina@example.test</span><span>{en ? 'Website' : 'Web'}</span><b>{en ? 'Confirmed' : 'Confirmada'}</b></div>
+          <div><strong>Olivia Martín</strong><span>est-001@example.test</span><span>{en ? 'Direct' : 'Directa'}</span><b>{en ? 'Confirmed' : 'Confirmada'}</b></div>
         </div>
       </div>
     ) : kind === 'preparation' ? (

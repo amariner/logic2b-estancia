@@ -28,7 +28,7 @@ const webAssessment = rural ? `${prefix}/${en ? 'assessment' : 'diagnostico'}/?$
     <div class="evidence-copy">
       <p class="eyebrow">{management.name} · Terrava</p>
       <h3>{en ? 'What does this enquiry need?' : '¿Qué necesita esta solicitud?'}</h3>
-      <p>{en ? 'Compare dates and an alternative before replying. Fictional data: no replies or real bookings.' : 'Compara fechas y una alternativa antes de responder. Datos ficticios: sin respuestas ni reservas reales.'}</p>
+      <p>{en ? 'Resolve a conflict and confirm a fictitious stay. Amend or cancel it with an option to undo the last change; reloading resets the demo. No live bookings or messages.' : 'Resuelve un conflicto y confirma una estancia ficticia. Modifica o cancela con opción de deshacer el último cambio; recargar reinicia la demo. Sin reservas ni mensajes reales.'}</p>
       <a class="text-link" data-evidence-panel href={panel.evidenceHref}>{en ? 'Inspect the sample enquiry' : 'Revisar la solicitud de muestra'} <span aria-hidden="true">→</span></a>
       <a class="text-link" data-evidence-assess href={planHandoffHref(locale, management, sourcePath, rural ? 'rural' : 'unknown', 'enquiries')}>{en ? 'Assess this management need' : 'Evaluar esta necesidad de gestión'} <span aria-hidden="true">→</span></a>
     </div>

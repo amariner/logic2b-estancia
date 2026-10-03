@@ -56,7 +56,7 @@ La configuración efectiva de la demo pública es:
 
 Este es el manifest público exacto de `/api/capabilities`. CRM, canales, mensajería e IA no aparecen como proveedores porque no existe un adaptador ejecutable para ellos; su ausencia forma parte del cierre, no implica un estado oculto.
 
-Las restricciones del modo demo prevalecen sobre cualquier otra operación de producto. `EMAIL_PROVIDER_MODE=resend` no tiene efecto si falta `COMMERCIAL_LEADS_ENABLED=true` o si la configuración de email es incompleta. La excepción no habilita analítica, pagos, reservas, webhooks, canales, IA, jobs ni formularios de las demos.
+Las restricciones del modo demo prevalecen sobre cualquier otra operación de producto. `EMAIL_PROVIDER_MODE=resend` no tiene efecto si falta `COMMERCIAL_LEADS_ENABLED=true` o si la configuración de email es incompleta. La excepción no habilita analítica, pagos, reservas reales, webhooks, canales, IA, jobs ni la entrega externa de formularios de las demos. Los controles y formularios ficticios de producto pueden modificar estado en memoria sin solicitar datos personales ni contactar un endpoint.
 
 ## Separación de arquitectura
 
@@ -64,6 +64,7 @@ Las restricciones del modo demo prevalecen sobre cualquier otra operación de pr
 
 - Arranca y se puede navegar sin secretos reales.
 - Usa fixtures ficticios y estado en memoria, de pestaña o de navegador que pueda restaurarse.
+- En Terrava, las solicitudes, estancias, planning, huéspedes e informes comparten una colección exclusivamente en memoria. Sus cambios no se guardan en `localStorage`, `sessionStorage` ni IndexedDB.
 - No escribe en Durable Objects, bases de datos, colas, almacenamiento externo ni sistemas de terceros, salvo el coordinador de un lead comercial cuando la allowlist está activa.
 - No ejecuta jobs, automatizaciones, webhooks o tareas programadas de negocio.
 - No carga proveedores de analítica, pagos, CRM, canales, mensajería o IA. Resend solo puede utilizarse para un lead comercial de Logic Estancia con allowlist explícita.
@@ -80,7 +81,7 @@ Logic2B Estancias solo tiene hoy una mutación externa real implementada: la ent
 
 ## Barreras de servidor
 
-Las barreras visuales ayudan a comprender el estado, pero no constituyen seguridad. Toda mutación debe pasar primero por la guarda efectiva del modo:
+Las barreras visuales ayudan a comprender el estado, pero no constituyen seguridad. Toda petición de mutación al servidor debe pasar primero por la guarda efectiva del modo:
 
 1. Resolver la configuración efectiva.
 2. Rechazar el efecto si no tiene su autorización específica: `product_operations_allowed` para producto o `commercial_lead_allowed` para la captación comercial.
@@ -100,8 +101,9 @@ El rechazo no debe crear una cuota de rate limit, referencia durable, alarma, lo
 | Superficie | Resultado visible en demo | Efecto real posible | Barrera efectiva en demo | Condición mínima de activación real |
 | --- | --- | --- | --- | --- |
 | Formulario comercial único de la portada | Confirmación simulada si la allowlist falta; entrega real solo si está activa | DO de coordinación y dos emails Resend | `403` antes de cuerpo, DO y proveedor si falta una puerta | `COMMERCIAL_LEADS_ENABLED=true`, `EMAIL_PROVIDER_MODE=resend`, secretos completos y smoke aislado |
-| Solicitudes y reservas | Fixtures de solicitud, alternativa y reserva | Reserva, inventario, comunicación o pago | Sin endpoint transaccional; estado temporal/restaurable | Adaptador, persistencia, permisos, migraciones y aceptación del cliente |
-| Planning y tarifas | Calendario y cifras ficticias | Cambios de unidad, disponibilidad o precio | Sin escritura ni PMS/canal conectado | Proveedor verificado, reconciliación, ownership y rollback |
+| Solicitudes y reservas | Solicitud, disponibilidad de muestra, alternativa y confirmación ficticia; modificación, cancelación y deshacer el último cambio | Reserva, inventario, comunicación o pago | Formularios y transiciones solo en memoria; sin endpoint transaccional, persistencia o escritura HTTP; reinicio y recarga restauran los fixtures | Adaptador, persistencia, permisos, migraciones y aceptación del cliente |
+| Planning y tarifas | Ocho casas, filtro de propiedad, bloqueos de servicio y estancias derivados de la misma colección en memoria | Cambios de unidad, disponibilidad o precio | Los cambios solo alteran disponibilidad e importes ficticios; sin escritura externa ni PMS/canal conectado | Proveedor verificado, reconciliación, ownership y rollback |
+| Huéspedes e informes de Terrava | Fichas de estancias confirmadas, ocupación e importes de muestra actualizados desde la colección común | Perfiles de huésped, contabilidad o informes operativos reales | Identidades ficticias; canceladas excluidas de huéspedes activos e informe; sin registro de viajeros, cobro, almacenamiento o proveedor | Fuente de datos, permisos, finalidad, contabilidad y aceptación validados según alcance |
 | Registro de preparación | Cinco expedientes y diez puertas comunes; cero proveedores validados y cero activaciones | Mostrar marca o habilitar una conexión | Todos los estados permanecen `not_validated`/`unavailable`; sin proveedor, logo, cuenta, credencial, endpoint, API, webhook, persistencia o escritura | Completar contrato, responsables, permisos, referencia opaca, pruebas aisladas, fallos, auditoría, aceptación, kill switch y reversión; después obtener autorización separada |
 | Pagos | Expediente ES/EN de quince condiciones en la portada, todas sin validar | Crear sesión, autorización, captura o devolución | 0/15; sin checkout, tarjeta, cuenta, proveedor, secreto, endpoint, webhook, persistencia o escritura; `/api/payments` devuelve `404` y el proveedor está `disabled` | Validar responsable/alcance, permisos, categoría de proveedor, referencia opaca, sandbox, monedas/importes, ciclo, idempotencia, webhooks, conciliación, fallos, auditoría, aceptación, kill switch y reversión |
 | Datos y PMS | Expediente ES/EN de dieciséis condiciones en la portada, todas sin validar | Leer, migrar, persistir, sincronizar o escribir datos de una fuente externa | 0/16; sin marca, cuenta, credencial, conexión PMS, API, webhook, huésped real, registro de viajeros, migración, persistencia, sincronización o escritura | Validar responsable/fuente, finalidad y mínimo, permisos, categoría de proveedor, referencia opaca, entidades/campos, identificadores/matching, baseline/migración, casos aislados, idempotencia, reconciliación, fallos, auditoría, aceptación, kill switch y reversión |
@@ -117,7 +119,7 @@ El rechazo no debe crear una cuota de rate limit, referencia durable, alarma, lo
 
 Cada capacidad pública usa exactamente uno de estos estados:
 
-- `demo_visual_disponible`: existe una representación ficticia, inerte y comprensible.
+- `demo_visual_disponible`: existe una representación ficticia y comprensible; puede incluir interacción local en memoria, pero no efectos externos ni activación operacional.
 - `demo_visual_pendiente`: hay base o narrativa técnica, pero no debe venderse todavía como demostrable.
 - `solo_interna`: control técnico sin valor visual directo para un cliente.
 - `activable_por_proyecto`: requiere configuración, migración, proveedor o validación específica antes de operar.
@@ -129,10 +131,11 @@ Inventario comercial vigente:
 | --- | --- | --- | --- |
 | Web modular de marca | `demo_visual_disponible` | Contenido, navegación, identidad y SEO técnico | No publica cambios desde la demo |
 | Solicitudes por email | `demo_visual_disponible` | Tres escenarios ficticios muestran el contexto que podría reunir un email y trece condiciones de preparación | Conserva 0/13 condiciones validadas; no recoge datos personales, no envía email, no consulta inventario y no crea reservas; recargar restaura el fixture |
-| Solicitudes y reservas | `demo_visual_disponible` | Continuidad visual entre consulta, alternativa y reserva ficticia | No crea reserva, inventario, cobro o comunicación |
-| Planning y tarifas | `demo_visual_disponible` | Calendario común, unidad, estancia y tarifa de muestra | No cambia PMS, canal, disponibilidad o precio real |
+| Solicitudes y reservas | `demo_visual_disponible` | Solicitud, conflicto, alternativa y confirmación ficticia; detalle, modificación, cancelación y deshacer el último cambio | Solo en memoria; no crea reservas reales ni modifica inventario externo, cobra o comunica; reinicio y recarga restauran los casos |
+| Planning y tarifas | `demo_visual_disponible` | Ocho casas, filtro de propiedad, catorce días, unidad fuera de servicio y estancias coherentes con la solicitud y su detalle | Refleja cambios locales; no cambia PMS, canal, disponibilidad o precio real |
+| Huéspedes y llegadas | `demo_visual_disponible` | Titulares de muestra vinculados al mismo detalle de las estancias confirmadas; las canceladas dejan la vista activa | No recoge datos personales reales, crea perfiles reales, registra viajeros ni envía comunicaciones |
 | Editor web supervisado | `demo_visual_disponible` | Edición, borrador, descarte, aprobación humana local y expediente de doce condiciones en Terrava | Solo Dirección aprueba la vista local y eso valida 0/12 condiciones; no hay CMS, repositorio, despliegue, proveedor o escritura HTTP y recargar restaura el fixture |
-| Informes básicos | `demo_visual_disponible` | Ocupación e ingresos calculados desde fixtures | No usa contabilidad, pagos o datos operativos |
+| Informes básicos | `demo_visual_disponible` | Ocupación de agosto, estancias e importes calculados desde la colección de Terrava, con filtro de propiedad y cambios locales | Los importes son ficticios y no cobrados; no usa contabilidad, pagos ni datos operativos reales; recargar restaura los fixtures |
 | Centro operativo | `demo_visual_disponible` | Priorización visual de llegadas y riesgos | No decide ni ejecuta acciones autónomas |
 | Limpieza y preparación | `demo_visual_disponible` | Estados y responsabilidades ficticias | No asigna personas ni modifica habitaciones |
 | Mantenimiento | `demo_visual_disponible` | Prioridad, responsable e impacto hipotético | No crea órdenes ni contacta proveedores |
@@ -146,7 +149,7 @@ Guardas de modo, validación de configuración, rate limit, idempotencia, saniti
 
 En lenguaje para clientes:
 
-- “Visible en la demo” significa que existe una representación ficticia, no una integración activa.
+- “Visible en la demo” significa que existe una representación ficticia, que puede admitir cambios locales en memoria sin activar una integración.
 - “Activable” significa que se valida y configura por proyecto; no está encendido por defecto.
 - “A medida” significa que puede analizarse y desarrollarse; no implica que esté incluido.
 - Una capacidad parcial, pendiente o futura nunca se presenta como disponible.
@@ -159,6 +162,12 @@ En lenguaje para clientes:
 - El estado permitido en `sessionStorage` se elimina al cerrar la pestaña, caducar, descartar o finalizar el recorrido previsto.
 - Cualquier estado local persistente debe ofrecer una acción de restablecimiento y tolerar valores corruptos volviendo al fixture inicial.
 - La limpieza de estado demo nunca borra datos de un entorno real.
+
+En R3, Terrava permite completar un caso de estancia: ajustar una solicitud de muestra, comprobar fechas y capacidad, comparar alternativas, confirmar una estancia ficticia, abrir su detalle, modificarla o cancelarla. Se incluyen conflicto con alternativa, estancia disponible, colección completa y capacidad insuficiente, además de una unidad fuera de servicio. Los formularios solo editan unidad, fechas y número de huéspedes; las identidades y contactos permanecen como fixtures.
+
+Solicitud, planning, detalle, huéspedes activos e informe comparten los mismos identificadores, fechas, unidades e importes en céntimos. La salida es exclusiva: deja libre esa noche. Una cancelación conserva la ficha como cancelada, libera sus noches y la excluye de huéspedes activos e informe. El informe suma importes de estancias confirmadas, no ingresos cobrados, y descuenta los bloqueos de servicio de la capacidad disponible.
+
+«Deshacer último cambio» recorre el historial local en orden inverso; no es una restauración arbitraria de cualquier estancia cancelada. Restaurar una estancia comprueba de nuevo su disponibilidad. «Restablecer demo» pide confirmar el descarte de los cambios y recupera la colección inicial; recargar también elimina el estado y el historial de esta visita. No se ejecutan reservas, cobros, mensajes, sincronizaciones ni escrituras HTTP. Nivora mantiene su demostración sin gestor y las vistas operativas de Aurem conservan su alcance visual ficticio.
 
 Si una migración instala una estructura, su existencia no activa la capacidad. La demo pública no crea cuentas, usuarios, credenciales, conexiones, suscripciones o datos de cliente.
 
@@ -206,6 +215,8 @@ La puerta mínima combina `pnpm check`, E2E relevantes y smoke seco. Las pruebas
 8. Una UI o tabla no convierte una capacidad inactiva en activa.
 9. El modo real funciona solo en un harness aislado con proveedores simulados o controlados.
 10. Un valor ausente, desconocido o parcial falla cerrado.
+
+Para el flujo local R3, [hospitality-r3.spec.ts](../tests/e2e/hospitality-r3.spec.ts) cubre los recorridos de Terrava en ES/EN, coherencia entre vistas, filtros, deshacer, reinicio y recarga. Su harness registra y bloquea peticiones de escritura HTTP o a orígenes externos, comprueba ausencia de llamadas API y WebSockets, vigila escrituras en Web Storage y apertura de IndexedDB, y exige almacenamiento local y de sesión vacíos. También verifica `connect-src 'none'` y `form-action 'none'` en la respuesta de la demo. Esta evidencia complementa las pruebas de guardas de servidor; no las sustituye ni acredita operaciones reales.
 
 El smoke de Resend es seco por defecto. Nunca debe ejecutarse contra una demo ni contra producción sin autorización humana y buzones controlados.
 

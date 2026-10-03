@@ -318,7 +318,7 @@ blockquote { margin: 20px 0; border-left: 2px solid var(--ink); padding: 4px 0 4
 @media (max-width: 900px) {
   .sidebar { transform: translateX(-102%); transition: transform .2s ease; }
   .sidebar.open { transform: none; }
-  .sidebar-close { position: absolute; top: 16px; right: 12px; display: grid; width: 40px; height: 40px; place-items: center; border: 0; background: transparent; }
+  .sidebar-close { position: absolute; top: 16px; right: 12px; display: grid !important; width: 40px; height: 40px; place-items: center; border: 0; background: transparent; }
   .backdrop { position: fixed; z-index: 15; inset: 0; border: 0; background: rgb(0 0 0 / .25); }
   .dash-main { margin-left: 0; }
   .mobile-menu { display: flex !important; }
@@ -430,3 +430,21 @@ blockquote { margin: 20px 0; border-left: 2px solid var(--ink); padding: 4px 0 4
 .dash .utility-panel { border-radius: 16px; }
 .dash .demo-conversion { border-color: var(--l2b-forest, #1f3b2b); border-radius: 12px; color: #fff; background: var(--l2b-forest, #1f3b2b); font-weight: 500; }
 .dash .demo-conversion:hover { background: var(--l2b-forest-hover, #2c5039); }
+
+/* Keep keyboard navigation and fixture search legible in the shared shell. */
+.dash .page-head h1:focus { outline: none; }
+.dash .page-head h1:focus-visible { outline: 2px solid var(--l2b-signal-text); outline-offset: 6px; }
+.dash .utility-results button > span { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+.dash .utility-results button strong { font-weight: 500; }
+.dash .utility-results button small { color: var(--slate); font-size: .7rem; line-height: 1.5; }
+.dash .notice-list > p { padding: 20px; color: var(--slate); font-size: .85rem; line-height: 1.6; }
+:where(.dash[data-scenario='terrava']) .demo-conversion { position: static; display: flex; width: fit-content; margin: 0 24px 24px auto; }
+@media (max-width: 620px) {
+  .dash[data-scenario='terrava'] .property-select { display: block; min-width: 0; flex: 1; margin-right: 0; }
+  .dash[data-scenario='terrava'] .property-select select { width: 100%; max-width: 100%; }
+  .dash[data-scenario='terrava'] .dash-top > button { flex-shrink: 0; }
+  .dash[data-scenario='terrava'] .dash-top:has(.role-select) .property-select { display: none; }
+}
+@media (max-width: 900px) {
+  .dash .sidebar.open .dash-brand { padding-right: 36px; }
+}

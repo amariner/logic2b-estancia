@@ -1,0 +1,218 @@
+.dash .stay-report {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dash .stay-report > .panel {
+  min-width: 0;
+}
+.dash .stay-report-heading,
+.dash .stay-report-chart-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+.dash .stay-report-heading h2 {
+  margin: 16px 0 8px;
+  font-family: var(--serif);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 400;
+}
+.dash .stay-report .tag {
+  align-items: center;
+  gap: 6px;
+}
+.dash .stay-report p {
+  max-width: 65ch;
+  margin: 0 0 12px;
+  color: var(--slate);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.dash .stay-report button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.dash .stay-report-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.dash .stay-report-metrics > div {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px;
+  background: var(--paper);
+}
+.dash .stay-report-metrics dt {
+  color: var(--slate);
+  font-size: 0.75rem;
+}
+.dash .stay-report-metrics dd {
+  margin: 16px 0 8px;
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+.dash .stay-report-metrics small {
+  display: block;
+  margin-top: 8px;
+  color: var(--slate);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.5;
+}
+.dash .stay-report h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.dash .stay-report-chart {
+  display: grid;
+  grid-template-columns: repeat(31, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 22px;
+}
+.dash .stay-report-chart > div {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  text-align: center;
+}
+.dash .stay-report-chart > div > span {
+  display: flex;
+  align-items: flex-end;
+  height: 160px;
+  border-radius: 4px;
+  background: var(--mist);
+  overflow: hidden;
+}
+.dash .stay-report-chart i {
+  display: block;
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--l2b-forest);
+}
+.dash .stay-report-chart small {
+  justify-self: center;
+  white-space: nowrap;
+  color: var(--slate);
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+}
+.dash .stay-report-chart > div:first-child small {
+  justify-self: start;
+}
+.dash .stay-report-chart > div:last-child small {
+  justify-self: end;
+}
+.dash .stay-report-ledger {
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.dash .stay-report-ledger summary {
+  padding: 16px 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.dash .stay-report-ledger > div {
+  overflow: auto;
+}
+.dash .stay-report table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.75rem;
+}
+.dash .stay-report caption {
+  padding: 10px 0;
+  text-align: left;
+  color: var(--slate);
+  line-height: 1.5;
+}
+.dash .stay-report td,
+.dash .stay-report th {
+  border-bottom: 1px solid var(--line);
+  padding: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.dash .stay-report th {
+  font-weight: 500;
+}
+.dash .stay-report-explanation {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+}
+.dash .stay-report-explanation dl {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+}
+.dash .stay-report-explanation dl > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.dash .stay-report-explanation dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.dash .stay-report-explanation dl > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+  font-weight: 600;
+}
+.dash .stay-report-explanation svg {
+  color: var(--slate);
+  margin-bottom: 12px;
+}
+@media (max-width: 760px) {
+  .dash .stay-report-metrics,
+  .dash .stay-report-explanation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dash .stay-report-heading,
+  .dash .stay-report-chart-heading {
+    flex-direction: column;
+  }
+  .dash .stay-report-chart {
+    gap: 3px;
+  }
+  .dash .stay-report-chart > div > span {
+    height: 110px;
+  }
+  .dash .stay-report-chart small {
+    visibility: hidden;
+  }
+  .dash .stay-report-chart > div:nth-child(5n + 1) small {
+    visibility: visible;
+  }
+}
