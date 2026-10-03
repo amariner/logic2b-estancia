@@ -1,0 +1,18 @@
+{
+  "status": "blocked-before-publication",
+  "commit": "e5997514a2af86fdab46483a8ae2e258d77b7e51",
+  "tag": "deploy-production-20261004-e599751",
+  "workflowRun": 37162199441,
+  "workflowUrl": "https://github.com/amariner/logic2b-estancia/actions/runs/37162199441",
+  "jobId": 111317774482,
+  "completedSteps": [
+    "tag-matches-main",
+    "dependency-install",
+    "pnpm-check",
+    "workspace-build"
+  ],
+  "failure": "CLOUDFLARE_API_TOKEN was unavailable to Wrangler in the non-interactive production job.",
+  "publishedVersion": null,
+  "newMigrations": false,
+  "publicSmoke": "blocked by the current execution environment HTTP proxy: CONNECT 403"
+}

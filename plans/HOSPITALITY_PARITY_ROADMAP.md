@@ -2,6 +2,8 @@
 
 Versión: **1.6 · 2026-10-04**. Estado: **R0–R2 publicados en producción; R3 y R4 verificados, ambos sin despliegue; R5 siguiente**. Resultado y evidencia de R4: [informe QA](../docs/qa/HOSPITALITY_R4_2026-10-04.md). Evidencia y resultado final de R3: [informe QA](../docs/qa/HOSPITALITY_R3_2026-10-04.md). SHA de producto R2: `2418a521ef03d7369bd148e3c035df45757bbbe1`. Base R1: `95b1c724c4cf16be58e8e7c77e544a224b7c9fc0`. Las cinco sesiones humanas de comprensión siguen pendientes. Base R0: `d10dd5580e626e715e577e609bee1d82cb112db8`. Publicación autorizada el 18/09: revisión `d4811d1b21a574e1b7c37353ef840b1368f89fb9`, con correcciones de reflow; [evidencia](../docs/qa/PRODUCTION_2026-09-18.md). No equivale a conversión comercial validada.
 
+**Publicación solicitada el 04/10:** cambios integrados en GitHub y corrección de foco verificada antes del intento. El workflow pasó check/build pero Wrangler quedó bloqueado por `CLOUDFLARE_API_TOKEN` no disponible; no hubo nueva publicación ni migración. El permiso del usuario ya está concedido. [Resultado y reanudación](../docs/qa/PRODUCTION_2026-10-04.md).
+
 Este es el roadmap estratégico vigente solicitado por el usuario. Sustituye la cola de [paridad Camp](./CAMP_PARITY_ROADMAP.md), que se conserva como histórico. La fuente operativa de continuidad sigue siendo [PROJECT_CONTINUATION.md](./PROJECT_CONTINUATION.md). Investigación: [síntesis y evidencia](../docs/research/HOSPITALITY_BENCHMARK_2026-09-14.md), [SuperHote](../docs/research/SUPERHOTE_2026-09-14.md), [Cloudbeds](../docs/research/CLOUDBEDS_2026-09-14.md), [Mews](../docs/research/MEWS_2026-09-14.md).
 
 ## 1. Objetivo y definición de paridad

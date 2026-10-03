@@ -1,0 +1,30 @@
+{
+  "before": {
+    "stage": "before",
+    "focusedBeforeRestore": true,
+    "frameCount": 1,
+    "focusedAfterRestore": false,
+    "activeAfterRestore": {
+      "tag": "SECTION",
+      "cls": "stay-workspace",
+      "stay": null
+    },
+    "detailCount": 0,
+    "headingFocused": false,
+    "unexpected": []
+  },
+  "after": {
+    "stage": "after",
+    "focusedBeforeRestore": true,
+    "frameCount": 1,
+    "focusedAfterRestore": true,
+    "activeAfterRestore": {
+      "tag": "BUTTON",
+      "cls": "sw-stay-row",
+      "stay": "EST-025"
+    },
+    "detailCount": 1,
+    "headingFocused": true,
+    "unexpected": []
+  }
+}

@@ -2,7 +2,27 @@
 
 Última actualización: 2026-10-04
 
-## Checkpoint vigente · R4, preparación y roles de Aurem · 2026-10-04
+## Checkpoint vigente · Publicación solicitada, bloqueada por credenciales · 2026-10-04
+
+El usuario autorizó expresamente integrar, subir a GitHub y desplegar en producción, con las migraciones necesarias. El permiso de producción para esta entrega ya está concedido; no se debe volver a pedir confirmación de la misma acción. La limitación histórica de continuidad no revoca esta petición posterior.
+
+**Git:** producto R3/R4 y corrección final integrados en `origin/main`, revisión candidata `e5997514a2af86fdab46483a8ae2e258d77b7e51`. Tag remoto `deploy-production-20261004-e599751`. Un commit documental posterior registra este resultado; no modifica el artefacto candidato.
+
+**Corrección necesaria:** Quality R3 `37159965979` terminó con fallo (268 correctos, uno fallido y uno en reintento), frente al estado en curso recogido anteriormente. Una restauración de foco tardía tras cerrar la ficha de Terrava podía robar el foco de la fila elegida e interceptar Enter. Se reprodujo de forma determinista y se corrigió preservando un foco nuevo conectado. La matriz comprueba la recuperación; una prueba nueva controla la intercalación original. `pnpm check` correcto con 257 contratos; E2E Terrava 21/21 más nueva regresión 1/1; teclado, texto al 200 %, Axe y aislamiento ES/EN. Comparación antes/después e [informe de publicación](../docs/qa/PRODUCTION_2026-10-04.md).
+
+**Producción:** [Deploy production 37162199441](https://github.com/amariner/logic2b-estancia/actions/runs/37162199441) verificó tag/main y pasó check/build. Wrangler se detuvo antes de publicar porque `CLOUDFLARE_API_TOKEN` no está disponible para el job. No se publicó una versión ni se ejecutó una migración. Worker/configuración no tienen cambios respecto a producción documentada: `LeadCoordinator` v1, sin D1/crons ni activación de proveedores. No existe sesión Cloudflare en el entorno actual; su proxy bloquea el dominio público con `CONNECT 403`.
+
+La revisión automática rechazó inicialmente el push del tag por interpretar la regla de continuidad como una prohibición absoluta. Tras comprobar la autorización posterior explícita, el procedimiento, el SHA y las pruebas, aceptó el mismo comando y se activó el workflow. Esa revisión está resuelta; el bloqueo restante es la credencial del proveedor.
+
+Quality del candidato [37162133289](https://github.com/amariner/logic2b-estancia/actions/runs/37162133289) seguía `in_progress` en la última consulta (01:37 CEST); no se declara verde. Consultarlo al reanudar.
+
+**Siguiente acción de publicación:** configurar por canal seguro `CLOUDFLARE_API_TOKEN` y comprobar `CLOUDFLARE_ACCOUNT_ID` en GitHub para `production`. No pegar credenciales en el chat ni versionarlas. Revalidar HEAD y Quality. Si `main` conserva exactamente la revisión del tag, repetir el workflow; si ha avanzado, crear un nuevo tag único sobre HEAD, sin relajar la guarda tag/main. Después verificar versión efectiva, ocho rutas y assets; habilitar el dominio público en la política de red o usar un entorno autorizado para el smoke. No solicitar de nuevo permisos ya concedidos ni usar una cuenta temporal de Wrangler.
+
+**Consejo posterior:** marketing/producto/SEO **correcto**, mismo alcance y límites; UX/frontend/QA **corregido**, foco reproducido y regresión permanente; UI **correcto**, sin cambios de presentación; full stack **correcto**, sin cambios de migración, proveedores o datos. Publicación y smoke **pendientes por acceso externo**, sin presentarlos como hechos. La última versión documentada de producción es `eabff2cf-959e-42df-8023-484ec3d980a7` del 18/09; no se ha reconfirmado como versión efectiva actual.
+
+R4 permanece terminado. La siguiente prioridad de producto, tras resolver la publicación, sigue siendo R5. Las deudas humanas/comerciales anteriores permanecen; no iniciar otro módulo como sustituto de completar este despliegue autorizado.
+
+## Checkpoint anterior · R4, preparación y roles de Aurem · 2026-10-04
 
 **R4 implementado y verificado. Siguiente incremento: R5.** Continúa la petición de pulir el gestor con fixtures. Base `3e36183929a4a96a6a51925baae855a9981de818`, rama de entorno `work`, inicialmente limpia y coincidente con `origin/main`. Producto: `13c2de9b515272302f623db7d8d96cd42e1631c7`. Este checkpoint prevalece sobre los históricos inferiores. Sin despliegue de producción.
 

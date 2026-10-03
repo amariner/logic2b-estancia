@@ -1,0 +1,317 @@
+{
+  "url": "https://estancia.logic2b.com",
+  "status": "local-only-passed",
+  "hashes": {
+    "localBuild": "22bd47d450a4c696f9bcfd750fe741252aa2124de24dae8c77135c30c08bdbe2"
+  },
+  "conclusions": [
+    "PASS local-R3-workspace-fixture-present",
+    "PASS local-R4-operations-fixture-present",
+    "PASS local-js-and-css-linked-from-verified-pages",
+    "LOCAL 8 routes; 22 linked JS/CSS assets; 0 failed checks; 0 blocked checks",
+    "No network requests made; public deployment remains unverified."
+  ],
+  "routes": [
+    {
+      "url": "https://estancia.logic2b.com/",
+      "status": "local-only",
+      "hashes": {
+        "local": "ac93d14d21457f5b0b411b407907f42da6e458c79a4b209c3b7b3b1b8b5f8e2f"
+      },
+      "conclusions": [
+        "PASS local-html-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/en/",
+      "status": "local-only",
+      "hashes": {
+        "local": "771a8204dc1e274c380209c30f449966fd5415637de76fa66691d5e1b0001a68"
+      },
+      "conclusions": [
+        "PASS local-html-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/api/capabilities",
+      "status": "local-only",
+      "hashes": {},
+      "conclusions": [
+        "PASS expected-api-contract-prepared-no-request"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/demos/nivora/",
+      "status": "local-only",
+      "hashes": {
+        "local": "1ce5e3267611025a57e1dfea3bdf776e3c83d9c6d7292c663404bde760c80c26"
+      },
+      "conclusions": [
+        "PASS local-html-present",
+        "PASS local-html-noindex-nofollow"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/demos/terrava/gestion/",
+      "status": "local-only",
+      "hashes": {
+        "local": "5e75c55b736d950d50b0b3a0b75d2ede4bb959e3a05521ed9b5881d2aac2157b"
+      },
+      "conclusions": [
+        "PASS local-html-present",
+        "PASS local-html-noindex-nofollow"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/demos/aurem/gestion/",
+      "status": "local-only",
+      "hashes": {
+        "local": "5ba6505bffb3f8811af2401ddb87a5cfee4c45c835f12d9dbe93f8eeb5547791"
+      },
+      "conclusions": [
+        "PASS local-html-present",
+        "PASS local-html-noindex-nofollow"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/webs/boscara/?embed=theme",
+      "status": "local-only",
+      "hashes": {
+        "local": "ce78471271a0a640509f1ed6f1f5a5234d2619925a32cb402bbe2e068a286cf0"
+      },
+      "conclusions": [
+        "PASS local-html-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/api/leads",
+      "status": "local-only",
+      "hashes": {},
+      "conclusions": [
+        "PASS expected-api-contract-prepared-no-request"
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "url": "https://estancia.logic2b.com/_astro/analytics-consent.Cl3vbnL9.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "b260accb54ae6d0094ee07af3af3979a80e8ca6bcd3b6ff40ad015e056987158"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/assessment-context.BJXJmIv4.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "1c315faa0a45b7a774fdc201a2bb1e4703327445b2d4267ebad9a931e8df7f11"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/client.BlZe1zq3.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "fca1273507e27a8c2cc8db94d8e7226606c8dd7cccbb460ae4b6060728618265"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/CookieBanner.astro_astro_type_script_index_0_lang.PR5ckTU-.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "f202e48e97588cc724d5be1e9a32ab776ed4b925e5f32a92ca0449f50bcff5b3"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/dashboard.CbK_dntL.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "05fb8a8485cb9e53da0eefb86e6620f8894e292e3201a231491bfb9df1b665e1"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/dashboard.COeDJf2S.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "f2c847b104a910b323484f108cdfe65d34f625d3aa25da9a451a6e1d2500cd01"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.Bfi3lj1B.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "a2065b7fe314cd37ef8a538c82305861e396a257316c514907b7950c1a554521"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.BonDEOvw.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "9bf67eb5e905f917aa8253657f0fc65893f425a689f5155166da60532f1c41b5"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.BRQxW2gE.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "637052f5b24ac58bc669b5e98b22c5e6a4c643efa63febcfefef13e8dd2d258f"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.Bvg8ixlV.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "1b6f19dd1db2349c56d17f712636011f487a57141984172304ca16fe76fde634"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.BYwtW6WS.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "e7ad8133a1992cb46d71b4714578a716db8f726b518de39d71431d985f704cad"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.C3fb51gR.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "182bb08e204275d57eec340155785a62f299d56a69555b46d2a4196a8a5d5bbc"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.CkAg_Vxw.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "d5aaf51109c62ce6ebf530be2d6a5877cc938017c9ab081c6242004a7c58789a"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.DcmIffc2.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "c1cdf487041dc1d6ddd2a70508c21b64fd5041b04f06eb6a0fd0cca7ff4cf814"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.DkN1hlzA.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "2937ebaa6165f3cf5654b5518e85bc6487e9fd414758a450a34d1bd4c7534db9"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.DwODXHOm.css",
+      "status": "local-only",
+      "hashes": {
+        "local": "f8731f28a4a3f30d3fe2f830cc335cbe7537a50ec12aaec00e03ef5123e3c60f"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/index.qNTDzdXh.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "1b93be296202faba252d08f0f77726adc0853459bff0d49cf441c13baa9357d3"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/Landing.astro_astro_type_script_index_0_lang.Cn5L0GZr.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "463a3160fcc9a27b2c5d622e222b9d640302c4ecb4b21c7118ab325c0b7f34c3"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/PanelPreviewDialog.astro_astro_type_script_index_0_lang.DqHhAlZz.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "4e7a554a36d66ad2852ac2819715c4d1e96c3e119497d8f61a193a1f5a045127"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/plan-contract.DzWFoy8R.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "601e2fc1834419116f77887a83fcf7a2111aa041f31f1b5a9ab881b1dc0162fe"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/PortfolioViewAnalytics.astro_astro_type_script_index_0_lang.DxEC2Hsm.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "2396af593418f0f3afdd6fd5fabc2b20ca88f81a57a0b11626d0b9da903e8fba"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    },
+    {
+      "url": "https://estancia.logic2b.com/_astro/ThemePreviewDialog.astro_astro_type_script_index_0_lang.DRl3Ii2H.js",
+      "status": "local-only",
+      "hashes": {
+        "local": "b4b24ed7acd5012e0629af7bb8cc0355eeb76d1a5ea1f836b6a92b805184d6d0"
+      },
+      "conclusions": [
+        "PASS local-linked-asset-present"
+      ]
+    }
+  ]
+}
