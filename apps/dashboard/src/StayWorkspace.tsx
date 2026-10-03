@@ -125,8 +125,22 @@ const scenarioName = (id: string, locale: Locale) => {
   return names[id]?.[locale === "es" ? 0 : 1] ?? id;
 };
 
-const restoreWorkspaceFocus = (resolveTarget: () => HTMLElement | null) => {
+const restoreWorkspaceFocus = (
+  resolveTarget: () => HTMLElement | null,
+  preserveNewFocus = false,
+) => {
+  const focusAtClose = document.activeElement;
   requestAnimationFrame(() => {
+    const active = document.activeElement;
+    // Closing may unmount the trigger. Do not steal focus from a control the
+    // user has reached while waiting for this restoration frame.
+    if (
+      preserveNewFocus &&
+      active?.isConnected &&
+      active !== document.body &&
+      active !== document.documentElement &&
+      active !== focusAtClose
+    ) return;
     const target = resolveTarget();
     if (target?.isConnected) target.focus();
     else document.querySelector<HTMLElement>("[data-stay-workspace]")?.focus();
@@ -187,10 +201,7 @@ export function TerravaWorkspace({
   };
   const closeStay = () => {
     setSelectedStayId(null);
-    requestAnimationFrame(() => {
-      if (detailTrigger.current?.isConnected) detailTrigger.current.focus();
-      else workspaceRef.current?.focus();
-    });
+    restoreWorkspaceFocus(() => detailTrigger.current, true);
   };
   useEffect(() => {
     if (previousProperty.current !== selectedProperty) {
@@ -220,10 +231,7 @@ export function TerravaWorkspace({
         selectedStayId
       ) {
         setSelectedStayId(null);
-        requestAnimationFrame(() => {
-          if (detailTrigger.current?.isConnected) detailTrigger.current.focus();
-          else workspaceRef.current?.focus();
-        });
+        restoreWorkspaceFocus(() => detailTrigger.current, true);
       }
     };
     document.addEventListener("keydown", escape);

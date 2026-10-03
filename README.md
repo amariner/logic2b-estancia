@@ -46,7 +46,7 @@ La cadencia comercial, la taxonomía de GA4 y el guion de entrevistas están doc
 
 La orden `/goal continua con el desarrollo de este proyecto` reanuda el trabajo desde el último punto verificado. Las reglas persistentes están en [`AGENTS.md`](AGENTS.md) y el estado, las prioridades y el registro de continuaciones se mantienen en [`plans/PROJECT_CONTINUATION.md`](plans/PROJECT_CONTINUATION.md). Ambos deben actualizarse cuando cambien el objetivo o el siguiente punto de desarrollo.
 
-El roadmap estratégico vigente es la [paridad comercial, demostrativa y operativa condicionada con SuperHote, Cloudbeds y Mews](plans/HOSPITALITY_PARITY_ROADMAP.md), basada en la [investigación del 14 de septiembre de 2026](docs/research/HOSPITALITY_BENCHMARK_2026-09-14.md). R0–R3 están completados; el estado y la siguiente tarea se mantienen en el checkpoint de continuidad.
+El roadmap estratégico vigente es la [paridad comercial, demostrativa y operativa condicionada con SuperHote, Cloudbeds y Mews](plans/HOSPITALITY_PARITY_ROADMAP.md), basada en la [investigación del 14 de septiembre de 2026](docs/research/HOSPITALITY_BENCHMARK_2026-09-14.md). R0–R4 están completados; el estado y la siguiente tarea se mantienen en el checkpoint de continuidad.
 
 Terrava incluye un gestor interactivo de estancias ficticias: disponibilidad de ocho casas, solicitud, confirmación, edición, cancelación y recuperación del último cambio. Inicio, planning, reservas, huéspedes e informes se derivan de la misma colección en memoria. El escenario se sitúa en agosto de 2026; fechas, capacidades y precios son de muestra. Los filtros funcionan también en móvil y recargar restaura los casos iniciales. No utiliza almacenamiento ni servicios externos.
 

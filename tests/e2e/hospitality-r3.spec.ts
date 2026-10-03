@@ -328,9 +328,11 @@ for (const locale of ['es', 'en'] as const) {
       await expect(page.locator('[data-stay-detail] h2')).toBeFocused();
       await page.keyboard.press('Escape');
       await expect(page.locator('[data-stay-detail]')).toHaveCount(0);
+      await expect(page.locator('[data-stay-workspace]')).toBeFocused();
 
       const row = page.locator('[data-stay-id="EST-025"]');
       await row.focus();
+      await expect(row).toBeFocused();
       await page.keyboard.press('Enter');
       await expect(page.locator('[data-stay-detail] h2')).toBeFocused();
       await page.keyboard.press('Escape');
@@ -439,4 +441,55 @@ test('R3 mobile notifications and accent-insensitive search open the exact local
   await search.getByLabel('Buscar sección, huésped o estancia', { exact: true }).fill('lucia');
   await expect(search.getByText('No hay resultados con estos términos y el filtro actual.', { exact: true })).toBeVisible();
   await expect(result).toHaveCount(0);
+});
+
+test('R3 delayed detail close preserves focus moved to another stay es 390', async ({ page }) => {
+  type FocusFrameWindow = Window & {
+    __r3CloseFocusFrame?: { release: () => number; restore: () => void };
+  };
+  await page.setViewportSize({ width: 390, height: 900 });
+  await openWorkspace(page, 'es');
+  await confirmCase(page, 'es', 'Casa Bruma');
+  await showConfirmedStay(page, 'es');
+  await expect(page.locator('[data-stay-detail] h2')).toBeFocused();
+
+  // Hold the close-restoration frame so a user can move focus before it runs.
+  // This reproduces the CI race without relying on machine speed or a sleep.
+  await page.evaluate(() => {
+    const original = window.requestAnimationFrame;
+    const pending: FrameRequestCallback[] = [];
+    const harness = window as FocusFrameWindow;
+    harness.__r3CloseFocusFrame = {
+      restore: () => { window.requestAnimationFrame = original; },
+      release: () => {
+        window.requestAnimationFrame = original;
+        const callbacks = pending.splice(0);
+        callbacks.forEach(callback => callback(performance.now()));
+        return callbacks.length;
+      },
+    };
+    window.requestAnimationFrame = callback => {
+      pending.push(callback);
+      return -pending.length;
+    };
+  });
+
+  try {
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-stay-detail]')).toHaveCount(0);
+    const row = page.locator('[data-stay-id="EST-025"]');
+    await row.focus();
+    await expect(row).toBeFocused();
+    expect(await page.evaluate(() => (window as FocusFrameWindow).__r3CloseFocusFrame!.release())).toBe(1);
+    await expect(row).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('[data-stay-detail] h2')).toBeFocused();
+    await expectStay(page, 'Marina Costa', 'Casa Bruma', '2026-08-21', '2026-08-24', 612);
+  } finally {
+    if (!page.isClosed()) await page.evaluate(() => {
+      const harness = window as FocusFrameWindow;
+      harness.__r3CloseFocusFrame?.restore();
+      delete harness.__r3CloseFocusFrame;
+    });
+  }
 });
